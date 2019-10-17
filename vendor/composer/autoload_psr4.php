@@ -50,6 +50,7 @@ return array(
     'Magento\\Widget\\' => array($vendorDir . '/magento/module-widget'),
     'Magento\\Weee\\' => array($vendorDir . '/magento/module-weee'),
     'Magento\\Webapi\\' => array($vendorDir . '/magento/module-webapi'),
+    'Magento\\WebapiSecurity\\' => array($vendorDir . '/magento/module-webapi-security'),
     'Magento\\Version\\' => array($vendorDir . '/magento/module-version'),
     'Magento\\Variable\\' => array($vendorDir . '/magento/module-variable'),
     'Magento\\Usps\\' => array($vendorDir . '/magento/module-usps'),

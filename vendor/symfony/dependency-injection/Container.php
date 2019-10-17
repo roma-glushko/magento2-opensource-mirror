@@ -200,6 +200,10 @@ class Container implements IntrospectableContainerInterface, ResettableContainer
             $this->scopedServices[$scope][$id] = $service;
         }
 
+        if (isset($this->aliases[$id])) {
+            unset($this->aliases[$id]);
+        }
+
         $this->services[$id] = $service;
 
         if (method_exists($this, $method = 'synchronize'.strtr($id, $this->underscoreMap).'Service')) {
@@ -371,9 +375,8 @@ class Container implements IntrospectableContainerInterface, ResettableContainer
     public function getServiceIds()
     {
         $ids = array();
-        $r = new \ReflectionClass($this);
-        foreach ($r->getMethods() as $method) {
-            if (preg_match('/^get(.+)Service$/', $method->name, $match)) {
+        foreach (get_class_methods($this) as $method) {
+            if (preg_match('/^get(.+)Service$/', $method, $match)) {
                 $ids[] = self::underscore($match[1]);
             }
         }
