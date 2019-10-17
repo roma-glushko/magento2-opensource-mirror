@@ -2,7 +2,7 @@
     "name": "magento/magento2-base",
     "description": "Magento 2 Base (Community Edition)",
     "type": "magento2-component",
-    "version": "2.0.5",
+    "version": "2.0.6",
     "require": {
         "magento/magento-composer-installer": "*",
         "php": "~5.5.0|~5.6.0|~7.0.0",
@@ -50,7 +50,6 @@
     "replace": {
         "trentrichardson/jquery-timepicker-addon": "1.4.3",
         "colinmollenhour/cache-backend-redis": "1.8",
-        "colinmollenhour/credis": "1.5",
         "components/jquery": "1.11.0",
         "blueimp/jquery-file-upload": "5.6.14",
         "components/jqueryui": "1.10.4",
@@ -61,7 +60,6 @@
         "component_paths": {
             "trentrichardson/jquery-timepicker-addon": "lib/web/jquery/jquery-ui-timepicker-addon.js",
             "colinmollenhour/cache-backend-redis": "lib/internal/Cm/Cache/Backend/Redis.php",
-            "colinmollenhour/credis": "lib/internal/Credis",
             "components/jquery": [
                 "lib/web/jquery.js",
                 "lib/web/jquery/jquery.min.js",
@@ -80,10 +78,6 @@
             [
                 "lib/internal/LinLibertineFont",
                 "lib/internal/LinLibertineFont"
-            ],
-            [
-                "lib/internal/Credis",
-                "lib/internal/Credis"
             ],
             [
                 "lib/.htaccess",

@@ -7,6 +7,10 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'CSSmin' => $vendorDir . '/tubalmartin/cssmin/cssmin.php',
+    'CredisException' => $vendorDir . '/colinmollenhour/credis/Client.php',
+    'Credis_Client' => $vendorDir . '/colinmollenhour/credis/Client.php',
+    'Credis_Cluster' => $vendorDir . '/colinmollenhour/credis/Cluster.php',
+    'Credis_Sentinel' => $vendorDir . '/colinmollenhour/credis/Sentinel.php',
     'File_Iterator' => $vendorDir . '/phpunit/php-file-iterator/File/Iterator.php',
     'File_Iterator_Facade' => $vendorDir . '/phpunit/php-file-iterator/File/Iterator/Facade.php',
     'File_Iterator_Factory' => $vendorDir . '/phpunit/php-file-iterator/File/Iterator/Factory.php',

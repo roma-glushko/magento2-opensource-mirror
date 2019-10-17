@@ -10,15 +10,15 @@ $status = new \Magento\Update\Status();
 $cronReadinessChecker = new \Magento\Update\CronReadinessCheck();
 
 if (!$cronReadinessChecker->runReadinessCheck()) {
-    exit('Cron readiness check failed');
+    exit('Cron readiness check failed' . PHP_EOL);
 }
 
 if ($status->isUpdateInProgress()) {
-    exit('Cron is already in progress...');
+    exit('Cron is already in progress...' . PHP_EOL);
 }
 
 if ($status->isUpdateError()) {
-    exit('There was an error in previous Updater jobs...');
+    exit('There was an error in previous Updater jobs...' . PHP_EOL);
 }
 
 $backupDirectory = BACKUP_DIR;

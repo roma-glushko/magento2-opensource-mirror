@@ -71,9 +71,13 @@ function file_exists($filename)
     return true;
 }
 
-function file_get_contents()
+function file_get_contents($filename)
 {
-    return json_encode([CronReadinessCheck::KEY_CURRENT_TIMESTAMP => 150]);
+    if ($filename === MAGENTO_BP . '/var/' . CronReadinessCheck::SETUP_CRON_JOB_STATUS_FILE) {
+        return json_encode([CronReadinessCheck::KEY_FILE_PATHS => [CronReadinessCheck::KEY_LIST => [__FILE__]]]);
+    } else {
+        return json_encode([CronReadinessCheck::KEY_CURRENT_TIMESTAMP => 150]);
+    }
 }
 
 function is_writable()
