@@ -1,9 +1,10 @@
 <?php
 
 /*
- * This file is part of the PHP CS utility.
+ * This file is part of PHP CS Fixer.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
+ *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -20,7 +21,7 @@ use Symfony\CS\Utils;
  * Fixer for rules defined in PSR2 ¶3.
  *
  * @author Ceeram <ceeram@cakephp.org>
- * @author Graham Campbell <graham@mineuk.com>
+ * @author Graham Campbell <graham@alt-three.com>
  */
 class SingleLineAfterImportsFixer extends AbstractFixer
 {
@@ -61,7 +62,8 @@ class SingleLineAfterImportsFixer extends AbstractFixer
                     ++$insertIndex;
                 }
 
-                // Do not add newline after inline T_COMMENT as it is part of T_COMMENT already (note: not needed on 2.x line )
+                // Do not add newline after inline T_COMMENT as it is part of T_COMMENT already
+                // TODO: remove on 2.x line
                 if ($tokens[$insertIndex]->isGivenKind(T_COMMENT) && false !== strpos($tokens[$insertIndex]->getContent(), "\n")) {
                     $newline = '';
                 }
@@ -87,7 +89,8 @@ class SingleLineAfterImportsFixer extends AbstractFixer
                         $nextToken->setContent($newline.$indent.ltrim($nextToken->getContent()));
                     }
                 } else {
-                    if ('' !== $newline.$indent) { // (note: check not needed on 2.x line)
+                    // TODO: remove check on 2.x line
+                    if ('' !== $newline.$indent) {
                         $tokens->insertAt($insertIndex, new Token(array(T_WHITESPACE, $newline.$indent)));
                     }
                 }

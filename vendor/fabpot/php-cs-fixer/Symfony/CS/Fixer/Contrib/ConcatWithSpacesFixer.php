@@ -1,9 +1,10 @@
 <?php
 
 /*
- * This file is part of the PHP CS utility.
+ * This file is part of PHP CS Fixer.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
+ *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -40,6 +41,23 @@ class ConcatWithSpacesFixer extends AbstractFixer
     }
 
     /**
+     * {@inheritdoc}
+     */
+    public function getDescription()
+    {
+        return 'Concatenation should be used with at least one whitespace around.';
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPriority()
+    {
+        // should be run after the ConcatWithoutSpacesFixer
+        return -10;
+    }
+
+    /**
      * @param Tokens $tokens
      * @param int    $index  Index of concat token
      * @param int    $offset 1 or -1
@@ -63,22 +81,5 @@ class ConcatWithSpacesFixer extends AbstractFixer
         }
 
         $tokens[$offsetIndex]->setContent(' ');
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getDescription()
-    {
-        return 'Concatenation should be used with at least one whitespace around.';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        // should be run after the ConcatWithoutSpacesFixer
-        return -10;
     }
 }

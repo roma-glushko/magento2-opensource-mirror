@@ -2,7 +2,7 @@
     "name": "magento/magento2-base",
     "description": "Magento 2 Base (Community Edition)",
     "type": "magento2-component",
-    "version": "2.0.9",
+    "version": "2.0.10",
     "require": {
         "magento/magento-composer-installer": "*",
         "php": "~5.5.0|~5.6.0|~7.0.0",
@@ -29,7 +29,7 @@
         "zendframework/zend-log": "~2.4.6",
         "zendframework/zend-http": "~2.4.6",
         "magento/zendframework1": "1.12.16",
-        "composer/composer": "1.0.0-alpha10",
+        "composer/composer": "<=1.0.0-alpha10",
         "monolog/monolog": "1.16.0",
         "oyejorge/less.php": "1.7.0.3",
         "pelago/emogrifier": "0.1.1",

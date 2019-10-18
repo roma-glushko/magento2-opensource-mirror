@@ -1,9 +1,10 @@
 <?php
 
 /*
- * This file is part of the PHP CS utility.
+ * This file is part of PHP CS Fixer.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
+ *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -90,7 +91,7 @@ class TernarySpacesFixer extends AbstractFixer
     {
         if ($tokens[$index]->isWhitespace()) {
             if (false === strpos($tokens[$index]->getContent(), "\n")) {
-                // comment with trailing line break check, on 1.x line only
+                // TODO: comment with trailing line break check should be removed on 2.0 line
                 if (!$tokens[$index - 1]->isComment() || false === strpos($tokens[$index - 1]->getContent(), "\n")) {
                     $tokens[$index]->setContent(' ');
                 }

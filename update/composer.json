@@ -2,7 +2,7 @@
     "name": "magento/updater",
     "description": "Magento Updater",
     "type": "project",
-    "version": "10.0.2",
+    "version": "10.0.3",
     "license": [
         "OSL-3.0",
         "AFL-3.0"
@@ -20,6 +20,9 @@
         "symfony/console": "~2.3 <2.7",
         "monolog/monolog": "1.16.0",
         "psr/log": "~1.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "4.1.0"
     },
     "autoload": {
         "psr-4": {

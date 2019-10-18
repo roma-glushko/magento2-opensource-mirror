@@ -1,9 +1,10 @@
 <?php
 
 /*
- * This file is part of the PHP CS utility.
+ * This file is part of PHP CS Fixer.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
+ *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -68,24 +69,6 @@ class Token
     }
 
     /**
-     * @param string[] $tokenNames
-     *
-     * @return array<int, int>
-     */
-    private static function getTokenKindsForNames(array $tokenNames)
-    {
-        $keywords = array();
-        foreach ($tokenNames as $keywordName) {
-            if (defined($keywordName)) {
-                $keyword = constant($keywordName);
-                $keywords[$keyword] = $keyword;
-            }
-        }
-
-        return $keywords;
-    }
-
-    /**
      * Clear token at given index.
      *
      * Clearing means override token by empty string.
@@ -147,7 +130,7 @@ class Token
      * @param array       $others        array of tokens or token prototypes
      * @param bool|bool[] $caseSensitive global case sensitiveness or an array of booleans, whose keys should match
      *                                   the ones used in $others. If any is missing, the default case-sensitive
-     *                                   comparison is used.
+     *                                   comparison is used
      *
      * @return bool
      */
@@ -169,7 +152,7 @@ class Token
      *
      * @param bool|bool[] $caseSensitive global case sensitiveness or an array of booleans, whose keys should match
      *                                   the ones used in $others. If any is missing, the default case-sensitive
-     *                                   comparison is used.
+     *                                   comparison is used
      * @param int         $key           the key of the token that has to be looked up
      *
      * @return bool
@@ -214,7 +197,7 @@ class Token
     /**
      * Get token's id.
      *
-     * @return int
+     * @return int|null
      */
     public function getId()
     {
@@ -502,5 +485,23 @@ class Token
         }
 
         return json_encode($this->toArray(), $options);
+    }
+
+    /**
+     * @param string[] $tokenNames
+     *
+     * @return array<int, int>
+     */
+    private static function getTokenKindsForNames(array $tokenNames)
+    {
+        $keywords = array();
+        foreach ($tokenNames as $keywordName) {
+            if (defined($keywordName)) {
+                $keyword = constant($keywordName);
+                $keywords[$keyword] = $keyword;
+            }
+        }
+
+        return $keywords;
     }
 }

@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16
+class ComposerStaticInit417eb539bb60b9a239953824545e8a72
 {
     public static $files = array (
         '07ec02c7e667fdcb3e30c02cc772b743' => __DIR__ . '/..' . '/magento/framework/registration.php',
@@ -40,20 +40,20 @@ class ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16
         '5c7dcd6ec83d6cf2988a97cdcba365ed' => __DIR__ . '/..' . '/magento/module-catalog-rule/registration.php',
         '3f1662385885db186423ec0b74dfe6e9' => __DIR__ . '/..' . '/magento/module-sales-rule/registration.php',
         'e54a2a6d4f945c30feee43a0713bfb8b' => __DIR__ . '/..' . '/magento/module-checkout/registration.php',
-        '4725125cbaeab31cd4e5c5c07061fa43' => __DIR__ . '/..' . '/magento/module-payment/registration.php',
-        '4e49f9b77cfaca5ecee9e68485c07e5a' => __DIR__ . '/..' . '/magento/module-contact/registration.php',
-        '53814a716d73013b1489c928a2cb4164' => __DIR__ . '/..' . '/magento/module-shipping/registration.php',
+        'cf44f9b1253939f955772534aabbf624' => __DIR__ . '/..' . '/magento/module-grouped-product/registration.php',
+        '0e991a783d700a320f90da58cc8a38fc' => __DIR__ . '/..' . '/magento/module-rss/registration.php',
+        '571be93292212396d8ebf8febc7bed8f' => __DIR__ . '/..' . '/magento/module-wishlist/registration.php',
         'a402dea5ff0872fb10e6b9910d2dd108' => __DIR__ . '/..' . '/magento/module-sales/registration.php',
         'a6d2049b4013058aebdab5256bfc92a1' => __DIR__ . '/..' . '/magento/module-import-export/registration.php',
-        'cf44f9b1253939f955772534aabbf624' => __DIR__ . '/..' . '/magento/module-grouped-product/registration.php',
+        '4725125cbaeab31cd4e5c5c07061fa43' => __DIR__ . '/..' . '/magento/module-payment/registration.php',
         '108fd301b720a30c9ec42a785ee00656' => __DIR__ . '/..' . '/magento/module-gift-message/registration.php',
         'bb6621289f135d14ac7bffe9e45ad6ef' => __DIR__ . '/..' . '/magento/module-catalog-import-export/registration.php',
         '44e7790b83e1936666da9a3a94daac39' => __DIR__ . '/..' . '/magento/module-downloadable/registration.php',
+        '4e49f9b77cfaca5ecee9e68485c07e5a' => __DIR__ . '/..' . '/magento/module-contact/registration.php',
+        '53814a716d73013b1489c928a2cb4164' => __DIR__ . '/..' . '/magento/module-shipping/registration.php',
         'ff4a42fb48f753f6d1e6177223059e3d' => __DIR__ . '/..' . '/magento/module-msrp/registration.php',
         '19b03cc33c349b5e5fbc6577c2f9dc87' => __DIR__ . '/..' . '/magento/module-catalog-url-rewrite/registration.php',
         'beef4a50b960435d4b145e8d222f5f10' => __DIR__ . '/..' . '/magento/module-configurable-product/registration.php',
-        '0e991a783d700a320f90da58cc8a38fc' => __DIR__ . '/..' . '/magento/module-rss/registration.php',
-        '571be93292212396d8ebf8febc7bed8f' => __DIR__ . '/..' . '/magento/module-wishlist/registration.php',
         '2d0debaab8ec34dfba214036a43af24e' => __DIR__ . '/..' . '/magento/module-url-rewrite/registration.php',
         'dfd9907262eacfe8b22fef82dc6725c9' => __DIR__ . '/..' . '/magento/module-integration/registration.php',
         'b2a251005c112dee4a8e7f7580a475f5' => __DIR__ . '/..' . '/magento/module-cookie/registration.php',
@@ -169,6 +169,7 @@ class ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16
         ),
         'P' => 
         array (
+            'Psr\\Log\\' => 8,
             'Pelago\\' => 7,
         ),
         'M' => 
@@ -449,6 +450,10 @@ class ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16
         'Seld\\JsonLint\\' => 
         array (
             0 => __DIR__ . '/..' . '/seld/jsonlint/src/Seld/JsonLint',
+        ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
         'Pelago\\' => 
         array (
@@ -926,10 +931,6 @@ class ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16
         ),
         'P' => 
         array (
-            'Psr\\Log\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/psr/log',
-            ),
             'PHPMD\\' => 
             array (
                 0 => __DIR__ . '/..' . '/phpmd/phpmd/src/main/php',
@@ -1702,11 +1703,11 @@ class ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit17ed51e7287cb39a5e9035d1585b2c16::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit417eb539bb60b9a239953824545e8a72::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit417eb539bb60b9a239953824545e8a72::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit417eb539bb60b9a239953824545e8a72::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit417eb539bb60b9a239953824545e8a72::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit417eb539bb60b9a239953824545e8a72::$classMap;
 
         }, null, ClassLoader::class);
     }
