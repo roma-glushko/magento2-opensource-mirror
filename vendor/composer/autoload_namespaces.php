@@ -20,7 +20,6 @@ return array(
     'JShrink' => array($vendorDir . '/tedivm/jshrink/src'),
     'File' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
     'Crypt' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
-    'Composer' => array($vendorDir . '/composer/composer/src'),
     'Cm\\RedisSession\\' => array($vendorDir . '/colinmollenhour/php-redis-session-abstract/src'),
     'Braintree' => array($vendorDir . '/braintree/braintree_php/lib'),
     '' => array($baseDir . '/app/code'),

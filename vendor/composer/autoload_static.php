@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2
+class ComposerStaticInit3f56ed5cf22e3877d86555f8dff0ef9f
 {
     public static $files = array (
         '07ec02c7e667fdcb3e30c02cc772b743' => __DIR__ . '/..' . '/magento/framework/registration.php',
@@ -166,7 +166,9 @@ class ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2
             'Symfony\\Component\\Config\\' => 25,
             'Symfony\\CS\\' => 11,
             'StaticReview\\' => 13,
+            'Seld\\PharUtils\\' => 15,
             'Seld\\JsonLint\\' => 14,
+            'Seld\\CliPrompt\\' => 15,
         ),
         'P' => 
         array (
@@ -297,6 +299,12 @@ class ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2
         'D' => 
         array (
             'Doctrine\\Instantiator\\' => 22,
+        ),
+        'C' => 
+        array (
+            'Composer\\Spdx\\' => 14,
+            'Composer\\Semver\\' => 16,
+            'Composer\\' => 9,
         ),
     );
 
@@ -449,9 +457,17 @@ class ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2
         array (
             0 => __DIR__ . '/..' . '/sjparkinson/static-review/src',
         ),
+        'Seld\\PharUtils\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/seld/phar-utils/src',
+        ),
         'Seld\\JsonLint\\' => 
         array (
             0 => __DIR__ . '/..' . '/seld/jsonlint/src/Seld/JsonLint',
+        ),
+        'Seld\\CliPrompt\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/seld/cli-prompt/src',
         ),
         'Psr\\Log\\' => 
         array (
@@ -914,6 +930,18 @@ class ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
         ),
+        'Composer\\Spdx\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/spdx-licenses/src',
+        ),
+        'Composer\\Semver\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/semver/src',
+        ),
+        'Composer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/composer/composer/src/Composer',
+        ),
     );
 
     public static $prefixesPsr0 = array (
@@ -1001,10 +1029,6 @@ class ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2
             'Crypt' => 
             array (
                 0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
-            ),
-            'Composer' => 
-            array (
-                0 => __DIR__ . '/..' . '/composer/composer/src',
             ),
             'Cm\\RedisSession\\' => 
             array (
@@ -1711,11 +1735,11 @@ class ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit9990b4a1e9baa54f75618269e050f5b2::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit3f56ed5cf22e3877d86555f8dff0ef9f::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit3f56ed5cf22e3877d86555f8dff0ef9f::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit3f56ed5cf22e3877d86555f8dff0ef9f::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit3f56ed5cf22e3877d86555f8dff0ef9f::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit3f56ed5cf22e3877d86555f8dff0ef9f::$classMap;
 
         }, null, ClassLoader::class);
     }

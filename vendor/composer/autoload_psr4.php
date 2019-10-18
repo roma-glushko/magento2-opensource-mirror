@@ -43,7 +43,9 @@ return array(
     'Symfony\\Component\\Config\\' => array($vendorDir . '/symfony/config'),
     'Symfony\\CS\\' => array($vendorDir . '/fabpot/php-cs-fixer/Symfony/CS'),
     'StaticReview\\' => array($vendorDir . '/sjparkinson/static-review/src'),
+    'Seld\\PharUtils\\' => array($vendorDir . '/seld/phar-utils/src'),
     'Seld\\JsonLint\\' => array($vendorDir . '/seld/jsonlint/src/Seld/JsonLint'),
+    'Seld\\CliPrompt\\' => array($vendorDir . '/seld/cli-prompt/src'),
     'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
     'Pelago\\' => array($vendorDir . '/pelago/emogrifier/Classes'),
     'Monolog\\' => array($vendorDir . '/monolog/monolog/src/Monolog'),
@@ -159,4 +161,7 @@ return array(
     'League\\CLImate\\' => array($vendorDir . '/league/climate/src'),
     'JsonSchema\\' => array($vendorDir . '/justinrainbow/json-schema/src/JsonSchema'),
     'Doctrine\\Instantiator\\' => array($vendorDir . '/doctrine/instantiator/src/Doctrine/Instantiator'),
+    'Composer\\Spdx\\' => array($vendorDir . '/composer/spdx-licenses/src'),
+    'Composer\\Semver\\' => array($vendorDir . '/composer/semver/src'),
+    'Composer\\' => array($vendorDir . '/composer/composer/src/Composer'),
 );
