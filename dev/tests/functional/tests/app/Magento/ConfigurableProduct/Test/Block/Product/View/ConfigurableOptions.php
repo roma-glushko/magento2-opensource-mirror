@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -87,15 +87,14 @@ class ConfigurableOptions extends CustomOptions
         /** @var ConfigurableProduct $product */
         $attributesData = [];
         $productVariations = [];
-
         if ($product->hasData('configurable_attributes_data')) {
             $attributesData = $product->getConfigurableAttributesData()['attributes_data'];
             $productVariations = $product->getConfigurableAttributesData()['matrix'];
         }
 
         $productVariations = array_keys($productVariations);
-        $result = [];
 
+        $result = [];
         foreach ($productVariations as $variation) {
             $variationOptions = explode(' ', $variation);
             $result[$variation]['price'] = $this->getOptionPrice($variationOptions, $attributesData);
@@ -123,7 +122,6 @@ class ConfigurableOptions extends CustomOptions
 
         $priceBlock = $this->getPriceBlock();
         $price = ($priceBlock->isOldPriceVisible()) ? $priceBlock->getOldPrice() : $priceBlock->getPrice();
-        
         return $price;
     }
 
@@ -141,8 +139,6 @@ class ConfigurableOptions extends CustomOptions
     }
 
     /**
-     * Select option from the select element.
-     *
      * @param string $attributeTitle
      * @param string $optionTitle
      */

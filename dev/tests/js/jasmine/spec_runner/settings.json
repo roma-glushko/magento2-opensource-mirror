@@ -57,8 +57,7 @@
             "^\/_SpecRunner.html",
             "^\/dev\/tests",
             "^\/.grunt",
-            "^\/pub\/static",
-            "^\/node_modules"
+            "^\/pub\/static"
         ],
         "options": {
             /**

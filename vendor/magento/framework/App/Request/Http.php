@@ -1,11 +1,10 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\App\Request;
 
-use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\App\RequestSafetyInterface;
 use Magento\Framework\App\Route\ConfigInterface\Proxy as ConfigInterface;
@@ -77,7 +76,6 @@ class Http extends Request implements RequestInterface, RequestSafetyInterface
 
     /**
      * @var ObjectManagerInterface
-     * @deprecated
      */
     protected $objectManager;
 
@@ -90,6 +88,11 @@ class Http extends Request implements RequestInterface, RequestSafetyInterface
      * @var array
      */
     protected $safeRequestTypes = ['GET', 'HEAD', 'TRACE', 'OPTIONS'];
+
+    /**
+     * @var string
+     */
+    private $distroBaseUrl;
 
     /**
      * @param CookieReaderInterface $cookieReader
@@ -146,50 +149,25 @@ class Http extends Request implements RequestInterface, RequestSafetyInterface
                 return $this;
             }
 
-            $requestUri = $this->removeRepeatedSlashes($requestUri);
-            $parsedRequestUri = explode('?', $requestUri, 2);
-            $queryString = !isset($parsedRequestUri[1]) ? '' : '?' . $parsedRequestUri[1];
-            $baseUrl = $this->getBaseUrl();
-            $pathInfo = (string)substr($parsedRequestUri[0], (int)strlen($baseUrl));
+            // Remove the query string from REQUEST_URI
+            $pos = strpos($requestUri, '?');
+            if ($pos) {
+                $requestUri = substr($requestUri, 0, $pos);
+            }
 
-            if ($this->isNoRouteUri($baseUrl, $pathInfo)) {
-                $pathInfo = 'noroute';
+            $baseUrl = $this->getBaseUrl();
+            $pathInfo = substr($requestUri, strlen($baseUrl));
+            if (!empty($baseUrl) && false === $pathInfo) {
+                $pathInfo = '';
+            } elseif (null === $baseUrl) {
+                $pathInfo = $requestUri;
             }
             $pathInfo = $this->pathInfoProcessor->process($this, $pathInfo);
             $this->originalPathInfo = (string)$pathInfo;
-            $this->requestString = $pathInfo . $queryString;
+            $this->requestString = $pathInfo . ($pos !== false ? substr($requestUri, $pos) : '');
         }
         $this->pathInfo = (string)$pathInfo;
         return $this;
-    }
-
-    /**
-     * Remove repeated slashes from the start of the path.
-     *
-     * @param string $pathInfo
-     * @return string
-     */
-    private function removeRepeatedSlashes($pathInfo)
-    {
-        $firstChar = (string)substr($pathInfo, 0, 1);
-        if ($firstChar == '/') {
-            $pathInfo = '/' . ltrim($pathInfo, '/');
-        }
-
-        return $pathInfo;
-    }
-
-    /**
-     * Check is URI should be marked as no route, helps to route 404 for incorrect URI.
-     *
-     * @param string $baseUrl
-     * @param string $pathInfo
-     * @return bool
-     */
-    private function isNoRouteUri($baseUrl, $pathInfo)
-    {
-        $firstChar = (string)substr($pathInfo, 0, 1);
-        return $baseUrl !== '' && !in_array($firstChar, ['/', '']);
     }
 
     /**
@@ -342,26 +320,27 @@ class Http extends Request implements RequestInterface, RequestSafetyInterface
      */
     public function getDistroBaseUrl()
     {
+        if ($this->distroBaseUrl) {
+            return $this->distroBaseUrl;
+        }
         $headerHttpHost = $this->getServer('HTTP_HOST');
         $headerHttpHost = $this->converter->cleanString($headerHttpHost);
-        $headerServerPort = $this->getServer('SERVER_PORT');
         $headerScriptName = $this->getServer('SCRIPT_NAME');
-        $headerHttps = $this->getServer('HTTPS');
 
         if (isset($headerScriptName) && isset($headerHttpHost)) {
-            $secure = !empty($headerHttps)
-                && $headerHttps != 'off'
-                || isset($headerServerPort)
-                && $headerServerPort == '443';
-            $scheme = ($secure ? 'https' : 'http') . '://';
+            if ($secure = $this->isSecure()) {
+                $scheme = 'https://';
+            } else {
+                $scheme = 'http://';
+            }
 
             $hostArr = explode(':', $headerHttpHost);
             $host = $hostArr[0];
             $port = isset($hostArr[1])
-            && (!$secure && $hostArr[1] != 80 || $secure && $hostArr[1] != 443) ? ':' . $hostArr[1] : '';
+                && (!$secure && $hostArr[1] != 80 || $secure && $hostArr[1] != 443) ? ':' . $hostArr[1] : '';
             $path = $this->getBasePath();
 
-            return $scheme . $host . $port . rtrim($path, '/') . '/';
+            return $this->distroBaseUrl = $scheme . $host . $port . rtrim($path, '/') . '/';
         }
         return 'http://localhost/';
     }
@@ -429,29 +408,7 @@ class Http extends Request implements RequestInterface, RequestSafetyInterface
         return [];
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @return bool
-     */
-    public function isSecure()
-    {
-        if ($this->immediateRequestSecure()) {
-            return true;
-        }
-        /* TODO: Untangle Config dependence on Scope, so that this class can be instantiated even if app is not
-        installed MAGETWO-31756 */
-        // Check if a proxy sent a header indicating an initial secure request
-        $config = $this->objectManager->get(\Magento\Framework\App\Config::class);
-        $offLoaderHeader = trim(
-            (string)$config->getValue(
-                self::XML_PATH_OFFLOADER_HEADER,
-                ScopeConfigInterface::SCOPE_TYPE_DEFAULT
-            )
-        );
 
-        return $this->initialRequestSecure($offLoaderHeader);
-    }
 
     /**
      * {@inheritdoc}
@@ -468,28 +425,5 @@ class Http extends Request implements RequestInterface, RequestSafetyInterface
         return $this->isSafeMethod;
     }
 
-    /**
-     * Checks if the immediate request is delivered over HTTPS
-     *
-     * @return bool
-     */
-    protected function immediateRequestSecure()
-    {
-        $https = $this->getServer('HTTPS');
-        return !empty($https) && ($https != 'off');
-    }
-
-    /**
-     * In case there is a proxy server, checks if the initial request to the proxy was delivered over HTTPS
-     *
-     * @param string $offLoaderHeader
-     * @return bool
-     */
-    protected function initialRequestSecure($offLoaderHeader)
-    {
-        $header = $this->getServer($offLoaderHeader);
-        $httpHeader = $this->getServer('HTTP_' . $offLoaderHeader);
-        return !empty($offLoaderHeader)
-        && (isset($header) && ($header === 'https') || isset($httpHeader) && ($httpHeader === 'https'));
-    }
+    
 }

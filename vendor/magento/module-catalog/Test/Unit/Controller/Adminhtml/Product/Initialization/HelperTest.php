@@ -1,18 +1,23 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\Catalog\Test\Unit\Controller\Adminhtml\Product\Initialization;
 
+use Magento\Catalog\Api\Data\ProductLinkInterfaceFactory;
+use Magento\Catalog\Api\ProductRepositoryInterface\Proxy as ProductRepository;
 use Magento\Catalog\Controller\Adminhtml\Product\Initialization\Helper;
 use Magento\Catalog\Controller\Adminhtml\Product\Initialization\StockDataFilter;
 use Magento\Catalog\Model\Product;
-use Magento\Catalog\Model\Product\Option;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use Magento\Store\Api\Data\StoreInterface;
+use Magento\Store\Api\Data\WebsiteInterface;
 use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Stdlib\DateTime\Filter\Date as DateFilter;
+use Magento\Catalog\Api\Data\ProductCustomOptionInterfaceFactory;
+use Magento\Catalog\Api\Data\ProductCustomOptionInterface;
 use Magento\Catalog\Model\Product\Initialization\Helper\ProductLinks;
 
 /**
@@ -30,12 +35,17 @@ class HelperTest extends \PHPUnit_Framework_TestCase
     protected $objectManager;
 
     /**
+     * @var int
+     */
+    protected $websiteId = 1;
+
+    /**
      * @var Helper
      */
     protected $helper;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var RequestInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $requestMock;
 
@@ -50,75 +60,83 @@ class HelperTest extends \PHPUnit_Framework_TestCase
     protected $stockFilterMock;
 
     /**
-     * @var ProductLinks|\PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $productLinksMock;
-
-    /**
      * @var Product|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $productMock;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var StoreInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $storeMock;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var WebsiteInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $websiteMock;
 
     /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
+     * @var DateFilter|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $dateFilterMock;
 
     /**
-     * @var int
+     * @var ProductLinkInterfaceFactory|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected $websiteId = 1;
+    protected $productLinkFactoryMock;
 
     /**
-     * @var \Magento\Backend\Helper\Js|\PHPUnit_Framework_MockObject_MockObject
+     * @var ProductRepository|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected $jsHelperMock;
+    protected $productRepositoryMock;
+
+    /**
+     * @var ProductCustomOptionInterfaceFactory|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $customOptionFactoryMock;
+
+    /**
+     * @var ProductCustomOptionInterface|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $customOptionMock;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $linkResolverMock;
+
+    /**
+     * @var ProductLinks
+     */
+    protected $productLinksMock;
 
     protected function setUp()
     {
         $this->objectManager = new ObjectManager($this);
+        $this->productLinkFactoryMock = $this->getMockBuilder(ProductLinkInterfaceFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->productRepositoryMock = $this->getMockBuilder(ProductRepository::class)
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->requestMock = $this->getMockBuilder(RequestInterface::class)
             ->setMethods(['getPost'])
             ->getMockForAbstractClass();
-
-        $this->jsHelperMock = $this->getMock(\Magento\Backend\Helper\Js::class, [], [], '', false);
-        $this->storeMock = $this->getMock(\Magento\Store\Model\Store::class, [], [], '', false);
-        $this->websiteMock = $this->getMock(\Magento\Store\Model\Website::class, [], [], '', false);
+        $this->storeMock = $this->getMockBuilder(StoreInterface::class)
+            ->setMethods(['getWebsite'])
+            ->getMockForAbstractClass();
+        $this->websiteMock = $this->getMockBuilder(WebsiteInterface::class)
+            ->getMockForAbstractClass();
         $this->storeManagerMock = $this->getMockBuilder(StoreManagerInterface::class)
             ->getMockForAbstractClass();
-        $this->dateFilterMock = $this->getMock(
-            \Magento\Framework\Stdlib\DateTime\Filter\Date::class,
-            [],
-            [],
-            '',
-            false
-        );
-
+        $this->dateFilterMock = $this->getMockBuilder(DateFilter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->stockFilterMock = $this->getMockBuilder(StockDataFilter::class)
             ->disableOriginalConstructor()
             ->getMock();
-
-        $this->productLinksMock = $this->getMock(
-            \Magento\Catalog\Model\Product\Initialization\Helper\ProductLinks::class,
-            [],
-            [],
-            '',
-            false
-        );
-
-        $this->productMock = $this->getMock(
-            \Magento\Catalog\Model\Product::class,
-            [
+        $this->productMock = $this->getMockBuilder(Product::class)
+            ->setMethods([
+                'setData',
                 'addData',
                 'getId',
                 'setWebsiteIds',
@@ -127,23 +145,49 @@ class HelperTest extends \PHPUnit_Framework_TestCase
                 'getAttributes',
                 'unlockAttribute',
                 'getOptionsReadOnly',
+                'setOptions',
                 'setCanSaveCustomOptions',
                 '__sleep',
-                '__wakeup'
-            ],
-            [],
-            '',
-            false
-        );
+                '__wakeup',
+                'getSku',
+                'getProductLinks',
+                'getWebsiteIds'
+            ])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->customOptionFactoryMock = $this->getMockBuilder(ProductCustomOptionInterfaceFactory::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['create'])
+            ->getMock();
+        $this->customOptionMock = $this->getMockBuilder(ProductCustomOptionInterface::class)
+            ->disableOriginalConstructor()
+            ->getMockForAbstractClass();
+        $this->productLinksMock = $this->getMockBuilder(ProductLinks::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->productLinksMock->expects($this->any())
+            ->method('initializeLinks')
+            ->willReturn($this->productMock);
 
         $this->helper = $this->objectManager->getObject(Helper::class, [
             'request' => $this->requestMock,
             'storeManager' => $this->storeManagerMock,
             'stockFilter' => $this->stockFilterMock,
             'productLinks' => $this->productLinksMock,
-            'jsHelper' => $this->jsHelperMock,
             'dateFilter' => $this->dateFilterMock,
+            'customOptionFactory' => $this->customOptionFactoryMock,
+            'productLinkFactory' => $this->productLinkFactoryMock,
+            'productRepository' => $this->productRepositoryMock,
         ]);
+
+        $this->linkResolverMock = $this->getMockBuilder(\Magento\Catalog\Model\Product\Link\Resolver::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $helperReflection = new \ReflectionClass(get_class($this->helper));
+        $resolverProperty = $helperReflection->getProperty('linkResolver');
+        $resolverProperty->setAccessible(true);
+        $resolverProperty->setValue($this->helper, $this->linkResolverMock);
     }
 
     /**
@@ -152,33 +196,19 @@ class HelperTest extends \PHPUnit_Framework_TestCase
      */
     public function testInitialize()
     {
+        $this->customOptionMock->expects($this->once())
+            ->method('setProductSku');
+        $this->customOptionMock->expects($this->once())
+            ->method('setOptionId');
+
         $optionsData = [
-            'option1' => ['is_delete' => false, 'name' => 'name1', 'price' => 'price1', 'option_id' => '13'],
-            'option2' => ['is_delete' => false, 'name' => 'name1', 'price' => 'price1', 'option_id' => '14',
-                'values' => [
-                    'value1' => ['option_type_id' => 1, 'is_delete' =>''],
-                    'value2' => ['option_type_id' => '-1', 'is_delete' =>'1']
-                ]
-            ],
+            'option1' => ['is_delete' => true, 'name' => 'name1', 'price' => 'price1'],
+            'option2' => ['is_delete' => false, 'name' => 'name1', 'price' => 'price1'],
         ];
         $productData = [
             'stock_data' => ['stock_data'],
             'options' => $optionsData,
         ];
-        
-        $this->websiteMock->expects($this->once())
-            ->method('getId')
-            ->will($this->returnValue($this->websiteId));
-
-        $this->storeMock->expects($this->once())
-            ->method('getWebsite')
-            ->will($this->returnValue($this->websiteMock));
-
-        $this->storeManagerMock->expects($this->once())
-            ->method('getStore')
-            ->with(true)
-            ->will($this->returnValue($this->storeMock));
-
         $attributeNonDate = $this->getMockBuilder(\Magento\Catalog\Model\ResourceModel\Eav\Attribute::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -196,20 +226,19 @@ class HelperTest extends \PHPUnit_Framework_TestCase
 
         $attributeNonDate->expects($this->any())
             ->method('getBackend')
-            ->will($this->returnValue($attributeNonDateBackEnd));
-
+            ->willReturn($attributeNonDateBackEnd);
         $attributeDate->expects($this->any())
             ->method('getBackend')
-            ->will($this->returnValue($attributeDateBackEnd));
-
-
+            ->willReturn($attributeDateBackEnd);
+        $this->productMock->expects($this->any())
+            ->method('getProductLinks')
+            ->willReturn([]);
         $attributeNonDateBackEnd->expects($this->any())
             ->method('getType')
-            ->will($this->returnValue('non-datetime'));
-
+            ->willReturn('non-datetime');
         $attributeDateBackEnd->expects($this->any())
             ->method('getType')
-            ->will($this->returnValue('datetime'));
+            ->willReturn('datetime');
 
         $attributesArray = [
             $attributeNonDate,
@@ -218,84 +247,59 @@ class HelperTest extends \PHPUnit_Framework_TestCase
 
         $useDefaults = ['attributeCode1', 'attributeCode2'];
 
-        $this->requestMock->expects($this->any())->method('getPost')->willReturnMap(
-            [
-                ['product', [], $productData],
-                ['use_default', null, $useDefaults]
-            ]
-        );
-
         $this->requestMock->expects($this->at(0))
             ->method('getPost')
             ->with('product')
-            ->will($this->returnValue($productData));
-
+            ->willReturn($productData);
         $this->requestMock->expects($this->at(1))
             ->method('getPost')
             ->with('use_default')
-            ->will($this->returnValue($useDefaults));
-
-        $this->requestMock->expects($this->at(3))
-            ->method('getPost')
-            ->with('options_use_default')
-            ->will($this->returnValue(true));
-
-        $this->requestMock->expects($this->at(4))
-            ->method('getPost')
-            ->with('affect_product_custom_options')
-            ->will($this->returnValue(true));
-
+            ->willReturn($useDefaults);
+        $this->linkResolverMock->expects($this->once())->method('getLinks')->willReturn([]);
         $this->stockFilterMock->expects($this->once())
             ->method('filter')
             ->with(['stock_data'])
-            ->will($this->returnValue(['stock_data']));
-
-        $this->storeManagerMock->expects($this->once())
-            ->method('hasSingleStore')
-            ->will($this->returnValue(true));
-
-        $this->productLinksMock->expects($this->once())
-            ->method('initializeLinks')
-            ->with($this->productMock)
-            ->will($this->returnValue($this->productMock));
-
+            ->willReturn(['stock_data']);
         $this->productMock->expects($this->once())
             ->method('isLockedAttribute')
             ->with('media')
-            ->will($this->returnValue(true));
-
+            ->willReturn(true);
         $this->productMock->expects($this->once())
             ->method('unlockAttribute')
             ->with('media');
-
+        $this->productMock->expects($this->any())
+            ->method('getProductLinks')
+            ->willReturn([]);
         $this->productMock->expects($this->once())
             ->method('lockAttribute')
             ->with('media');
-
         $this->productMock->expects($this->once())
             ->method('getAttributes')
-            ->will($this->returnValue($attributesArray));
+            ->willReturn($attributesArray);
 
         $productData['category_ids'] = [];
         $productData['website_ids'] = [];
+        unset($productData['options']);
 
         $this->productMock->expects($this->once())
             ->method('addData')
             ->with($productData);
-
         $this->productMock->expects($this->once())
-            ->method('setWebsiteIds')
-            ->with([$this->websiteId]);
-
+            ->method('getSku')
+            ->willReturn('sku');
         $this->productMock->expects($this->any())
             ->method('getOptionsReadOnly')
-            ->will($this->returnValue(false));
+            ->willReturn(false);
+
+        $this->customOptionFactoryMock->expects($this->any())
+            ->method('create')
+            ->with(['data' => $optionsData['option2']])
+            ->willReturn($this->customOptionMock);
+        $this->productMock->expects($this->once())
+            ->method('setOptions')
+            ->with([$this->customOptionMock]);
 
         $this->assertEquals($this->productMock, $this->helper->initialize($this->productMock));
-
-        $productOptions = $this->productMock->getProductOptions();
-        $this->assertTrue(2 == count($productOptions));
-        $this->assertTrue(1 == count($productOptions['option2']['values']));
     }
 
     /**
@@ -306,25 +310,72 @@ class HelperTest extends \PHPUnit_Framework_TestCase
     public function mergeProductOptionsDataProvider()
     {
         return [
-            [
+            'options are not array, empty array is returned' => [
                 null,
                 [],
                 [],
             ],
-            [
-                ['key' => 'val'],
+            'replacement is not array, original options are returned' => [
+                ['val'],
                 null,
-                ['key' => 'val'],
+                ['val'],
             ],
-            [
-                ['key' => ['key' => 'val']],
-                ['key' => ['key' => 'val2' , 'key2' => 'val2']],
-                ['key' => ['key' => 'val2' , 'key2' => 'val2']],
+            'ids do not match, no replacement occurs' => [
+                [
+                    [
+                        'option_id' => '3',
+                        'key1' => 'val1',
+                        'default_key1' => 'val2'
+                    ]
+                ],
+                [4 => ['key1' => '1']],
+                [
+                    [
+                        'option_id' => '3',
+                        'key1' => 'val1',
+                        'default_key1' => 'val2'
+                    ]
+                ]
             ],
-            [
-                ['key' => ['key' => 'val', 'another_key' => 'another_value']],
-                ['key' => ['key' => 'val2' , 'key2' => 'val2']],
-                ['key' => ['key' => 'val2' , 'another_key' => 'another_value', 'key2' => 'val2', ]],
+            'key2 is replaced, key1 is not (checkbox is not checked)' => [
+                [
+                    [
+                        'option_id' => '5',
+                        'key1' => 'val1',
+                        'key2' => 'val2',
+                        'default_key1' => 'val3',
+                        'default_key2' => 'val4'
+                    ]
+                ],
+                [5 => ['key1' => '0', 'key2' => '1']],
+                [
+                    [
+                        'option_id' => '5',
+                        'key1' => 'val1',
+                        'key2' => 'val4',
+                        'default_key1' => 'val3',
+                        'default_key2' => 'val4'
+                    ]
+                ]
+            ],
+            'key1 is replaced, key2 has no default value' => [
+                [
+                    [
+                        'option_id' => '7',
+                        'key1' => 'val1',
+                        'key2' => 'val2',
+                        'default_key1' => 'val3'
+                    ]
+                ],
+                [7 => ['key1' => '1', 'key2' => '1']],
+                [
+                    [
+                        'option_id' => '7',
+                        'key1' => 'val3',
+                        'key2' => 'val2',
+                        'default_key1' => 'val3'
+                    ]
+                ],
             ],
         ];
     }

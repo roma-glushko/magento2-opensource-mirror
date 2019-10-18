@@ -1,11 +1,12 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\Filesystem\Directory;
 
 use Magento\Framework\Exception\FileSystemException;
+use Magento\Framework\Filesystem\DriverInterface;
 
 class Write extends Read implements WriteInterface
 {
@@ -39,7 +40,7 @@ class Write extends Read implements WriteInterface
     }
 
     /**
-     * Check if directory or file is writable
+     * Check if directory is writable
      *
      * @param string $path
      * @return void
@@ -48,9 +49,7 @@ class Write extends Read implements WriteInterface
     protected function assertWritable($path)
     {
         if ($this->isWritable($path) === false) {
-            $path = (!$this->driver->isFile($path))
-                ? $this->getAbsolutePath($this->path, $path)
-                : $this->getAbsolutePath($path);
+            $path = $this->getAbsolutePath($this->path, $path);
             throw new FileSystemException(new \Magento\Framework\Phrase('The path "%1" is not writable', [$path]));
         }
     }
@@ -68,7 +67,7 @@ class Write extends Read implements WriteInterface
         $absolutePath = $this->driver->getAbsolutePath($this->path, $path);
         if (!$this->driver->isFile($absolutePath)) {
             throw new FileSystemException(
-                new \Magento\Framework\Phrase('The "%1" file doesn\'t exist or not a file', [$absolutePath])
+                new \Magento\Framework\Phrase('The file "%1" doesn\'t exist or not a file', [$absolutePath])
             );
         }
     }
@@ -106,7 +105,7 @@ class Write extends Read implements WriteInterface
             $targetDirectory->create($this->driver->getParentDirectory($newPath));
         }
         $absolutePath = $this->driver->getAbsolutePath($this->path, $path);
-        $absoluteNewPath = $targetDirectory->getAbsolutePath($newPath);
+        $absoluteNewPath = $targetDirectory->driver->getAbsolutePath($this->path, $newPath);
         return $this->driver->rename($absolutePath, $absoluteNewPath, $targetDirectory->driver);
     }
 
@@ -144,6 +143,8 @@ class Write extends Read implements WriteInterface
      */
     public function createSymlink($path, $destination, WriteInterface $targetDirectory = null)
     {
+        $this->assertIsFile($path);
+
         $targetDirectory = $targetDirectory ?: $this;
         $parentDirectory = $this->driver->getParentDirectory($destination);
         if (!$targetDirectory->isExist($parentDirectory)) {
@@ -239,13 +240,12 @@ class Write extends Read implements WriteInterface
      * @param string $path
      * @param string $mode
      * @return \Magento\Framework\Filesystem\File\WriteInterface
-     * @throws \Magento\Framework\Exception\FileSystemException
      */
     public function openFile($path, $mode = 'w')
     {
         $folder = dirname($path);
         $this->create($folder);
-        $this->assertWritable($this->isExist($path) ? $path : $folder);
+        $this->assertWritable($folder);
         $absolutePath = $this->driver->getAbsolutePath($this->path, $path);
         return $this->fileFactory->create($absolutePath, $this->driver, $mode);
     }

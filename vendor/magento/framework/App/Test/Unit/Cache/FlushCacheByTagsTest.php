@@ -1,7 +1,9 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
- * See COPYING.txt for license details.
+ * Created by PhpStorm.
+ * User: akasian
+ * Date: 1/25/16
+ * Time: 10:26 AM
  */
 
 namespace Magento\Framework\App\Test\Unit\Cache;

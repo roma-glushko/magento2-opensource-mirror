@@ -1,12 +1,12 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Integration\Helper\Oauth;
 
 /**
- * OAuth View Helper for Controllers.
+ * OAuth View Helper for Controllers
  */
 class Data
 {
@@ -56,87 +56,73 @@ class Data
     /**#@-*/
 
     /**
-     * Calculate cleanup possibility for data with lifetime property.
+     * Calculate cleanup possibility for data with lifetime property
      *
      * @return bool
      */
     public function isCleanupProbability()
     {
         // Safe get cleanup probability value from system configuration
-        $configValue = (int)$this->_scopeConfig->getValue(self::XML_PATH_CLEANUP_PROBABILITY);
-
+        $configValue = (int)$this->_scopeConfig->getValue(
+            self::XML_PATH_CLEANUP_PROBABILITY,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
         return $configValue > 0 ? 1 == \Magento\Framework\Math\Random::getRandomNumber(1, $configValue) : false;
     }
 
     /**
-     * Get cleanup expiration period value from system configuration in minutes.
+     * Get cleanup expiration period value from system configuration in minutes
      *
      * @return int
      */
     public function getCleanupExpirationPeriod()
     {
-        $minutes = (int)$this->_scopeConfig->getValue(self::XML_PATH_CLEANUP_EXPIRATION_PERIOD);
-
+        $minutes = (int)$this->_scopeConfig->getValue(
+            self::XML_PATH_CLEANUP_EXPIRATION_PERIOD,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
         return $minutes > 0 ? $minutes : self::CLEANUP_EXPIRATION_PERIOD_DEFAULT;
     }
 
     /**
-     * Get consumer expiration period value from system configuration in seconds.
+     * Get consumer expiration period value from system configuration in seconds
      *
      * @return int
      */
     public function getConsumerExpirationPeriod()
     {
-        $seconds = (int)$this->_scopeConfig->getValue(self::XML_PATH_CONSUMER_EXPIRATION_PERIOD);
-
+        $seconds = (int)$this->_scopeConfig->getValue(
+            self::XML_PATH_CONSUMER_EXPIRATION_PERIOD,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
         return $seconds > 0 ? $seconds : self::CONSUMER_EXPIRATION_PERIOD_DEFAULT;
     }
 
     /**
-     * Get the number of consumer post maximum redirects.
+     * Get the number of consumer post maximum redirects
      *
      * @return int
      */
     public function getConsumerPostMaxRedirects()
     {
-        $redirects = (int)$this->_scopeConfig->getValue(self::XML_PATH_CONSUMER_POST_MAXREDIRECTS);
-
+        $redirects = (int)$this->_scopeConfig->getValue(
+            self::XML_PATH_CONSUMER_POST_MAXREDIRECTS,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
         return $redirects > 0 ? $redirects : 0;
     }
 
     /**
-     * Get the number seconds for the consumer post timeout.
+     * Get the number seconds for the consumer post timeout
      *
      * @return int
      */
     public function getConsumerPostTimeout()
     {
-        $seconds = (int)$this->_scopeConfig->getValue(self::XML_PATH_CONSUMER_POST_TIMEOUT);
-
+        $seconds = (int)$this->_scopeConfig->getValue(
+            self::XML_PATH_CONSUMER_POST_TIMEOUT,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        );
         return $seconds > 0 ? $seconds : self::CONSUMER_POST_TIMEOUT_DEFAULT;
-    }
-
-    /**
-     * Get customer token lifetime from config.
-     *
-     * @return int hours
-     */
-    public function getCustomerTokenLifetime()
-    {
-        $hours = (int)$this->_scopeConfig->getValue('oauth/access_token_lifetime/customer');
-
-        return $hours > 0 ? $hours : 0;
-    }
-
-    /**
-     * Get admin token lifetime from config.
-     *
-     * @return int hours
-     */
-    public function getAdminTokenLifetime()
-    {
-        $hours = (int)$this->_scopeConfig->getValue('oauth/access_token_lifetime/admin');
-
-        return $hours > 0 ? $hours : 0;
     }
 }

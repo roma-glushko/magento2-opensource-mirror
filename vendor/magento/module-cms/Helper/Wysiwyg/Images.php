@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Cms\Helper\Wysiwyg;
@@ -127,25 +127,17 @@ class Images extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Decode HTML element id.
+     * Decode HTML element id
      *
      * @param string $id
      * @return string
-     * @throws \InvalidArgumentException When path contains restricted symbols.
      */
     public function convertIdToPath($id)
     {
         if ($id === \Magento\Theme\Helper\Storage::NODE_ROOT) {
             return $this->getStorageRoot();
         } else {
-            $path = $this->getStorageRoot() . $this->idDecode($id);
-            if (preg_match('/\.\.(\\\|\/)/', $path)) {
-                throw new \InvalidArgumentException(
-                    'Path is invalid'
-                );
-            }
-
-            return $path;
+            return $this->getStorageRoot() . $this->idDecode($id);
         }
     }
 
@@ -254,7 +246,7 @@ class Images extends \Magento\Framework\App\Helper\AbstractHelper
     }
 
     /**
-     * Revert operation to idEncode
+     * Revert opration to idEncode
      *
      * @param string $string
      * @return string

@@ -26,11 +26,13 @@ class FileResource implements SelfCheckingResourceInterface, \Serializable
     private $resource;
 
     /**
+     * Constructor.
+     *
      * @param string $resource The file path to the resource
      */
     public function __construct($resource)
     {
-        $this->resource = realpath($resource) ?: (file_exists($resource) ? $resource : false);
+        $this->resource = realpath($resource);
     }
 
     /**

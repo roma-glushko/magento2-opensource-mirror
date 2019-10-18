@@ -1,13 +1,10 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magento\Backend\Test\Unit\Block\Widget\Grid\Column\Filter;
-
-use Magento\Framework\Escaper;
-use Magento\Backend\Block\Context;
 
 /**
  * Class DateTest to test Magento\Backend\Block\Widget\Grid\Column\Filter\Date
@@ -32,16 +29,6 @@ class DateTest extends \PHPUnit_Framework_TestCase
 
     /** @var \Magento\Framework\Stdlib\DateTime\TimezoneInterface|\PHPUnit_Framework_MockObject_MockObject */
     protected $localeDateMock;
-
-    /**
-     * @var Escaper|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $escaperMock;
-
-    /**
-     * @var Context
-     */
-    private $context;
 
     protected function setUp()
     {
@@ -71,27 +58,14 @@ class DateTest extends \PHPUnit_Framework_TestCase
             ->setMethods([])
             ->getMock();
 
-        $this->escaperMock = $this->getMockBuilder(Escaper::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
         $objectManagerHelper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-
-        $this->context = $objectManagerHelper->getObject(
-            Context::class,
-            [
-                'escaper' => $this->escaperMock
-            ]
-        );
-
         $this->model = $objectManagerHelper->getObject(
             'Magento\Backend\Block\Widget\Grid\Column\Filter\Date',
             [
                 'mathRandom' => $this->mathRandomMock,
                 'localeResolver' => $this->localeResolverMock,
                 'dateTimeFormatter' => $this->dateTimeFormatterMock,
-                'localeDate' => $this->localeDateMock,
-                'context' => $this->context
+                'localeDate' => $this->localeDateMock
             ]
         );
         $this->model->setColumn($this->columnMock);
@@ -119,20 +93,6 @@ class DateTest extends \PHPUnit_Framework_TestCase
         $this->localeResolverMock->expects($this->any())->method('getLocale')->willReturn('en_US');
         $this->model->setColumn($this->columnMock);
         $this->model->setValue($value);
-
-        $map = [
-            $yesterday->getTimestamp() => $yesterday->getTimestamp(),
-            $tomorrow->getTimestamp() => $tomorrow->getTimestamp()
-        ];
-
-        $this->escaperMock->expects($this->atLeastOnce())
-            ->method('escapeHtml')->will($this->returnCallback(
-                function ($data) use ($yesterday, $tomorrow, $map) {
-                    if (isset($map[(string) $data])) {
-                        return $map[$data];
-                    }
-                }
-        ));
 
         $output = $this->model->getHtml();
         $this->assertContains('id="' . $uniqueHash . '_from" value="' . $yesterday->getTimestamp(), $output);

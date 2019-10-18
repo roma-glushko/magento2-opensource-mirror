@@ -1,6 +1,8 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Test for \Magento\Integration\Model\CustomerTokenService
+ *
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -9,9 +11,6 @@ namespace Magento\Integration\Test\Unit\Model;
 use Magento\Integration\Model\Integration;
 use Magento\Integration\Model\Oauth\Token;
 
-/**
- * Test for \Magento\Integration\Model\CustomerTokenService
- */
 class CustomerTokenServiceTest extends \PHPUnit_Framework_TestCase
 {
     /** \Magento\Integration\Model\CustomerTokenService */
@@ -50,7 +49,7 @@ class CustomerTokenServiceTest extends \PHPUnit_Framework_TestCase
 
         $this->_tokenMock = $this->getMockBuilder('Magento\Integration\Model\Oauth\Token')
             ->disableOriginalConstructor()
-            ->setMethods(['getToken', 'loadByCustomerId', 'delete', '__wakeup'])->getMock();
+            ->setMethods(['getToken', 'loadByCustomerId', 'setRevoked', 'save', '__wakeup'])->getMock();
 
         $this->_tokenModelCollectionMock = $this->getMockBuilder(
             'Magento\Integration\Model\ResourceModel\Oauth\Token\Collection'
@@ -86,6 +85,9 @@ class CustomerTokenServiceTest extends \PHPUnit_Framework_TestCase
             ->method('addFilterByCustomerId')
             ->with($customerId)
             ->will($this->returnValue($this->_tokenModelCollectionMock));
+        $this->_tokenModelCollectionMock->expects($this->any())
+            ->method('getSize')
+            ->will($this->returnValue(1));
         $this->_tokenModelCollectionMock->expects($this->once())
             ->method('getIterator')
             ->will($this->returnValue(new \ArrayIterator([$this->_tokenMock])));
@@ -93,25 +95,30 @@ class CustomerTokenServiceTest extends \PHPUnit_Framework_TestCase
             ->method('_fetchAll')
             ->will($this->returnValue(1));
         $this->_tokenMock->expects($this->once())
-            ->method('delete')
+            ->method('setRevoked')
             ->will($this->returnValue($this->_tokenMock));
+        $this->_tokenMock->expects($this->once())
+            ->method('save');
 
         $this->assertTrue($this->_tokenService->revokeCustomerAccessToken($customerId));
     }
 
+    /**
+     * @expectedException \Magento\Framework\Exception\LocalizedException
+     * @expectedExceptionMessage This customer has no tokens.
+     */
     public function testRevokeCustomerAccessTokenWithoutCustomerId()
     {
-        $this->_tokenModelCollectionMock->expects($this->once())
-            ->method('getIterator')
-            ->will($this->returnValue(new \ArrayIterator()));
         $this->_tokenModelCollectionMock->expects($this->once())
             ->method('addFilterByCustomerId')
             ->with(null)
             ->will($this->returnValue($this->_tokenModelCollectionMock));
         $this->_tokenMock->expects($this->never())
-            ->method('delete')
+            ->method('save');
+        $this->_tokenMock->expects($this->never())
+            ->method('setRevoked')
             ->will($this->returnValue($this->_tokenMock));
-        $this->assertTrue($this->_tokenService->revokeCustomerAccessToken(null));
+        $this->_tokenService->revokeCustomerAccessToken(null);
     }
 
     /**
@@ -127,11 +134,16 @@ class CustomerTokenServiceTest extends \PHPUnit_Framework_TestCase
             ->with($customerId)
             ->will($this->returnValue($this->_tokenModelCollectionMock));
         $this->_tokenModelCollectionMock->expects($this->once())
+            ->method('getSize')
+            ->will($this->returnValue(1));
+        $this->_tokenModelCollectionMock->expects($this->once())
             ->method('getIterator')
             ->will($this->returnValue(new \ArrayIterator([$this->_tokenMock])));
 
+        $this->_tokenMock->expects($this->never())
+            ->method('save');
         $this->_tokenMock->expects($this->once())
-            ->method('delete')
+            ->method('setRevoked')
             ->will($this->throwException($exception));
         $this->_tokenService->revokeCustomerAccessToken($customerId);
     }

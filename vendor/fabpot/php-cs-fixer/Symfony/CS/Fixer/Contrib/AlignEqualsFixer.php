@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -17,7 +16,7 @@ use Symfony\CS\Tokenizer\Tokens;
 
 /**
  * @author Carlos Cirello <carlos.cirello.nl@gmail.com>
- * @author Graham Campbell <graham@alt-three.com>
+ * @author Graham Campbell <graham@mineuk.com>
  */
 class AlignEqualsFixer extends AbstractAlignFixer
 {
@@ -26,9 +25,9 @@ class AlignEqualsFixer extends AbstractAlignFixer
      */
     public function fix(\SplFileInfo $file, $content)
     {
-        $data = $this->injectAlignmentPlaceholders($content);
+        list($tokens, $deepestLevel) = $this->injectAlignmentPlaceholders($content);
 
-        return $this->replacePlaceholder($data['tokens'], $data['deepestLevel']);
+        return $this->replacePlaceholder($tokens, $deepestLevel);
     }
 
     /**
@@ -51,13 +50,9 @@ class AlignEqualsFixer extends AbstractAlignFixer
     /**
      * Inject into the text placeholders of candidates of vertical alignment.
      *
-     * Output structure:
-     * * Tokens $tokens
-     * * int    $deepestLevel
-     *
      * @param string $content
      *
-     * @return array
+     * @return array($code, $deepestLevel)
      */
     private function injectAlignmentPlaceholders($content)
     {
@@ -87,9 +82,6 @@ class AlignEqualsFixer extends AbstractAlignFixer
             }
         }
 
-        return array(
-            'tokens' => $tokens,
-            'deepestLevel' => $deepestLevel,
-        );
+        return array($tokens, $deepestLevel);
     }
 }

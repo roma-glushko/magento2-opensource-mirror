@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -15,7 +14,7 @@ namespace Symfony\CS\DocBlock;
 /**
  * This represents an entire annotation from a docblock.
  *
- * @author Graham Campbell <graham@alt-three.com>
+ * @author Graham Campbell <graham@mineuk.com>
  */
 class Annotation
 {
@@ -87,19 +86,9 @@ class Annotation
     }
 
     /**
-     * Get the string representation of object.
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getContent();
-    }
-
-    /**
      * Get all the annotation tag names with types.
      *
-     * @return string[]
+     * @var string[]
      */
     public static function getTagsWithTypes()
     {
@@ -139,6 +128,31 @@ class Annotation
         }
 
         return $this->tag;
+    }
+
+    /**
+     * Get the current types content.
+     *
+     * Be careful modifying the underlying line as that won't flush the cache.
+     *
+     * @return string
+     */
+    private function getTypesContent()
+    {
+        if (null === $this->typesContent) {
+            $name = $this->getTag()->getName();
+
+            if (!in_array($name, self::$tags, true)) {
+                throw new \RuntimeException('This tag does not support types');
+            }
+
+            $tagSplit = preg_split('/\s*\@'.$name.'\s*/', $this->lines[0]->getContent(), 2);
+            $spaceSplit = preg_split('/\s/', $tagSplit[1], 2);
+
+            $this->typesContent = $spaceSplit[0];
+        }
+
+        return $this->typesContent;
     }
 
     /**
@@ -186,27 +200,12 @@ class Annotation
     }
 
     /**
-     * Get the current types content.
-     *
-     * Be careful modifying the underlying line as that won't flush the cache.
+     * Get the string representation of object.
      *
      * @return string
      */
-    private function getTypesContent()
+    public function __toString()
     {
-        if (null === $this->typesContent) {
-            $name = $this->getTag()->getName();
-
-            if (!in_array($name, self::$tags, true)) {
-                throw new \RuntimeException('This tag does not support types');
-            }
-
-            $tagSplit = preg_split('/\s*\@'.$name.'\s*/', $this->lines[0]->getContent(), 2);
-            $spaceSplit = preg_split('/\s/', $tagSplit[1], 2);
-
-            $this->typesContent = $spaceSplit[0];
-        }
-
-        return $this->typesContent;
+        return $this->getContent();
     }
 }

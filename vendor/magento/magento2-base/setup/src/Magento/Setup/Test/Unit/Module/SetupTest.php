@@ -1,16 +1,13 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Setup\Test\Unit\Module;
 
-use Magento\Framework\App\ResourceConnection;
-use Magento\Setup\Module\Setup;
+use \Magento\Setup\Module\Setup;
 
-/**
- * Class SetupTest
- */
 class SetupTest extends \PHPUnit_Framework_TestCase
 {
     const CONNECTION_NAME = 'connection';
@@ -25,20 +22,15 @@ class SetupTest extends \PHPUnit_Framework_TestCase
      */
     private $setup;
 
-    /**
-     * @var ResourceConnection|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $resourceModelMock;
-
     protected function setUp()
     {
-        $this->resourceModelMock = $this->getMock('\Magento\Framework\App\ResourceConnection', [], [], '', false);
+        $resourceModel = $this->getMock('\Magento\Framework\App\ResourceConnection', [], [], '', false);
         $this->connection = $this->getMockForAbstractClass('\Magento\Framework\DB\Adapter\AdapterInterface');
-        $this->resourceModelMock->expects($this->any())
+        $resourceModel->expects($this->any())
             ->method('getConnection')
             ->with(self::CONNECTION_NAME)
             ->will($this->returnValue($this->connection));
-        $this->setup = new Setup($this->resourceModelMock, self::CONNECTION_NAME);
+        $this->setup = new Setup($resourceModel, self::CONNECTION_NAME);
     }
 
     public function testGetIdxName()
@@ -47,11 +39,6 @@ class SetupTest extends \PHPUnit_Framework_TestCase
         $fields = ['field'];
         $indexType = 'index_type';
         $expectedIdxName = 'idxName';
-
-        $this->resourceModelMock->expects($this->once())
-            ->method('getTableName')
-            ->with($tableName)
-            ->will($this->returnValue($tableName));
 
         $this->connection->expects($this->once())
             ->method('getIndexName')
@@ -67,11 +54,6 @@ class SetupTest extends \PHPUnit_Framework_TestCase
         $refTable = 'ref_table';
         $columnName = 'columnName';
         $refColumnName = 'refColumnName';
-
-        $this->resourceModelMock->expects($this->once())
-            ->method('getTableName')
-            ->with($tableName)
-            ->will($this->returnValue($tableName));
 
         $this->connection->expects($this->once())
             ->method('getForeignKeyName')

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -49,15 +49,13 @@ class Login extends \Magento\Framework\App\Action\Action
 
     /**
      * @var AccountRedirect
-     * @deprecated
      */
-    private $accountRedirect;
+    protected $accountRedirect;
 
     /**
      * @var ScopeConfigInterface
-     * @deprecated
      */
-    private $scopeConfig;
+    protected $scopeConfig;
 
     /**
      * Initialize Login controller
@@ -92,7 +90,7 @@ class Login extends \Magento\Framework\App\Action\Action
      * @deprecated
      * @return AccountRedirect
      */
-    private function getAccountRedirect()
+    protected function getAccountRedirect()
     {
         if (!is_object($this->accountRedirect)) {
             $this->accountRedirect = ObjectManager::getInstance()->get(AccountRedirect::class);
@@ -116,7 +114,7 @@ class Login extends \Magento\Framework\App\Action\Action
      * @deprecated
      * @return ScopeConfigInterface
      */
-    private function getScopeConfig()
+    protected function getScopeConfig()
     {
         if (!is_object($this->scopeConfig)) {
             $this->scopeConfig = ObjectManager::getInstance()->get(ScopeConfigInterface::class);

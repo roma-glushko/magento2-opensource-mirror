@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -33,11 +32,6 @@ class Php4ConstructorFixer extends AbstractFixer
 
         for ($i = 0; $i < $numClasses; ++$i) {
             $index = $classes[$i];
-
-            // is it an an anonymous class definition?
-            if ($tokens->isAnonymousClass($index)) {
-                continue;
-            }
 
             // is it inside a namespace?
             $nspIndex = $tokens->getPrevTokenOfKind($index, array(array(T_NAMESPACE, 'namespace')));
@@ -320,7 +314,7 @@ class Php4ConstructorFixer extends AbstractFixer
      *     - endIndex (int): The index of the function/method end.
      *     - bodyIndex (int): The index of the function/method body.
      *     - modifiers (array): The modifiers as array keys and their index as
-     *       the values, e.g. array(T_PUBLIC => 10)
+     *       the values, e.g. array(T_PUBLIC => 10).
      */
     private function findFunction(Tokens $tokens, $name, $startIndex, $endIndex)
     {

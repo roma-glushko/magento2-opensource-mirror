@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -19,11 +19,6 @@ class Export extends \Magento\ImportExport\Model\AbstractModel
     const FILTER_ELEMENT_GROUP = 'export_filter';
 
     const FILTER_ELEMENT_SKIP = 'skip_attr';
-
-    /**
-     * Allow multiple values wrapping in double quotes for additional attributes.
-     */
-    const FIELDS_ENCLOSURE = 'fields_enclosure';
 
     /**
      * Filter fields types.
@@ -239,10 +234,13 @@ class Export extends \Magento\ImportExport\Model\AbstractModel
      */
     public static function getStaticAttributeFilterType(\Magento\Eav\Model\Entity\Attribute $attribute)
     {
-        if ($attribute->getAttributeCode() == 'category_ids') {
+        if (in_array($attribute->getAttributeCode(), ['category_ids', 'media_gallery'])) {
             return self::FILTER_TYPE_INPUT;
         }
         $columns = $attribute->getFlatColumns();
+        if (empty($columns)) {
+            return self::FILTER_TYPE_INPUT;
+        }
         switch ($columns[$attribute->getAttributeCode()]['type']) {
             case \Magento\Framework\DB\Ddl\Table::TYPE_INTEGER:
             case \Magento\Framework\DB\Ddl\Table::TYPE_BIGINT:

@@ -11,12 +11,11 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Compiler\CheckDefinitionValidityPass;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class CheckDefinitionValidityPassTest extends TestCase
+class CheckDefinitionValidityPassTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @expectedException \Symfony\Component\DependencyInjection\Exception\RuntimeException
@@ -85,8 +84,6 @@ class CheckDefinitionValidityPassTest extends TestCase
         $container->register('d', 'class')->setSynthetic(true);
 
         $this->process($container);
-
-        $this->addToAssertionCount(1);
     }
 
     public function testValidTags()
@@ -98,8 +95,6 @@ class CheckDefinitionValidityPassTest extends TestCase
         $container->register('d', 'class')->addTag('foo', array('bar' => 1.1));
 
         $this->process($container);
-
-        $this->addToAssertionCount(1);
     }
 
     /**

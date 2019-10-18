@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -58,6 +58,20 @@ class Cart extends Block
     protected $paypalCheckoutButton = '[data-action=checkout-form-submit]';
 
     /**
+     * Locator value for "Check out with PayPal" button.
+     *
+     * @var string
+     */
+    protected $inContextPaypalCheckoutButton = '#paypal-express-in-context-mini-cart';
+
+    /**
+     * Locator value for "Check out with Braintree PayPal" button.
+     *
+     * @var string
+     */
+    protected $braintreePaypalCheckoutButton = './/button[contains(@id, "braintree-paypal-mini-cart")]';
+
+    /**
      * Locator value for "empty Shopping Cart" block.
      *
      * @var string
@@ -79,11 +93,21 @@ class Cart extends Block
     protected $deleteItemButton = 'a.action.action-delete';
 
     /**
-     * Cart item class name.
+     * PayPal load spinner.
      *
      * @var string
      */
-    protected $cartItemClass = \Magento\Checkout\Test\Block\Cart\CartItem::class;
+    protected $preloaderSpinner = '#preloaderSpinner';
+
+    /**
+     * Wait for PayPal page is loaded.
+     *
+     * @return void
+     */
+    public function waitForFormLoaded()
+    {
+        $this->waitForElementNotVisible($this->preloaderSpinner);
+    }
 
     /**
      * Get Shopping Cart item.
@@ -105,7 +129,7 @@ class Cart extends Block
                 Locator::SELECTOR_XPATH
             );
             $cartItem = $this->blockFactory->create(
-                $this->cartItemClass,
+                'Magento\Checkout\Test\Block\Cart\CartItem',
                 ['element' => $cartItemBlock]
             );
         }
@@ -126,6 +150,19 @@ class Cart extends Block
     }
 
     /**
+     * Click "Check out with Braintree PayPal" button.
+     *
+     * @return string
+     */
+    public function braintreePaypalCheckout()
+    {
+        $currentWindow = $this->browser->getCurrentWindow();
+        $this->_rootElement->find($this->braintreePaypalCheckoutButton, Locator::SELECTOR_XPATH)
+            ->click();
+        return $currentWindow;
+    }
+
+    /**
      * Click "Check out with PayPal" button.
      *
      * @return void
@@ -133,6 +170,17 @@ class Cart extends Block
     public function paypalCheckout()
     {
         $this->_rootElement->find($this->paypalCheckoutButton)->click();
+    }
+
+    /**
+     * Click "Check out with PayPal" button.
+     */
+    public function inContextPaypalCheckout()
+    {
+        $this->_rootElement->find($this->inContextPaypalCheckoutButton)->click();
+        $this->browser->selectWindow();
+        $this->waitForFormLoaded();
+        $this->browser->closeWindow();
     }
 
     /**

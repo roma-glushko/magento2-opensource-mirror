@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\Test\Unit;
@@ -17,15 +17,9 @@ class EscaperTest extends \PHPUnit_Framework_TestCase
      */
     protected $_escaper = null;
 
-    /**
-     * @var \Psr\Log\LoggerInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $loggerMock;
-
     protected function setUp()
     {
-        $this->loggerMock = $this->getMockForAbstractClass(\Psr\Log\LoggerInterface::class);
-        $this->_escaper = new Escaper(null, $this->loggerMock);
+        $this->_escaper = new Escaper();
     }
 
     /**
@@ -79,16 +73,8 @@ class EscaperTest extends \PHPUnit_Framework_TestCase
      */
     public function testEscapeJsQuote()
     {
-        $data = [
-            "Don't do that.",
-            'lost_key' => "Can't do that.",
-            '</script><script>alert("1");</script>'
-        ];
-        $expected = [
-            "Don\\'t do that.",
-            "Can\\'t do that.",
-            "<' + '/script><' + 'script>alert(\"1\");<' + '/script>"
-        ];
+        $data = ["Don't do that.", 'lost_key' => "Can't do that."];
+        $expected = ["Don\\'t do that.", "Can\\'t do that."];
         $this->assertEquals($expected, $this->_escaper->escapeJsQuote($data));
         $this->assertEquals($expected[0], $this->_escaper->escapeJsQuote($data[0]));
     }

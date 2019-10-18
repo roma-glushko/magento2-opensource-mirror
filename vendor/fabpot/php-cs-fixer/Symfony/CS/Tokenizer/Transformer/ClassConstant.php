@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -27,14 +26,7 @@ class ClassConstant extends AbstractTransformer
      */
     public function process(Tokens $tokens)
     {
-        foreach ($tokens as $index => $token) {
-            if (!$token->equalsAny(array(
-                array(T_CLASS, 'class'),
-                array(T_STRING, 'class'),
-            ), false)) {
-                continue;
-            }
-
+        foreach ($tokens->findGivenKind(T_CLASS) as $index => $token) {
             $prevIndex = $tokens->getPrevMeaningfulToken($index);
             $prevToken = $tokens[$prevIndex];
 

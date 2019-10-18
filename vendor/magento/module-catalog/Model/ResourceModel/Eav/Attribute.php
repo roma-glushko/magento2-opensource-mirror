@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -824,6 +824,7 @@ class Attribute extends \Magento\Eav\Model\Entity\Attribute implements
      */
     public function __sleep()
     {
+        $this->unsetData('entity_type');
         return array_diff(
             parent::__sleep(),
             ['_indexerEavProcessor', '_productFlatIndexerProcessor', '_productFlatIndexerHelper', 'attrLockValidator']

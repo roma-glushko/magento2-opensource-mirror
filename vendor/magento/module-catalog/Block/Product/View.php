@@ -1,11 +1,12 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Catalog\Block\Product;
 
 use Magento\Catalog\Api\ProductRepositoryInterface;
+use Magento\Catalog\Model\Category;
 use Magento\Catalog\Model\Product;
 
 /**
@@ -55,7 +56,7 @@ class View extends AbstractProduct implements \Magento\Framework\DataObject\Iden
      * @var \Magento\Customer\Model\Session
      */
     protected $customerSession;
-    
+
     /**
      * @var ProductRepositoryInterface
      */
@@ -232,28 +233,26 @@ class View extends AbstractProduct implements \Magento\Framework\DataObject\Iden
         foreach ($tierPricesList as $tierPrice) {
             $tierPrices[] = $this->priceCurrency->convert($tierPrice['price']->getValue());
         }
-        $regularPriceAmount = $product->getPriceInfo()->getPrice('regular_price')->getAmount();
-        $finalPriceAmount = $product->getPriceInfo()->getPrice('final_price')->getAmount();
         $config = [
             'productId' => $product->getId(),
             'priceFormat' => $this->_localeFormat->getPriceFormat(),
             'prices' => [
                 'oldPrice' => [
-                    'amount' => $regularPriceAmount
-                        ? $this->priceCurrency->convert($regularPriceAmount->getValue())
-                        : null,
+                    'amount' => $this->priceCurrency->convert(
+                        $product->getPriceInfo()->getPrice('regular_price')->getAmount()->getValue()
+                    ),
                     'adjustments' => []
                 ],
                 'basePrice' => [
-                    'amount' => $finalPriceAmount
-                        ? $this->priceCurrency->convert($finalPriceAmount->getBaseAmount())
-                        : null,
+                    'amount' => $this->priceCurrency->convert(
+                        $product->getPriceInfo()->getPrice('final_price')->getAmount()->getBaseAmount()
+                    ),
                     'adjustments' => []
                 ],
                 'finalPrice' => [
-                    'amount' => $finalPriceAmount
-                        ? $this->priceCurrency->convert($finalPriceAmount->getValue())
-                        : null,
+                    'amount' => $this->priceCurrency->convert(
+                        $product->getPriceInfo()->getPrice('final_price')->getAmount()->getValue()
+                    ),
                     'adjustments' => []
                 ]
             ],
@@ -373,7 +372,7 @@ class View extends AbstractProduct implements \Magento\Framework\DataObject\Iden
         $identities = $this->getProduct()->getIdentities();
         $category = $this->_coreRegistry->registry('current_category');
         if ($category) {
-            $identities[] = Product::CACHE_PRODUCT_CATEGORY_TAG . '_' . $category->getId();
+            $identities[] = Category::CACHE_TAG . '_' . $category->getId();
         }
         return $identities;
     }

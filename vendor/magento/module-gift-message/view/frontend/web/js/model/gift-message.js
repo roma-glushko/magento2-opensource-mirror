@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*global define*/
@@ -32,7 +32,6 @@ define(['uiElement', 'underscore', 'mage/url'],
                         message =
                             window.giftOptionsConfig.giftMessage.hasOwnProperty('itemLevel')
                             && window.giftOptionsConfig.giftMessage['itemLevel'].hasOwnProperty(this.itemId)
-                            && window.giftOptionsConfig.giftMessage['itemLevel'][this.itemId].hasOwnProperty('message')
                             ? window.giftOptionsConfig.giftMessage['itemLevel'][this.itemId]['message']
                             : null;
                     }
@@ -79,7 +78,7 @@ define(['uiElement', 'underscore', 'mage/url'],
                 },
                 afterSubmit: function() {
                     window.location.href = url.build('checkout/cart/updatePost')
-                        + '?form_key=' + window.checkoutConfig.formKey
+                        + '?form_key=' + window.giftOptionsConfig.giftMessage.formKey
                         + '&cart[]';
                 },
                 getSubmitParams: function(remove) {
@@ -105,8 +104,9 @@ define(['uiElement', 'underscore', 'mage/url'],
                     });
                     return params;
                 },
+
                 /**
-                 * Check if gift message can be displayed.
+                 * Check if gift message can be displayed
                  *
                  * @returns {Boolean}
                  */
@@ -124,7 +124,7 @@ define(['uiElement', 'underscore', 'mage/url'],
                     isGloballyAvailable = this.getConfigValue('isItemLevelGiftOptionsEnabled');
                     giftMessageConfig = window.giftOptionsConfig.giftMessage;
                     itemConfig = giftMessageConfig.hasOwnProperty('itemLevel') &&
-                    giftMessageConfig.itemLevel.hasOwnProperty(this.itemId) ?
+                        giftMessageConfig.itemLevel.hasOwnProperty(this.itemId) ?
                         giftMessageConfig.itemLevel[this.itemId] :
                         {};
 

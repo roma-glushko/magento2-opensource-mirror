@@ -1,13 +1,11 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Customer\Model;
 
-use Magento\Customer\Api\CustomerMetadataInterface;
-use Magento\Customer\Api\Data\CustomerInterface;
 use Magento\Customer\Api\GroupManagementInterface;
 use Magento\Framework\App\RequestInterface;
 
@@ -62,23 +60,12 @@ class CustomerExtractor
     /**
      * @param string $formCode
      * @param RequestInterface $request
-     * @param array $attributeValues
-     * @return CustomerInterface
+     * @return \Magento\Customer\Api\Data\CustomerInterface
      */
-    public function extract(
-        $formCode,
-        RequestInterface $request,
-        array $attributeValues = []
-    ) {
-        $customerForm = $this->formFactory->create(
-            CustomerMetadataInterface::ENTITY_TYPE_CUSTOMER,
-            $formCode,
-            $attributeValues
-        );
-
+    public function extract($formCode, RequestInterface $request)
+    {
+        $customerForm = $this->formFactory->create('customer', $formCode);
         $customerData = $customerForm->extractData($request);
-        $customerData = $customerForm->compactData($customerData);
-
         $allowedAttributes = $customerForm->getAllowedAttributes();
         $isGroupIdEmpty = isset($allowedAttributes['group_id']);
 

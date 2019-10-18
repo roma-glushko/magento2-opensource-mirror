@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -15,13 +15,6 @@ use Magento\Framework\Model\AbstractModel;
 
 class Instance extends \Magento\Framework\Model\ResourceModel\Db\AbstractDb
 {
-    /**
-     * Fields that should be serialized before persistence
-     *
-     * @var array
-     */
-    protected $_serializableFields = ['widget_parameters' => [[], []]];
-
     /**
      * Define main table
      *

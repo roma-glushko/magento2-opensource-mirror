@@ -56,7 +56,7 @@ class LockHandler
     /**
      * Lock the resource.
      *
-     * @param bool $blocking Wait until the lock is released
+     * @param bool $blocking wait until the lock is released
      *
      * @return bool Returns true if the lock was acquired, false otherwise
      *
@@ -68,12 +68,8 @@ class LockHandler
             return true;
         }
 
-        $error = null;
-
         // Silence error reporting
-        set_error_handler(function ($errno, $msg) use (&$error) {
-            $error = $msg;
-        });
+        set_error_handler(function () {});
 
         if (!$this->handle = fopen($this->file, 'r')) {
             if ($this->handle = fopen($this->file, 'x')) {
@@ -86,7 +82,8 @@ class LockHandler
         restore_error_handler();
 
         if (!$this->handle) {
-            throw new IOException($error, 0, null, $this->file);
+            $error = error_get_last();
+            throw new IOException($error['message'], 0, null, $this->file);
         }
 
         // On Windows, even if PHP doc says the contrary, LOCK_NB works, see

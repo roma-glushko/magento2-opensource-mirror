@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -8,12 +8,13 @@ namespace Magento\Framework\View\Asset;
 
 use Magento\Framework\UrlInterface;
 use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\App\ObjectManager;
-use Magento\Framework\View\Design\Theme\ThemeProviderInterface;
+use Magento\Framework\Filesystem;
 
 /**
  * A repository service for view assets
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ *
+ * @api
  */
 class Repository
 {
@@ -34,7 +35,6 @@ class Repository
 
     /**
      * @var \Magento\Framework\View\Design\Theme\ListInterface
-     * @deprecated
      */
     private $themeList;
 
@@ -72,16 +72,10 @@ class Repository
      * @var File\ContextFactory
      */
     private $contextFactory;
-
     /**
      * @var RemoteFactory
      */
     private $remoteFactory;
-
-    /**
-     * @var ThemeProviderInterface
-     */
-    private $themeProvider;
 
     /**
      * @param \Magento\Framework\UrlInterface $baseUrl
@@ -144,7 +138,7 @@ class Repository
         }
 
         if ($theme) {
-            $params['themeModel'] = $this->getThemeProvider()->getThemeByFullPath($area . '/' . $theme);
+            $params['themeModel'] = $this->themeList->getThemeByFullPath($area . '/' . $theme);
             if (!$params['themeModel']) {
                 throw new \UnexpectedValueException("Could not find theme '$theme' for area '$area'");
             }
@@ -162,19 +156,6 @@ class Repository
             $params['locale'] = $this->getDefaultParameter('locale');
         }
         return $this;
-    }
-
-    /**
-     * @return ThemeProviderInterface
-     * @deprecated
-     */
-    private function getThemeProvider()
-    {
-        if (null === $this->themeProvider) {
-            $this->themeProvider = ObjectManager::getInstance()->get(ThemeProviderInterface::class);
-        }
-
-        return $this->themeProvider;
     }
 
     /**

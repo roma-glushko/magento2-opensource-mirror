@@ -1,22 +1,16 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\ConfigurableProduct\Controller\Adminhtml\Product;
 
 use Magento\Backend\App\Action;
+use Magento\Framework\Controller\ResultFactory;
 
 class AddAttribute extends Action
 {
-    /**
-     * Authorization level of a basic admin session.
-     *
-     * @see _isAllowed()
-     */
-    const ADMIN_RESOURCE = 'Magento_Catalog::products';
-
     /**
      * @var \Magento\Catalog\Controller\Adminhtml\Product\Builder
      */
@@ -35,18 +29,11 @@ class AddAttribute extends Action
     }
 
     /**
-     * Add "super" attribute from popup window
-     *
-     * @return void
+     * @inheritdoc
      */
     public function execute()
     {
-        $this->_view->loadLayout('popup');
         $this->productBuilder->build($this->getRequest());
-        $attributeBlock = $this->_view->getLayout()->createBlock(
-            \Magento\ConfigurableProduct\Block\Adminhtml\Product\Attribute\NewAttribute\Product\Created::class
-        );
-        $this->_addContent($attributeBlock);
-        $this->_view->renderLayout();
+        return $this->resultFactory->create(ResultFactory::TYPE_LAYOUT);
     }
 }

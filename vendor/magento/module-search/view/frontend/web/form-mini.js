@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*jshint browser:true jquery:true*/
@@ -79,9 +79,6 @@ define([
             }.bind(this));
 
             this.element.on('blur', $.proxy(function () {
-                if (!this.searchLabel.hasClass('active')) {
-                    return;
-                }
 
                 setTimeout($.proxy(function () {
                     if (this.autoComplete.is(':hidden')) {
@@ -270,7 +267,7 @@ define([
             this.submitBtn.disabled = isEmpty(value);
 
             if (value.length >= parseInt(this.options.minSearchLength, 10)) {
-                $.getJSON(this.options.url, {q: value}, $.proxy(function (data) {
+                $.get(this.options.url, {q: value}, $.proxy(function (data) {
                     $.each(data, function(index, element) {
                         element.index = index;
                         var html = template({
@@ -294,7 +291,7 @@ define([
 
                     this.responseList.indexList
                         .on('click', function (e) {
-                            this.responseList.selected = $(e.target);
+                            this.responseList.selected = $(e.currentTarget);
                             this.searchForm.trigger('submit');
                         }.bind(this))
                         .on('mouseenter mouseleave', function (e) {

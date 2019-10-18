@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -151,7 +151,22 @@ class Item extends AbstractModel implements ShipmentItemInterface
      */
     public function setQty($qty)
     {
-        $this->setData('qty', $qty);
+        if ($this->getOrderItem()->getIsQtyDecimal()) {
+            $qty = (double)$qty;
+        } else {
+            $qty = (int)$qty;
+        }
+        $qty = $qty > 0 ? $qty : 0;
+        /**
+         * Check qty availability
+         */
+        if ($qty <= $this->getOrderItem()->getQtyToShip() || $this->getOrderItem()->isDummy(true)) {
+            $this->setData('qty', $qty);
+        } else {
+            throw new \Magento\Framework\Exception\LocalizedException(
+                __('We found an invalid quantity to ship for item "%1".', $this->getName())
+            );
+        }
         return $this;
     }
 
@@ -159,7 +174,6 @@ class Item extends AbstractModel implements ShipmentItemInterface
      * Applying qty to order item
      *
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function register()
     {

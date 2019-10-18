@@ -11,11 +11,10 @@
 
 namespace Symfony\Component\Yaml\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Yaml\Parser;
 use Symfony\Component\Yaml\Dumper;
 
-class DumperTest extends TestCase
+class DumperTest extends \PHPUnit_Framework_TestCase
 {
     protected $parser;
     protected $dumper;
@@ -210,25 +209,23 @@ EOF;
     public function getEscapeSequences()
     {
         return array(
-            'empty string' => array('', "''"),
-            'null' => array("\x0", '"\\0"'),
-            'bell' => array("\x7", '"\\a"'),
-            'backspace' => array("\x8", '"\\b"'),
-            'horizontal-tab' => array("\t", '"\\t"'),
-            'line-feed' => array("\n", '"\\n"'),
-            'vertical-tab' => array("\v", '"\\v"'),
-            'form-feed' => array("\xC", '"\\f"'),
-            'carriage-return' => array("\r", '"\\r"'),
-            'escape' => array("\x1B", '"\\e"'),
-            'space' => array(' ', "' '"),
-            'double-quote' => array('"', "'\"'"),
-            'slash' => array('/', '/'),
-            'backslash' => array('\\', '\\'),
-            'next-line' => array("\xC2\x85", '"\\N"'),
-            'non-breaking-space' => array("\xc2\xa0", '"\\_"'),
-            'line-separator' => array("\xE2\x80\xA8", '"\\L"'),
-            'paragraph-separator' => array("\xE2\x80\xA9", '"\\P"'),
-            'colon' => array(':', "':'"),
+            'null' => array("\t\\0", '"\t\\\\0"'),
+            'bell' => array("\t\\a", '"\t\\\\a"'),
+            'backspace' => array("\t\\b", '"\t\\\\b"'),
+            'horizontal-tab' => array("\t\\t", '"\t\\\\t"'),
+            'line-feed' => array("\t\\n", '"\t\\\\n"'),
+            'vertical-tab' => array("\t\\v", '"\t\\\\v"'),
+            'form-feed' => array("\t\\f", '"\t\\\\f"'),
+            'carriage-return' => array("\t\\r", '"\t\\\\r"'),
+            'escape' => array("\t\\e", '"\t\\\\e"'),
+            'space' => array("\t\\ ", '"\t\\\\ "'),
+            'double-quote' => array("\t\\\"", '"\t\\\\\\""'),
+            'slash' => array("\t\\/", '"\t\\\\/"'),
+            'backslash' => array("\t\\\\", '"\t\\\\\\\\"'),
+            'next-line' => array("\t\\N", '"\t\\\\N"'),
+            'non-breaking-space' => array("\t\\�", '"\t\\\\�"'),
+            'line-separator' => array("\t\\L", '"\t\\\\L"'),
+            'paragraph-separator' => array("\t\\P", '"\t\\\\P"'),
         );
     }
 

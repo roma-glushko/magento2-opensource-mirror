@@ -1,15 +1,15 @@
 <?xml version="1.0" ?>
 <!--
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../../../../../vendor/magento/mtf/Magento/Mtf/Repository/etc/repository.xsd">
     <repository class="Magento\Catalog\Test\Repository\CatalogAttributeSet">
         <dataset name="default">
-            <field name="attribute_set_id" xsi:type="string">%id%</field>
             <field name="attribute_set_name" xsi:type="string">Default</field>
+            <field name="attribute_set_id" xsi:type="string">4</field>
         </dataset>
 
         <dataset name="custom_attribute_set">

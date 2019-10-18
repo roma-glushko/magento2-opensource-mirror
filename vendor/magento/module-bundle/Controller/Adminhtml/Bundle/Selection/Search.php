@@ -1,14 +1,12 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Bundle\Controller\Adminhtml\Bundle\Selection;
 
-use Magento\Catalog\Controller\Adminhtml\Product;
-
-class Search extends Product
+class Search extends \Magento\Backend\App\Action
 {
     /**
      * @return mixed
@@ -17,7 +15,7 @@ class Search extends Product
     {
         return $this->getResponse()->setBody(
             $this->_view->getLayout()->createBlock(
-                \Magento\Bundle\Block\Adminhtml\Catalog\Product\Edit\Tab\Bundle\Option\Search::class
+                'Magento\Bundle\Block\Adminhtml\Catalog\Product\Edit\Tab\Bundle\Option\Search'
             )->setIndex(
                 $this->getRequest()->getParam('index')
             )->setFirstShow(

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\View\Test\Unit\Asset;
@@ -9,8 +9,6 @@ use Magento\Framework\Filesystem;
 use Magento\Framework\View\Asset\LockerProcess;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Directory\WriteInterface;
-use Magento\Framework\App\State;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
 /**
  * Class LockerProcessTest
@@ -37,11 +35,6 @@ class LockerProcessTest extends \PHPUnit_Framework_TestCase
     private $filesystemMock;
 
     /**
-     * @var State|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $stateMock;
-
-    /**
      * Set up
      */
     protected function setUp()
@@ -51,20 +44,8 @@ class LockerProcessTest extends \PHPUnit_Framework_TestCase
         $this->filesystemMock = $this->getMockBuilder('Magento\Framework\Filesystem')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->stateMock = $this->getMockBuilder(State::class)
-            ->disableOriginalConstructor()
-            ->getMock();
 
-        $this->lockerProcess = (new ObjectManager($this))->getObject(
-            LockerProcess::class,
-            [
-                'filesystem' => $this->filesystemMock,
-            ]
-        );
-        $reflection = new \ReflectionClass(LockerProcess::class);
-        $reflectionProperty = $reflection->getProperty('state');
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue($this->lockerProcess, $this->stateMock);
+        $this->lockerProcess = new LockerProcess($this->filesystemMock);
     }
 
     /**
@@ -76,19 +57,10 @@ class LockerProcessTest extends \PHPUnit_Framework_TestCase
      */
     public function testLockProcess($method)
     {
-        $this->stateMock->expects(self::once())->method('getMode')->willReturn(State::MODE_DEVELOPER);
         $this->filesystemMock->expects(self::once())
             ->method('getDirectoryWrite')
             ->with(DirectoryList::VAR_DIR)
             ->willReturn($this->$method());
-
-        $this->lockerProcess->lockProcess(self::LOCK_NAME);
-    }
-
-    public function testNotLockProcessInProductionMode()
-    {
-        $this->stateMock->expects(self::once())->method('getMode')->willReturn(State::MODE_PRODUCTION);
-        $this->filesystemMock->expects($this->never())->method('getDirectoryWrite');
 
         $this->lockerProcess->lockProcess(self::LOCK_NAME);
     }
@@ -98,20 +70,10 @@ class LockerProcessTest extends \PHPUnit_Framework_TestCase
      */
     public function testUnlockProcess()
     {
-        $this->stateMock->expects(self::exactly(2))->method('getMode')->willReturn(State::MODE_DEVELOPER);
         $this->filesystemMock->expects(self::once())
             ->method('getDirectoryWrite')
             ->with(DirectoryList::VAR_DIR)
             ->willReturn($this->getTmpDirectoryMockFalse(1));
-
-        $this->lockerProcess->lockProcess(self::LOCK_NAME);
-        $this->lockerProcess->unlockProcess();
-    }
-
-    public function testNotUnlockProcessInProductionMode()
-    {
-        $this->stateMock->expects(self::exactly(2))->method('getMode')->willReturn(State::MODE_PRODUCTION);
-        $this->filesystemMock->expects(self::never())->method('getDirectoryWrite');
 
         $this->lockerProcess->lockProcess(self::LOCK_NAME);
         $this->lockerProcess->unlockProcess();

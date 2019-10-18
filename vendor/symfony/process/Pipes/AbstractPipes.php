@@ -18,15 +18,16 @@ namespace Symfony\Component\Process\Pipes;
  */
 abstract class AbstractPipes implements PipesInterface
 {
+    /** @var array */
     public $pipes = array();
 
+    /** @var string */
     private $inputBuffer = '';
+    /** @var resource|null */
     private $input;
+    /** @var bool */
     private $blocked = true;
 
-    /**
-     * @param resource|null $input
-     */
     public function __construct($input)
     {
         if (is_resource($input)) {
@@ -94,7 +95,7 @@ abstract class AbstractPipes implements PipesInterface
         $w = array($this->pipes[0]);
 
         // let's have a look if something changed in streams
-        if (false === @stream_select($r, $w, $e, 0, 0)) {
+        if (false === $n = @stream_select($r, $w, $e, 0, 0)) {
             return;
         }
 
@@ -133,7 +134,9 @@ abstract class AbstractPipes implements PipesInterface
         if (null === $this->input && !isset($this->inputBuffer[0])) {
             fclose($this->pipes[0]);
             unset($this->pipes[0]);
-        } elseif (!$w) {
+        }
+
+        if (!$w) {
             return array($this->pipes[0]);
         }
     }

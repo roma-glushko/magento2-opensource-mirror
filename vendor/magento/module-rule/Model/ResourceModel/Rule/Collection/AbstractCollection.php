@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -74,18 +74,15 @@ abstract class AbstractCollection extends \Magento\Framework\Model\ResourceModel
      */
     public function addWebsiteFilter($websiteId)
     {
+        $entityInfo = $this->_getAssociatedEntityInfo('website');
         if (!$this->getFlag('is_website_table_joined')) {
-            $websiteIds = is_array($websiteId) ? $websiteId : [$websiteId];
-            $entityInfo = $this->_getAssociatedEntityInfo('website');
             $this->setFlag('is_website_table_joined', true);
-            foreach ($websiteIds as $index => $website) {
-                if ($website instanceof \Magento\Store\Model\Website) {
-                    $websiteIds[$index] = $website->getId();
-                }
+            if ($websiteId instanceof \Magento\Store\Model\Website) {
+                $websiteId = $websiteId->getId();
             }
             $this->getSelect()->join(
                 ['website' => $this->getTable($entityInfo['associations_table'])],
-                $this->getConnection()->quoteInto('website.' . $entityInfo['entity_id_field'] . ' IN (?)', $websiteIds)
+                $this->getConnection()->quoteInto('website.' . $entityInfo['entity_id_field'] . ' = ?', $websiteId)
                 . ' AND main_table.' . $entityInfo['rule_id_field'] . ' = website.' . $entityInfo['rule_id_field'],
                 []
             );

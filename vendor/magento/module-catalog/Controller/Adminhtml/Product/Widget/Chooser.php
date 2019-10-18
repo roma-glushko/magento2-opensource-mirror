@@ -1,20 +1,13 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Catalog\Controller\Adminhtml\Product\Widget;
 
 class Chooser extends \Magento\Backend\App\Action
 {
-    /**
-     * Authorization level of a basic admin session.
-     *
-     * @see _isAllowed()
-     */
-    const ADMIN_RESOURCE = 'Magento_Widget::widget_instance';
-
     /**
      * @var \Magento\Framework\Controller\Result\RawFactory
      */
@@ -53,7 +46,7 @@ class Chooser extends \Magento\Backend\App\Action
 
         $layout = $this->layoutFactory->create();
         $productsGrid = $layout->createBlock(
-            \Magento\Catalog\Block\Adminhtml\Product\Widget\Chooser::class,
+            'Magento\Catalog\Block\Adminhtml\Product\Widget\Chooser',
             '',
             [
                 'data' => [
@@ -69,7 +62,7 @@ class Chooser extends \Magento\Backend\App\Action
 
         if (!$this->getRequest()->getParam('products_grid')) {
             $categoriesTree = $layout->createBlock(
-                \Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser::class,
+                'Magento\Catalog\Block\Adminhtml\Category\Widget\Chooser',
                 '',
                 [
                     'data' => [
@@ -80,7 +73,7 @@ class Chooser extends \Magento\Backend\App\Action
                 ]
             );
 
-            $html = $layout->createBlock(\Magento\Catalog\Block\Adminhtml\Product\Widget\Chooser\Container::class)
+            $html = $layout->createBlock('Magento\Catalog\Block\Adminhtml\Product\Widget\Chooser\Container')
                 ->setTreeHtml($categoriesTree->toHtml())
                 ->setGridHtml($html)
                 ->toHtml();
@@ -88,7 +81,6 @@ class Chooser extends \Magento\Backend\App\Action
 
         /** @var \Magento\Framework\Controller\Result\Raw $resultRaw */
         $resultRaw = $this->resultRawFactory->create();
-
         return $resultRaw->setContents($html);
     }
 }

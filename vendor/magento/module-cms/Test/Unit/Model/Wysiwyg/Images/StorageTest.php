@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Cms\Test\Unit\Model\Wysiwyg\Images;
@@ -127,7 +127,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
 
         $this->directoryMock = $this->getMock(
             'Magento\Framework\Filesystem\Directory\Write',
-            ['delete', 'getDriver', 'create', 'getRelativePath', 'isExist'],
+            ['delete', 'getDriver', 'create'],
             [],
             '',
             false
@@ -166,7 +166,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         );
         $this->imageHelperMock = $this->getMock(
             'Magento\Cms\Helper\Wysiwyg\Images',
-            ['getStorageRoot', 'getCurrentPath'],
+            ['getStorageRoot'],
             [],
             '',
             false
@@ -220,10 +220,7 @@ class StorageTest extends \PHPUnit_Framework_TestCase
         $this->uploaderFactoryMock = $this->getMockBuilder('Magento\MediaStorage\Model\File\UploaderFactory')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->sessionMock = $this->getMockBuilder('Magento\Backend\Model\Session')
-            ->setMethods(['getCurrentPath'])
-        ->disableOriginalConstructor()
-        ->getMock();
+        $this->sessionMock = $this->getMock('Magento\Backend\Model\Session', [], [], '', false);
         $this->backendUrlMock = $this->getMock('Magento\Backend\Model\Url', [], [], '', false);
 
         $this->coreFileStorageMock = $this->getMockBuilder('Magento\MediaStorage\Helper\File\Storage\Database')

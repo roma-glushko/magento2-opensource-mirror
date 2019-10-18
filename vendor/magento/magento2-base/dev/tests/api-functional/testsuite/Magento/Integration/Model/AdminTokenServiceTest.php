@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -79,19 +79,6 @@ class AdminTokenServiceTest extends WebapiAbstract
     }
 
     /**
-     * Provider to test input validation
-     *
-     * @return array
-     */
-    public function validationDataProvider()
-    {
-        return [
-            'Check for empty credentials' => ['', ''],
-            'Check for null credentials' => [null, null]
-        ];
-    }
-
-    /**
      * @dataProvider validationDataProvider
      */
     public function testCreateAdminAccessTokenEmptyOrNullCredentials()
@@ -107,8 +94,8 @@ class AdminTokenServiceTest extends WebapiAbstract
             $requestData = ['username' => '', 'password' => ''];
             $this->_webApiCall($serviceInfo, $requestData);
             $noExceptionOccurred = true;
-        } catch (\Exception $exception) {
-            $this->assertInputExceptionMessages($exception);
+        } catch (\Exception $e) {
+            $this->assertInputExceptionMessages($e);
         }
         if ($noExceptionOccurred) {
             $this->fail("Exception was expected to be thrown when provided credentials are invalid.");
@@ -130,8 +117,8 @@ class AdminTokenServiceTest extends WebapiAbstract
             $requestData = ['username' => $customerUserName, 'password' => $password];
             $this->_webApiCall($serviceInfo, $requestData);
             $noExceptionOccurred = true;
-        } catch (\Exception $exception) {
-            $this->assertInvalidCredentialsException($exception);
+        } catch (\Exception $e) {
+            $this->assertInvalidCredentialsException($e);
         }
         if ($noExceptionOccurred) {
             $this->fail("Exception was expected to be thrown when provided credentials are invalid.");
@@ -139,63 +126,16 @@ class AdminTokenServiceTest extends WebapiAbstract
     }
 
     /**
-     * @magentoApiDataFixture Magento/Webapi/_files/webapi_user.php
+     * Provider to test input validation
+     *
+     * @return array
      */
-    public function testUseAdminAccessTokenInactiveAdmin()
+    public function validationDataProvider()
     {
-        $adminUserNameFromFixture = 'webapi_user';
-
-        $serviceInfo = [
-            'rest' => [
-                'resourcePath' => self::RESOURCE_PATH_ADMIN_TOKEN,
-                'httpMethod' => \Magento\Framework\Webapi\Rest\Request::HTTP_METHOD_POST,
-            ],
+        return [
+            'Check for empty credentials' => ['', ''],
+            'Check for null credentials' => [null, null]
         ];
-        $requestData = [
-            'username' => $adminUserNameFromFixture,
-            'password' => \Magento\TestFramework\Bootstrap::ADMIN_PASSWORD,
-        ];
-        $accessToken = $this->_webApiCall($serviceInfo, $requestData);
-        $this->assertToken($adminUserNameFromFixture, $accessToken);
-
-        $serviceInfo = [
-            'rest' => [
-                'resourcePath' => '/V1/store/storeConfigs',
-                'httpMethod' => \Magento\Framework\Webapi\Rest\Request::HTTP_METHOD_GET,
-                'token' => $accessToken
-            ]
-        ];
-        $requestData = [
-            'storeCodes' => ['default'],
-        ];
-        $storeConfigs = $this->_webApiCall($serviceInfo, $requestData);
-        $this->assertNotNull($storeConfigs);
-
-        $adminUser = $this->userModel->loadByUsername($adminUserNameFromFixture);
-        $adminUser->setData("is_active", 0);
-        $adminUser->save();
-
-        $serviceInfo = [
-            'rest' => [
-                'resourcePath' => '/V1/store/storeConfigs',
-                'httpMethod' => \Magento\Framework\Webapi\Rest\Request::HTTP_METHOD_GET,
-                'token' => $accessToken
-            ]
-        ];
-        $requestData = [
-            'storeCodes' => ['default'],
-        ];
-
-        $noExceptionOccurred = false;
-        try {
-            $this->_webApiCall($serviceInfo, $requestData);
-            $noExceptionOccurred = true;
-        } catch (\Exception $exception) {
-            $this->assertUnauthorizedAccessException($exception);
-        }
-        if ($noExceptionOccurred) {
-            $this->fail("Exception was expected to be thrown when provided token is expired.");
-        }
     }
 
     /**
@@ -226,7 +166,7 @@ class AdminTokenServiceTest extends WebapiAbstract
             try {
                 $this->_webApiCall($serviceInfo, $invalidCredentials);
                 $noExceptionOccurred = true;
-            } catch (\Exception $exception) {
+            } catch (\Exception $e) {
             }
         }
         if ($noExceptionOccurred) {
@@ -268,8 +208,8 @@ class AdminTokenServiceTest extends WebapiAbstract
             try {
                 $this->_webApiCall($serviceInfo, $invalidCredentials);
                 $noExceptionOccurred = true;
-            } catch (\Exception $exception) {
-                $this->assertInvalidCredentialsException($exception);
+            } catch (\Exception $e) {
+                $this->assertInvalidCredentialsException($e);
             }
             if ($noExceptionOccurred) {
                 $this->fail("Exception was expected to be thrown when provided credentials are invalid.");
@@ -280,8 +220,8 @@ class AdminTokenServiceTest extends WebapiAbstract
         try {
             $this->_webApiCall($serviceInfo, $validCredentials);
             $noExceptionOccurred = true;
-        } catch (\Exception $exception) {
-            $this->assertInvalidCredentialsException($exception);
+        } catch (\Exception $e) {
+            $this->assertInvalidCredentialsException($e);
         }
         if ($noExceptionOccurred) {
             $this->fail("Exception was expected to be thrown because account should have been locked at this point.");
@@ -291,23 +231,23 @@ class AdminTokenServiceTest extends WebapiAbstract
     /**
      * Assert for presence of Input exception messages
      *
-     * @param \Exception $exception
+     * @param \Exception $e
      */
-    private function assertInputExceptionMessages($exception)
+    private function assertInputExceptionMessages($e)
     {
-        $this->assertEquals(HTTPExceptionCodes::HTTP_BAD_REQUEST, $exception->getCode());
-        $exceptionData = $this->processRestExceptionResult($exception);
+        $this->assertEquals(HTTPExceptionCodes::HTTP_BAD_REQUEST, $e->getCode());
+        $exceptionData = $this->processRestExceptionResult($e);
         $expectedExceptionData = [
-            'message' => InputException::DEFAULT_MESSAGE,
+            'message' => 'One or more input exceptions have occurred.',
             'errors' => [
                 [
-                    'message' => InputException::REQUIRED_FIELD,
+                    'message' => '%fieldName is a required field.',
                     'parameters' => [
                         'fieldName' => 'username',
                     ],
                 ],
                 [
-                    'message' => InputException::REQUIRED_FIELD,
+                    'message' => '%fieldName is a required field.',
                     'parameters' => [
                         'fieldName' => 'password',
                     ]
@@ -320,40 +260,14 @@ class AdminTokenServiceTest extends WebapiAbstract
     /**
      * Make sure that status code and message are correct in case of authentication failure.
      *
-     * @param \Exception $exception
+     * @param \Exception $e
      */
-    private function assertInvalidCredentialsException($exception)
+    private function assertInvalidCredentialsException($e)
     {
-        $this->assertEquals(
-            HTTPExceptionCodes::HTTP_UNAUTHORIZED,
-            $exception->getCode(),
-            "Response HTTP code is invalid."
-        );
-        $exceptionData = $this->processRestExceptionResult($exception);
+        $this->assertEquals(HTTPExceptionCodes::HTTP_UNAUTHORIZED, $e->getCode(), "Response HTTP code is invalid.");
+        $exceptionData = $this->processRestExceptionResult($e);
         $expectedExceptionData = [
             'message' => 'You did not sign in correctly or your account is temporarily disabled.'
-        ];
-        $this->assertEquals($expectedExceptionData, $exceptionData, "Exception message is invalid.");
-    }
-
-    /**
-     * Make sure that status code and message are correct in case of authentication failure.
-     *
-     * @param \Exception $exception
-     */
-    private function assertUnauthorizedAccessException($exception)
-    {
-        $this->assertEquals(
-            HTTPExceptionCodes::HTTP_UNAUTHORIZED,
-            $exception->getCode(),
-            "Response HTTP code is invalid."
-        );
-        $exceptionData = $this->processRestExceptionResult($exception);
-        $expectedExceptionData = [
-            'message' => 'Consumer is not authorized to access %resources',
-            'parameters' => [
-                'resources' => 'Magento_Backend::store'
-            ]
         ];
         $this->assertEquals($expectedExceptionData, $exceptionData, "Exception message is invalid.");
     }

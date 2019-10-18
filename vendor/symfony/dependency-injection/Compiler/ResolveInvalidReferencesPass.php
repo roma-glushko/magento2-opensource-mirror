@@ -28,6 +28,8 @@ class ResolveInvalidReferencesPass implements CompilerPassInterface
 
     /**
      * Process the ContainerBuilder to resolve invalid references.
+     *
+     * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
     {

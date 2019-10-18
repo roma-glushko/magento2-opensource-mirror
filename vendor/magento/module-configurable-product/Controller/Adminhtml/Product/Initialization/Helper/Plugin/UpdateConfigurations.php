@@ -2,7 +2,7 @@
 /**
  * Product initialzation helper
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\ConfigurableProduct\Controller\Adminhtml\Product\Initialization\Helper\Plugin;
@@ -17,6 +17,23 @@ class UpdateConfigurations
 
     /** @var \Magento\ConfigurableProduct\Model\Product\VariationHandler */
     protected $variationHandler;
+
+    /**
+     * @var array
+     */
+    private $keysPost = [
+        'status',
+        'sku',
+        'name',
+        'price',
+        'configurable_attribute',
+        'weight',
+        'media_gallery',
+        'swatch_image',
+        'small_image',
+        'thumbnail',
+        'image'
+    ];
 
     /**
      * @param \Magento\Framework\App\RequestInterface $request
@@ -46,30 +63,58 @@ class UpdateConfigurations
         \Magento\Catalog\Controller\Adminhtml\Product\Initialization\Helper $subject,
         \Magento\Catalog\Model\Product $configurableProduct
     ) {
-        $configurations = $this->request->getParam('configurations', []);
-        if ($this->request->getParam('configurations_serialized')) {
-            $configurations = json_decode($this->request->getParam('configurations_serialized'), true);
-        }
+        $configurations = $this->getConfigurations();
         $configurations = $this->variationHandler->duplicateImagesForVariations($configurations);
-        $productsAttributeSets = [];
-
         foreach ($configurations as $productId => $productData) {
             /** @var \Magento\Catalog\Model\Product $product */
             $product = $this->productRepository->getById($productId, false, $this->request->getParam('store', 0));
             $productData = $this->variationHandler->processMediaGallery($product, $productData);
-            $productAttributeSetId = $product->getAttributeSetId();
-
-            if (!array_key_exists($productAttributeSetId, $productsAttributeSets)) {
-                $product->getResource()->getSortedAttributes($productAttributeSetId);
-                $productsAttributeSets[$productAttributeSetId] = 1;
-            }
-
             $product->addData($productData);
             if ($product->hasDataChanges()) {
                 $product->save();
             }
         }
-        
         return $configurableProduct;
+    }
+
+    /**
+     * Get configurations from request
+     *
+     * @return array
+     */
+    protected function getConfigurations()
+    {
+        $result = [];
+        $configurableMatrix = $this->request->getParam('configurable-matrix', []);
+        foreach ($configurableMatrix as $item) {
+            if (!$item['newProduct']) {
+                $result[$item['id']] = $this->mapData($item);
+
+                if (isset($item['qty'])) {
+                    $result[$item['id']]['quantity_and_stock_status']['qty'] = $item['qty'];
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    /**
+     * Map data from POST
+     *
+     * @param array $item
+     * @return array
+     */
+    private function mapData(array $item)
+    {
+        $result = [];
+
+        foreach ($this->keysPost as $key) {
+            if (isset($item[$key])) {
+                $result[$key] = $item[$key];
+            }
+        }
+
+        return $result;
     }
 }

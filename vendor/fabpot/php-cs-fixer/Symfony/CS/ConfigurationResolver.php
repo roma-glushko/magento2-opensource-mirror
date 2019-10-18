@@ -1,18 +1,15 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
  */
 
 namespace Symfony\CS;
-
-use Symfony\CS\ConfigurationException\InvalidConfigurationException;
 
 /**
  * The resolver that resolves configuration to use by command line options and config.
@@ -46,11 +43,6 @@ class ConfigurationResolver
         'level' => null,
         'progress' => null,
     );
-
-    /**
-     * @var string
-     */
-    private $format;
 
     public function setAllFixers(array $allFixers)
     {
@@ -91,7 +83,6 @@ class ConfigurationResolver
     {
         $this->resolveByLevel();
         $this->resolveByNames();
-        $this->resolveFormat();
 
         return $this;
     }
@@ -104,16 +95,6 @@ class ConfigurationResolver
     public function getFixers()
     {
         return $this->fixers;
-    }
-
-    /**
-     * Returns output format.
-     *
-     * @return string
-     */
-    public function getFormat()
-    {
-        return $this->format;
     }
 
     public function getProgress()
@@ -177,24 +158,6 @@ class ConfigurationResolver
         }
     }
 
-    protected function resolveFormat()
-    {
-        if (array_key_exists('format', $this->options)) {
-            $format = $this->options['format'];
-        } elseif (method_exists($this->config, 'getFormat')) {
-            $format = $this->config->getFormat();
-        } else {
-            $format = 'txt'; // default
-        }
-
-        static $formats = array('txt', 'xml', 'json');
-        if (!in_array($format, $formats, true)) {
-            throw new InvalidConfigurationException(sprintf('The format "%s" is not defined, supported are %s.', $format, implode(', ', $formats)));
-        }
-
-        $this->format = $format;
-    }
-
     protected function parseLevel()
     {
         static $levelMap = array(
@@ -209,7 +172,7 @@ class ConfigurationResolver
 
         if (null !== $levelOption) {
             if (!isset($levelMap[$levelOption])) {
-                throw new InvalidConfigurationException(sprintf('The level "%s" is not defined.', $levelOption));
+                throw new \InvalidArgumentException(sprintf('The level "%s" is not defined.', $levelOption));
             }
 
             return $levelMap[$levelOption];
@@ -224,6 +187,8 @@ class ConfigurationResolver
                 return $this->config->getLevel();
             }
         }
+
+        return;
     }
 
     protected function parseFixers()
@@ -235,5 +200,7 @@ class ConfigurationResolver
         if (null === $this->options['level']) {
             return $this->config->getFixers();
         }
+
+        return;
     }
 }

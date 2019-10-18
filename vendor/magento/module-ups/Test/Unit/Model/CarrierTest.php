@@ -1,18 +1,13 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Ups\Test\Unit\Model;
 
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Magento\Ups\Model\Carrier;
-use Magento\Directory\Model\Country;
-use PHPUnit_Framework_MockObject_MockObject as MockObject;
 
-/**
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- */
 class CarrierTest extends \PHPUnit_Framework_TestCase
 {
     const FREE_METHOD_NAME = 'free_method';
@@ -59,7 +54,7 @@ class CarrierTest extends \PHPUnit_Framework_TestCase
     protected $countryFactory;
 
     /**
-     * @var Country|MockObject
+     * @var \Magento\Directory\Model\Country
      */
     protected $country;
 
@@ -78,7 +73,7 @@ class CarrierTest extends \PHPUnit_Framework_TestCase
         $this->helper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
 
         $this->scope = $this->getMockBuilder(
-            \Magento\Framework\App\Config\ScopeConfigInterface::class
+            '\Magento\Framework\App\Config\ScopeConfigInterface'
         )->disableOriginalConstructor()->getMock();
 
         $this->scope->expects(
@@ -89,35 +84,35 @@ class CarrierTest extends \PHPUnit_Framework_TestCase
             $this->returnCallback([$this, 'scopeConfiggetValue'])
         );
 
-        $this->error = $this->getMockBuilder(\Magento\Quote\Model\Quote\Address\RateResult\Error::class)
+        $this->error = $this->getMockBuilder('\Magento\Quote\Model\Quote\Address\RateResult\Error')
             ->setMethods(['setCarrier', 'setCarrierTitle', 'setErrorMessage'])
             ->getMock();
 
-        $this->errorFactory = $this->getMockBuilder(\Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory::class)
+        $this->errorFactory = $this->getMockBuilder('Magento\Quote\Model\Quote\Address\RateResult\ErrorFactory')
             ->disableOriginalConstructor()
             ->setMethods(['create'])
             ->getMock();
 
         $this->errorFactory->expects($this->any())->method('create')->willReturn($this->error);
 
-        $this->rate = $this->getMock(\Magento\Shipping\Model\Rate\Result::class, ['getError'], [], '', false);
-        $rateFactory = $this->getMock(\Magento\Shipping\Model\Rate\ResultFactory::class, ['create'], [], '', false);
+        $this->rate = $this->getMock('Magento\Shipping\Model\Rate\Result', ['getError'], [], '', false);
+        $rateFactory = $this->getMock('Magento\Shipping\Model\Rate\ResultFactory', ['create'], [], '', false);
 
         $rateFactory->expects($this->any())->method('create')->willReturn($this->rate);
 
-        $this->country = $this->getMockBuilder(\Magento\Directory\Model\Country::class)
+        $this->country = $this->getMockBuilder('\Magento\Directory\Model\Country')
             ->disableOriginalConstructor()
             ->setMethods(['load'])
             ->getMock();
 
-        $this->abstractModel = $this->getMockBuilder(\Magento\Framework\Model\AbstractModel::class)
+        $this->abstractModel = $this->getMockBuilder('Magento\Framework\Model\AbstractModel')
             ->disableOriginalConstructor()
             ->setMethods(['getData'])
             ->getMock();
 
         $this->country->expects($this->any())->method('load')->willReturn($this->abstractModel);
 
-        $this->countryFactory = $this->getMockBuilder(\Magento\Directory\Model\CountryFactory::class)
+        $this->countryFactory = $this->getMockBuilder('\Magento\Directory\Model\CountryFactory')
             ->disableOriginalConstructor()
             ->setMethods(['create'])
             ->getMock();
@@ -125,7 +120,7 @@ class CarrierTest extends \PHPUnit_Framework_TestCase
         $this->countryFactory->expects($this->any())->method('create')->willReturn($this->country);
 
         $this->model = $this->helper->getObject(
-            \Magento\Ups\Model\Carrier::class,
+            'Magento\Ups\Model\Carrier',
             [
                 'scopeConfig' => $this->scope,
                 'rateErrorFactory' => $this->errorFactory,
@@ -243,45 +238,72 @@ class CarrierTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @covers \Magento\Ups\Model\Carrier::setRequest
-     * @param string $countryCode
-     * @param string $foundCountryCode
-     * @dataProvider countryDataProvider
+     * @param string $data
+     * @param array $maskFields
+     * @param string $expected
+     * @dataProvider logDataProvider
      */
-    public function testSetRequest($countryCode, $foundCountryCode)
+    public function testFilterDebugData($data, array $maskFields, $expected)
     {
-        /** @var RateRequest $request */
-        $request = $this->helper->getObject(RateRequest::class);
-        $request->setData([
-            'orig_country' => 'USA',
-            'orig_region_code' => 'CA',
-            'orig_post_code' => 90230,
-            'orig_city' => 'Culver City',
-            'dest_country_id' => $countryCode,
-        ]);
+        $refClass = new \ReflectionClass(Carrier::class);
+        $property = $refClass->getProperty('_debugReplacePrivateDataKeys');
+        $property->setAccessible(true);
+        $property->setValue($this->model, $maskFields);
 
-        $this->country->expects(static::at(1))
-            ->method('load')
-            ->with($countryCode)
-            ->willReturnSelf();
-
-        $this->country->expects(static::any())
-            ->method('getData')
-            ->with('iso2_code')
-            ->willReturn($foundCountryCode);
-
-        $this->model->setRequest($request);
+        $refMethod = $refClass->getMethod('filterDebugData');
+        $refMethod->setAccessible(true);
+        $result = $refMethod->invoke($this->model, $data);
+        $expectedXml = new \SimpleXMLElement($expected);
+        $resultXml = new \SimpleXMLElement($result);
+        static::assertEquals($expectedXml->asXML(), $resultXml->asXML());
     }
 
     /**
-     * Get list of country variations
-     * @return array
+     * Get list of variations
      */
-    public function countryDataProvider()
+    public function logDataProvider()
     {
         return [
-            ['countryCode' => 'PR', 'foundCountryCode' => null],
-            ['countryCode' => 'US', 'foundCountryCode' => 'US'],
+            [
+                '<?xml version="1.0" encoding="UTF-8"?>
+                <RateRequest>
+                    <UserId>42121</UserId>
+                    <Password>TestPassword</Password>
+                    <Package ID="0">
+                        <Service>ALL</Service>
+                    </Package>
+                </RateRequest>',
+                ['UserId', 'Password'],
+                '<?xml version="1.0" encoding="UTF-8"?>
+                <RateRequest>
+                    <UserId>****</UserId>
+                    <Password>****</Password>
+                    <Package ID="0">
+                        <Service>ALL</Service>
+                    </Package>
+                </RateRequest>',
+            ],
+            [
+                '<?xml version="1.0" encoding="UTF-8"?>
+                <RateRequest>
+                    <Auth>
+                        <UserId>1231</UserId>
+                    </Auth>
+                    <Package ID="0">
+                        <Service>ALL</Service>
+                    </Package>
+                </RateRequest>',
+                ['UserId'],
+                '<?xml version="1.0" encoding="UTF-8"?>
+                <RateRequest>
+                    <Auth>
+                        <UserId>****</UserId>
+                    </Auth>
+                    <Package ID="0">
+                        <Service>ALL</Service>
+                    </Package>
+                </RateRequest>',
+            ]
         ];
     }
 }

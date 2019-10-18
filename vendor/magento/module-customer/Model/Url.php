@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Customer\Model;
@@ -57,42 +57,24 @@ class Url
     protected $urlEncoder;
 
     /**
-     * @var \Magento\Framework\Url\DecoderInterface
-     */
-    private $urlDecoder;
-
-    /**
-     * @var \Magento\Framework\Url\HostChecker
-     */
-    private $hostChecker;
-
-    /**
      * @param Session $customerSession
      * @param ScopeConfigInterface $scopeConfig
      * @param RequestInterface $request
      * @param UrlInterface $urlBuilder
      * @param EncoderInterface $urlEncoder
-     * @param \Magento\Framework\Url\DecoderInterface|null $urlDecoder
-     * @param \Magento\Framework\Url\HostChecker|null $hostChecker
      */
     public function __construct(
         Session $customerSession,
         ScopeConfigInterface $scopeConfig,
         RequestInterface $request,
         UrlInterface $urlBuilder,
-        EncoderInterface $urlEncoder,
-        \Magento\Framework\Url\DecoderInterface $urlDecoder = null,
-        \Magento\Framework\Url\HostChecker $hostChecker = null
+        EncoderInterface $urlEncoder
     ) {
         $this->request = $request;
         $this->urlBuilder = $urlBuilder;
         $this->scopeConfig = $scopeConfig;
         $this->customerSession = $customerSession;
         $this->urlEncoder = $urlEncoder;
-        $this->urlDecoder = $urlDecoder ?: \Magento\Framework\App\ObjectManager::getInstance()
-            ->get(\Magento\Framework\Url\DecoderInterface::class);
-        $this->hostChecker = $hostChecker ?: \Magento\Framework\App\ObjectManager::getInstance()
-            ->get(\Magento\Framework\Url\HostChecker::class);
     }
 
     /**
@@ -113,7 +95,7 @@ class Url
     public function getLoginUrlParams()
     {
         $params = [];
-        $referer = $this->getRequestReferrer();
+        $referer = $this->request->getParam(self::REFERER_QUERY_PARAM_NAME);
         if (!$referer
             && !$this->scopeConfig->isSetFlag(
                 self::XML_PATH_CUSTOMER_STARTUP_REDIRECT_TO_DASHBOARD,
@@ -140,13 +122,11 @@ class Url
     public function getLoginPostUrl()
     {
         $params = [];
-        $referer = $this->getRequestReferrer();
-        if ($referer) {
+        if ($this->request->getParam(self::REFERER_QUERY_PARAM_NAME)) {
             $params = [
-                self::REFERER_QUERY_PARAM_NAME => $referer,
+                self::REFERER_QUERY_PARAM_NAME => $this->request->getParam(self::REFERER_QUERY_PARAM_NAME),
             ];
         }
-
         return $this->urlBuilder->getUrl('customer/account/loginPost', $params);
     }
 
@@ -239,23 +219,5 @@ class Url
     public function getEmailConfirmationUrl($email = null)
     {
         return $this->urlBuilder->getUrl('customer/account/confirmation', ['email' => $email]);
-    }
-
-    /**
-     * Returns request referrer.
-     *
-     * Will return referrer in case referrer from the same origin.
-     * Otherwise NULL will be returned.
-     *
-     * @return mixed|null
-     */
-    private function getRequestReferrer()
-    {
-        $referer = $this->request->getParam(self::REFERER_QUERY_PARAM_NAME);
-        if ($referer && $this->hostChecker->isOwnOrigin($this->urlDecoder->decode($referer))) {
-            return $referer;
-        }
-
-        return null;
     }
 }

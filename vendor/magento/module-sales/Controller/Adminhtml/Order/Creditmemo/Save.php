@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Sales\Controller\Adminhtml\Order\Creditmemo;
@@ -12,7 +12,9 @@ use Magento\Sales\Model\Order\Email\Sender\CreditmemoSender;
 class Save extends \Magento\Backend\App\Action
 {
     /**
-     * {@inheritdoc}
+     * Authorization level of a basic admin session
+     *
+     * @see _isAllowed()
      */
     const ADMIN_RESOURCE = 'Magento_Sales::sales_creditmemo';
 
@@ -100,7 +102,7 @@ class Save extends \Magento\Backend\App\Action
                 $creditmemoManagement = $this->_objectManager->create(
                     'Magento\Sales\Api\CreditmemoManagementInterface'
                 );
-                $creditmemoManagement->refund($creditmemo, (bool)$data['do_offline']);
+                $creditmemoManagement->refund($creditmemo, (bool)$data['do_offline'], !empty($data['send_email']));
 
                 if (!empty($data['send_email'])) {
                     $this->creditmemoSender->send($creditmemo);

@@ -1,10 +1,11 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Update;
 
+use Magento\Theme\Model\Resource\Theme\Customization\Update;
 use Magento\Update\Backup\BackupInfo;
 
 class CronTest extends \PHPUnit_Framework_TestCase
@@ -44,7 +45,7 @@ class CronTest extends \PHPUnit_Framework_TestCase
             mkdir($this->backupPath, 0777, true);
         }
 
-        $this->cronScript = UPDATER_BP . '/dev/tests/integration/framework/cron.php';
+        $this->cronScript = UPDATER_BP . '/cron.php';
         $this->backupToRollback = $this->backupPath . '/BackupToRollback.zip';
         $this->backupToRemoveA = $this->backupPath . '/BackupToRemoveA.zip';
         $this->backupToRemoveB = $this->backupPath . '/BackupToRemoveB.zip';
@@ -55,10 +56,8 @@ class CronTest extends \PHPUnit_Framework_TestCase
         file_put_contents($this->backupToRemoveB, 'w');
     }
 
-
     protected function tearDown()
     {
-        parent::tearDown();
         $this->status->setUpdateInProgress(false);
         $this->status->setUpdateError(false);
         if (file_exists($this->backupToRollback)) {
@@ -76,22 +75,15 @@ class CronTest extends \PHPUnit_Framework_TestCase
             rmdir(TESTS_TEMP_DIR . '/var');
         }
         if (file_exists(MAGENTO_BP . '/var/.update_queue.json')) {
-            unlink(MAGENTO_BP . '/var/.update_queue.json');
-        }
-        if (file_exists(MAGENTO_BP . '/var/.update_status.txt')) {
-            unlink(MAGENTO_BP . '/var/.update_status.txt');
-        }
-        if (file_exists(MAGENTO_BP . '/var/.update_cronjob_status')) {
-            unlink(MAGENTO_BP . '/var/.update_cronjob_status');
+            file_put_contents(MAGENTO_BP . '/var/.update_queue.json', '');
         }
     }
 
     public function testUpdateInProgress()
     {
         $this->status->setUpdateInProgress();
-        shell_exec('php -f ' . $this->cronScript);
-        $jobStatus = $this->status->get();
-        $this->assertContains('Update is already in progress.', $jobStatus);
+        $actualResponse = shell_exec('php -f ' . $this->cronScript);
+        $this->assertEquals('Cron is already in progress...', $actualResponse);
     }
 
     public function testValidQueue()

@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Cms\Controller\Adminhtml\Wysiwyg;
@@ -10,13 +10,6 @@ use Magento\Backend\App\Action;
 
 class Directive extends \Magento\Backend\App\Action
 {
-    /**
-     * Authorization level of a basic admin session.
-     *
-     * @see _isAllowed()
-     */
-    const ADMIN_RESOURCE = 'Magento_Cms::media_gallery';
-
     /**
      * @var \Magento\Framework\Url\DecoderInterface
      */
@@ -51,9 +44,9 @@ class Directive extends \Magento\Backend\App\Action
     {
         $directive = $this->getRequest()->getParam('___directive');
         $directive = $this->urlDecoder->decode($directive);
-        $imagePath = $this->_objectManager->create(\Magento\Cms\Model\Template\Filter::class)->filter($directive);
+        $imagePath = $this->_objectManager->create('Magento\Cms\Model\Template\Filter')->filter($directive);
         /** @var \Magento\Framework\Image\Adapter\AdapterInterface $image */
-        $image = $this->_objectManager->get(\Magento\Framework\Image\AdapterFactory::class)->create();
+        $image = $this->_objectManager->get('Magento\Framework\Image\AdapterFactory')->create();
         /** @var \Magento\Framework\Controller\Result\Raw $resultRaw */
         $resultRaw = $this->resultRawFactory->create();
         try {
@@ -61,13 +54,12 @@ class Directive extends \Magento\Backend\App\Action
             $resultRaw->setHeader('Content-Type', $image->getMimeType());
             $resultRaw->setContents($image->getImage());
         } catch (\Exception $e) {
-            $imagePath = $this->_objectManager->get(\Magento\Cms\Model\Wysiwyg\Config::class)->getSkinImagePlaceholderPath();
+            $imagePath = $this->_objectManager->get('Magento\Cms\Model\Wysiwyg\Config')->getSkinImagePlaceholderPath();
             $image->open($imagePath);
             $resultRaw->setHeader('Content-Type', $image->getMimeType());
             $resultRaw->setContents($image->getImage());
-            $this->_objectManager->get(\Psr\Log\LoggerInterface::class)->critical($e);
+            $this->_objectManager->get('Psr\Log\LoggerInterface')->critical($e);
         }
-
         return $resultRaw;
     }
 }

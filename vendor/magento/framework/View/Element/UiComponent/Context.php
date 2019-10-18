@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\View\Element\UiComponent;
@@ -13,9 +13,9 @@ use Magento\Framework\View\Element\UiComponent\Control\ActionPoolInterface;
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderFactory;
 use Magento\Framework\View\Element\UiComponent\ContentType\ContentTypeFactory;
 use Magento\Framework\View\Element\UiComponent\Control\ButtonProviderInterface;
-use Magento\Framework\View\Element\UiComponent\ContentType\ContentTypeInterface;
 use Magento\Framework\View\Element\UiComponent\DataProvider\DataProviderInterface;
 use Magento\Framework\View\LayoutInterface as PageLayoutInterface;
+use Magento\Framework\View\Element\UiComponentFactory;
 
 /**
  * Class Context
@@ -97,8 +97,10 @@ class Context implements ContextInterface
      * @param ContentTypeFactory $contentTypeFactory
      * @param UrlInterface $urlBuilder
      * @param Processor $processor
+     * @param UiComponentFactory $uiComponentFactory
      * @param DataProviderInterface|null $dataProvider
      * @param null $namespace
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
         PageLayoutInterface $pageLayout,
@@ -108,6 +110,7 @@ class Context implements ContextInterface
         ContentTypeFactory $contentTypeFactory,
         UrlInterface $urlBuilder,
         Processor $processor,
+        UiComponentFactory $uiComponentFactory,
         DataProviderInterface $dataProvider = null,
         $namespace = null
     ) {
@@ -120,6 +123,7 @@ class Context implements ContextInterface
         $this->contentTypeFactory = $contentTypeFactory;
         $this->urlBuilder = $urlBuilder;
         $this->processor = $processor;
+        $this->uiComponentFactory = $uiComponentFactory;
         $this->setAcceptType();
     }
 
@@ -134,13 +138,16 @@ class Context implements ContextInterface
     {
         if (!isset($this->componentsDefinitions[$name])) {
             $this->componentsDefinitions[$name] = $config;
+        } else {
+            $this->componentsDefinitions[$name] = array_merge(
+                $this->componentsDefinitions[$name],
+                $config
+            );
         }
     }
 
     /**
-     * To get the registry components
-     *
-     * @return array
+     * {@inheritdoc}
      */
     public function getComponentsDefinitions()
     {
@@ -148,9 +155,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Get render engine
-     *
-     * @return ContentTypeInterface
+     * {@inheritdoc}
      */
     public function getRenderEngine()
     {
@@ -158,7 +163,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * @return string
+     * {@inheritdoc}
      */
     public function getNamespace()
     {
@@ -166,9 +171,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Getting accept type
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getAcceptType()
     {
@@ -176,9 +179,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Getting all request data
-     *
-     * @return mixed
+     * {@inheritdoc}
      */
     public function getRequestParams()
     {
@@ -186,11 +187,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Getting data according to the key
-     *
-     * @param string $key
-     * @param mixed|null $defaultValue
-     * @return mixed
+     * {@inheritdoc}
      */
     public function getRequestParam($key, $defaultValue = null)
     {
@@ -215,9 +212,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Get data provider
-     *
-     * @return DataProviderInterface
+     * {@inheritdoc}
      */
     public function getDataProvider()
     {
@@ -225,8 +220,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * @param UiComponentInterface $component
-     * @return array
+     * {@inheritdoc}
      */
     public function getDataSourceData(UiComponentInterface $component)
     {
@@ -251,9 +245,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Get page layout
-     *
-     * @return PageLayoutInterface
+     * {@inheritdoc}
      */
     public function getPageLayout()
     {
@@ -261,11 +253,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Add button in the actions toolbar
-     *
-     * @param array $buttons
-     * @param UiComponentInterface $component
-     * @return void
+     * {@inheritdoc}
      */
     public function addButtons(array $buttons, UiComponentInterface $component)
     {
@@ -311,6 +299,19 @@ class Context implements ContextInterface
     }
 
     /**
+     * {@inheritdoc}
+     * @SuppressWarnings(PHPMD.UnusedLocalVariable)
+     */
+    public function addHtmlBlocks(array $htmlBlocks, UiComponentInterface $component)
+    {
+        if (!empty($htmlBlocks)) {
+            foreach ($htmlBlocks as $htmlBlock => $blockData) {
+                $this->actionPool->addHtmlBlock($blockData['type'], $blockData['name'], $blockData['arguments']);
+            }
+        }
+    }
+
+    /**
      * Getting requested accept type
      *
      * @return void
@@ -320,7 +321,7 @@ class Context implements ContextInterface
         $this->acceptType = 'html';
 
         $rawAcceptType = $this->request->getHeader('Accept');
-        if ($this->request->getParam('isAjax') === 'true' || strpos($rawAcceptType, 'json') !== false) {
+        if (strpos($rawAcceptType, 'json') !== false) {
             $this->acceptType = 'json';
         } else if (strpos($rawAcceptType, 'html') !== false) {
             $this->acceptType = 'html';
@@ -330,10 +331,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Set data provider
-     *
-     * @param DataProviderInterface $dataProvider
-     * @return void
+     * {@inheritdoc}
      */
     public function setDataProvider(DataProviderInterface $dataProvider)
     {
@@ -341,11 +339,7 @@ class Context implements ContextInterface
     }
 
     /**
-     * Generate url by route and parameters
-     *
-     * @param   string $route
-     * @param   array $params
-     * @return  string
+     * {@inheritdoc}
      */
     public function getUrl($route = '', $params = [])
     {
@@ -371,10 +365,18 @@ class Context implements ContextInterface
     }
 
     /**
-     * @inheritDoc
+     * {@inheritdoc}
      */
     public function getProcessor()
     {
         return $this->processor;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getUiComponentFactory()
+    {
+        return $this->uiComponentFactory;
     }
 }

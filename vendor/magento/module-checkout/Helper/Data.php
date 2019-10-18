@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Checkout\Helper;
@@ -8,7 +8,6 @@ namespace Magento\Checkout\Helper;
 use Magento\Framework\Pricing\PriceCurrencyInterface;
 use Magento\Quote\Model\Quote\Item\AbstractItem;
 use Magento\Store\Model\Store;
-use Magento\Store\Model\ScopeInterface;
 
 /**
  * Checkout default helper
@@ -21,12 +20,6 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     const XML_PATH_GUEST_CHECKOUT = 'checkout/options/guest_checkout';
 
     const XML_PATH_CUSTOMER_MUST_BE_LOGGED = 'checkout/options/customer_must_be_logged';
-
-    /**
-     * @deprecated Need to be replaced by constant
-     * @var string
-     */
-    private $xmlPathDisplayBillingAddressOn = 'checkout/options/display_billing_address_on';
 
     /**
      * @var \Magento\Store\Model\StoreManagerInterface
@@ -143,7 +136,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return (bool)$this->scopeConfig->getValue(
             'checkout/options/onepage_checkout_enabled',
-            ScopeInterface::SCOPE_STORE
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
         );
     }
 
@@ -217,14 +210,14 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $template = $this->scopeConfig->getValue(
             'checkout/payment_failed/template',
-            ScopeInterface::SCOPE_STORE,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
             $checkout->getStoreId()
         );
 
         $copyTo = $this->_getEmails('checkout/payment_failed/copy_to', $checkout->getStoreId());
         $copyMethod = $this->scopeConfig->getValue(
             'checkout/payment_failed/copy_method',
-            ScopeInterface::SCOPE_STORE,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
             $checkout->getStoreId()
         );
         $bcc = [];
@@ -234,19 +227,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
 
         $_receiver = $this->scopeConfig->getValue(
             'checkout/payment_failed/receiver',
-            ScopeInterface::SCOPE_STORE,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
             $checkout->getStoreId()
         );
         $sendTo = [
             [
                 'email' => $this->scopeConfig->getValue(
                     'trans_email/ident_' . $_receiver . '/email',
-                    ScopeInterface::SCOPE_STORE,
+                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
                     $checkout->getStoreId()
                 ),
                 'name' => $this->scopeConfig->getValue(
                     'trans_email/ident_' . $_receiver . '/name',
-                    ScopeInterface::SCOPE_STORE,
+                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
                     $checkout->getStoreId()
                 ),
             ],
@@ -302,21 +295,19 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
                     'shippingAddress' => $checkout->getShippingAddress(),
                     'shippingMethod' => $this->scopeConfig->getValue(
                         'carriers/' . $shippingMethod . '/title',
-                        ScopeInterface::SCOPE_STORE
+                        \Magento\Store\Model\ScopeInterface::SCOPE_STORE
                     ),
                     'paymentMethod' => $this->scopeConfig->getValue(
                         'payment/' . $paymentMethod . '/title',
-                        ScopeInterface::SCOPE_STORE
+                        \Magento\Store\Model\ScopeInterface::SCOPE_STORE
                     ),
                     'items' => nl2br($items),
                     'total' => $total,
                 ]
-            )->setScopeId(
-                $checkout->getStoreId()
             )->setFrom(
                 $this->scopeConfig->getValue(
                     'checkout/payment_failed/identity',
-                    ScopeInterface::SCOPE_STORE,
+                    \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
                     $checkout->getStoreId()
                 )
             )->addTo(
@@ -343,7 +334,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         $data = $this->scopeConfig->getValue(
             $configPath,
-            ScopeInterface::SCOPE_STORE,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
             $storeId
         );
         if (!empty($data)) {
@@ -367,7 +358,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
         }
         $guestCheckout = $this->scopeConfig->isSetFlag(
             self::XML_PATH_GUEST_CHECKOUT,
-            ScopeInterface::SCOPE_STORE,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
             $store
         );
 
@@ -406,20 +397,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_CUSTOMER_MUST_BE_LOGGED,
-            ScopeInterface::SCOPE_STORE
-        );
-    }
-
-    /**
-     * Checks if display billing address on payment method is available, otherwise
-     * billing address should be display on payment page
-     * @return bool
-     */
-    public function isDisplayBillingOnPaymentMethodAvailable()
-    {
-        return (bool) !$this->scopeConfig->getValue(
-            $this->xmlPathDisplayBillingAddressOn,
-            ScopeInterface::SCOPE_STORE
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
         );
     }
 }

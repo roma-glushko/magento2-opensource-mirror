@@ -11,13 +11,12 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Compiler\ResolveInvalidReferencesPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class ResolveInvalidReferencesPassTest extends TestCase
+class ResolveInvalidReferencesPassTest extends \PHPUnit_Framework_TestCase
 {
     public function testProcess()
     {

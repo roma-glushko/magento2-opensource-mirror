@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -18,7 +17,7 @@ use Symfony\CS\Tokenizer\Tokens;
 use Symfony\CS\Utils;
 
 /**
- * @author Graham Campbell <graham@alt-three.com>
+ * @author Graham Campbell <graham@mineuk.com>
  */
 class NoEmptyLinesAfterPhpdocsFixer extends AbstractFixer
 {
@@ -58,15 +57,6 @@ class NoEmptyLinesAfterPhpdocsFixer extends AbstractFixer
     public function getDescription()
     {
         return 'There should not be blank lines between docblock and the documented element.';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        // should be ran before the SingleBlankLineBeforeNamespaceFixer.
-        return 1;
     }
 
     /**

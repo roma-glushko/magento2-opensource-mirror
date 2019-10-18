@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -48,32 +48,18 @@ class Edit extends \Magento\Backend\Block\Widget\Form\Container
         parent::_construct();
 
         $this->buttonList->update('save', 'label', __('Save User'));
-        $this->buttonList->remove('delete');
+        $this->buttonList->update('delete', 'label', __('Delete User'));
 
         $objId = $this->getRequest()->getParam($this->_objectId);
 
         if (!empty($objId)) {
-            $this->addButton(
-                'delete',
-                [
-                    'label' => __('Delete User'),
-                    'class' => 'delete',
-                    'onclick' => sprintf(
-                        'deleteConfirm("%s", "%s", %s)',
-                        __('Are you sure you want to do this?'),
-                        $this->getUrl('adminhtml/*/delete'),
-                        json_encode(['data' => ['user_id' => $objId]])
-                    ),
-                ]
-            );
-
             $deleteConfirmMsg = __("Are you sure you want to revoke the user\'s tokens?");
             $this->addButton(
                 'invalidate',
                 [
                     'label' => __('Force Sign-In'),
                     'class' => 'invalidate-token',
-                    'onclick' => 'deleteConfirm(\'' . $deleteConfirmMsg . '\', \'' . $this->getInvalidateUrl() . '\')',
+                    'onclick' => "deleteConfirm('" . $deleteConfirmMsg . "', '" . $this->getInvalidateUrl() . "')",
                 ]
             );
         }

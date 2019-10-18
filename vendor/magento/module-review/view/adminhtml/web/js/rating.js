@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 define([
@@ -23,7 +23,7 @@ define([
         _bind: function() {
             this._labels.on({
                 click: $.proxy(function(e) {
-                    $(e.currentTarget).prev().prop('checked', true);
+                    $('[id="' + $(e.currentTarget).attr('for') + '"]').prop('checked', true);
                     this._updateRating();
                 }, this),
 

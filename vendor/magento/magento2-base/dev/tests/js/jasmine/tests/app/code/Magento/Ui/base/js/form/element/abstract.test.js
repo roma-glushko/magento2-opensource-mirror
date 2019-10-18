@@ -1,13 +1,12 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 /*eslint max-nested-callbacks: 0*/
 
 define([
-    'Magento_Ui/js/form/element/abstract',
-    'Magento_Ui/js/lib/ko/initialize'
+    'Magento_Ui/js/form/element/abstract'
 ], function (Abstract) {
     'use strict';
 
@@ -44,12 +43,12 @@ define([
                 expect(model.validation).toEqual({});
             });
         });
-        describe('initConfig method', function () {
+        describe('initProperties method', function () {
             it('check for chainable', function () {
-                expect(model.initConfig()).toEqual(model);
+                expect(model.initProperties()).toEqual(model);
             });
             it('check for extend', function () {
-                model.initConfig();
+                model.initProperties();
                 expect(model.uid).toBeDefined();
                 expect(model.noticeId).toBeDefined();
                 expect(model.inputName).toBeDefined();
@@ -88,7 +87,6 @@ define([
                 var extendObject = {
                     simple: true,
                     required: model.required,
-                    _warn: model.warn,
                     _error: model.error,
                     _disabled: model.disabled
                 };
@@ -101,7 +99,6 @@ define([
                 var extendObject = {
                     simple: true,
                     required: model.required,
-                    _warn: model.warn,
                     _error: model.error,
                     _disabled: model.disabled
                 };
@@ -114,7 +111,6 @@ define([
                 var extendObject = {
                     simple: true,
                     example: true,
-                    _warn: model.warn,
                     required: model.required,
                     _error: model.error,
                     _disabled: model.disabled
@@ -129,7 +125,6 @@ define([
                     simple: true,
                     example: true,
                     required: model.required,
-                    _warn: model.warn,
                     _error: model.error,
                     _disabled: model.disabled
                 };

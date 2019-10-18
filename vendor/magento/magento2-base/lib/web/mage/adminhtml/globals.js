@@ -1,11 +1,10 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 define([
-    'Magento_Ui/js/modal/confirm',
-    'mage/dataPost'
-], function (confirm, dataPost) {
+    'Magento_Ui/js/modal/confirm'
+], function (confirm) {
     'use strict';
 
     /**
@@ -20,20 +19,14 @@ define([
      * Helper for onclick action.
      * @param {String} message
      * @param {String} url
-     * @param {Object} postData
      * @returns {boolean}
      */
-    window.deleteConfirm = function (message, url, postData) {
+    window.deleteConfirm = function (message, url) {
         confirm({
             content: message,
             actions: {
                 confirm: function () {
-                    if (postData !== undefined) {
-                        postData.action = url;
-                        dataPost().postData(postData);
-                    } else {
-                        setLocation(url);
-                    }
+                    setLocation(url);
                 }
             }
         });

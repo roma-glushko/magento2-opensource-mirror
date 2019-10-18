@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -61,7 +61,7 @@ class AssertBundleItemsOnProductPage extends AbstractAssertForm
         foreach ($bundleOptions as $optionKey => $bundleOption) {
             $optionData = [
                 'title' => $bundleOption['title'],
-                'type' => $bundleOption['frontend_type'],
+                'type' => $bundleOption['type'],
                 'is_require' => $bundleOption['required'],
             ];
 

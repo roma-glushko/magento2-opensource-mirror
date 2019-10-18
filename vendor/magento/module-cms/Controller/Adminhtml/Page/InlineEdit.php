@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Cms\Controller\Adminhtml\Page;
@@ -17,13 +17,6 @@ use Magento\Cms\Api\Data\PageInterface;
  */
 class InlineEdit extends \Magento\Backend\App\Action
 {
-    /**
-     * Authorization level of a basic admin session.
-     *
-     * @see _isAllowed()
-     */
-    const ADMIN_RESOURCE = 'Magento_Cms::save';
-
     /** @var PostDataProcessor */
     protected $dataProcessor;
 
@@ -112,7 +105,6 @@ class InlineEdit extends \Magento\Backend\App\Action
         $pageData['custom_root_template'] = isset($pageData['custom_root_template'])
             ? $pageData['custom_root_template']
             : null;
-
         return $pageData;
     }
 
@@ -158,7 +150,6 @@ class InlineEdit extends \Magento\Backend\App\Action
     public function setCmsPageData(\Magento\Cms\Model\Page $page, array $extendedPageData, array $pageData)
     {
         $page->setData(array_merge($page->getData(), $extendedPageData, $pageData));
-
         return $this;
     }
 }

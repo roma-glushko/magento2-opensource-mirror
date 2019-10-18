@@ -1,15 +1,9 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Catalog\Test\Unit\Model\Product\Option\Type;
-
-use Magento\Catalog\Model\Product\Configuration\Item\Option\OptionInterface;
-use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\Filesystem;
-use Magento\Framework\Filesystem\Directory\ReadInterface;
-use Magento\Framework\Filesystem\DriverPool;
 
 class FileTest extends \PHPUnit_Framework_TestCase
 {
@@ -19,7 +13,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
     protected $objectManager;
 
     /**
-     * @var ReadInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var \Magento\Framework\Filesystem\Directory\ReadInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $rootDirectory;
 
@@ -28,29 +22,17 @@ class FileTest extends \PHPUnit_Framework_TestCase
      */
     protected $coreFileStorageDatabase;
 
-    /**
-     * @var Filesystem|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $filesystemMock;
-
     protected function setUp()
     {
         $this->objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
 
-        $this->filesystemMock = $this->getMockBuilder(Filesystem::class)
+        $this->rootDirectory = $this->getMockBuilder('Magento\Framework\Filesystem\Directory\ReadInterface')
             ->disableOriginalConstructor()
-            ->getMock();
-
-        $this->rootDirectory = $this->getMockBuilder(ReadInterface::class)
-            ->getMock();
-
-        $this->filesystemMock->expects($this->once())
-            ->method('getDirectoryRead')
-            ->with(DirectoryList::MEDIA, DriverPool::FILE)
-            ->willReturn($this->rootDirectory);
+            ->setMethods(['isFile', 'isReadable', 'getAbsolutePath'])
+            ->getMockForAbstractClass();
 
         $this->coreFileStorageDatabase = $this->getMock(
-            \Magento\MediaStorage\Helper\File\Storage\Database::class,
+            'Magento\MediaStorage\Helper\File\Storage\Database',
             ['copyFile'],
             [],
             '',
@@ -64,29 +46,28 @@ class FileTest extends \PHPUnit_Framework_TestCase
     protected function getFileObject()
     {
         return $this->objectManager->getObject(
-            \Magento\Catalog\Model\Product\Option\Type\File::class,
+            'Magento\Catalog\Model\Product\Option\Type\File',
             [
-                'filesystem' => $this->filesystemMock,
-                'coreFileStorageDatabase' => $this->coreFileStorageDatabase
+                'saleableItem' => $this->rootDirectory,
+                'priceCurrency' => $this->coreFileStorageDatabase
             ]
         );
     }
 
     public function testCopyQuoteToOrder()
     {
-        $optionMock = $this->getMockBuilder(OptionInterface::class)
-            ->disableOriginalConstructor()
-            ->setMethods(['getValue'])
-            ->getMockForAbstractClass();
+        $optionMock = $this->getMockBuilder(
+            'Magento\Catalog\Model\Product\Configuration\Item\Option\OptionInterface'
+        )->disableOriginalConstructor()->setMethods(['getValue'])->getMockForAbstractClass();
 
         $quotePath = '/quote/path/path/uploaded.file';
         $orderPath = '/order/path/path/uploaded.file';
 
         $optionMock->expects($this->any())
             ->method('getValue')
-            ->will($this->returnValue(serialize(['quote_path' => $quotePath, 'order_path' => $orderPath])));
+            ->will($this->returnValue(['quote_path' => $quotePath, 'order_path' => $orderPath]));
 
-        $this->rootDirectory->expects($this->once())
+        $this->rootDirectory->expects($this->any())
             ->method('isFile')
             ->with($this->equalTo($quotePath))
             ->will($this->returnValue(true));
@@ -108,7 +89,7 @@ class FileTest extends \PHPUnit_Framework_TestCase
         $fileObject->setData('configuration_item_option', $optionMock);
 
         $this->assertInstanceOf(
-            \Magento\Catalog\Model\Product\Option\Type\File::class,
+            'Magento\Catalog\Model\Product\Option\Type\File',
             $fileObject->copyQuoteToOrder()
         );
     }

@@ -1,12 +1,13 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Ui\Controller\Adminhtml\Index;
 
-use Magento\Framework\View\Element\UiComponent\Context;
+use Magento\Backend\App\Action\Context;
 use Magento\Ui\Controller\Adminhtml\AbstractAction;
+use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Framework\View\Element\UiComponentInterface;
 
 /**
@@ -21,20 +22,13 @@ class Render extends AbstractAction
      */
     public function execute()
     {
-        $component = $this->factory->create($this->_request->getParam('namespace'));
-        $aclResource = $component->getData('acl');
-
-        if ($aclResource && !$this->_authorization->isAllowed($aclResource)) {
+        if ($this->_request->getParam('namespace') === null) {
             $this->_redirect('admin/noroute');
             return;
         }
 
+        $component = $this->factory->create($this->_request->getParam('namespace'));
         $this->prepareComponent($component);
-
-        if ($component->getContext()->getAcceptType() == 'json') {
-            $this->_response->setHeader('Content-Type', 'application/json');
-        }
-
         $this->_response->appendBody((string) $component->render());
     }
 

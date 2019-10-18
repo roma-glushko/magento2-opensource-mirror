@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Checkout\Test\Unit\Block\Cart;
@@ -123,8 +123,7 @@ class SidebarTest extends \PHPUnit_Framework_TestCase
 
     public function testGetConfig()
     {
-        $websiteId = 100;
-        $storeMock = $this->getMock(\Magento\Store\Model\Store::class, [], [], '', false);
+        $storeMock = $this->getMock('\Magento\Store\Model\Store', [], [], '', false);
 
         $shoppingCartUrl = 'http://url.com/cart';
         $checkoutUrl = 'http://url.com/checkout';
@@ -140,8 +139,7 @@ class SidebarTest extends \PHPUnit_Framework_TestCase
             'removeItemUrl' => $removeItemUrl,
             'imageTemplate' => $imageTemplate,
             'baseUrl' => $baseUrl,
-            'minicartMaxItemsVisible' => 3,
-            'websiteId' => 100
+            'minicartMaxItemsVisible' => 3
         ];
 
         $valueMap = [
@@ -158,18 +156,16 @@ class SidebarTest extends \PHPUnit_Framework_TestCase
         $this->urlBuilderMock->expects($this->exactly(4))
             ->method('getUrl')
             ->willReturnMap($valueMap);
-        $this->storeManagerMock->expects($this->exactly(2))->method('getStore')->willReturn($storeMock);
+        $this->storeManagerMock->expects($this->once())->method('getStore')->willReturn($storeMock);
         $storeMock->expects($this->once())->method('getBaseUrl')->willReturn($baseUrl);
         $this->imageHelper->expects($this->once())->method('getFrame')->willReturn(false);
 
         $this->scopeConfigMock->expects($this->once())
             ->method('getValue')
             ->with(
-                'checkout/sidebar/count',
+                \Magento\Checkout\Block\Cart\Sidebar::XML_PATH_CHECKOUT_SIDEBAR_COUNT,
                 \Magento\Store\Model\ScopeInterface::SCOPE_STORE
             )->willReturn(3);
-
-        $storeMock->expects($this->once())->method('getWebsiteId')->willReturn($websiteId);
 
         $this->assertEquals($expectedResult, $this->model->getConfig());
     }

@@ -30,6 +30,7 @@ class AnalyzeServiceReferencesPass implements RepeatablePassInterface
     private $container;
     private $currentId;
     private $currentDefinition;
+    private $repeatedPass;
     private $onlyConstructorArguments;
 
     /**
@@ -45,11 +46,13 @@ class AnalyzeServiceReferencesPass implements RepeatablePassInterface
      */
     public function setRepeatedPass(RepeatedPass $repeatedPass)
     {
-        // no-op for BC
+        $this->repeatedPass = $repeatedPass;
     }
 
     /**
      * Processes a ContainerBuilder object to populate the service reference graph.
+     *
+     * @param ContainerBuilder $container
      */
     public function process(ContainerBuilder $container)
     {
@@ -123,7 +126,7 @@ class AnalyzeServiceReferencesPass implements RepeatablePassInterface
     /**
      * Returns a service definition given the full name or an alias.
      *
-     * @param string $id A full id or alias for a service definition
+     * @param string $id A full id or alias for a service definition.
      *
      * @return Definition|null The definition related to the supplied id
      */

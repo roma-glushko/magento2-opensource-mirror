@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\Error;
@@ -301,7 +301,7 @@ class Processor
     {
         $documentRoot = '';
         if (!empty($_SERVER['DOCUMENT_ROOT'])) {
-            $documentRoot = rtrim($_SERVER['DOCUMENT_ROOT'], '/');
+            $documentRoot = rtrim(realpath($_SERVER['DOCUMENT_ROOT']), '/');
         }
         return dirname($documentRoot . $this->_scriptName) . '/';
     }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -65,6 +65,11 @@ class OrderGetTest extends \PHPUnit_Framework_TestCase
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     private $orderRepositoryMock;
+
+    /**
+     * @var \PHPUnit_Framework_MockObject_MockObject
+     */
+    private $collectionMock;
 
     public function setUp()
     {
@@ -238,5 +243,37 @@ class OrderGetTest extends \PHPUnit_Framework_TestCase
             ->method('setGiftMessage');
 
         $this->plugin->afterGet($this->orderRepositoryMock, $this->orderMock);
+    }
+
+    public function testAfterGetList()
+    {
+        //set Gift Message List for Order
+        $orderId = 1;
+        $this->orderMock->expects($this->once())->method('getEntityId')->willReturn($orderId);
+        $this->orderMock
+            ->expects($this->once())
+            ->method('getExtensionAttributes')
+            ->willReturn($this->orderExtensionMock);
+        $this->orderExtensionMock->expects($this->once())->method('getGiftMessage')->willReturn([]);
+        $this->giftMessageOrderRepositoryMock
+            ->expects($this->once())
+            ->method('get')
+            ->with($orderId)
+            ->willReturn($this->giftMessageMock);
+        $this->orderExtensionMock
+            ->expects($this->once())
+            ->method('setGiftMessage')
+            ->with($this->giftMessageMock)
+            ->willReturnSelf();
+        $this->orderMock
+            ->expects($this->once())
+            ->method('setExtensionAttributes')
+            ->with($this->orderExtensionMock)
+            ->willReturnSelf();
+
+        // set Gift Message on Item Level
+        $this->orderMock->expects($this->once())->method('getItems')->willReturn([]);
+        $this->collectionMock->expects($this->once())->method('getItems')->willReturn([$this->orderMock]);
+        $this->plugin->afterGetList($this->orderRepositoryMock, $this->collectionMock);
     }
 }

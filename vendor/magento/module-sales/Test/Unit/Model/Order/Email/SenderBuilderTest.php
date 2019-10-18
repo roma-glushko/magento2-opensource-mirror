@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Sales\Test\Unit\Model\Order\Email;
@@ -28,11 +28,6 @@ class SenderBuilderTest extends \PHPUnit_Framework_TestCase
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     protected $transportBuilder;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $storeMock;
 
     protected function setUp()
     {
@@ -63,7 +58,7 @@ class SenderBuilderTest extends \PHPUnit_Framework_TestCase
             [
                 'getEmailIdentity', 'getCustomerEmail',
                 'getCustomerName', 'getTemplateOptions', 'getEmailCopyTo',
-                'getCopyMethod', 'getStore'
+                'getCopyMethod'
             ],
             [],
             '',
@@ -104,9 +99,6 @@ class SenderBuilderTest extends \PHPUnit_Framework_TestCase
         $this->identityContainerMock->expects($this->once())
             ->method('getEmailIdentity')
             ->will($this->returnValue($emailIdentity));
-        $this->identityContainerMock->expects($this->once())
-            ->method('getStore')
-            ->will($this->returnValue($this->storeMock));
         $this->transportBuilder->expects($this->once())
             ->method('setFrom')
             ->with($this->equalTo($emailIdentity));

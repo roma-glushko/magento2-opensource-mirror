@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -23,7 +22,7 @@ class EregToPregFixer extends AbstractFixer
 {
     /**
      * @var array the list of the ext/ereg function names, their preg equivalent and the preg modifier(s), if any
-     *            all condensed in an array of arrays
+     *            all condensed in an array of arrays.
      */
     private static $functions = array(
         array('ereg', 'preg_match', ''),
@@ -35,7 +34,7 @@ class EregToPregFixer extends AbstractFixer
     );
 
     /**
-     * @var array the list of preg delimiters, in order of preference
+     * @var array the list of preg delimiters, in order of preference.
      */
     private static $delimiters = array('/', '#', '!');
 

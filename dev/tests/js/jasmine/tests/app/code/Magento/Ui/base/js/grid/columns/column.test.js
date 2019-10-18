@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*eslint max-nested-callbacks: 0*/
@@ -17,8 +17,7 @@ define([
                 sortable: true,
                 sorting: false,
                 headerTmpl: 'header',
-                bodyTmpl: 'body',
-                source: function () {}
+                bodyTmpl: 'body'
             });
         });
 
@@ -26,6 +25,11 @@ define([
             it('apply sorting first time', function () {
                 column.sort(true);
                 expect(column.sorting).toBe('asc');
+            });
+
+            it('apply sorting in other direction', function () {
+                column.sort(true).sort(true);
+                expect(column.sorting).toBe('desc');
             });
 
             it('remove sorting', function () {

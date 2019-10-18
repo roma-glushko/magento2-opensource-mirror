@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\ProductAlert\Model;
@@ -374,8 +374,6 @@ class Email extends \Magento\Framework\Model\AbstractModel
                 'customerName' => $this->_customerHelper->getCustomerName($this->_customer),
                 'alertGrid' => $alertGrid,
             ]
-        )->setScopeId(
-            $storeId
         )->setFrom(
             $this->_scopeConfig->getValue(
                 self::XML_PATH_EMAIL_IDENTITY,

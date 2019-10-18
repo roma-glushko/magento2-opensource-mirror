@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\CatalogImportExport\Model\Import\Product;
@@ -35,6 +35,11 @@ class Validator extends AbstractValidator implements RowValidatorInterface
      */
     protected $_rowData;
 
+    /*
+     * @var string|null
+     */
+    protected $invalidAttribute;
+
     /**
      * @param \Magento\Framework\Stdlib\StringUtils $string
      * @param RowValidatorInterface[] $validators
@@ -64,32 +69,6 @@ class Validator extends AbstractValidator implements RowValidatorInterface
             $this->_addMessages([RowValidatorInterface::ERROR_EXCEEDED_MAX_LENGTH]);
         }
         return $valid;
-    }
-
-    /**
-     * Check if value is valid attribute option
-     *
-     * @param string $attrCode
-     * @param array $possibleOptions
-     * @param string $value
-     * @return bool
-     */
-    private function validateOption($attrCode, $possibleOptions, $value)
-    {
-        if (!isset($possibleOptions[strtolower($value)])) {
-            $this->_addMessages(
-                [
-                    sprintf(
-                        $this->context->retrieveMessageTemplate(
-                            RowValidatorInterface::ERROR_INVALID_ATTRIBUTE_OPTION
-                        ),
-                        $attrCode
-                    )
-                ]
-            );
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -187,15 +166,23 @@ class Validator extends AbstractValidator implements RowValidatorInterface
                 break;
             case 'select':
             case 'boolean':
-                $valid = $this->validateOption($attrCode, $attrParams['options'], $rowData[$attrCode]);
-                break;
             case 'multiselect':
-                $values = $this->parseMultiSelectValues($this->context->getParameters(), $rowData[$attrCode]);
+                $values = explode(Product::PSEUDO_MULTI_LINE_SEPARATOR, $rowData[$attrCode]);
+                $valid = true;
                 foreach ($values as $value) {
-                    $valid = $this->validateOption($attrCode, $attrParams['options'], $value);
-                    if (!$valid) {
-                        break;
-                    }
+                    $valid = $valid && isset($attrParams['options'][strtolower($value)]);
+                }
+                if (!$valid) {
+                    $this->_addMessages(
+                        [
+                            sprintf(
+                                $this->context->retrieveMessageTemplate(
+                                    RowValidatorInterface::ERROR_INVALID_ATTRIBUTE_OPTION
+                                ),
+                                $attrCode
+                            )
+                        ]
+                    );
                 }
                 break;
             case 'datetime':
@@ -218,8 +205,30 @@ class Validator extends AbstractValidator implements RowValidatorInterface
             }
             $this->_uniqueAttributes[$attrCode][$rowData[$attrCode]] = $rowData[Product::COL_SKU];
         }
+        
+        if (!$valid) {
+            $this->setInvalidAttribute($attrCode);
+        }
+
         return (bool)$valid;
 
+    }
+
+    /**
+     * @param string|null $attribute
+     * @return void
+     */
+    protected function setInvalidAttribute($attribute)
+    {
+        $this->invalidAttribute = $attribute;
+    }
+
+    /**
+     * @return string
+     */
+    public function getInvalidAttribute()
+    {
+        return $this->invalidAttribute;
     }
 
     /**
@@ -229,6 +238,7 @@ class Validator extends AbstractValidator implements RowValidatorInterface
     protected function isValidAttributes()
     {
         $this->_clearMessages();
+        $this->setInvalidAttribute(null);
         if (!isset($this->_rowData['product_type'])) {
             return false;
         }
@@ -288,25 +298,5 @@ class Validator extends AbstractValidator implements RowValidatorInterface
         foreach ($this->validators as $validator) {
             $validator->init($context);
         }
-    }
-
-    /**
-     * Parse values of multiselect attributes depends on "Fields Enclosure" parameter
-     *
-     * @param array $parameters
-     * @param string $values
-     * @return array
-     */
-    private function parseMultiSelectValues(array $parameters, $values)
-    {
-        if (empty($parameters[\Magento\ImportExport\Model\Import::FIELDS_ENCLOSURE])) {
-            return explode(\Magento\CatalogImportExport\Model\Import\Product::PSEUDO_MULTI_LINE_SEPARATOR, $values);
-        }
-        if (preg_match_all('~"((?:[^"]|"")*)"~', $values, $matches)) {
-            return $values = array_map(function ($value) {
-                return str_replace('""', '"', $value);
-            }, $matches[1]);
-        }
-        return [$values];
     }
 }

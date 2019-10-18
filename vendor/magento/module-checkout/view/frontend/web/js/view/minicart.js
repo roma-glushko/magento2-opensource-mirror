@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 define([
@@ -7,9 +7,9 @@ define([
     'Magento_Customer/js/customer-data',
     'jquery',
     'ko',
-    'sidebar',
-    'mage/translate'
-], function (Component, customerData, $, ko) {
+    'underscore',
+    'sidebar'
+], function (Component, customerData, $, ko, _) {
     'use strict';
 
     var sidebarInitialized = false,
@@ -68,7 +68,9 @@ define([
                 'qty': ':input.cart-item-qty',
                 'button': ':button.update-cart-item'
             },
-            'confirmMessage': $.mage.__('Are you sure you would like to remove this item from the shopping cart?')
+            'confirmMessage': $.mage.__(
+                'Are you sure you would like to remove this item from the shopping cart?'
+            )
         });
     }
 
@@ -96,21 +98,10 @@ define([
                 self.isLoading(true);
             });
 
-            if (cartData.website_id !== window.checkout.websiteId) {
-                customerData.reload(['cart'], false);
-            }
-
             return this._super();
         },
         isLoading: ko.observable(false),
         initSidebar: initSidebar,
-
-        /**
-         * Close mini shopping cart.
-         */
-        closeMinicart: function () {
-            $('[data-block="minicart"]').find('[data-role="dropdownDialog"]').dropdownDialog('close');
-        },
 
         /**
          * @return {Boolean}

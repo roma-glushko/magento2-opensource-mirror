@@ -1,19 +1,19 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magento\SalesRule\Test\TestCase;
 
-use Magento\Mtf\Fixture\FixtureFactory;
-use Magento\Mtf\TestCase\Injectable;
-use Magento\Mtf\TestStep\TestStepFactory;
 use Magento\SalesRule\Test\Fixture\SalesRule;
 use Magento\SalesRule\Test\Page\Adminhtml\PromoQuoteEdit;
 use Magento\SalesRule\Test\Page\Adminhtml\PromoQuoteIndex;
 use Magento\SalesRule\Test\Page\Adminhtml\PromoQuoteNew;
-use Magento\SalesRule\Test\TestStep\GenerateCouponCodeStep;
+use Magento\Mtf\Fixture\FixtureFactory;
+use Magento\Mtf\TestCase\Injectable;
+use Magento\Catalog\Test\Fixture\CatalogProductSimple;
+use Magento\Customer\Test\Fixture\Customer;
 
 /**
  * Precondition:
@@ -35,6 +35,7 @@ class CreateSalesRuleEntityTest extends Injectable
     /* tags */
     const MVP = 'yes';
     const DOMAIN = 'CS';
+    const TEST_TYPE = 'extended_acceptance_test';
     /* end tags */
 
     /**
@@ -66,14 +67,7 @@ class CreateSalesRuleEntityTest extends Injectable
     protected $salesRuleName;
 
     /**
-     * Factory for creating GenerateCouponCodeStep.
-     *
-     * @var TestStepFactory
-     */
-    protected $testStepFactory;
-
-    /**
-     * Factory for creating SalesRule fixture.
+     * Fixture factory.
      *
      * @var FixtureFactory
      */
@@ -85,7 +79,6 @@ class CreateSalesRuleEntityTest extends Injectable
      * @param PromoQuoteNew $promoQuoteNew
      * @param PromoQuoteIndex $promoQuoteIndex
      * @param PromoQuoteEdit $promoQuoteEdit
-     * @param TestStepFactory $testStepFactory
      * @param FixtureFactory $fixtureFactory
      * @return void
      */
@@ -93,76 +86,81 @@ class CreateSalesRuleEntityTest extends Injectable
         PromoQuoteNew $promoQuoteNew,
         PromoQuoteIndex $promoQuoteIndex,
         PromoQuoteEdit $promoQuoteEdit,
-        TestStepFactory $testStepFactory,
         FixtureFactory $fixtureFactory
     ) {
         $this->promoQuoteNew = $promoQuoteNew;
         $this->promoQuoteIndex = $promoQuoteIndex;
         $this->promoQuoteEdit = $promoQuoteEdit;
-        $this->testStepFactory = $testStepFactory;
         $this->fixtureFactory = $fixtureFactory;
     }
 
     /**
-     * Create customer and 2 simple products with categories before run test.
-     *
-     * @param FixtureFactory $fixtureFactory
-     * @return array
-     */
-    public function __prepare(FixtureFactory $fixtureFactory)
-    {
-        $customer = $fixtureFactory->createByCode('customer', ['dataset' => 'default']);
-        $customer->persist();
-
-        $productForSalesRule1 = $fixtureFactory->createByCode(
-            'catalogProductSimple',
-            ['dataset' => 'simple_for_salesrule_1']
-        );
-        $productForSalesRule1->persist();
-
-        $productForSalesRule2 = $fixtureFactory->createByCode(
-            'catalogProductSimple',
-            ['dataset' => 'simple_for_salesrule_2']
-        );
-        $productForSalesRule2->persist();
-
-        return [
-            'customer' => $customer,
-            'productForSalesRule1' => $productForSalesRule1,
-            'productForSalesRule2' => $productForSalesRule2
-        ];
-    }
-
-    /**
-     * Create Sales Rule Entity.
+     * Create Sales Price Rule.
      *
      * @param SalesRule $salesRule
-     * @param array $coupon
-     * @return array
+     * @param CatalogProductSimple $productForSalesRule1
+     * @param CatalogProductSimple $productForSalesRule2
+     * @param Customer $customer
+     * @param string $conditionEntity
      */
-    public function testCreateSalesRule(SalesRule $salesRule, $coupon = [])
-    {
-        // Preconditions
+    public function testCreateSalesRule(
+        SalesRule $salesRule,
+        CatalogProductSimple $productForSalesRule1,
+        CatalogProductSimple $productForSalesRule2 = null,
+        Customer $customer = null,
+        $conditionEntity = null
+    ) {
+        $replace = null;
         $this->salesRuleName = $salesRule->getName();
+
+        // Prepare data
+        if ($customer !== null) {
+            $customer->persist();
+        }
+        $productForSalesRule1->persist();
+        if ($productForSalesRule2 !== null) {
+            $productForSalesRule2->persist();
+            if ($conditionEntity !== null) {
+                $replace = $this->prepareCondition($productForSalesRule2, $conditionEntity);
+            }
+        }
 
         // Steps
         $this->promoQuoteNew->open();
-        $this->promoQuoteNew->getSalesRuleForm()->fill($salesRule);
-        if ($salesRule->getCouponType() == 'Auto') {
-            $this->promoQuoteNew->getFormPageActions()->saveAndContinue();
-            if ($coupon) {
-                $couponCode = $this->testStepFactory->create(GenerateCouponCodeStep::class, ['coupon' => $coupon])
-                    ->run();
-                $data = array_merge(
-                    $salesRule->getData(),
-                    ['coupon_code' => $couponCode]
-                );
-                $salesRule = $this->fixtureFactory->create(SalesRule::class, ['data' => $data]);
-            }
-        }
+        $this->promoQuoteNew->getSalesRuleForm()->fill($salesRule, null, $replace);
         $this->promoQuoteNew->getFormPageActions()->save();
+    }
 
-        return ['salesRule' => $salesRule];
+    /**
+     * Prepare condition for Sales rule.
+     *
+     * @param CatalogProductSimple $productSimple
+     * @param string $conditionEntity
+     * @return array
+     */
+    protected function prepareCondition(CatalogProductSimple $productSimple, $conditionEntity)
+    {
+        $result = [];
+
+        switch ($conditionEntity) {
+            case 'category':
+                $result['%category_id%'] = $productSimple->getDataFieldConfig('category_ids')['source']->getIds()[0];
+                break;
+            case 'attribute':
+                /** @var \Magento\Catalog\Test\Fixture\CatalogProductAttribute[] $attrs */
+                $attributes = $productSimple->getDataFieldConfig('attribute_set_id')['source']
+                    ->getAttributeSet()->getDataFieldConfig('assigned_attributes')['source']->getAttributes();
+
+                $result['%attribute_name%'] = $attributes[0]->getFrontendLabel();
+                $result['%attribute_value%'] = $attributes[0]->getOptions()[0]['view'];
+                break;
+        }
+
+        return [
+            'conditions' => [
+                'conditions_serialized' => $result,
+            ],
+        ];
     }
 
     /**

@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -47,24 +46,24 @@ class TernarySpacesFixer extends AbstractFixer
                     }
                 } else {
                     // for `$a ? $b : $c` ensure space after `?`
-                    $this->ensureWhitespaceExistence($tokens, $index + 1, true);
+                    $this->ensureWhitespaceExistance($tokens, $index + 1, true);
                 }
 
                 // for `$a ? $b : $c` ensure space before `?`
-                $this->ensureWhitespaceExistence($tokens, $index - 1, false);
+                $this->ensureWhitespaceExistance($tokens, $index - 1, false);
 
                 continue;
             }
 
             if ($ternaryLevel && $token->equals(':')) {
                 // for `$a ? $b : $c` ensure space after `:`
-                $this->ensureWhitespaceExistence($tokens, $index + 1, true);
+                $this->ensureWhitespaceExistance($tokens, $index + 1, true);
 
                 $prevNonWhitespaceToken = $tokens[$tokens->getPrevNonWhitespace($index)];
 
                 if (!$prevNonWhitespaceToken->equals('?')) {
                     // for `$a ? $b : $c` ensure space before `:`
-                    $this->ensureWhitespaceExistence($tokens, $index - 1, false);
+                    $this->ensureWhitespaceExistance($tokens, $index - 1, false);
                 }
 
                 --$ternaryLevel;
@@ -82,25 +81,15 @@ class TernarySpacesFixer extends AbstractFixer
         return 'Standardize spaces around ternary operator.';
     }
 
-    /**
-     * @param Tokens $tokens
-     * @param int    $index
-     * @param bool   $after
-     */
-    private function ensureWhitespaceExistence(Tokens $tokens, $index, $after)
+    private function ensureWhitespaceExistance(Tokens $tokens, $index, $after)
     {
-        if ($tokens[$index]->isWhitespace()) {
-            if (false === strpos($tokens[$index]->getContent(), "\n")) {
-                // TODO: comment with trailing line break check should be removed on 2.0 line
-                if (!$tokens[$index - 1]->isComment() || false === strpos($tokens[$index - 1]->getContent(), "\n")) {
-                    $tokens[$index]->setContent(' ');
-                }
-            }
+        $indexChange = $after ? 0 : 1;
+        $token = $tokens[$index];
 
+        if ($token->isWhitespace()) {
             return;
         }
 
-        $indexChange = $after ? 0 : 1;
-        $tokens->insertAt($index + $indexChange, new Token(array(T_WHITESPACE, ' ', $tokens[$index]->getLine())));
+        $tokens->insertAt($index + $indexChange, new Token(array(T_WHITESPACE, ' ', $token->getLine())));
     }
 }

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*jshint browser:true jquery:true*/
@@ -8,7 +8,7 @@ define([
     "jquery/ui"
 ], function($){
     "use strict";
-
+    
     $.widget('mage.addToWishlist', {
         options: {
             bundleInfo: 'div.control [name^=bundle_option]',
@@ -161,6 +161,6 @@ define([
             });
         }
     });
-
+    
     return $.mage.addToWishlist;
 });

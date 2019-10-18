@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -10,11 +10,9 @@ namespace Magento\Framework\View\Test\Unit\Asset;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\DriverPool;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Framework\View\Asset\PreProcessor\ChainFactoryInterface;
 use Magento\Framework\View\Asset\PreProcessor\Chain;
 use Magento\Framework\View\Asset\Source;
-use Magento\Framework\View\Design\Theme\ThemeProviderInterface;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -71,6 +69,11 @@ class SourceTest extends \PHPUnit_Framework_TestCase
      */
     private $chain;
 
+    /**
+     * @var \Magento\Framework\Filesystem\Directory\ReadFactory|\PHPUnit_Framework_MockObject_MockObject
+     */
+    private $readFactory;
+
     protected function setUp()
     {
         $this->preProcessorPool = $this->getMock(
@@ -92,25 +95,24 @@ class SourceTest extends \PHPUnit_Framework_TestCase
             ->method('create')
             ->willReturn($this->chain);
 
-        $themeProvider = $this->getMock(ThemeProviderInterface::class);
-        $themeProvider->expects($this->any())
+        $themeList = $this->getMockForAbstractClass('Magento\Framework\View\Design\Theme\ListInterface');
+        $themeList->expects($this->any())
             ->method('getThemeByFullPath')
             ->with('frontend/magento_theme')
             ->willReturn($this->theme);
 
+        $this->readFactory = $this->getMock('Magento\Framework\Filesystem\Directory\ReadFactory', [], [], '', false);
+
         $this->initFilesystem();
 
-        $this->object = (new ObjectManager($this))->getObject(Source::class, [
-            'filesystem' => $this->filesystem,
-            'preProcessorPool' => $this->preProcessorPool,
-            'fallback' => $this->viewFileResolution,
-            'chainFactory' => $this->chainFactory
-        ]);
-
-        $reflection = new \ReflectionClass(Source::class);
-        $reflectionProperty = $reflection->getProperty('themeProvider');
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue($this->object, $themeProvider);
+        $this->object = new Source(
+            $this->filesystem,
+            $this->readFactory,
+            $this->preProcessorPool,
+            $this->viewFileResolution,
+            $themeList,
+            $this->chainFactory
+        );
     }
 
     /**
@@ -125,18 +127,13 @@ class SourceTest extends \PHPUnit_Framework_TestCase
     public function testGetFile($origFile, $origPath, $origContent, $isMaterialization, $isExist)
     {
         $filePath = 'some/file.ext';
+        $read = $this->getMock('Magento\Framework\Filesystem\Directory\Read', [], [], '', false);
+        $read->expects($this->at(0))->method('readFile')->with($origPath)->willReturn($origContent);
+        $this->readFactory->expects($this->atLeastOnce())->method('create')->willReturn($read);
         $this->viewFileResolution->expects($this->once())
             ->method('getFile')
             ->with('frontend', $this->theme, 'en_US', $filePath, 'Magento_Module')
             ->willReturn($origFile);
-        $this->rootDirRead->expects($this->once())
-            ->method('getRelativePath')
-            ->with($origFile)
-            ->willReturn($origPath);
-        $this->rootDirRead->expects($this->once())
-            ->method('readFile')
-            ->with($origPath)
-            ->willReturn($origContent);
         $this->preProcessorPool->expects($this->once())
             ->method('process')
             ->with($this->chain);
@@ -161,12 +158,16 @@ class SourceTest extends \PHPUnit_Framework_TestCase
                 ->with('view_preprocessed/source/some/file.ext', 'processed');
             $this->varDir->expects($this->once())
                 ->method('getAbsolutePath')
-                ->with('view_preprocessed/source/some/file.ext')->willReturn('result');
+                ->willReturn('var');
+            $read->expects($this->once())
+                ->method('getAbsolutePath')
+                ->with('view_preprocessed/source/some/file.ext')
+                ->willReturn('result');
         } else {
             $this->varDir->expects($this->never())->method('writeFile');
-            $this->rootDirRead->expects($this->once())
+            $read->expects($this->at(1))
                 ->method('getAbsolutePath')
-                ->with('source/some/file.ext')
+                ->with('file.ext')
                 ->willReturn('result');
         }
         $this->assertSame('result', $this->object->getFile($this->getAsset()));
@@ -211,10 +212,10 @@ class SourceTest extends \PHPUnit_Framework_TestCase
     public function getFileDataProvider()
     {
         return [
-            ['/root/some/file.ext', 'source/some/file.ext', 'processed', false, true],
-            ['/root/some/file.ext', 'source/some/file.ext', 'not_processed', true, false],
-            ['/root/some/file.ext2', 'source/some/file.ext2', 'processed', true, true],
-            ['/root/some/file.ext2', 'source/some/file.ext2', 'not_processed', true, false],
+            ['/root/some/file.ext', 'file.ext', 'processed', false, true],
+            ['/root/some/file.ext', 'file.ext', 'not_processed', true, false],
+            ['/root/some/file.ext2', 'file.ext2', 'processed', true, true],
+            ['/root/some/file.ext2', 'file.ext2', 'not_processed', true, false],
         ];
     }
 

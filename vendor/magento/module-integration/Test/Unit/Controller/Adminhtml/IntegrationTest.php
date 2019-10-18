@@ -2,13 +2,14 @@
 /**
  * \Magento\Integration\Controller\Adminhtml
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Integration\Test\Unit\Controller\Adminhtml;
 
 use Magento\Integration\Block\Adminhtml\Integration\Edit\Tab\Info;
 use Magento\Integration\Model\Integration as IntegrationModel;
+use Magento\Security\Model\SecurityCookie;
 
 /**
  * @SuppressWarnings(PHPMD.TooManyFields)
@@ -43,11 +44,20 @@ abstract class IntegrationTest extends \PHPUnit_Framework_TestCase
     /** @var \Magento\Backend\App\Action\Context|\PHPUnit_Framework_MockObject_MockObject */
     protected $_backendActionCtxMock;
 
+    /** @var SecurityCookie|\PHPUnit_Framework_MockObject_MockObject */
+    protected $securityCookieMock;
+
     /** @var \Magento\Integration\Api\IntegrationServiceInterface|\PHPUnit_Framework_MockObject_MockObject */
     protected $_integrationSvcMock;
 
     /** @var \Magento\Integration\Api\OauthServiceInterface|\PHPUnit_Framework_MockObject_MockObject */
     protected $_oauthSvcMock;
+
+    /** @var \Magento\Backend\Model\Auth|\PHPUnit_Framework_MockObject_MockObject */
+    protected $_authMock;
+
+    /** @var \Magento\User\Model\User|\PHPUnit_Framework_MockObject_MockObject */
+    protected $_userMock;
 
     /** @var \Magento\Framework\Registry|\PHPUnit_Framework_MockObject_MockObject */
     protected $_registryMock;
@@ -116,75 +126,92 @@ abstract class IntegrationTest extends \PHPUnit_Framework_TestCase
     {
         /** @var \Magento\Framework\TestFramework\Unit\Helper\ObjectManager  $objectManagerHelper */
         $this->_objectManagerHelper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
-        $this->_objectManagerMock = $this->getMock(\Magento\Framework\ObjectManagerInterface::class);
+        $this->_objectManagerMock = $this->getMock('Magento\Framework\ObjectManagerInterface');
         // Initialize mocks which are used in several test cases
         $this->_configMock = $this->getMockBuilder(
-            \Magento\Framework\App\Config\ScopeConfigInterface::class
+            'Magento\Framework\App\Config\ScopeConfigInterface'
         )->disableOriginalConstructor()->getMock();
-        $this->_eventManagerMock = $this->getMockBuilder(
-            \Magento\Framework\Event\ManagerInterface::class
-        )->disableOriginalConstructor()->getMock();
+        $this->_eventManagerMock = $this->getMockBuilder('Magento\Framework\Event\ManagerInterface')
+            ->disableOriginalConstructor()
+            ->setMethods(['dispatch'])
+            ->getMock();
         $this->_layoutFilterMock = $this->getMockBuilder(
-            \Magento\Backend\Model\Layout\Filter\Acl::class
+            'Magento\Backend\Model\Layout\Filter\Acl'
         )->disableOriginalConstructor()->getMock();
-        $this->_backendSessionMock = $this->getMockBuilder(
-            \Magento\Backend\Model\Session::class
-        )->disableOriginalConstructor()->getMock();
+        $this->_backendSessionMock = $this->getMockBuilder('Magento\Backend\Model\Session')
+            ->setMethods(['__call', 'getIntegrationData'])
+            ->disableOriginalConstructor()
+            ->getMock();
+
+        $this->_userMock = $this->getMockBuilder('Magento\User\Model\User')
+            ->disableOriginalConstructor()
+            ->setMethods(['getId', 'load', 'performIdentityCheck'])
+            ->getMock();
+
         $this->_translateModelMock = $this->getMockBuilder(
-            \Magento\Framework\TranslateInterface::class
+            'Magento\Framework\TranslateInterface'
         )->disableOriginalConstructor()->getMock();
         $this->_integrationSvcMock = $this->getMockBuilder(
-            \Magento\Integration\Api\IntegrationServiceInterface::class
+            'Magento\Integration\Api\IntegrationServiceInterface'
         )->disableOriginalConstructor()->getMock();
         $this->_oauthSvcMock = $this->getMockBuilder(
-            \Magento\Integration\Api\OauthServiceInterface::class
+            'Magento\Integration\Api\OauthServiceInterface'
         )->disableOriginalConstructor()->getMock();
+        $this->_authMock = $this->getMockBuilder('Magento\Backend\Model\Auth')
+            ->disableOriginalConstructor()
+            ->setMethods(['getUser', 'logout'])
+            ->getMock();
         $this->_requestMock = $this->getMockBuilder(
-            \Magento\Framework\App\Request\Http::class
+            'Magento\Framework\App\Request\Http'
         )->disableOriginalConstructor()->getMock();
         $this->_responseMock = $this->getMockBuilder(
-            \Magento\Framework\App\Response\Http::class
+            'Magento\Framework\App\Response\Http'
         )->disableOriginalConstructor()->getMock();
-        $this->_registryMock = $this->getMockBuilder(\Magento\Framework\Registry::class)
+        $this->_registryMock = $this->getMockBuilder('Magento\Framework\Registry')
             ->disableOriginalConstructor()
             ->getMock();
         $this->_configScopeMock = $this->getMockBuilder(
-            \Magento\Framework\Config\ScopeInterface::class
+            'Magento\Framework\Config\ScopeInterface'
         )->disableOriginalConstructor()->getMock();
         $this->_integrationHelperMock = $this->getMockBuilder(
-            \Magento\Integration\Helper\Data::class
+            'Magento\Integration\Helper\Data'
         )->disableOriginalConstructor()->getMock();
         $this->_messageManager = $this->getMockBuilder(
-            \Magento\Framework\Message\ManagerInterface::class
+            'Magento\Framework\Message\ManagerInterface'
         )->disableOriginalConstructor()->getMock();
         $this->_escaper = $this->getMockBuilder(
-            \Magento\Framework\Escaper::class
+            'Magento\Framework\Escaper'
         )->setMethods(
             ['escapeHtml']
         )->disableOriginalConstructor()->getMock();
-        $this->resultPageMock = $this->getMockBuilder(\Magento\Framework\View\Result\Page::class)
+        $this->resultPageMock = $this->getMockBuilder('Magento\Framework\View\Result\Page')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->viewConfigMock = $this->getMockBuilder(\Magento\Framework\View\Page\Config::class)
+        $this->viewConfigMock = $this->getMockBuilder('Magento\Framework\View\Page\Config')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->pageTitleMock = $this->getMockBuilder(\Magento\Framework\View\Page\Title::class)
+        $this->pageTitleMock = $this->getMockBuilder('Magento\Framework\View\Page\Title')
             ->disableOriginalConstructor()
+            ->getMock();
+        $this->securityCookieMock = $this->getMockBuilder(SecurityCookie::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['setLogoutReasonCookie'])
             ->getMock();
     }
 
     /**
      * @param string $actionName
      * @return \Magento\Integration\Controller\Adminhtml\Integration
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     protected function _createIntegrationController($actionName)
     {
         // Mock Layout passed into constructor
-        $this->_viewMock = $this->getMockBuilder(\Magento\Framework\App\ViewInterface::class)
+        $this->_viewMock = $this->getMockBuilder('Magento\Framework\App\ViewInterface')
             ->getMock();
-        $this->_layoutMock = $this->getMock(\Magento\Framework\View\LayoutInterface::class);
+        $this->_layoutMock = $this->getMock('Magento\Framework\View\LayoutInterface');
         $this->_layoutMergeMock = $this->getMockBuilder(
-            \Magento\Framework\View\Model\Layout\Merge::class
+            'Magento\Framework\View\Model\Layout\Merge'
         )->disableOriginalConstructor()->getMock();
         $this->_layoutMock->expects(
             $this->any()
@@ -197,9 +224,9 @@ abstract class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->_layoutMock->expects($this->any())->method('getNode')->will($this->returnValue($testElement));
         // for _setActiveMenu
         $this->_viewMock->expects($this->any())->method('getLayout')->will($this->returnValue($this->_layoutMock));
-        $blockMock = $this->getMockBuilder(\Magento\Backend\Block\Menu::class)->disableOriginalConstructor()->getMock();
+        $blockMock = $this->getMockBuilder('Magento\Backend\Block\Menu')->disableOriginalConstructor()->getMock();
         $menuMock = $this->getMock(
-            \Magento\Backend\Model\Menu::class,
+            'Magento\Backend\Model\Menu',
             [],
             [$this->getMock('Psr\Log\LoggerInterface')]
         );
@@ -218,16 +245,33 @@ abstract class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->viewConfigMock->expects($this->any())
             ->method('getTitle')
             ->willReturn($this->pageTitleMock);
+        $this->_escaper->expects($this->any())->method('escapeHtml')->will($this->returnArgument(0));
 
-        $this->resultRedirectFactory = $this->getMockBuilder(\Magento\Backend\Model\View\Result\RedirectFactory::class)
+        $this->resultRedirectFactory = $this->getMockBuilder('Magento\Backend\Model\View\Result\RedirectFactory')
             ->disableOriginalConstructor()
             ->setMethods(['create'])
             ->getMock();
 
-        $this->resultFactory = $this->getMockBuilder(\Magento\Framework\Controller\ResultFactory::class)
+        $this->resultFactory = $this->getMockBuilder('Magento\Framework\Controller\ResultFactory')
             ->disableOriginalConstructor()
             ->setMethods(['create'])
             ->getMock();
+
+        $this->_authMock->expects(
+            $this->any()
+        )->method(
+            'getUser'
+        )->will(
+            $this->returnValue($this->_userMock)
+        );
+
+        $this->_userMock->expects($this->any())
+            ->method('load')
+            ->willReturn($this->_userMock);
+
+        $this->_backendSessionMock->expects($this->any())
+            ->method('getIntegrationData')
+            ->willReturn(['all_resources' => 1]);
 
         $contextParameters = [
             'view' => $this->_viewMock,
@@ -238,16 +282,18 @@ abstract class IntegrationTest extends \PHPUnit_Framework_TestCase
             'response' => $this->_responseMock,
             'messageManager' => $this->_messageManager,
             'resultRedirectFactory' => $this->resultRedirectFactory,
-            'resultFactory' => $this->resultFactory
+            'resultFactory' => $this->resultFactory,
+            'auth' => $this->_authMock,
+            'eventManager' => $this->_eventManagerMock
         ];
 
         $this->_backendActionCtxMock = $this->_objectManagerHelper->getObject(
-            \Magento\Backend\App\Action\Context::class,
+            'Magento\Backend\App\Action\Context',
             $contextParameters
         );
 
         $integrationCollection =
-            $this->getMockBuilder(\Magento\Integration\Model\ResourceModel\Integration\Collection::class)
+            $this->getMockBuilder('\Magento\Integration\Model\ResourceModel\Integration\Collection')
             ->disableOriginalConstructor()
             ->setMethods(['addUnsecureUrlsFilter', 'getSize'])
             ->getMock();
@@ -273,6 +319,12 @@ abstract class IntegrationTest extends \PHPUnit_Framework_TestCase
             '\\Magento\\Integration\\Controller\\Adminhtml\\Integration\\' . $actionName,
             $subControllerParams
         );
+        if ($actionName == 'Save') {
+            $reflection = new \ReflectionClass(get_class($controller));
+            $reflectionProperty = $reflection->getProperty('securityCookie');
+            $reflectionProperty->setAccessible(true);
+            $reflectionProperty->setValue($controller, $this->securityCookieMock);
+        }
         return $controller;
     }
 
@@ -284,11 +336,11 @@ abstract class IntegrationTest extends \PHPUnit_Framework_TestCase
     protected function _verifyLoadAndRenderLayout()
     {
         $map = [
-            [\Magento\Framework\App\Config\ScopeConfigInterface::class, $this->_configMock],
-            [\Magento\Backend\Model\Layout\Filter\Acl::class, $this->_layoutFilterMock],
-            [\Magento\Backend\Model\Session::class, $this->_backendSessionMock],
-            [\Magento\Framework\TranslateInterface::class, $this->_translateModelMock],
-            [\Magento\Framework\Config\ScopeInterface::class, $this->_configScopeMock],
+            ['Magento\Framework\App\Config\ScopeConfigInterface', $this->_configMock],
+            ['Magento\Backend\Model\Layout\Filter\Acl', $this->_layoutFilterMock],
+            ['Magento\Backend\Model\Session', $this->_backendSessionMock],
+            ['Magento\Framework\TranslateInterface', $this->_translateModelMock],
+            ['Magento\Framework\Config\ScopeInterface', $this->_configScopeMock],
         ];
         $this->_objectManagerMock->expects($this->any())->method('get')->will($this->returnValueMap($map));
     }
@@ -320,7 +372,7 @@ abstract class IntegrationTest extends \PHPUnit_Framework_TestCase
     protected function _getIntegrationModelMock()
     {
         $integrationModelMock = $this->getMock(
-            \Magento\Integration\Model\Integration::class,
+            'Magento\Integration\Model\Integration',
             ['save', '__wakeup'],
             [],
             '',

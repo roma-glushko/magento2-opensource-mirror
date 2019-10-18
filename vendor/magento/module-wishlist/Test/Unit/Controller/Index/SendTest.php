@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Wishlist\Test\Unit\Controller\Index;
@@ -661,10 +661,6 @@ class SendTest extends \PHPUnit_Framework_TestCase
                 'message' => $text . $text,
                 'store' => $this->store,
             ])
-            ->willReturnSelf();
-        $this->transportBuilder->expects($this->once())
-            ->method('setScopeId')
-            ->with($storeId)
             ->willReturnSelf();
         $this->transportBuilder->expects($this->once())
             ->method('setFrom')

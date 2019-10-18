@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -77,14 +77,14 @@ class VisitorTest extends \PHPUnit_Framework_TestCase
 
     public function testInitByRequest()
     {
-        $oldSessionId = 'asdfhasdfjhkj2198sadf8sdf897';
-        $newSessionId = 'bsdfhasdfjhkj2198sadf8sdf897';
-        $this->session->expects($this->any())->method('getSessionId')
-            ->will($this->returnValue($newSessionId));
-        $this->session->expects($this->atLeastOnce())->method('getVisitorData')
-            ->willReturn(['session_id' => $oldSessionId]);
+        $this->session->expects($this->once())->method('getSessionId')
+            ->will($this->returnValue('asdfhasdfjhkj2198sadf8sdf897'));
         $this->visitor->initByRequest(null);
-        $this->assertEquals($newSessionId, $this->visitor->getSessionId());
+        $this->assertEquals('asdfhasdfjhkj2198sadf8sdf897', $this->visitor->getSessionId());
+
+        $this->visitor->setData(['visitor_id' => 1]);
+        $this->visitor->initByRequest(null);
+        $this->assertNull($this->visitor->getSessionId());
     }
 
     public function testSaveByRequest()

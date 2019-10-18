@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Tax\Model\Sales\Total\Quote;
@@ -303,7 +303,7 @@ class Tax extends CommonTaxCollector
             $applied = unserialize($applied);
         }
         $amount = $total->getTaxAmount();
-        if ($amount == null) {
+        if ($amount === null) {
             $this->enhanceTotalData($quote, $total);
             $amount = $total->getTaxAmount();
         }

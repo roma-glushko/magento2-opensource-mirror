@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*jshint browser:true jquery:true*/
@@ -12,8 +12,7 @@
             'Magento_Payment/js/model/credit-card-validation/credit-card-number-validator',
             'Magento_Payment/js/model/credit-card-validation/expiration-date-validator/expiration-year-validator',
             'Magento_Payment/js/model/credit-card-validation/expiration-date-validator/expiration-month-validator',
-            'Magento_Payment/js/model/credit-card-validation/credit-card-data',
-            'mage/translate'
+            'Magento_Payment/js/model/credit-card-validation/credit-card-data'
         ], factory);
     } else {
         factory(jQuery);
@@ -41,7 +40,7 @@
                     return false;
                 }
             },
-            $.mage.__('Please enter a valid credit card type number.')
+            'Please enter a valid credit card type number.'
         ],
         'validate-card-number': [
             /**
@@ -52,7 +51,7 @@
                 function (number) {
                 return creditCardNumberValidator(number).isValid;
             },
-            $.mage.__('Please enter a valid credit card number.')
+            'Please enter a valid credit card number.'
         ],
         'validate-card-date': [
             /**
@@ -63,7 +62,7 @@
                 function (date) {
                 return monthValidator(date).isValid;
             },
-            $.mage.__('Incorrect credit card expiration month.')
+            'Incorrect credit card expiration month.'
         ],
         'validate-card-cvv': [
             /**
@@ -75,7 +74,7 @@
                 var maxLength = creditCardData.creditCard ? creditCardData.creditCard.code.size : 3;
                 return cvvValidator(cvv, maxLength).isValid;
             },
-            $.mage.__('Please enter a valid credit card verification number.')
+            'Please enter a valid credit card verification number.'
         ],
         'validate-card-year': [
             /**
@@ -86,7 +85,7 @@
                 function (date) {
                 return monthValidator(date).isValid;
             },
-            $.mage.__('Incorrect credit card expiration year.')
+            'Incorrect credit card expiration year.'
         ]
 
     }, function (i, rule) {

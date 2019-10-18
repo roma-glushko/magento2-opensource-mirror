@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -40,7 +39,7 @@ class IncludeFixer extends AbstractFixer
      */
     public function getDescription()
     {
-        return 'Include/Require and file path should be divided with a single space. File path should not be placed under brackets.';
+        return 'Include and file path should be divided with a single space. File path should not be placed under brackets.';
     }
 
     private function clearIncludies(Tokens $tokens, array $includies)
@@ -55,7 +54,7 @@ class IncludeFixer extends AbstractFixer
             if ($braces) {
                 $nextToken = $tokens[$tokens->getNextMeaningfulToken($braces['close'])];
 
-                if ($nextToken->equalsAny(array(';', array(T_CLOSE_TAG)))) {
+                if ($nextToken->equals(';')) {
                     $tokens->removeLeadingWhitespace($braces['open']);
                     $tokens->removeTrailingWhitespace($braces['open']);
                     $tokens->removeLeadingWhitespace($braces['close']);
@@ -75,7 +74,7 @@ class IncludeFixer extends AbstractFixer
 
             if ($nextToken->isWhitespace()) {
                 $nextToken->setContent(' ');
-            } elseif ($braces || $tokens[$nextIndex]->isGivenKind(array(T_VARIABLE, T_CONSTANT_ENCAPSED_STRING, T_COMMENT))) {
+            } elseif ($braces) {
                 $tokens->insertAt($includy['begin'] + 1, new Token(array(T_WHITESPACE, ' ')));
             }
         }
@@ -92,7 +91,7 @@ class IncludeFixer extends AbstractFixer
                 $includy = array(
                     'begin' => $index,
                     'braces' => null,
-                    'end' => $tokens->getNextTokenOfKind($index, array(';', array(T_CLOSE_TAG))),
+                    'end' => $tokens->getNextTokenOfKind($index, array(';')),
                 );
 
                 $nextTokenIndex = $tokens->getNextMeaningfulToken($index);
@@ -103,7 +102,7 @@ class IncludeFixer extends AbstractFixer
                     // Include is also legal as function parameter or condition statement but requires being wrapped then.
                     $braceCloseIndex = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $nextTokenIndex);
 
-                    if ($tokens[$tokens->getNextMeaningfulToken($braceCloseIndex)]->equalsAny(array(';', array(T_CLOSE_TAG)))) {
+                    if ($tokens[$tokens->getNextMeaningfulToken($braceCloseIndex)]->equals(';')) {
                         $includy['braces'] = array(
                             'open' => $nextTokenIndex,
                             'close' => $braceCloseIndex,

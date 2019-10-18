@@ -2,7 +2,7 @@
 /**
  * Resources and connections registry and factory
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\App;
@@ -93,18 +93,6 @@ class ResourceConnection
     }
 
     /**
-     * @param string $resourceName
-     * @return void
-     */
-    public function closeConnection($resourceName = self::DEFAULT_CONNECTION)
-    {
-        $processConnectionName = $this->getProcessConnectionName($this->config->getConnectionName($resourceName));
-        if (isset($this->connections[$processConnectionName])) {
-            $this->connections[$processConnectionName] = null;
-        }
-    }
-
-    /**
      * Retrieve connection by $connectionName
      *
      * @param string $connectionName
@@ -113,9 +101,8 @@ class ResourceConnection
      */
     public function getConnectionByName($connectionName)
     {
-        $processConnectionName = $this->getProcessConnectionName($connectionName);
-        if (isset($this->connections[$processConnectionName])) {
-            return $this->connections[$processConnectionName];
+        if (isset($this->connections[$connectionName])) {
+            return $this->connections[$connectionName];
         }
 
         $connectionConfig = $this->deploymentConfig->get(
@@ -128,17 +115,8 @@ class ResourceConnection
             throw new \DomainException('Connection "' . $connectionName . '" is not defined');
         }
 
-        $this->connections[$processConnectionName] = $connection;
+        $this->connections[$connectionName] = $connection;
         return $connection;
-    }
-
-    /**
-     * @param string $connectionName
-     * @return string
-     */
-    private function getProcessConnectionName($connectionName)
-    {
-        return  $connectionName . '_process_' . getmypid();
     }
 
     /**
@@ -172,6 +150,18 @@ class ResourceConnection
             $tableName .= '_' . $tableSuffix;
         }
         return $this->getConnection($connectionName)->getTableName($tableName);
+    }
+
+    /**
+     * Gets table placeholder by table name
+     *
+     * @param string $tableName
+     * @return string
+     */
+    public function getTablePlaceholder($tableName)
+    {
+        $tableName = preg_replace('/^' . preg_quote($this->getTablePrefix()) . '_/', '', $tableName);
+        return $tableName;
     }
 
     /**

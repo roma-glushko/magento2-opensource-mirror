@@ -11,14 +11,13 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Compiler\ResolveParameterPlaceHoldersPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
  * @group legacy
  */
-class LegacyResolveParameterPlaceHoldersPassTest extends TestCase
+class LegacyResolveParameterPlaceHoldersPassTest extends \PHPUnit_Framework_TestCase
 {
     public function testFactoryClassParametersShouldBeResolved()
     {

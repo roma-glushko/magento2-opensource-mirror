@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Widget\Model\Widget;
@@ -43,10 +43,8 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('widget_window_url', $settings);
 
         $jsFilename = $settings['widget_plugin_src'];
-        $this->assertStringMatchesFormat(
-            'http://localhost/pub/static/%s/adminhtml/Magento/backend/en_US/%s/editor_plugin.js',
-            $jsFilename
-        );
+        $this->assertStringStartsWith('http://localhost/pub/static/adminhtml/Magento/backend/en_US/', $jsFilename);
+        $this->assertStringEndsWith('editor_plugin.js', $jsFilename);
 
         $this->assertInternalType('array', $settings['widget_placeholders']);
 

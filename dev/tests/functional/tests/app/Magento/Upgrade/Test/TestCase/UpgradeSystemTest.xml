@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
  -->
@@ -18,7 +18,6 @@
             <data name="upgrade/optionsMedia" xsi:type="string">No</data>
             <data name="upgrade/optionsDb" xsi:type="string">No</data>
             <data name="upgrade/otherComponents" xsi:type="string">{otherComponents}</data>
-            <data name="upgrade/sampledataVersion" xsi:type="string">{sampledataVersion}</data>
         </variation>
     </testCase>
 </config>

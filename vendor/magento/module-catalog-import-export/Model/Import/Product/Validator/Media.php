@@ -1,17 +1,13 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\CatalogImportExport\Model\Import\Product\Validator;
 
+use Magento\CatalogImportExport\Model\Import\Product\Validator\AbstractImportValidator;
 use Magento\CatalogImportExport\Model\Import\Product\RowValidatorInterface;
 
-/**
- * Product import media validation model
- *
- * @package Magento\CatalogImportExport\Model\Import\Product\Validator
- */
 class Media extends AbstractImportValidator implements RowValidatorInterface
 {
     const URL_REGEXP = '|^http(s)?://[a-z0-9-]+(.[a-z0-9-]+)*(:[0-9]+)?(/.*)?$|i';
@@ -20,10 +16,6 @@ class Media extends AbstractImportValidator implements RowValidatorInterface
 
     const ADDITIONAL_IMAGES = 'additional_images';
 
-    /**
-     * @deprecated
-     * @see \Magento\CatalogImportExport\Model\Import\Product::getMultipleValueSeparator()
-     */
     const ADDITIONAL_IMAGES_DELIMITER = ',';
 
     /** @var array */
@@ -91,7 +83,7 @@ class Media extends AbstractImportValidator implements RowValidatorInterface
             }
         }
         if (isset($value[self::ADDITIONAL_IMAGES]) && strlen($value[self::ADDITIONAL_IMAGES])) {
-            foreach (explode($this->context->getMultipleValueSeparator(), $value[self::ADDITIONAL_IMAGES]) as $image) {
+            foreach (explode(self::ADDITIONAL_IMAGES_DELIMITER, $value[self::ADDITIONAL_IMAGES]) as $image) {
                 if (!$this->checkPath($image) && !$this->checkValidUrl($image)) {
                     $this->_addMessages(
                         [

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Sales\Controller\Adminhtml\Order\View;
@@ -13,19 +13,12 @@ namespace Magento\Sales\Controller\Adminhtml\Order\View;
 abstract class Giftmessage extends \Magento\Backend\App\Action
 {
     /**
-     * Authorization level of a basic admin session.
-     *
-     * @see _isAllowed()
-     */
-    const ADMIN_RESOURCE = 'Magento_Sales::sales_order';
-
-    /**
-     * Retrieve gift message save model.
+     * Retrieve gift message save model
      *
      * @return \Magento\GiftMessage\Model\Save
      */
     protected function _getGiftmessageSaveModel()
     {
-        return $this->_objectManager->get(\Magento\GiftMessage\Model\Save::class);
+        return $this->_objectManager->get('Magento\GiftMessage\Model\Save');
     }
 }

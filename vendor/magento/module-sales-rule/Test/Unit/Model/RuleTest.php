@@ -1,13 +1,10 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magento\SalesRule\Test\Unit\Model;
-
-use Magento\Framework\Unserialize\SecureUnserializer;
-use Magento\Framework\ObjectManagerInterface;
 
 class RuleTest extends \PHPUnit_Framework_TestCase
 {
@@ -22,28 +19,25 @@ class RuleTest extends \PHPUnit_Framework_TestCase
     protected $coupon;
 
     /**
-     * @var \Magento\Framework\TestFramework\Unit\Helper\ObjectManager
+     * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\SalesRule\Model\Rule\Condition\CombineFactory
      */
-    private $objectManager;
+    protected $conditionCombineFactoryMock;
 
     /**
-     * @var SecureUnserializer
+     * @var \Magento\SalesRule\Model\Rule\Condition\Product\CombineFactory|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $unserialize;
+    protected $condProdCombineFactoryMock;
 
-    /**
-     * @inheritdoc
-     */
-    public function setUp()
+    protected function setUp()
     {
-        $this->objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
+        $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
 
-        $this->coupon = $this->getMockBuilder(\Magento\SalesRule\Model\Coupon::class)
+        $this->coupon = $this->getMockBuilder('Magento\SalesRule\Model\Coupon')
             ->disableOriginalConstructor()
             ->setMethods(['loadPrimaryByRule', 'setRule', 'setIsPrimary', 'getCode', 'getUsageLimit'])
             ->getMock();
 
-        $couponFactory = $this->getMockBuilder(\Magento\SalesRule\Model\CouponFactory::class)
+        $couponFactory = $this->getMockBuilder('Magento\SalesRule\Model\CouponFactory')
             ->disableOriginalConstructor()
             ->setMethods(['create'])
             ->getMock();
@@ -51,12 +45,35 @@ class RuleTest extends \PHPUnit_Framework_TestCase
             ->method('create')
             ->willReturn($this->coupon);
 
-        $this->prepareObjectManager();
+        $this->conditionCombineFactoryMock = $this->getMockBuilder(
+            '\Magento\SalesRule\Model\Rule\Condition\CombineFactory'
+        )->disableOriginalConstructor()
+            ->setMethods(['create'])
+            ->getMock();
 
-        $this->model = $this->objectManager->getObject(
-            \Magento\SalesRule\Model\Rule::class,
+        $this->condProdCombineFactoryMock = $this->getMockBuilder(
+            '\Magento\SalesRule\Model\Rule\Condition\Product\CombineFactory'
+        )->disableOriginalConstructor()
+            ->setMethods(['create'])
+            ->getMock();
+
+        $this->prepareObjectManager([
+            [
+                'Magento\Framework\Api\ExtensionAttributesFactory',
+                $this->getMock('Magento\Framework\Api\ExtensionAttributesFactory', [], [], '', false)
+            ],
+            [
+                'Magento\Framework\Api\AttributeValueFactory',
+                $this->getMock('Magento\Framework\Api\AttributeValueFactory', [], [], '', false)
+            ],
+        ]);
+
+        $this->model = $objectManager->getObject(
+            'Magento\SalesRule\Model\Rule',
             [
                 'couponFactory' => $couponFactory,
+                'condCombineFactory' => $this->conditionCombineFactoryMock,
+                'condProdCombineF' => $this->condProdCombineFactoryMock,
             ]
         );
     }
@@ -89,36 +106,93 @@ class RuleTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $this->model->getUsesPerCoupon());
     }
 
-    /**
-     * Prepares ObjectManager mock.
-     *
-     * @return void
-     */
-    private function prepareObjectManager()
+    public function testBeforeSaveResetConditionToNull()
     {
-        $objectManagerMock = $this->getMockBuilder(ObjectManagerInterface::class)
+        $conditionMock = $this->setupConditionMock();
+
+        //Make sure that we reset _condition in beforeSave method
+        $this->conditionCombineFactoryMock->expects($this->exactly(2))
+            ->method('create')
+            ->willReturn($conditionMock);
+
+        $prodConditionMock = $this->setupProdConditionMock();
+        $this->condProdCombineFactoryMock->expects($this->exactly(2))
+            ->method('create')
+            ->willReturn($prodConditionMock);
+
+        $this->model->beforeSave();
+        $this->model->getConditions();
+        $this->model->getActions();
+    }
+
+    protected function setupProdConditionMock()
+    {
+        $prodConditionMock = $this->getMockBuilder('\Magento\SalesRule\Model\Rule\Condition\Product\Combine')
             ->disableOriginalConstructor()
+            ->setMethods(['setRule', 'setId', 'loadArray', 'getConditions'])
             ->getMock();
 
-        $this->unserialize =  $this->getMockBuilder(SecureUnserializer::class)
+        $prodConditionMock->expects($this->any())
+            ->method('setRule')
+            ->willReturnSelf();
+        $prodConditionMock->expects($this->any())
+            ->method('setId')
+            ->willReturnSelf();
+        $prodConditionMock->expects($this->any())
+            ->method('getConditions')
+            ->willReturn([]);
+
+        return $prodConditionMock;
+    }
+
+    protected function setupConditionMock()
+    {
+        $conditionMock = $this->getMockBuilder('\Magento\SalesRule\Model\Rule\Condition\Combine')
             ->disableOriginalConstructor()
+            ->setMethods(['setRule', 'setId', 'loadArray', 'getConditions'])
             ->getMock();
+        $conditionMock->expects($this->any())
+            ->method('setRule')
+            ->willReturnSelf();
+        $conditionMock->expects($this->any())
+            ->method('setId')
+            ->willReturnSelf();
+        $conditionMock->expects($this->any())
+            ->method('getConditions')
+            ->willReturn([]);
 
-        $objectManagerMock->expects($this->any())->method('get')->willReturn(
-            [SecureUnserializer::class, $this->unserialize]
-        );
+        return $conditionMock;
+    }
 
-        \Magento\Framework\App\ObjectManager::setInstance($objectManagerMock);
+    public function testGetConditionsFieldSetId()
+    {
+        $formName = 'form_name';
+        $this->model->setId(100);
+        $expectedResult = 'form_namerule_conditions_fieldset_100';
+        $this->assertEquals($expectedResult, $this->model->getConditionsFieldSetId($formName));
+    }
+
+    public function testGetActionsFieldSetId()
+    {
+        $formName = 'form_name';
+        $this->model->setId(100);
+        $expectedResult = 'form_namerule_actions_fieldset_100';
+        $this->assertEquals($expectedResult, $this->model->getActionsFieldSetId($formName));
     }
 
     /**
-     * @inheritdoc
+     * @param $map
      */
-    protected function tearDown()
+    private function prepareObjectManager($map)
     {
-        $reflectionClass = new \ReflectionClass(\Magento\Framework\App\ObjectManager::class);
+        $objectManagerMock = $this->getMock('Magento\Framework\ObjectManagerInterface');
+        $objectManagerMock->expects($this->any())->method('getInstance')->willReturnSelf();
+        $objectManagerMock->expects($this->any())
+            ->method('get')
+            ->will($this->returnValueMap($map));
+        $reflectionClass = new \ReflectionClass('Magento\Framework\App\ObjectManager');
         $reflectionProperty = $reflectionClass->getProperty('_instance');
         $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue(null, null);
+        $reflectionProperty->setValue($objectManagerMock);
     }
 }

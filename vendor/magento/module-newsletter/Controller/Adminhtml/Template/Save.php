@@ -1,6 +1,7 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ *
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Newsletter\Controller\Adminhtml\Template;
@@ -11,7 +12,7 @@ use Magento\Framework\Exception\LocalizedException;
 class Save extends \Magento\Newsletter\Controller\Adminhtml\Template
 {
     /**
-     * Save Newsletter Template.
+     * Save Newsletter Template
      *
      * @return void
      */
@@ -20,10 +21,8 @@ class Save extends \Magento\Newsletter\Controller\Adminhtml\Template
         $request = $this->getRequest();
         if (!$request->isPost()) {
             $this->getResponse()->setRedirect($this->getUrl('*/template'));
-
-            return;
         }
-        $template = $this->_objectManager->create(\Magento\Newsletter\Model\Template::class);
+        $template = $this->_objectManager->create('Magento\Newsletter\Model\Template');
 
         $id = (int)$request->getParam('id');
         if ($id) {
@@ -46,7 +45,7 @@ class Save extends \Magento\Newsletter\Controller\Adminhtml\Template
             )->setTemplateStyles(
                 $request->getParam('styles')
             )->setModifiedAt(
-                $this->_objectManager->get(\Magento\Framework\Stdlib\DateTime\DateTime::class)->gmtDate()
+                $this->_objectManager->get('Magento\Framework\Stdlib\DateTime\DateTime')->gmtDate()
             );
 
             if (!$template->getId()) {
@@ -64,9 +63,8 @@ class Save extends \Magento\Newsletter\Controller\Adminhtml\Template
 
             $this->messageManager->addSuccess(__('The newsletter template has been saved.'));
             $this->_getSession()->setFormData(false);
-
+            $this->_getSession()->unsPreviewData();
             $this->_redirect('*/template');
-
             return;
         } catch (LocalizedException $e) {
             $this->messageManager->addError(nl2br($e->getMessage()));

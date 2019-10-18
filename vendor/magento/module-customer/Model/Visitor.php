@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -151,10 +151,8 @@ class Visitor extends \Magento\Framework\Model\AbstractModel
 
         if ($this->session->getVisitorData()) {
             $this->setData($this->session->getVisitorData());
-            if ($this->getSessionId() != $this->session->getSessionId()) {
-                $this->setSessionId($this->session->getSessionId());
-            }
         }
+
         $this->setLastVisitAt((new \DateTime())->format(\Magento\Framework\Stdlib\DateTime::DATETIME_PHP_FORMAT));
 
         if (!$this->getId()) {

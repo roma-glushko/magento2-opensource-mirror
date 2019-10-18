@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -35,11 +35,11 @@ class MinificationTest extends \PHPUnit_Framework_TestCase
     protected function setUp()
     {
         $this->resolverMock = $this
-            ->getMockBuilder(\Magento\Framework\View\Design\FileResolution\Fallback\ResolverInterface::class)
+            ->getMockBuilder('Magento\Framework\View\Design\FileResolution\Fallback\ResolverInterface')
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->assetMinificationMock = $this->getMockBuilder(\Magento\Framework\View\Asset\Minification::class)
+        $this->assetMinificationMock = $this->getMockBuilder('Magento\Framework\View\Asset\Minification')
             ->disableOriginalConstructor()
             ->getMock();
 

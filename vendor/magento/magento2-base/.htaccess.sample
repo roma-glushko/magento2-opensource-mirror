@@ -30,9 +30,10 @@
 ############################################
 ## default index file
 
-DirectoryIndex index.php
+    DirectoryIndex index.php
 
 <IfModule mod_php5.c>
+
 ############################################
 ## adjust memory limit
 
@@ -54,8 +55,11 @@ DirectoryIndex index.php
 ## disable user agent verification to not break multiple image upload
 
     php_flag suhosin.session.cryptua off
+
 </IfModule>
+
 <IfModule mod_php7.c>
+
 ############################################
 ## adjust memory limit
 
@@ -77,7 +81,9 @@ DirectoryIndex index.php
 ## disable user agent verification to not break multiple image upload
 
     php_flag suhosin.session.cryptua off
+
 </IfModule>
+
 <IfModule mod_security.c>
 ###########################################
 ## disable POST processing to not break multiple image upload
@@ -207,10 +213,6 @@ DirectoryIndex index.php
         deny from all
     </Files>
     <Files composer.lock>
-        order allow,deny
-        deny from all
-    </Files>
-    <Files auth.json>
         order allow,deny
         deny from all
     </Files>

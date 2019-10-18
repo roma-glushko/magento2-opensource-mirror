@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Setup\Model\DateTime;
@@ -15,7 +15,7 @@ class DateTimeProvider
     /**
      * Timezone provider
      *
-     * @var TimezoneProvider
+     * @var TimeZoneProvider
      */
     private $tzProvider;
 
@@ -36,10 +36,10 @@ class DateTimeProvider
     /**
      * Init
      *
-     * @param TimezoneProvider $tzProvider
+     * @param TimeZoneProvider $tzProvider
      * @param ObjectManagerProvider $objectManagerProvider
      */
-    public function __construct(TimezoneProvider $tzProvider, ObjectManagerProvider $objectManagerProvider)
+    public function __construct(TimeZoneProvider $tzProvider, ObjectManagerProvider $objectManagerProvider)
     {
         $this->tzProvider = $tzProvider;
         $this->objectManagerProvider = $objectManagerProvider;

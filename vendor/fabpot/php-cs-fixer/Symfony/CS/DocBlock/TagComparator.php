@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -16,7 +15,7 @@ namespace Symfony\CS\DocBlock;
  * This class is responsible for comparing tags to see if they should be kept
  * together, or kept apart.
  *
- * @author Graham Campbell <graham@alt-three.com>
+ * @author Graham Campbell <graham@mineuk.com>
  */
 class TagComparator
 {
@@ -28,7 +27,7 @@ class TagComparator
     private static $groups = array(
         array('deprecated', 'link', 'see', 'since'),
         array('author', 'copyright', 'license'),
-        array('category', 'package', 'subpackage'),
+        array('package', 'subpackage'),
         array('property', 'property-read', 'property-write'),
     );
 

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*jshint browser:true jquery:true*/
@@ -14,7 +14,7 @@ define([], function () {
 
         return {
             email: addressData.email,
-            countryId: addressData['country_id'] || addressData.countryId || window.checkoutConfig.defaultCountryId,
+            countryId: (addressData.country_id) ? addressData.country_id : window.checkoutConfig.defaultCountryId,
             regionId: (addressData.region && addressData.region.region_id) ?
                 addressData.region.region_id
                 : window.checkoutConfig.defaultRegionId,

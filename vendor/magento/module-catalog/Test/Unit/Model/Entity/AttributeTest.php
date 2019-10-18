@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -127,10 +127,6 @@ class AttributeTest extends \PHPUnit_Framework_TestCase
      */
     private $dateTimeFormatter;
 
-    /**
-     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
-     * @return void
-     */
     protected function setUp()
     {
         $this->contextMock = $this->getMockBuilder('Magento\Framework\Model\Context')
@@ -228,11 +224,6 @@ class AttributeTest extends \PHPUnit_Framework_TestCase
                 'attributeCache' => $attributeCacheMock
             ]
         );
-
-        $reflection = new \ReflectionClass(get_class($this->attribute));
-        $reflectionProperty = $reflection->getProperty('attributeCache');
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue($this->attribute, $attributeCacheMock);
     }
 
     public function testAfterSaveEavCache()

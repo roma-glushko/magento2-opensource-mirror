@@ -1,56 +1,58 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
-use Magento\TestFramework\Helper\Bootstrap as BootstrapHelper;
-use Magento\Framework\Indexer\IndexerRegistry;
-use Magento\CatalogSearch\Model\Indexer\Fulltext as FulltextIndexer;
-use Magento\Catalog\Model\Product;
-use Magento\Sales\Model\Order\Address as OrderAddress;
-use Magento\Sales\Model\Order\Payment as OrderPayment;
-use Magento\Sales\Model\Order\Item as OrderItem;
-use Magento\Sales\Model\Order;
-use Magento\Store\Model\StoreManagerInterface;
+// @codingStandardsIgnoreFile
 
-require __DIR__ . '/../../Store/_files/core_fixturestore.php';
+require __DIR__ . '/../../../Magento/Store/_files/core_fixturestore.php';
 
-$objectManager = BootstrapHelper::getObjectManager();
-$objectManager->get(IndexerRegistry::class)
-    ->get(FulltextIndexer::INDEXER_ID)
-    ->reindexAll();
-
-require __DIR__ . '/../../Catalog/_files/product_simple_duplicated.php';
+require __DIR__ . '/../../../Magento/Catalog/_files/product_simple_duplicated.php';
+/** @var \Magento\Catalog\Model\Product $product */
 
 $addressData = include __DIR__ . '/address_data.php';
 
-$billingAddress = $objectManager->create(OrderAddress::class, ['data' => $addressData]);
+$objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
+
+$billingAddress = $objectManager->create('Magento\Sales\Model\Order\Address', ['data' => $addressData]);
 $billingAddress->setAddressType('billing');
 
 $shippingAddress = clone $billingAddress;
 $shippingAddress->setId(null)->setAddressType('shipping');
 
-$payment = $objectManager->create(OrderPayment::class);
+$payment = $objectManager->create('Magento\Sales\Model\Order\Payment');
 $payment->setMethod('checkmo');
 
-/** @var OrderItem $orderItem */
-$orderItem = $objectManager->create(OrderItem::class);
-/** @var Product $product */
+/** @var \Magento\Sales\Model\Order\Item $orderItem */
+$orderItem = $objectManager->create('Magento\Sales\Model\Order\Item');
 $orderItem->setProductId($product->getId())->setQtyOrdered(2);
 
-/** @var Order $order */
-$order = $objectManager->create(Order::class);
-$order->setIncrementId('100000004')
-    ->setState(Order::STATE_PROCESSING)
-    ->setStatus($order->getConfig()->getStateDefaultStatus(Order::STATE_PROCESSING))
-    ->setSubtotal(100)
-    ->setBaseSubtotal(100)
-    ->setCustomerIsGuest(true)
-    ->setCustomerEmail('customer@null.com')
-    ->setBillingAddress($billingAddress)
-    ->setShippingAddress($shippingAddress)
-    ->setStoreId($objectManager->get(StoreManagerInterface::class)->getStore('fixturestore')->getId())
-    ->addItem($orderItem)
-    ->setPayment($payment);
+/** @var \Magento\Sales\Model\Order $order */
+$order = $objectManager->create('Magento\Sales\Model\Order');
+$order->setIncrementId(
+    '100000004'
+)->setState(
+    \Magento\Sales\Model\Order::STATE_PROCESSING
+)->setStatus(
+    $order->getConfig()->getStateDefaultStatus(\Magento\Sales\Model\Order::STATE_PROCESSING)
+)->setSubtotal(
+    100
+)->setBaseSubtotal(
+    100
+)->setCustomerIsGuest(
+    true
+)->setCustomerEmail(
+    'customer@null.com'
+)->setBillingAddress(
+    $billingAddress
+)->setShippingAddress(
+    $shippingAddress
+)->setStoreId(
+    $objectManager->get('Magento\Store\Model\StoreManagerInterface')->getStore('fixturestore')->getId()
+)->addItem(
+    $orderItem
+)->setPayment(
+    $payment
+);
 $order->save();

@@ -95,6 +95,8 @@ class Compiler
 
     /**
      * Run the Compiler and process all Passes.
+     *
+     * @param ContainerBuilder $container
      */
     public function compile(ContainerBuilder $container)
     {

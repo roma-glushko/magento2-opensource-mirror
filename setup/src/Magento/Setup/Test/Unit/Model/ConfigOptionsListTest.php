@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -176,6 +176,7 @@ class ConfigOptionsListTest extends \PHPUnit_Framework_TestCase
             ['122.11.2.34:800', false],
             ['122.11.2.34:800,localhost', false],
             ['website.com:9000', false],
+            ['web-site.com:9000', false],
             ['website.com/m2ce:9000', true],
             ['website.com+:9000', true],
         ];

@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 define([
@@ -180,7 +180,7 @@ define([
                         };
                     });
 
-                    $option.text(template(toTemplate));
+                    $option.html(template(toTemplate));
                 });
             });
         },
@@ -295,10 +295,6 @@ define([
             case 'hidden':
                 optionHash = 'bundle-option-' + optionName + '##' + optionValue;
                 optionQty = optionConfig[optionValue].qty || 0;
-                canQtyCustomize = optionConfig[optionValue].customQty === '1';
-                qtyField = element.data('qtyField');
-                qtyField.data('option', element);
-                toggleQtyField(qtyField, optionQty, optionId, optionValue, canQtyCustomize);
                 tempChanges = utils.deepClone(optionConfig[optionValue].prices);
                 tempChanges = applyTierPrice(tempChanges, optionQty, optionConfig);
                 tempChanges = applyQty(tempChanges, optionQty);

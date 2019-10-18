@@ -1,17 +1,14 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
+
+namespace Magento\Backend\Block\Store;
 
 /**
  * Store switcher block
  *
- * @author     Magento Core Team <core@magentocommerce.com>
- */
-namespace Magento\Backend\Block\Store;
-
-/**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class Switcher extends \Magento\Backend\Block\Template
@@ -19,7 +16,7 @@ class Switcher extends \Magento\Backend\Block\Template
     /**
      * URL for store switcher hint
      */
-    const HINT_URL = 'http://www.magentocommerce.com/knowledge-base/entry/understanding-store-scopes';
+    const HINT_URL = 'http://docs.magento.com/m2/ce/user_guide/configuration/scope.html';
 
     /**
      * Name of website variable
@@ -155,7 +152,11 @@ class Switcher extends \Magento\Backend\Block\Template
     {
         $websites = $this->_storeManager->getWebsites();
         if ($websiteIds = $this->getWebsiteIds()) {
-            $websites = array_intersect_key($websites, array_flip($websiteIds));
+            foreach (array_keys($websites) as $websiteId) {
+                if (!in_array($websiteId, $websiteIds)) {
+                    unset($websites[$websiteId]);
+                }
+            }
         }
         return $websites;
     }

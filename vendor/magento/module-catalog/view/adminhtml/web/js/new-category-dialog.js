@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*jshint browser:true jquery:true*/
@@ -83,42 +83,18 @@ define([
                         var thisButton = $(e.currentTarget);
 
                         thisButton.prop('disabled', true);
-
-                        var postData = {
-                            general: {
-                                name: $('#new_category_name').val(),
-                                is_active: 1,
-                                include_in_menu: 1
-                            },
-                            parent: $('#new_category_parent').val(),
-                            use_config: ['available_sort_by', 'default_sort_by'],
-                            form_key: FORM_KEY,
-                            return_session_messages_only: 1
-                        };
-
-                        var fields = {};
-
-                        $.each($(newCategoryForm).serializeArray(), function(_, field) {
-                            if (
-                                field.name &&
-                                field.name != 'new_category_name' &&
-                                field.name != 'new_category_parent'
-                            ) {
-                                if (fields.hasOwnProperty(field.name)) {
-                                    fields[field.name] = $.makeArray(fields[field.name]);
-                                    fields[field.name].push(field.value);
-                                }
-                                else {
-                                    fields[field.name] = field.value;
-                                }
-                            }
-                        });
-                        $.extend(postData, fields);
-
                         $.ajax({
                             type: 'POST',
                             url: widget.options.saveCategoryUrl,
-                            data: postData,
+                            data: {
+                                name: $('#new_category_name').val(),
+                                parent: $('#new_category_parent').val(),
+                                is_active: 1,
+                                include_in_menu: 1,
+                                use_config: ['available_sort_by', 'default_sort_by'],
+                                form_key: FORM_KEY,
+                                return_session_messages_only: 1
+                            },
                             dataType: 'json',
                             context: $('body')
                         }).success(function (data) {

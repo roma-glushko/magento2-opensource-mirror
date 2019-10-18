@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -40,11 +40,9 @@
 <script>
     require([
         'jquery',
-        'priceBox'
+        'Magento_Catalog/js/price-box'
     ], function($){
-        var dataPriceBoxSelector = '[data-role=priceBox]',
-            dataProductIdSelector = '[data-product-id=<?php echo $block->escapeHtml($_product->getId())?>]',
-            priceBoxes = $(dataPriceBoxSelector + dataProductIdSelector);
+        var priceBoxes = $('[data-role=priceBox]');
 
         priceBoxes = priceBoxes.filter(function(index, elem){
             return !$(elem).find('.price-from').length;

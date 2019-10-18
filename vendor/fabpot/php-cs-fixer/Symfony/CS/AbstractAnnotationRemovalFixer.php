@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -16,7 +15,7 @@ use Symfony\CS\DocBlock\DocBlock;
 use Symfony\CS\Tokenizer\Tokens;
 
 /**
- * @author Graham Campbell <graham@alt-three.com>
+ * @author Graham Campbell <graham@mineuk.com>
  */
 abstract class AbstractAnnotationRemovalFixer extends AbstractFixer
 {
@@ -25,8 +24,8 @@ abstract class AbstractAnnotationRemovalFixer extends AbstractFixer
      */
     public function getPriority()
     {
-        // must be run before the PhpdocSeparationFixer, PhpdocOrderFixer,
-        // PhpdocTrimFixer and PhpdocNoEmptyReturnFixer.
+        // must be run before the PhpdocSeparationFixer, PhpdocOrderFixer, and
+        // PhpdocTrimFixer
         return 10;
     }
 

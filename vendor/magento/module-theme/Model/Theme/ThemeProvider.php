@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Theme\Model\Theme;
@@ -18,20 +18,25 @@ class ThemeProvider implements \Magento\Framework\View\Design\Theme\ThemeProvide
     protected $themeFactory;
 
     /**
-     * @var \Magento\Framework\View\Design\ThemeInterface[]
+     * @var \Magento\Framework\App\CacheInterface
      */
-    private $themes;
+    protected $cache;
 
     /**
+     * ThemeProvider constructor.
+     *
      * @param \Magento\Theme\Model\ResourceModel\Theme\CollectionFactory $collectionFactory
      * @param \Magento\Theme\Model\ThemeFactory $themeFactory
+     * @param \Magento\Framework\App\CacheInterface $cache
      */
     public function __construct(
         \Magento\Theme\Model\ResourceModel\Theme\CollectionFactory $collectionFactory,
-        \Magento\Theme\Model\ThemeFactory $themeFactory
+        \Magento\Theme\Model\ThemeFactory $themeFactory,
+        \Magento\Framework\App\CacheInterface $cache
     ) {
         $this->collectionFactory = $collectionFactory;
         $this->themeFactory = $themeFactory;
+        $this->cache = $cache;
     }
 
     /**
@@ -39,15 +44,18 @@ class ThemeProvider implements \Magento\Framework\View\Design\Theme\ThemeProvide
      */
     public function getThemeByFullPath($fullPath)
     {
-        if (isset($this->themes[$fullPath])) {
-            return $this->themes[$fullPath];
-        }
-
         /** @var $themeCollection \Magento\Theme\Model\ResourceModel\Theme\Collection */
+        $theme = $this->cache->load('theme'. $fullPath);
+        if ($theme) {
+            return unserialize($theme);
+        }
         $themeCollection = $this->collectionFactory->create();
         $item = $themeCollection->getThemeByFullPath($fullPath);
-        $this->themes[$fullPath] = $item;
-
+        if ($item->getId()) {
+            $themeData = serialize($item);
+            $this->cache->save($themeData, 'theme' . $fullPath);
+            $this->cache->save($themeData, 'theme-by-id-' . $item->getId());
+        }
         return $item;
     }
 
@@ -69,16 +77,16 @@ class ThemeProvider implements \Magento\Framework\View\Design\Theme\ThemeProvide
      */
     public function getThemeById($themeId)
     {
-        if (isset($this->themes[$themeId])) {
-            return $this->themes[$themeId];
+        $theme = $this->cache->load('theme-by-id-' . $themeId);
+        if ($theme) {
+            return unserialize($theme);
         }
         /** @var $themeModel \Magento\Framework\View\Design\ThemeInterface */
         $themeModel = $this->themeFactory->create();
         $themeModel->load($themeId);
         if ($themeModel->getId()) {
-            $this->themes[$themeId] = $themeModel;
+            $this->cache->save(serialize($themeModel), 'theme-by-id-' . $themeId);
         }
-
         return $themeModel;
     }
 }

@@ -1,13 +1,14 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Sales\Test\Unit\Model\Order;
 
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+
 /**
  * Unit test for shipment factory class.
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class ShipmentFactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -38,7 +39,7 @@ class ShipmentFactoryTest extends \PHPUnit_Framework_TestCase
      */
     protected function setUp()
     {
-        $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
+        $objectManager = new ObjectManager($this);
 
         $this->converter = $this->getMock(
             'Magento\Sales\Model\Convert\Order',

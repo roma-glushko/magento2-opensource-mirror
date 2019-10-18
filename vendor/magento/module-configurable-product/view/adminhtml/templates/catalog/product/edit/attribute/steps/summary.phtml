@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -8,14 +8,15 @@
 
 /* @var $block \Magento\ConfigurableProduct\Block\Adminhtml\Product\Steps\Summary */
 ?>
-<div data-bind="scope: '<?= /* @escapeNotVerified */  $block->getComponentName()?>'">
-    <h2 class="steps-wizard-title"><?= /* @escapeNotVerified */  __('Step 4: Summary') ?></h2>
+<div data-bind="scope: '<?= /* @noEscape */  $block->getComponentName()?>'">
+    <h2 class="steps-wizard-title"><?php echo $block->escapeHtml(
+            __('Step 4: Summary')
+        ); ?></h2>
 
     <div class="admin__data-grid-wrap admin__data-grid-wrap-static">
         <!-- ko if: gridNew().length -->
         <!-- ko template: {name: getGridTemplate(), data: {
             grid: gridNew,
-            paging: pagingNew,
             id: getGridId(),
             title: $t('New Product Review'),
             note: $t('Here are the products you\'re about to create.')
@@ -24,7 +25,6 @@
 
         <!-- ko if: gridExisting().length -->
         <!-- ko template: {name: getGridTemplate(), data: {
-            paging: pagingExisting,
             grid: gridExisting,
             id: getGridId(),
             title: $t('Associated Products'),
@@ -34,7 +34,6 @@
 
         <!-- ko if: gridDeleted().length -->
         <!-- ko template: {name: getGridTemplate(), data: {
-            paging: pagingDeleted,
             grid: gridDeleted,
             id: getGridId(),
             title: $t('Disassociated Products'),
@@ -49,10 +48,11 @@
         "*": {
             "Magento_Ui/js/core/app": {
                 "components": {
-                    "<?= /* @escapeNotVerified */  $block->getComponentName()?>": {
+                    "<?= /* @noEscape */  $block->getComponentName()?>": {
                         "component": "Magento_ConfigurableProduct/js/variations/steps/summary",
-                        "appendTo": "<?= /* @escapeNotVerified */  $block->getParentComponentName()?>",
-                        "variationsComponent": "configurableVariations"
+                        "appendTo": "<?= /* @noEscape */  $block->getParentComponentName()?>",
+                        "variationsComponent": "<?= /* @noEscape */ $block->getData('config/form') ?>.configurableVariations",
+                        "modalComponent": "<?= /* @noEscape */ $block->getData('config/form') ?>.configurableModal"
                     }
                 }
             }

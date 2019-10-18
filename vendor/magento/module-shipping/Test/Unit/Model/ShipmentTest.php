@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -26,7 +26,7 @@ class ShipmentTest extends \PHPUnit_Framework_TestCase
      */
     protected $shipment;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->orderRepository = $this->getMock(
             '\Magento\Sales\Api\OrderRepositoryInterface',

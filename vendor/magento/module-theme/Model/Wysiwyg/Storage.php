@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -76,20 +76,6 @@ class Storage
     protected $urlDecoder;
 
     /**
-     * Uploader factory.
-     *
-     * @var \Magento\MediaStorage\Model\File\UploaderFactory
-     */
-    private $uploaderFactory;
-
-    /**
-     * Logger.
-     *
-     * @var \Psr\Log\LoggerInterface
-     */
-    private $logger;
-
-    /**
      * Initialize dependencies
      *
      * @param \Magento\Framework\Filesystem $filesystem
@@ -98,8 +84,6 @@ class Storage
      * @param \Magento\Framework\Image\AdapterFactory $imageFactory
      * @param \Magento\Framework\Url\EncoderInterface $urlEncoder
      * @param \Magento\Framework\Url\DecoderInterface $urlDecoder
-     * @param \Magento\MediaStorage\Model\File\UploaderFactory $uploaderFactory
-     * @param \Psr\Log\LoggerInterface $logger
      */
     public function __construct(
         \Magento\Framework\Filesystem $filesystem,
@@ -107,9 +91,7 @@ class Storage
         \Magento\Framework\ObjectManagerInterface $objectManager,
         \Magento\Framework\Image\AdapterFactory $imageFactory,
         \Magento\Framework\Url\EncoderInterface $urlEncoder,
-        \Magento\Framework\Url\DecoderInterface $urlDecoder,
-        \Magento\MediaStorage\Model\File\UploaderFactory $uploaderFactory = null,
-        \Psr\Log\LoggerInterface $logger = null
+        \Magento\Framework\Url\DecoderInterface $urlDecoder
     ) {
         $this->mediaWriteDirectory = $filesystem->getDirectoryWrite(DirectoryList::MEDIA);
         $this->_helper = $helper;
@@ -117,28 +99,23 @@ class Storage
         $this->_imageFactory = $imageFactory;
         $this->urlEncoder = $urlEncoder;
         $this->urlDecoder = $urlDecoder;
-        $this->uploaderFactory = $uploaderFactory ?:
-            $objectManager->create(\Magento\MediaStorage\Model\File\UploaderFactory::class);
-        $this->logger = $logger ?:
-            $objectManager->get(\Psr\Log\LoggerInterface::class);
     }
 
     /**
-     * Upload file.
+     * Upload file
      *
      * @param string $targetPath
-     * @return array
+     * @return bool
      * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function uploadFile($targetPath)
     {
         /** @var $uploader \Magento\MediaStorage\Model\File\Uploader */
-        $uploader = $this->uploaderFactory->create(['fileId' => 'file']);
+        $uploader = $this->_objectManager->create('Magento\MediaStorage\Model\File\Uploader', ['fileId' => 'file']);
         $uploader->setAllowedExtensions($this->_helper->getAllowedExtensionsByType());
         $uploader->setAllowRenameFiles(true);
         $uploader->setFilesDispersion(false);
         $result = $uploader->save($targetPath);
-        unset($result['path']);
 
         if (!$result) {
             throw new \Magento\Framework\Exception\LocalizedException(__('We can\'t upload the file right now.'));
@@ -158,7 +135,7 @@ class Storage
     }
 
     /**
-     * Create thumbnail for image and save it to thumbnails directory.
+     * Create thumbnail for image and save it to thumbnails directory
      *
      * @param string $source
      * @return bool|string Resized filepath or false if errors were occurred
@@ -183,20 +160,18 @@ class Storage
             $image->resize(self::THUMBNAIL_WIDTH, self::THUMBNAIL_HEIGHT);
             $image->save($this->mediaWriteDirectory->getAbsolutePath($thumbnailPath));
         } catch (\Magento\Framework\Exception\FileSystemException $e) {
-            $this->logger->critical($e);
-
+            $this->_objectManager->get('Psr\Log\LoggerInterface')->critical($e);
             return false;
         }
 
         if ($this->mediaWriteDirectory->isFile($thumbnailPath)) {
             return $thumbnailPath;
         }
-
         return false;
     }
 
     /**
-     * Create folder.
+     * Create folder
      *
      * @param string $name
      * @param string $path
@@ -233,7 +208,7 @@ class Storage
     }
 
     /**
-     * Delete file.
+     * Delete file
      *
      * @param string $file
      * @return \Magento\Theme\Model\Wysiwyg\Storage
@@ -250,12 +225,11 @@ class Storage
             $this->mediaWriteDirectory->delete($filePath);
             $this->mediaWriteDirectory->delete($thumbnailPath);
         }
-
         return $this;
     }
 
     /**
-     * Get directory collection.
+     * Get directory collection
      *
      * @param string $currentPath
      * @return array
@@ -273,12 +247,11 @@ class Storage
                 $directories[] = $path;
             }
         }
-
         return $directories;
     }
 
     /**
-     * Get files collection.
+     * Get files collection
      *
      * @return array
      */
@@ -306,12 +279,11 @@ class Storage
             }
             $files[] = $file;
         }
-
         return $files;
     }
 
     /**
-     * Get directories tree array.
+     * Get directories tree array
      *
      * @return array
      */
@@ -326,12 +298,11 @@ class Storage
                 'cls' => 'folder'
             ];
         }
-
         return $resultArray;
     }
 
     /**
-     * Delete directory.
+     * Delete directory
      *
      * @param string $path
      * @return bool

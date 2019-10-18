@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Catalog\Test\Unit\Block\Product;
@@ -148,9 +148,9 @@ class ListProductTest extends \PHPUnit_Framework_TestCase
         ];
 
         $this->typeInstanceMock->expects($this->once())
-            ->method('isPossibleBuyFromList')
+            ->method('hasRequiredOptions')
             ->with($this->equalTo($this->productMock))
-            ->will($this->returnValue(true));
+            ->will($this->returnValue(false));
         $this->cartHelperMock->expects($this->any())
             ->method('getAddUrl')
             ->with($this->equalTo($this->productMock), $this->equalTo([]))

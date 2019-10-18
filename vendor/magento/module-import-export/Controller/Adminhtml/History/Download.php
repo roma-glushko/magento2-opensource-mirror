@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\ImportExport\Controller\Adminhtml\History;
@@ -39,10 +39,10 @@ class Download extends \Magento\ImportExport\Controller\Adminhtml\History
      */
     public function execute()
     {
-        $fileName = basename($this->getRequest()->getParam('filename'));
+        $fileName = $this->getRequest()->getParam('filename');
 
         /** @var \Magento\ImportExport\Helper\Report $reportHelper */
-        $reportHelper = $this->_objectManager->get(\Magento\ImportExport\Helper\Report::class);
+        $reportHelper = $this->_objectManager->get('Magento\ImportExport\Helper\Report');
 
         if (!$reportHelper->importFileExists($fileName)) {
             /** @var \Magento\Backend\Model\View\Result\Redirect $resultRedirect */

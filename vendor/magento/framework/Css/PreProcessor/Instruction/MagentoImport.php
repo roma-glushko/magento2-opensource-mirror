@@ -1,22 +1,19 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\Css\PreProcessor\Instruction;
 
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Css\PreProcessor\ErrorHandlerInterface;
 use Magento\Framework\View\Asset\File\FallbackContext;
 use Magento\Framework\View\Asset\LocalInterface;
 use Magento\Framework\View\Asset\PreProcessorInterface;
-use Magento\Framework\View\Design\Theme\ThemeProviderInterface;
 use Magento\Framework\View\DesignInterface;
 use Magento\Framework\View\File\CollectorInterface;
 
 /**
  * @magento_import instruction preprocessor
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class MagentoImport implements PreProcessorInterface
 {
@@ -48,14 +45,8 @@ class MagentoImport implements PreProcessorInterface
 
     /**
      * @var \Magento\Framework\View\Design\Theme\ListInterface
-     * @deprecated
      */
     protected $themeList;
-
-    /**
-     * @var ThemeProviderInterface
-     */
-    private $themeProvider;
 
     /**
      * @param DesignInterface $design
@@ -129,23 +120,8 @@ class MagentoImport implements PreProcessorInterface
     {
         $context = $asset->getContext();
         if ($context instanceof FallbackContext) {
-            return $this->getThemeProvider()->getThemeByFullPath(
-                $context->getAreaCode() . '/' . $context->getThemePath()
-            );
+            return $this->themeList->getThemeByFullPath($context->getAreaCode() . '/' . $context->getThemePath());
         }
         return $this->design->getDesignTheme();
-    }
-
-    /**
-     * @return ThemeProviderInterface
-     * @deprecated
-     */
-    private function getThemeProvider()
-    {
-        if (null === $this->themeProvider) {
-            $this->themeProvider = ObjectManager::getInstance()->get(ThemeProviderInterface::class);
-        }
-
-        return $this->themeProvider;
     }
 }

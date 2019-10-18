@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -18,6 +18,24 @@ class SubscriberTest extends \PHPUnit_Framework_TestCase
         $this->_model = \Magento\TestFramework\Helper\Bootstrap::getObjectManager()->create(
             'Magento\Newsletter\Model\Subscriber'
         );
+    }
+
+    /**
+     * @magentoDataFixture Magento/Newsletter/_files/subscribers.php
+     * @magentoConfigFixture current_store newsletter/subscription/confirm 1
+     */
+    public function testEmailConfirmation()
+    {
+        $this->_model->subscribe('customer_confirm@example.com');
+        $transportBuilder = \Magento\TestFramework\Helper\Bootstrap::getObjectManager()
+            ->get('Magento\TestFramework\Mail\Template\TransportBuilderMock');
+        // confirmationCode 'ysayquyajua23iq29gxwu2eax2qb6gvy' is taken from fixture
+        $this->assertContains(
+            '/newsletter/subscriber/confirm/id/' . $this->_model->getSubscriberId()
+            . '/code/ysayquyajua23iq29gxwu2eax2qb6gvy',
+            $transportBuilder->getSentMessage()->getBodyHtml()->getRawContent()
+        );
+        $this->assertEquals(Subscriber::STATUS_NOT_ACTIVE, $this->_model->getSubscriberStatus());
     }
 
     /**

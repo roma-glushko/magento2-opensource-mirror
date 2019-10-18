@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Theme\Model\Theme\Domain;
@@ -86,5 +86,11 @@ class VirtualTest extends \PHPUnit_Framework_TestCase
                 \Magento\Framework\View\Design\ThemeInterface::TYPE_VIRTUAL
             )->getPhysicalTheme()->getId()
         );
+    }
+
+    protected function tearDown()
+    {
+        unset($this->_physicalThemeId);
+        unset($this->_virtualThemeId);
     }
 }

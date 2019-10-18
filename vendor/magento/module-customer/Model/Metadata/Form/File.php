@@ -2,15 +2,11 @@
 /**
  * Form Element File Data Model
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Customer\Model\Metadata\Form;
 
-use Magento\Customer\Model\FileProcessor;
-use Magento\Customer\Model\FileProcessorFactory;
-use Magento\Framework\Api\Data\ImageContentInterface;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\File\UploaderFactory;
 use Magento\Framework\Filesystem;
 use Magento\Framework\App\Filesystem\DirectoryList;
@@ -49,16 +45,6 @@ class File extends AbstractData
      * @var UploaderFactory
      */
     private $uploaderFactory;
-
-    /**
-     * @var FileProcessor
-     */
-    protected $fileProcessor;
-
-    /**
-     * @var FileProcessorFactory
-     */
-    protected $fileProcessorFactory;
 
     /**
      * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
@@ -100,6 +86,10 @@ class File extends AbstractData
      */
     public function extractValue(\Magento\Framework\App\RequestInterface $request)
     {
+        if ($this->getIsAjaxRequest()) {
+            return false;
+        }
+
         $extend = $this->_getRequestValue($request);
 
         $attrCode = $this->getAttribute()->getAttributeCode();
@@ -127,14 +117,6 @@ class File extends AbstractData
                         $value[$fileKey] = $scopeData[$attrCode];
                     }
                 }
-            } else if (isset($extend[0]['file']) && !empty($extend[0]['file'])) {
-                /**
-                 * This case is required by file uploader UI component
-                 *
-                 * $extend[0]['file'] - uses for AJAX validation
-                 * $extend[0] - uses for POST request
-                 */
-                $value = $this->getIsAjaxRequest() ? $extend[0]['file'] : $extend[0];
             } else {
                 $value = [];
             }
@@ -146,9 +128,7 @@ class File extends AbstractData
             }
         }
 
-        if (!empty($extend['delete'])
-            && filter_var($extend['delete'], FILTER_VALIDATE_BOOLEAN)
-        ) {
+        if (!empty($extend['delete'])) {
             $value['delete'] = true;
         }
 
@@ -214,17 +194,7 @@ class File extends AbstractData
      */
     protected function _isUploadedFile($filename)
     {
-        if (is_uploaded_file($filename)) {
-            return true;
-        }
-
-        // This case is required for file uploader UI component
-        $temporaryFile = FileProcessor::TMP_DIR . '/' . pathinfo($filename)['basename'];
-        if ($this->getFileProcessor()->isExist($temporaryFile)) {
-            return true;
-        }
-
-        return false;
+        return is_uploaded_file($filename);
     }
 
     /**
@@ -271,7 +241,7 @@ class File extends AbstractData
     /**
      * {@inheritdoc}
      *
-     * @return ImageContentInterface|array|string|null
+     * @return $this|string
      */
     public function compactValue($value)
     {
@@ -279,49 +249,11 @@ class File extends AbstractData
             return $this;
         }
 
-        // Remove outdated file (in the case of file uploader UI component)
-        if (empty($value) && !empty($this->_value)) {
-            $this->getFileProcessor()->removeUploadedFile($this->_value);
-            return $value;
-        }
-
-        if (isset($value['file']) && !empty($value['file'])) {
-            if ($value['file'] == $this->_value) {
-                return $this->_value;
-            }
-            $result = $this->processUiComponentValue($value);
-        } else {
-            $result = $this->processInputFieldValue($value);
-        }
-
-        return $result;
-    }
-
-    /**
-     * Process file uploader UI component data
-     *
-     * @param array $value
-     * @return string|null
-     */
-    protected function processUiComponentValue(array $value)
-    {
-        $result = $this->getFileProcessor()->moveTemporaryFile($value['file']);
-        return $result;
-    }
-
-    /**
-     * Process input type=file component data
-     *
-     * @param string $value
-     * @return bool|int|string
-     */
-    protected function processInputFieldValue($value)
-    {
+        $attribute = $this->getAttribute();
+        $original = $this->_value;
         $toDelete = false;
-        if ($this->_value) {
-            if (!$this->getAttribute()->isRequired()
-                && !empty($value['delete'])
-            ) {
+        if ($original) {
+            if (!$attribute->isRequired() && !empty($value['delete'])) {
                 $toDelete = true;
             }
             if (!empty($value['tmp_name'])) {
@@ -330,11 +262,11 @@ class File extends AbstractData
         }
 
         $mediaDir = $this->_fileSystem->getDirectoryWrite(DirectoryList::MEDIA);
-        $result = $this->_value;
-
+        $result = $original;
+        // unlink entity file
         if ($toDelete) {
-            $mediaDir->delete($this->_entityTypeCode . '/' . ltrim($this->_value, '/'));
             $result = '';
+            $mediaDir->delete($this->_entityTypeCode . $original);
         }
 
         if (!empty($value['tmp_name'])) {
@@ -376,36 +308,5 @@ class File extends AbstractData
         }
 
         return $output;
-    }
-
-    /**
-     * Get FileProcessor instance
-     *
-     * @return FileProcessor
-     */
-    protected function getFileProcessor()
-    {
-        if ($this->fileProcessor === null) {
-            $this->fileProcessor = $this->getFileProcessorFactory()->create([
-                'entityTypeCode' => $this->_entityTypeCode,
-            ]);
-        }
-        return $this->fileProcessor;
-    }
-
-    /**
-     * Get FileProcessorFactory instance
-     *
-     * @return FileProcessorFactory
-     *
-     * @deprecated
-     */
-    protected function getFileProcessorFactory()
-    {
-        if ($this->fileProcessorFactory === null) {
-            $this->fileProcessorFactory = ObjectManager::getInstance()
-                ->get(FileProcessorFactory::class);
-        }
-        return $this->fileProcessorFactory;
     }
 }

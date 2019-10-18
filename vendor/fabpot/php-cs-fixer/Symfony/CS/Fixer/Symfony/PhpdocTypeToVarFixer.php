@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -17,7 +16,7 @@ use Symfony\CS\DocBlock\DocBlock;
 use Symfony\CS\Tokenizer\Tokens;
 
 /**
- * @author Graham Campbell <graham@alt-three.com>
+ * @author Graham Campbell <graham@mineuk.com>
  */
 class PhpdocTypeToVarFixer extends AbstractFixer
 {
@@ -28,11 +27,7 @@ class PhpdocTypeToVarFixer extends AbstractFixer
     {
         $tokens = Tokens::fromCode($content);
 
-        foreach ($tokens as $index => $token) {
-            if (!$token->isGivenKind(T_DOC_COMMENT)) {
-                continue;
-            }
-
+        foreach ($tokens->findGivenKind(T_DOC_COMMENT) as $token) {
             $doc = new DocBlock($token->getContent());
             $annotations = $doc->getAnnotationsOfType('type');
 
@@ -57,14 +52,5 @@ class PhpdocTypeToVarFixer extends AbstractFixer
     public function getDescription()
     {
         return '@type should always be written as @var.';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function getPriority()
-    {
-        // should be ran before the PhpdocSingleLineVarSpacingFixer.
-        return -9;
     }
 }

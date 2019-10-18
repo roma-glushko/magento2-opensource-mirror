@@ -22,12 +22,23 @@ use Symfony\Component\Config\Exception\FileLoaderImportCircularReferenceExceptio
  */
 abstract class FileLoader extends Loader
 {
+    /**
+     * @var array
+     */
     protected static $loading = array();
 
+    /**
+     * @var FileLocatorInterface
+     */
     protected $locator;
 
     private $currentDir;
 
+    /**
+     * Constructor.
+     *
+     * @param FileLocatorInterface $locator A FileLocatorInterface instance
+     */
     public function __construct(FileLocatorInterface $locator)
     {
         $this->locator = $locator;
@@ -77,7 +88,7 @@ abstract class FileLoader extends Loader
                 // @deprecated should be removed in 3.0
                 $locator = $loader->getLocator();
                 if (null === $locator) {
-                    @trigger_error('Not calling the parent constructor in '.get_class($loader).' which extends '.__CLASS__.' is deprecated since Symfony 2.7 and will not be supported anymore in 3.0.', E_USER_DEPRECATED);
+                    @trigger_error('Not calling the parent constructor in '.get_class($loader).' which extends '.__CLASS__.' is deprecated since version 2.7 and will not be supported anymore in 3.0.', E_USER_DEPRECATED);
                     $locator = $this->locator;
                 }
 

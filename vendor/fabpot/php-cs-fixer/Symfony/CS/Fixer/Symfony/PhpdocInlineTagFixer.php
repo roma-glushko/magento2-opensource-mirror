@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -71,6 +70,6 @@ final class PhpdocInlineTagFixer extends AbstractFixer
      */
     public function getDescription()
     {
-        return 'Fix phpdoc inline tags, make inheritdoc always inline.';
+        return 'Fix PHPDoc inline tags, make inheritdoc always inline.';
     }
 }

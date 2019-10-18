@@ -1,12 +1,11 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Downloadable\Controller;
 
 use Magento\Downloadable\Helper\Download as DownloadHelper;
-use Magento\Framework\App\Response\Http as HttpResponse;
 
 /**
  * Download controller
@@ -15,13 +14,6 @@ use Magento\Framework\App\Response\Http as HttpResponse;
  */
 abstract class Download extends \Magento\Framework\App\Action\Action
 {
-    /**
-     * @var array
-     */
-    private $disallowedContentTypes = [
-        'text/html'
-    ];
-
     /**
      * Prepare response to output resource contents
      *
@@ -36,12 +28,9 @@ abstract class Download extends \Magento\Framework\App\Action\Action
 
         $helper->setResource($path, $resourceType);
         $fileName = $helper->getFilename();
-
         $contentType = $helper->getContentType();
 
-        /** @var HttpResponse $response */
-        $response = $this->getResponse();
-        $response->setHttpResponseCode(
+        $this->getResponse()->setHttpResponseCode(
             200
         )->setHeader(
             'Pragma',
@@ -58,19 +47,15 @@ abstract class Download extends \Magento\Framework\App\Action\Action
         );
 
         if ($fileSize = $helper->getFileSize()) {
-            $response->setHeader('Content-Length', $fileSize);
+            $this->getResponse()->setHeader('Content-Length', $fileSize);
         }
 
-        $contentDisposition = $helper->getContentDisposition();
-        if (!$contentDisposition || in_array($contentType, $this->disallowedContentTypes)) {
-            // For security reasons we force browsers to download the file instead of opening it.
-            $contentDisposition = \Zend_Mime::DISPOSITION_ATTACHMENT;
+        if ($contentDisposition = $helper->getContentDisposition()) {
+            $this->getResponse()->setHeader('Content-Disposition', $contentDisposition . '; filename=' . $fileName);
         }
 
-        $response->setHeader('Content-Disposition', $contentDisposition  . '; filename=' . $fileName);
-        //Rendering
-        $response->clearBody();
-        $response->sendHeaders();
+        $this->getResponse()->clearBody();
+        $this->getResponse()->sendHeaders();
 
         $helper->output();
     }

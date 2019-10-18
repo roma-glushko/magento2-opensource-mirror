@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Payment\Test\Unit\Block;
@@ -33,25 +33,25 @@ class InfoTest extends \PHPUnit_Framework_TestCase
     {
         $helper = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
         $this->_storeManager = $this->getMockBuilder(
-            \Magento\Store\Model\StoreManager::class
+            '\Magento\Store\Model\StoreManager'
         )->setMethods(
             ['getStore']
         )->disableOriginalConstructor()->getMock();
         $this->_eventManager = $this->getMockBuilder(
-            \Magento\Framework\Event\ManagerInterface::class
+            '\Magento\Framework\Event\ManagerInterface'
         )->setMethods(
             ['dispatch']
         )->disableOriginalConstructor()->getMock();
-        $this->_escaper = $this->getMock(\Magento\Framework\Escaper::class, null, [], '', true);
+        $this->_escaper = $this->getMock('\Magento\Framework\Escaper', null, [], '', true);
         $context = $helper->getObject(
-            \Magento\Framework\View\Element\Template\Context::class,
+            'Magento\Framework\View\Element\Template\Context',
             [
                 'storeManager' => $this->_storeManager,
                 'eventManager' => $this->_eventManager,
                 'escaper' => $this->_escaper
             ]
         );
-        $this->_object = $helper->getObject(\Magento\Payment\Block\Info::class, ['context' => $context]);
+        $this->_object = $helper->getObject('Magento\Payment\Block\Info', ['context' => $context]);
     }
 
     /**
@@ -73,8 +73,7 @@ class InfoTest extends \PHPUnit_Framework_TestCase
             $this->_storeManager->expects($this->any())->method('getStore')->will($this->returnValue($storeMock));
         }
 
-        $paymentInfo = $this->getMockBuilder(\Magento\Payment\Model\Info::class)
-            ->disableOriginalConstructor()->getMock();
+        $paymentInfo = $this->getMockBuilder('\Magento\Payment\Model\Info')->disableOriginalConstructor()->getMock();
         $paymentInfo->expects($this->any())->method('getMethodInstance')->will($this->returnValue($methodInstance));
 
         $this->_object->setData('info', $paymentInfo);
@@ -102,7 +101,7 @@ class InfoTest extends \PHPUnit_Framework_TestCase
     protected function _getMethodInstanceMock($store)
     {
         $methodInstance = $this->getMockBuilder(
-            \Magento\Payment\Model\Method\AbstractMethod::class
+            '\Magento\Payment\Model\Method\AbstractMethod'
         )->setMethods(
             ['getStore']
         )->disableOriginalConstructor()->getMock();
@@ -116,7 +115,7 @@ class InfoTest extends \PHPUnit_Framework_TestCase
      */
     protected function _getStoreMock($storeCode)
     {
-        $storeMock = $this->getMockBuilder(\Magento\Store\Model\Store::class)->disableOriginalConstructor()->getMock();
+        $storeMock = $this->getMockBuilder('\Magento\Store\Model\Store')->disableOriginalConstructor()->getMock();
         $storeMock->expects($this->any())->method('getCode')->will($this->returnValue($storeCode));
         return $storeMock;
     }
@@ -132,8 +131,7 @@ class InfoTest extends \PHPUnit_Framework_TestCase
 
     public function testGetSpecificInformation()
     {
-        $paymentInfo = $this->getMockBuilder(\Magento\Payment\Model\Info::class)
-            ->disableOriginalConstructor()->getMock();
+        $paymentInfo = $this->getMockBuilder('\Magento\Payment\Model\Info')->disableOriginalConstructor()->getMock();
 
         $this->_object->setData('info', $paymentInfo);
         $this->_object->getSpecificInformation();
@@ -157,7 +155,7 @@ class InfoTest extends \PHPUnit_Framework_TestCase
             [[], false, []],
             ['string', true, [0 => 'string']],
             ['string', false, ['string']],
-            [['key' => 'v"a!@#%$%^^&&*(*/\'\]l'], true, ['key' => 'v&quot;a!@#%$%^^&amp;&amp;*(*/&#039;\]l']],
+            [['key' => 'v"a!@#%$%^^&&*(*/\'\]l'], true, ['key' => 'v&quot;a!@#%$%^^&amp;&amp;*(*/\'\]l']],
             [['key' => 'val'], false, ['key' => 'val']]
         ];
     }

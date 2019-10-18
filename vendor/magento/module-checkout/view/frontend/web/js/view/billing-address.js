@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*jshint browser:true*/
@@ -7,7 +7,6 @@
 define(
     [
         'ko',
-        'underscore',
         'Magento_Ui/js/form/form',
         'Magento_Customer/js/model/customer',
         'Magento_Customer/js/model/address-list',
@@ -23,7 +22,6 @@ define(
     ],
     function (
         ko,
-        _,
         Component,
         customer,
         addressList,
@@ -41,13 +39,9 @@ define(
 
         var lastSelectedBillingAddress = null,
             newAddressOption = {
-                /**
-                 * Get new address label
-                 * @returns {String}
-                 */
                 getAddressInline: function () {
-                    return $t('New Address');
-                },
+                return $t('New Address');
+            },
                 customerAddressId: null
             },
             countryData = customerData.get('directory-data'),
@@ -127,8 +121,9 @@ define(
             useShippingAddress: function () {
                 if (this.isAddressSameAsShipping()) {
                     selectBillingAddress(quote.shippingAddress());
-
-                    this.updateAddresses();
+                    if (window.checkoutConfig.reloadOnBillingAddress) {
+                        setBillingAddressAction(globalMessageList);
+                    }
                     this.isAddressDetailsVisible(true);
                 } else {
                     lastSelectedBillingAddress = quote.billingAddress();
@@ -147,13 +142,15 @@ define(
                 if (this.selectedAddress() && this.selectedAddress() != newAddressOption) {
                     selectBillingAddress(this.selectedAddress());
                     checkoutData.setSelectedBillingAddress(this.selectedAddress().getKey());
+                    if (window.checkoutConfig.reloadOnBillingAddress) {
+                        setBillingAddressAction(globalMessageList);
+                    }
                 } else {
                     this.source.set('params.invalid', false);
                     this.source.trigger(this.dataScopePrefix + '.data.validate');
-
                     if (this.source.get(this.dataScopePrefix + '.custom_attributes')) {
                         this.source.trigger(this.dataScopePrefix + '.custom_attributes.data.validate');
-                    }
+                    };
 
                     if (!this.source.get('params.invalid')) {
                         var addressData = this.source.get(this.dataScopePrefix),
@@ -162,16 +159,19 @@ define(
                         if (customer.isLoggedIn() && !this.customerHasAddresses) {
                             this.saveInAddressBook(1);
                         }
-                        addressData['save_in_address_book'] = this.saveInAddressBook() ? 1 : 0;
+                        addressData.save_in_address_book = this.saveInAddressBook() ? 1 : 0;
                         newBillingAddress = createBillingAddress(addressData);
 
                         // New address must be selected as a billing address
                         selectBillingAddress(newBillingAddress);
                         checkoutData.setSelectedBillingAddress(newBillingAddress.getKey());
                         checkoutData.setNewCustomerBillingAddress(addressData);
+
+                        if (window.checkoutConfig.reloadOnBillingAddress) {
+                            setBillingAddressAction(globalMessageList);
+                        }
                     }
                 }
-                this.updateAddresses();
             },
 
             /**
@@ -193,8 +193,8 @@ define(
                     // restore 'Same As Shipping' checkbox state
                     this.isAddressSameAsShipping(
                         quote.billingAddress() != null &&
-                        quote.billingAddress().getCacheKey() == quote.shippingAddress().getCacheKey() &&
-                        !quote.isVirtual()
+                            quote.billingAddress().getCacheKey() == quote.shippingAddress().getCacheKey() &&
+                            !quote.isVirtual()
                     );
                     this.isAddressDetailsVisible(true);
                 }
@@ -222,26 +222,6 @@ define(
              */
             getCountryName: function (countryId) {
                 return countryData()[countryId] != undefined ? countryData()[countryId].name : '';
-            },
-
-            /**
-             * Trigger action to update shipping and billing addresses
-             */
-            updateAddresses: function () {
-                if (window.checkoutConfig.reloadOnBillingAddress ||
-                    !window.checkoutConfig.displayBillingOnPaymentMethod
-                ) {
-                    setBillingAddressAction(globalMessageList);
-                }
-            },
-
-            /**
-             * Get code
-             * @param {Object} parent
-             * @returns {String}
-             */
-            getCode: function (parent) {
-                return _.isFunction(parent.getCode) ? parent.getCode() : 'shared';
             }
         });
     }

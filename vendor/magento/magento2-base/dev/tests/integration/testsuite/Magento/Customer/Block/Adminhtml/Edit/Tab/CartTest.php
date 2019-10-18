@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Customer\Block\Adminhtml\Edit\Tab;
@@ -35,19 +35,19 @@ class CartTest extends \PHPUnit_Framework_TestCase
     {
         $this->_objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
 
-        $this->_storeManager = $this->_objectManager->get(\Magento\Store\Model\StoreManager::class);
+        $this->_storeManager = $this->_objectManager->get('Magento\Store\Model\StoreManager');
         $this->_context = $this->_objectManager->get(
-            \Magento\Backend\Block\Template\Context::class,
+            'Magento\Backend\Block\Template\Context',
             ['storeManager' => $this->_storeManager]
         );
 
-        $this->_coreRegistry = $this->_objectManager->get(\Magento\Framework\Registry::class);
+        $this->_coreRegistry = $this->_objectManager->get('Magento\Framework\Registry');
         $this->_coreRegistry->register(RegistryConstants::CURRENT_CUSTOMER_ID, self::CUSTOMER_ID_VALUE);
 
         $this->_block = $this->_objectManager->get(
-            \Magento\Framework\View\LayoutInterface::class
+            'Magento\Framework\View\LayoutInterface'
         )->createBlock(
-            \Magento\Customer\Block\Adminhtml\Edit\Tab\Cart::class,
+            'Magento\Customer\Block\Adminhtml\Edit\Tab\Cart',
             '',
             ['context' => $this->_context, 'registry' => $this->_coreRegistry]
         );
@@ -71,13 +71,13 @@ class CartTest extends \PHPUnit_Framework_TestCase
     public function testGetGridParentHtml()
     {
         $this->_block = $this->_objectManager->get(
-            \Magento\Framework\View\LayoutInterface::class
+            'Magento\Framework\View\LayoutInterface'
         )->createBlock(
-            \Magento\Customer\Block\Adminhtml\Edit\Tab\Cart::class,
+            'Magento\Customer\Block\Adminhtml\Edit\Tab\Cart',
             '',
             []
         );
-        $mockCollection = $this->getMockBuilder(\Magento\Framework\Data\Collection::class)
+        $mockCollection = $this->getMockBuilder('\Magento\Framework\Data\Collection')
             ->disableOriginalConstructor()
             ->getMock();
         $this->_block->setCollection($mockCollection);
@@ -101,8 +101,7 @@ class CartTest extends \PHPUnit_Framework_TestCase
         $this->assertContains("<div class=\"admin__data-grid-header admin__data-grid-toolbar\"", $html);
         $this->assertContains("customer_cart_gridJsObject = new varienGrid(\"customer_cart_grid\",", $html);
         $this->assertContains(
-            'backend\u002Fcustomer\u002Fcart_product_composite_cart\u002Fconfigure\u002Fcustomer_id\u002F'
-            . self::CUSTOMER_ID_VALUE,
+            "backend/customer/cart_product_composite_cart/configure/customer_id/" . self::CUSTOMER_ID_VALUE,
             $html
         );
     }

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -201,7 +201,7 @@ class Sitemap extends \Magento\Framework\Model\AbstractModel
      */
     protected function _construct()
     {
-        $this->_init(\Magento\Sitemap\Model\ResourceModel\Sitemap::class);
+        $this->_init('Magento\Sitemap\Model\ResourceModel\Sitemap');
     }
 
     /**
@@ -586,12 +586,7 @@ class Sitemap extends \Magento\Framework\Model\AbstractModel
      */
     protected function _getStoreBaseUrl($type = \Magento\Framework\UrlInterface::URL_TYPE_LINK)
     {
-        /** @var \Magento\Store\Model\Store $store */
-        $store = $this->_storeManager->getStore($this->getStoreId());
-
-        $isSecure = $store->isUrlSecure();
-
-        return rtrim($store->getBaseUrl($type, $isSecure), '/') . '/';
+        return rtrim($this->_storeManager->getStore($this->getStoreId())->getBaseUrl($type), '/') . '/';
     }
 
     /**
@@ -635,7 +630,7 @@ class Sitemap extends \Magento\Framework\Model\AbstractModel
      */
     protected function _getDocumentRoot()
     {
-        return $this->_request->getServer('DOCUMENT_ROOT');
+        return realpath($this->_request->getServer('DOCUMENT_ROOT'));
     }
 
     /**

@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Backup\Controller\Adminhtml\Index;
@@ -19,7 +19,7 @@ class Create extends \Magento\Backup\Controller\Adminhtml\Index
      */
     public function execute()
     {
-        if (!$this->getRequest()->isAjax() || !$this->getRequest()->isPost()) {
+        if (!$this->getRequest()->isAjax()) {
             return $this->_redirect('*/*/index');
         }
 

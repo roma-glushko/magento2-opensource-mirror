@@ -1,13 +1,12 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Downloadable\Controller\Adminhtml\Downloadable\Product\Edit;
 
 use Magento\Downloadable\Helper\Download as DownloadHelper;
-use Magento\Framework\App\Response\Http as HttpResponse;
 
 class Link extends \Magento\Catalog\Controller\Adminhtml\Product\Edit
 {
@@ -43,9 +42,7 @@ class Link extends \Magento\Catalog\Controller\Adminhtml\Product\Edit
         $fileName = $helper->getFilename();
         $contentType = $helper->getContentType();
 
-        /** @var HttpResponse $response */
-        $response = $this->getResponse();
-        $response->setHttpResponseCode(
+        $this->getResponse()->setHttpResponseCode(
             200
         )->setHeader(
             'Pragma',
@@ -60,22 +57,18 @@ class Link extends \Magento\Catalog\Controller\Adminhtml\Product\Edit
             $contentType,
             true
         );
+
         if ($fileSize = $helper->getFileSize()) {
-            $response->setHeader('Content-Length', $fileSize);
+            $this->getResponse()->setHeader('Content-Length', $fileSize);
         }
-        //Setting disposition as state in the config or forcing it for HTML.
-        /** @var string|null $contentDisposition */
-        $contentDisposition = $helper->getContentDisposition();
-        if (!$contentDisposition || $contentType === 'text/html') {
-            $contentDisposition = 'attachment';
+
+        if ($contentDisposition = $helper->getContentDisposition()) {
+            $this->getResponse()
+                ->setHeader('Content-Disposition', $contentDisposition . '; filename=' . $fileName);
         }
-        $response->setHeader(
-            'Content-Disposition',
-            $contentDisposition . '; filename=' . $fileName
-        );
-        //Rendering
-        $response->clearBody();
-        $response->sendHeaders();
+
+        $this->getResponse()->clearBody();
+        $this->getResponse()->sendHeaders();
         $helper->output();
     }
 

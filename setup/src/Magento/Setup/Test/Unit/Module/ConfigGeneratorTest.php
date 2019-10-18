@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Setup\Test\Unit\Module;
@@ -38,16 +38,6 @@ class ConfigGeneratorTest extends \PHPUnit_Framework_TestCase
         $returnValue = $this->configGeneratorObject->createCryptConfig([]);
         $this->assertEquals(ConfigFilePool::APP_ENV, $returnValue->getFileKey());
         $this->assertEquals(['crypt' => ['key' => md5('key')]], $returnValue->getData());
-    }
-
-    /**
-     * @deprecated
-     */
-    public function testCreateInstallConfig()
-    {
-        $returnValue = $this->configGeneratorObject->createInstallConfig([]);
-        $this->assertInstanceOf('Magento\Framework\Config\Data\ConfigData', $returnValue);
-        $this->assertEquals(ConfigFilePool::APP_ENV, $returnValue->getFileKey());
     }
 
     public function testCreateSessionConfigWithInput()

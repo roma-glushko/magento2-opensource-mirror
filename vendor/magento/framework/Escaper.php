@@ -1,53 +1,20 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework;
 
 /**
- * Magento escape methods.
+ * Magento escape methods
  */
 class Escaper extends \Zend\Escaper\Escaper
 {
     /**
-     * @var \Psr\Log\LoggerInterface
-     */
-    private $logger;
-
-    /**
-     * @var string[]
-     */
-    private $notAllowedTags = ['script', 'img', 'embed', 'iframe', 'video', 'source', 'object', 'audio'];
-
-    /**
-     * @var string[]
-     */
-    private $allowedAttributes = ['id', 'class', 'href', 'target', 'title', 'style'];
-
-    /**
-     * @var string[]
-     */
-    private $escapeAsUrlAttributes = ['href'];
-
-    /**
-     * @param string $encoding
-     * @param \Psr\Log\LoggerInterface|null $logger
-     */
-    public function __construct(
-        $encoding = null,
-        \Psr\Log\LoggerInterface $logger = null
-    ) {
-        parent::__construct($encoding);
-        $this->logger = $logger ?: \Magento\Framework\App\ObjectManager::getInstance()
-            ->get(\Psr\Log\LoggerInterface::class);
-    }
-
-    /**
-     * Escape HTML entities.
+     * Escape html entities
      *
-     * @param string|array $data
-     * @param array $allowedTags
+     * @param  string|array $data
+     * @param  array $allowedTags
      * @return string|array
      */
     public function escapeHtml($data, $allowedTags = null)
@@ -55,148 +22,32 @@ class Escaper extends \Zend\Escaper\Escaper
         if (is_array($data)) {
             $result = [];
             foreach ($data as $item) {
-                $result[] = $this->escapeHtml($item, $allowedTags);
+                $result[] = $this->escapeHtml($item);
             }
         } elseif (strlen($data)) {
-            if (is_array($allowedTags) && !empty($allowedTags)) {
-                $notAllowedTags = array_intersect(
-                    array_map('strtolower', $allowedTags),
-                    $this->notAllowedTags
-                );
-                if (!empty($notAllowedTags)) {
-                    $this->logger->critical(
-                        'The following tag(s) are not allowed: ' . implode(', ', $notAllowedTags)
-                    );
-                    $allowedTags = array_diff($allowedTags, $this->notAllowedTags);
-                }
-                $wrapperElementId = uniqid();
-                $domDocument = new \DOMDocument('1.0', 'UTF-8');
-                set_error_handler(
-                    function ($errorNumber, $errorString) {
-                        throw new \Exception($errorString, $errorNumber);
-                    }
-                );
-                $string = mb_convert_encoding($data, 'HTML-ENTITIES', 'UTF-8');
-                try {
-                    $domDocument->loadHTML(
-                        '<html><body id="' . $wrapperElementId . '">' . $string . '</body></html>'
-                    );
-                } catch (\Exception $e) {
-                    restore_error_handler();
-                    $this->logger->critical($e);
-                }
-                restore_error_handler();
-                $this->removeNotAllowedTags($domDocument, $allowedTags);
-                $this->removeNotAllowedAttributes($domDocument);
-                $this->escapeText($domDocument);
-                $this->escapeAttributeValues($domDocument);
-                $result = mb_convert_encoding($domDocument->saveHTML(), 'UTF-8', 'HTML-ENTITIES');
-                preg_match('/<body id="' . $wrapperElementId . '">(.+)<\/body><\/html>$/si', $result, $matches);
-                return !empty($matches) ? $matches[1] : '';
+            if (is_array($allowedTags) and !empty($allowedTags)) {
+                $allowed = implode('|', $allowedTags);
+                $result = preg_replace('/<([\/\s\r\n]*)(' . $allowed . ')([\/\s\r\n]*)>/si', '##$1$2$3##', $data);
+                $result = htmlspecialchars($result, ENT_COMPAT, 'UTF-8', false);
+                $result = preg_replace('/##([\/\s\r\n]*)(' . $allowed . ')([\/\s\r\n]*)##/si', '<$1$2$3>', $result);
             } else {
-                $result = htmlspecialchars($data, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8', false);
+                $result = htmlspecialchars($data, ENT_COMPAT, 'UTF-8', false);
             }
         } else {
             $result = $data;
         }
-
         return $result;
     }
 
     /**
-     * Remove not allowed tags.
-     *
-     * @param \DOMDocument $domDocument
-     * @param string[] $allowedTags
-     * @return void
-     */
-    private function removeNotAllowedTags(\DOMDocument $domDocument, array $allowedTags)
-    {
-        $xpath = new \DOMXPath($domDocument);
-        $nodes = $xpath->query(
-            '//node()[name() != \''
-            . implode('\' and name() != \'', array_merge($allowedTags, ['html', 'body']))
-            . '\']'
-        );
-        foreach ($nodes as $node) {
-            if ($node->nodeName != '#text' && $node->nodeName != '#comment') {
-                $node->parentNode->replaceChild($domDocument->createTextNode($node->textContent), $node);
-            }
-        }
-    }
-
-    /**
-     * Remove not allowed attributes.
-     *
-     * @param \DOMDocument $domDocument
-     * @return void
-     */
-    private function removeNotAllowedAttributes(\DOMDocument $domDocument)
-    {
-        $xpath = new \DOMXPath($domDocument);
-        $nodes = $xpath->query(
-            '//@*[name() != \'' . implode('\' and name() != \'', $this->allowedAttributes) . '\']'
-        );
-        foreach ($nodes as $node) {
-            $node->parentNode->removeAttribute($node->nodeName);
-        }
-    }
-
-    /**
-     * Escape text
-     *
-     * @param \DOMDocument $domDocument.
-     * @return void
-     */
-    private function escapeText(\DOMDocument $domDocument)
-    {
-        $xpath = new \DOMXPath($domDocument);
-        $nodes = $xpath->query('//text()');
-        foreach ($nodes as $node) {
-            $node->nodeValue = $this->escapeHtml($node->nodeValue);
-        }
-    }
-
-    /**
-     * Escape attribute values.
-     *
-     * @param \DOMDocument $domDocument
-     * @return void
-     */
-    private function escapeAttributeValues(\DOMDocument $domDocument)
-    {
-        $xpath = new \DOMXPath($domDocument);
-        $nodes = $xpath->query('//@*');
-        foreach ($nodes as $node) {
-            $value = $this->escapeAttributeValue(
-                $node->nodeName,
-                $node->parentNode->getAttribute($node->nodeName)
-            );
-            $node->parentNode->setAttribute($node->nodeName, $value);
-        }
-    }
-
-    /**
-     * Escape attribute value using escapeHtml or escapeUrl.
-     *
-     * @param string $name
-     * @param string $value
-     * @return string
-     */
-    private function escapeAttributeValue($name, $value)
-    {
-        return in_array($name, $this->escapeAsUrlAttributes) ? $this->escapeUrl($value) : $this->escapeHtml($value);
-    }
-
-    /**
-     * Escape URL.
+     * Escape html entities in url
      *
      * @param string $data
      * @return string
      */
     public function escapeUrl($data)
     {
-        return $this->escapeHtml($this->escapeXssInUrl($data));
+        return htmlspecialchars($data, ENT_COMPAT, 'UTF-8', false);
     }
 
     /**
@@ -215,19 +66,7 @@ class Escaper extends \Zend\Escaper\Escaper
             }
         } else {
             $result = str_replace($quote, '\\' . $quote, $data);
-            // Preventing inserting script tags in JS inside an HTML document.
-            $result = str_replace(
-                '</script>',
-                '<' . $quote . ' + ' . $quote . '/script>',
-                $result
-            );
-            $result = str_replace(
-                '<script>',
-                '<' . $quote . ' + ' . $quote . 'script>',
-                $result
-            );
         }
-
         return $result;
     }
 

@@ -1,18 +1,15 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magento\Framework\View\Test\Unit\Asset;
 
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Framework\View\Asset\Repository;
-use Magento\Framework\View\Design\Theme\ThemeProviderInterface;
 
 /**
  * Unit test for Magento\Framework\View\Asset\Repository
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class RepositoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -34,7 +31,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
     /**
      * @var \Magento\Framework\View\Design\Theme\ListInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $themeProvider;
+    private $listMock;
 
     /**
      * @var \Magento\Framework\View\Asset\Source|\PHPUnit_Framework_MockObject_MockObject
@@ -77,7 +74,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
         $this->designMock = $this->getMockBuilder('Magento\Framework\View\DesignInterface')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->themeProvider = $this->getMockBuilder(ThemeProviderInterface::class)
+        $this->listMock = $this->getMockBuilder('Magento\Framework\View\Design\Theme\ListInterface')
             ->disableOriginalConstructor()
             ->getMock();
         $this->sourceMock = $this->getMockBuilder('Magento\Framework\View\Asset\Source')
@@ -102,21 +99,17 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->repository = (new ObjectManager($this))->getObject(Repository::class, [
-            'baseUrl' => $this->urlMock,
-            'design' => $this->designMock,
-            'assetSource' => $this->sourceMock,
-            'request' => $this->httpMock,
-            'fileFactory' => $this->fileFactoryMock,
-            'fallbackContextFactory' => $this->fallbackFactoryMock,
-            'contextFactory' => $this->contextFactoryMock,
-            'remoteFactory' => $this->remoteFactoryMock
-        ]);
-
-        $reflection = new \ReflectionClass(Repository::class);
-        $reflectionProperty = $reflection->getProperty('themeProvider');
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue($this->repository, $this->themeProvider);
+        $this->repository = new Repository(
+            $this->urlMock,
+            $this->designMock,
+            $this->listMock,
+            $this->sourceMock,
+            $this->httpMock,
+            $this->fileFactoryMock,
+            $this->fallbackFactoryMock,
+            $this->contextFactoryMock,
+            $this->remoteFactoryMock
+        );
     }
 
     /**
@@ -127,7 +120,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
     public function testUpdateDesignParamsWrongTheme()
     {
         $params = ['area' => 'area', 'theme' => 'nonexistent_theme'];
-        $this->themeProvider->expects($this->once())
+        $this->listMock->expects($this->once())
             ->method('getThemeByFullPath')
             ->with('area/nonexistent_theme')
             ->will($this->returnValue(null));
@@ -142,7 +135,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testUpdateDesignParams($params, $result)
     {
-        $this->themeProvider
+        $this->listMock
             ->expects($this->any())
             ->method('getThemeByFullPath')
             ->willReturn('ThemeID');
@@ -172,7 +165,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateAsset()
     {
-        $this->themeProvider
+        $this->listMock
             ->expects($this->any())
             ->method('getThemeByFullPath')
             ->willReturnArgument(0);
@@ -234,7 +227,7 @@ class RepositoryTest extends \PHPUnit_Framework_TestCase
                     'locale' => 'locale'
                 ]
             );
-        $this->themeProvider
+        $this->listMock
             ->expects($this->any())
             ->method('getThemeByFullPath')
             ->willReturnArgument(0);

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -11,13 +11,6 @@ namespace Magento\Theme\Controller\Adminhtml\System\Design\Wysiwyg;
 
 abstract class Files extends \Magento\Backend\App\Action
 {
-    /**
-     * Authorization level of a basic admin session.
-     *
-     * @see _isAllowed()
-     */
-    const ADMIN_RESOURCE = 'Magento_Theme::theme';
-
     /**
      * @var \Magento\Framework\App\Response\Http\FileFactory
      */
@@ -50,6 +43,6 @@ abstract class Files extends \Magento\Backend\App\Action
      */
     protected function _getStorage()
     {
-        return $this->_objectManager->get(\Magento\Theme\Model\Wysiwyg\Storage::class);
+        return $this->_objectManager->get('Magento\Theme\Model\Wysiwyg\Storage');
     }
 }

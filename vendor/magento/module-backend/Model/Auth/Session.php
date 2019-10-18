@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Backend\Model\Auth;
@@ -156,22 +156,11 @@ class Session extends \Magento\Framework\Session\SessionManager implements \Mage
      */
     public function isLoggedIn()
     {
-        $lifetime = $this->_config->getValue(self::XML_PATH_SESSION_LIFETIME);
-        $currentTime = time();
-
-        /* Validate admin session lifetime that should be more than 60 seconds */
-        if ($lifetime >= 60 && $this->getUpdatedAt() < $currentTime - $lifetime) {
-            return false;
-        }
-
-        if ($this->getUser() && $this->getUser()->getId()) {
-            return true;
-        }
-        return false;
+        return $this->getUser() && $this->getUser()->getId();
     }
 
     /**
-     * Set session UpdatedAt to current time and update cookie expiration time
+     * Set session UpdatedAt to current time
      *
      * @return void
      */

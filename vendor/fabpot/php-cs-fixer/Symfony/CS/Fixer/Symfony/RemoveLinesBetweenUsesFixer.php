@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -76,13 +75,10 @@ class RemoveLinesBetweenUsesFixer extends AbstractFixer
     private function fixLineBreaksPerImportGroup(Tokens $tokens, array $uses)
     {
         foreach ($uses as $index) {
-            $endIndex = $tokens->getNextTokenOfKind($index, array(';', T_CLOSE_TAG));
-            if ($endIndex === count($tokens) - 1) {
-                continue;
-            }
-
+            $endIndex = $tokens->getNextTokenOfKind($index, array(';'));
             $afterSemicolonIndex = $tokens->getNextNonWhitespace($endIndex);
-            if (null === $afterSemicolonIndex || !$tokens[$afterSemicolonIndex]->isGivenKind(T_USE)) {
+
+            if (null !== $afterSemicolonIndex && !$tokens[$afterSemicolonIndex]->isGivenKind(T_USE)) {
                 continue;
             }
 

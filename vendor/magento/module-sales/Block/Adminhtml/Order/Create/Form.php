@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Sales\Block\Adminhtml\Order\Create;
@@ -168,23 +168,10 @@ class Form extends \Magento\Sales\Block\Adminhtml\Order\Create\AbstractCreate
             $addresses = $this->customerRepository->getById($this->getCustomerId())->getAddresses();
 
             foreach ($addresses as $address) {
-                $addressArray = $this->addressMapper->toFlatArray($address);
-
-                foreach ($addressArray as $key => $value) {
-                    if (gettype($value) === 'string') {
-                        $escapedValue = htmlspecialchars(
-                            (string)$value,
-                            ENT_QUOTES | ENT_SUBSTITUTE,
-                            'UTF-8',
-                            false
-                        );
-                        $addressArray[$key] = $escapedValue;
-                    }
-                }
                 $addressForm = $this->_customerFormFactory->create(
                     'customer_address',
                     'adminhtml_customer_address',
-                    $addressArray
+                    $this->addressMapper->toFlatArray($address)
                 );
                 $data['addresses'][$address->getId()] = $addressForm->outputData(
                     \Magento\Eav\Model\AttributeDataFactory::OUTPUT_FORMAT_JSON

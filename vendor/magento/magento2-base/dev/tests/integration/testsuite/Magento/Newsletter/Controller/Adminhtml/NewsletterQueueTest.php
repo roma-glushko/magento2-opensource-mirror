@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Newsletter\Controller\Adminhtml;
@@ -38,6 +38,7 @@ class NewsletterQueueTest extends \Magento\TestFramework\TestCase\AbstractBacken
 
     /**
      * @magentoDataFixture Magento/Newsletter/_files/newsletter_sample.php
+     * @magentoAppIsolation disabled
      */
     public function testSaveActionQueueTemplateAndVerifySuccessMessage()
     {

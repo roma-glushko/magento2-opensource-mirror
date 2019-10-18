@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  *
  */
@@ -24,12 +24,12 @@ class EditTest extends \PHPUnit_Framework_TestCase
         parent::setUp();
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
         /** @var \Magento\Framework\App\Request\Http $request */
-        $request = $objectManager->get(\Magento\Framework\App\Request\Http::class);
+        $request = $objectManager->get('Magento\Framework\App\Request\Http');
         $request->setRouteName('adminhtml')->setControllerName('integration');
         $this->editButtonBlock = $objectManager->create(
-            \Magento\Integration\Block\Adminhtml\Widget\Grid\Column\Renderer\Button\Edit::class
+            'Magento\Integration\Block\Adminhtml\Widget\Grid\Column\Renderer\Button\Edit'
         );
-        $column = $objectManager->create(\Magento\Backend\Block\Widget\Grid\Column::class);
+        $column = $objectManager->create('Magento\Backend\Block\Widget\Grid\Column');
         $this->editButtonBlock->setColumn($column);
     }
 
@@ -40,7 +40,7 @@ class EditTest extends \PHPUnit_Framework_TestCase
         $this->assertContains('title="Edit"', $buttonHtml);
         $this->assertContains('class="action edit"', $buttonHtml);
         $this->assertContains(
-            'onclick="window.location.href=&#039;http://localhost/index.php/backend/admin/integration/edit/id/'
+            'onclick="window.location.href=\'http://localhost/index.php/backend/admin/integration/edit/id/'
             . $integration->getId(),
             $buttonHtml
         );
@@ -62,7 +62,7 @@ class EditTest extends \PHPUnit_Framework_TestCase
     {
         /** @var $integration Integration */
         $objectManager = \Magento\TestFramework\Helper\Bootstrap::getObjectManager();
-        $integration = $objectManager->create(\Magento\Integration\Model\Integration::class);
+        $integration = $objectManager->create('Magento\Integration\Model\Integration');
         return $integration->load('Fixture Integration', 'name');
     }
 }

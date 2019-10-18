@@ -11,13 +11,12 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\DefinitionDecorator;
 use Symfony\Component\DependencyInjection\Compiler\ResolveDefinitionTemplatesPass;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
-class ResolveDefinitionTemplatesPassTest extends TestCase
+class ResolveDefinitionTemplatesPassTest extends \PHPUnit_Framework_TestCase
 {
     public function testProcess()
     {
@@ -234,36 +233,6 @@ class ResolveDefinitionTemplatesPassTest extends TestCase
         $this->assertTrue($container->getDefinition('child1')->isLazy());
     }
 
-    public function testSetAutowiredOnServiceHasParent()
-    {
-        $container = new ContainerBuilder();
-
-        $container->register('parent', 'stdClass');
-
-        $container->setDefinition('child1', new DefinitionDecorator('parent'))
-            ->setAutowired(true)
-        ;
-
-        $this->process($container);
-
-        $this->assertTrue($container->getDefinition('child1')->isAutowired());
-    }
-
-    public function testSetAutowiredOnServiceIsParent()
-    {
-        $container = new ContainerBuilder();
-
-        $container->register('parent', 'stdClass')
-            ->setAutowired(true)
-        ;
-
-        $container->setDefinition('child1', new DefinitionDecorator('parent'));
-
-        $this->process($container);
-
-        $this->assertTrue($container->getDefinition('child1')->isAutowired());
-    }
-
     public function testDeepDefinitionsResolving()
     {
         $container = new ContainerBuilder();
@@ -280,23 +249,23 @@ class ResolveDefinitionTemplatesPassTest extends TestCase
         $this->process($container);
 
         $configurator = $container->getDefinition('sibling')->getConfigurator();
-        $this->assertInstanceOf('Symfony\Component\DependencyInjection\Definition', $configurator);
+        $this->assertSame('Symfony\Component\DependencyInjection\Definition', get_class($configurator));
         $this->assertSame('parentClass', $configurator->getClass());
 
         $factory = $container->getDefinition('sibling')->getFactory();
-        $this->assertInstanceOf('Symfony\Component\DependencyInjection\Definition', $factory[0]);
+        $this->assertSame('Symfony\Component\DependencyInjection\Definition', get_class($factory[0]));
         $this->assertSame('parentClass', $factory[0]->getClass());
 
         $argument = $container->getDefinition('sibling')->getArgument(0);
-        $this->assertInstanceOf('Symfony\Component\DependencyInjection\Definition', $argument);
+        $this->assertSame('Symfony\Component\DependencyInjection\Definition', get_class($argument));
         $this->assertSame('parentClass', $argument->getClass());
 
         $properties = $container->getDefinition('sibling')->getProperties();
-        $this->assertInstanceOf('Symfony\Component\DependencyInjection\Definition', $properties['prop']);
+        $this->assertSame('Symfony\Component\DependencyInjection\Definition', get_class($properties['prop']));
         $this->assertSame('parentClass', $properties['prop']->getClass());
 
         $methodCalls = $container->getDefinition('sibling')->getMethodCalls();
-        $this->assertInstanceOf('Symfony\Component\DependencyInjection\Definition', $methodCalls[0][1][0]);
+        $this->assertSame('Symfony\Component\DependencyInjection\Definition', get_class($methodCalls[0][1][0]));
         $this->assertSame('parentClass', $methodCalls[0][1][0]->getClass());
     }
 
@@ -361,11 +330,8 @@ class ResolveDefinitionTemplatesPassTest extends TestCase
 
         $this->process($container);
 
-        $childDef = $container->getDefinition('child');
-        $this->assertEquals(array('Foo', 'Bar'), $childDef->getAutowiringTypes());
-
-        $parentDef = $container->getDefinition('parent');
-        $this->assertSame(array('Foo'), $parentDef->getAutowiringTypes());
+        $def = $container->getDefinition('child');
+        $this->assertEquals(array('Foo', 'Bar'), $def->getAutowiringTypes());
     }
 
     protected function process(ContainerBuilder $container)

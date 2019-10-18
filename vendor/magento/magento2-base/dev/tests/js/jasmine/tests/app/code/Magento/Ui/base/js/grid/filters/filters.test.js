@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -39,6 +39,16 @@ define([
             temp = filterObj.cancel();
             expect(temp).toBeDefined();
         });
+        it('has isOpened method', function () {
+            filterObj.opened = function () {
+                return true;
+            };
+            filterObj.hasVisible = function () {
+                return true;
+            };
+            temp = filterObj.isOpened();
+            expect(temp).toBeTruthy();
+        });
         it('has isFilterVisible method', function () {
             temp = {
                 visible: function () {
@@ -58,6 +68,16 @@ define([
             spyOn(filterObj, 'hasVisible');
             filterObj.hasVisible();
             expect(filterObj.hasVisible).toHaveBeenCalled();
+        });
+        it('has extractActive method', function () {
+            spyOn(filterObj, 'extractActive');
+            filterObj.extractActive();
+            expect(filterObj.extractActive).toHaveBeenCalled();
+        });
+        it('has extractPreviews method', function () {
+            spyOn(filterObj, 'extractPreviews');
+            filterObj.extractPreviews();
+            expect(filterObj.extractPreviews).toHaveBeenCalled();
         });
     });
 });

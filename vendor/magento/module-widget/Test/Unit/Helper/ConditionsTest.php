@@ -1,13 +1,12 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magento\Widget\Test\Unit\Helper;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager as ObjectManagerHelper;
-use Magento\Framework\Unserialize\SecureUnserializer;
 
 /**
  * Class ConditionsTest
@@ -19,32 +18,12 @@ class ConditionsTest extends \PHPUnit_Framework_TestCase
      */
     protected $conditions;
 
-    /**
-     * @var SecureUnserializer
-     */
-    private $unserializerMock;
-
-    /**
-     * @inheritdoc
-     */
     protected function setUp()
     {
-        $this->unserializerMock = $this->getMockBuilder(SecureUnserializer::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-
         $objectManagerHelper = new ObjectManagerHelper($this);
-        $this->conditions = $objectManagerHelper->getObject(
-            \Magento\Widget\Helper\Conditions::class,
-            [
-                'unserializer' => $this->unserializerMock,
-            ]
-        );
+        $this->conditions = $objectManagerHelper->getObject('Magento\Widget\Helper\Conditions');
     }
 
-    /**
-     * @return void
-     */
     public function testEncodeDecode()
     {
         $value = [
@@ -67,11 +46,6 @@ class ConditionsTest extends \PHPUnit_Framework_TestCase
                 "operator" => "==",
             ],
         ];
-
-        $this->unserializerMock->expects($this->once())
-            ->method('unserialize')
-            ->willReturn($value);
-
         $encoded = $this->conditions->encode($value);
         $this->assertEquals($value, $this->conditions->decode($encoded));
     }

@@ -1,13 +1,13 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 ?>
 <?php /** @var $block \Magento\Swatches\Block\Product\Renderer\Configurable */ ?>
 <div class="swatch-opt-<?php /* @escapeNotVerified */ echo $block->getProduct()->getId() ?>"></div>
 <script>
-    require(["jquery", "jquery/ui", "Magento_Swatches/js/SwatchRenderer", "Magento_Swatches/js/catalog-add-to-cart"], function ($) {
+    require(["jquery", "jquery/ui", "Magento_Swatches/js/swatch-renderer"], function ($) {
         $('.swatch-opt-<?php /* @escapeNotVerified */ echo $block->getProduct()->getId() ?>').SwatchRenderer({
             selectorProduct: '.product-item-details',
             onlySwatches: true,

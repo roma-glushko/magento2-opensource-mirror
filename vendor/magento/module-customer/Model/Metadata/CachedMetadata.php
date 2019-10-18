@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -31,30 +31,6 @@ class CachedMetadata implements MetadataInterface
      * @var MetadataInterface
      */
     protected $metadata;
-
-    /**
-     * @deprecated
-     * @var array
-     */
-    protected $attributeMetadataCache = [];
-
-    /**
-     * @deprecated
-     * @var array
-     */
-    protected $attributesCache = [];
-
-    /**
-     * @deprecated
-     * @var \Magento\Customer\Api\Data\AttributeMetadataInterface[]
-     */
-    protected $allAttributeMetadataCache = null;
-
-    /**
-     * @deprecated
-     * @var \Magento\Customer\Api\Data\AttributeMetadataInterface[]
-     */
-    protected $customAttributesMetadataCache = null;
 
     /**
      * Initialize dependencies.
@@ -131,6 +107,7 @@ class CachedMetadata implements MetadataInterface
         if (!$this->cache) {
             $this->cache = ObjectManager::getInstance()->get(AttributeCache::class);
         }
+        
         return $this->cache;
     }
 }

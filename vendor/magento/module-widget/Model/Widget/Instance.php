@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Widget\Model\Widget;
@@ -166,7 +166,7 @@ class Instance extends \Magento\Framework\Model\AbstractModel
     protected function _construct()
     {
         parent::_construct();
-        $this->_init(\Magento\Widget\Model\ResourceModel\Widget\Instance::class);
+        $this->_init('Magento\Widget\Model\ResourceModel\Widget\Instance');
         $this->_layoutHandles = [
             'anchor_categories' => self::ANCHOR_CATEGORY_LAYOUT_HANDLE,
             'notanchor_categories' => self::NOTANCHOR_CATEGORY_LAYOUT_HANDLE,
@@ -243,15 +243,15 @@ class Instance extends \Magento\Framework\Model\AbstractModel
         }
 
         $parameters = $this->getData('widget_parameters');
-        if (!is_array($parameters)) {
-            $this->setData('widget_parameters', []);
-            $errorMessage = sprintf(
-                'Expecting widget parameters to be an array, but received %s',
-                (is_object($parameters) ? get_class($parameters) : gettype($parameters))
-            );
-            $this->_logger->error($errorMessage);
+        if (is_array($parameters)) {
+            if (array_key_exists('show_pager', $parameters) && !array_key_exists('page_var_name', $parameters)) {
+                $parameters['page_var_name'] = 'p' . $this->mathRandom->getRandomString(
+                    5,
+                    \Magento\Framework\Math\Random::CHARS_LOWERS
+                );
+            }
+            $this->setData('widget_parameters', serialize($parameters));
         }
-
         $this->setData('page_groups', $tmpPageGroups);
         $this->setData('page_group_ids', $pageGroupIds);
 
@@ -364,12 +364,18 @@ class Instance extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
-     * Getter to retrieve widget_parameters
+     * Getter
+     * Unserialize if serialized string setted
      *
      * @return array
      */
     public function getWidgetParameters()
     {
+        if (is_string($this->getData('widget_parameters'))) {
+            return unserialize($this->getData('widget_parameters'));
+        } elseif (null === $this->getData('widget_parameters')) {
+            return [];
+        }
         return is_array($this->getData('widget_parameters')) ? $this->getData('widget_parameters') : [];
     }
 

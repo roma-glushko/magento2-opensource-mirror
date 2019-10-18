@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 /*global define*/
@@ -12,8 +12,7 @@ define(
         '../action/select-shipping-address',
         './postcode-validator',
         'mage/translate',
-        'uiRegistry',
-        'Magento_Checkout/js/model/quote'
+        'uiRegistry'
     ],
     function (
         $,
@@ -23,8 +22,7 @@ define(
         selectShippingAddress,
         postcodeValidator,
         $t,
-        uiRegistry,
-        quote
+        uiRegistry
     ) {
         'use strict';
 
@@ -43,7 +41,7 @@ define(
              * @param {Object} validator
              */
             registerValidator: function (carrier, validator) {
-                if (checkoutConfig.activeCarriers.indexOf(carrier) !== -1) {
+                if (checkoutConfig.activeCarriers.indexOf(carrier) != -1) {
                     validators.push(validator);
                 }
             },
@@ -53,7 +51,7 @@ define(
              * @return {Boolean}
              */
             validateAddressData: function (address) {
-                return validators.some(function(validator) {
+                return validators.some(function (validator) {
                     return validator.validate(address);
                 });
             },
@@ -119,7 +117,7 @@ define(
             bindHandler: function (element, delay) {
                 var self = this;
 
-                delay = typeof delay === "undefined" ? self.validateDelay : delay;
+                delay = typeof delay === 'undefined' ? self.validateDelay : delay;
 
                 if (element.component.indexOf('/group') !== -1) {
                     $.each(element.elems(), function (index, elem) {
@@ -143,7 +141,7 @@ define(
              */
             postcodeValidation: function () {
                 var countryId = $('select[name="country_id"]').val(),
-                    validationResult = postcodeValidator.validate(postcodeElement.value(), countryId),
+                    validationResult,
                     warnMessage;
 
                 if (postcodeElement == null || postcodeElement.value() == null) {
@@ -151,9 +149,11 @@ define(
                 }
 
                 postcodeElement.warn(null);
+                validationResult = postcodeValidator.validate(postcodeElement.value(), countryId);
 
                 if (!validationResult) {
                     warnMessage = $t('Provided Zip/Postal Code seems to be invalid.');
+
                     if (postcodeValidator.validatedPostCodeExample.length) {
                         warnMessage += $t(' Example: ') + postcodeValidator.validatedPostCodeExample.join('; ') + '. ';
                     }
@@ -175,7 +175,6 @@ define(
                     address;
 
                 if (this.validateAddressData(addressFlat)) {
-                    addressFlat = $.extend(true, {}, quote.shippingAddress(), addressFlat);
                     address = addressConverter.formAddressDataToQuoteAddress(addressFlat);
                     selectShippingAddress(address);
                 }

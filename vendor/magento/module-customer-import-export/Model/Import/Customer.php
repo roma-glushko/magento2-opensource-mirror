@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\CustomerImportExport\Model\Import;
@@ -154,6 +154,9 @@ class Customer extends AbstractCustomer
         CustomerInterface::GENDER,
         'rp_token',
         'rp_token_created_at',
+        'failures_num',
+        'first_failure',
+        'lock_expires',
     ];
 
     /**
@@ -367,6 +370,10 @@ class Customer extends AbstractCustomer
 
         // attribute values
         foreach (array_intersect_key($rowData, $this->_attributes) as $attributeCode => $value) {
+            if ($newCustomer && !strlen($value)) {
+                continue;
+            }
+
             $attributeParameters = $this->_attributes[$attributeCode];
             if ('select' == $attributeParameters['type']) {
                 $value = isset($attributeParameters['options'][strtolower($value)])

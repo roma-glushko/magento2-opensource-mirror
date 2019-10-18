@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\CatalogImportExport\Model\Import;
@@ -155,8 +155,7 @@ class Uploader extends \Magento\MediaStorage\Model\File\Uploader
 
         $filePath = $this->_directory->getRelativePath($this->getTmpDir() . '/' . $fileName);
         $this->_setUploadFile($filePath);
-        $destDir = $this->_directory->getAbsolutePath($this->getDestDir());
-        $result = $this->save($destDir);
+        $result = $this->save($this->getDestDir());
         $result['name'] = self::getCorrectFileName($result['name']);
         return $result;
     }
@@ -306,10 +305,11 @@ class Uploader extends \Magento\MediaStorage\Model\File\Uploader
             $tmpRealPath = $this->_directory->getDriver()->getRealPath(
                 $this->_directory->getAbsolutePath($tmpPath)
             );
-            $destinationRealPath = $this->_directory->getDriver()->getRealPath($destPath);
-            $relativeDestPath = $this->_directory->getRelativePath($destPath);
+            $destinationRealPath = $this->_directory->getDriver()->getRealPath(
+                $this->_directory->getAbsolutePath($destPath)
+            );
             $isSameFile = $tmpRealPath === $destinationRealPath;
-            return $isSameFile ?: $this->_directory->copyFile($tmpPath, $relativeDestPath);
+            return $isSameFile ?: $this->_directory->copyFile($tmpPath, $destPath);
         } else {
             return false;
         }

@@ -29,7 +29,7 @@ class Definition
     private $factoryService;
     private $shared = true;
     private $deprecated = false;
-    private $deprecationTemplate;
+    private $deprecationTemplate = 'The "%service_id%" service is deprecated. You should stop using it, as it will soon be removed.';
     private $scope = ContainerInterface::SCOPE_CONTAINER;
     private $properties = array();
     private $calls = array();
@@ -43,8 +43,6 @@ class Definition
     private $decoratedService;
     private $autowired = false;
     private $autowiringTypes = array();
-
-    private static $defaultDeprecationTemplate = 'The "%service_id%" service is deprecated. You should stop using it, as it will soon be removed.';
 
     protected $arguments;
 
@@ -63,11 +61,11 @@ class Definition
      *
      * @param string|array $factory A PHP function or an array containing a class/Reference and a method to call
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setFactory($factory)
     {
-        if (is_string($factory) && false !== strpos($factory, '::')) {
+        if (is_string($factory) && strpos($factory, '::') !== false) {
             $factory = explode('::', $factory, 2);
         }
 
@@ -92,13 +90,13 @@ class Definition
      *
      * @param string $factoryClass The factory class name
      *
-     * @return $this
+     * @return Definition The current instance
      *
      * @deprecated since version 2.6, to be removed in 3.0.
      */
     public function setFactoryClass($factoryClass)
     {
-        @trigger_error(sprintf('%s(%s) is deprecated since Symfony 2.6 and will be removed in 3.0. Use Definition::setFactory() instead.', __METHOD__, $factoryClass), E_USER_DEPRECATED);
+        @trigger_error(sprintf('%s(%s) is deprecated since version 2.6 and will be removed in 3.0. Use Definition::setFactory() instead.', __METHOD__, $factoryClass), E_USER_DEPRECATED);
 
         $this->factoryClass = $factoryClass;
 
@@ -115,7 +113,7 @@ class Definition
     public function getFactoryClass($triggerDeprecationError = true)
     {
         if ($triggerDeprecationError) {
-            @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.6 and will be removed in 3.0.', E_USER_DEPRECATED);
+            @trigger_error('The '.__METHOD__.' method is deprecated since version 2.6 and will be removed in 3.0.', E_USER_DEPRECATED);
         }
 
         return $this->factoryClass;
@@ -126,13 +124,13 @@ class Definition
      *
      * @param string $factoryMethod The factory method name
      *
-     * @return $this
+     * @return Definition The current instance
      *
      * @deprecated since version 2.6, to be removed in 3.0.
      */
     public function setFactoryMethod($factoryMethod)
     {
-        @trigger_error(sprintf('%s(%s) is deprecated since Symfony 2.6 and will be removed in 3.0. Use Definition::setFactory() instead.', __METHOD__, $factoryMethod), E_USER_DEPRECATED);
+        @trigger_error(sprintf('%s(%s) is deprecated since version 2.6 and will be removed in 3.0. Use Definition::setFactory() instead.', __METHOD__, $factoryMethod), E_USER_DEPRECATED);
 
         $this->factoryMethod = $factoryMethod;
 
@@ -146,9 +144,9 @@ class Definition
      * @param null|string $renamedId The new decorated service id
      * @param int         $priority  The priority of decoration
      *
-     * @return $this
+     * @return Definition The current instance
      *
-     * @throws InvalidArgumentException in case the decorated service id and the new decorated service id are equals
+     * @throws InvalidArgumentException In case the decorated service id and the new decorated service id are equals.
      */
     public function setDecoratedService($id, $renamedId = null, $priority = 0)
     {
@@ -166,7 +164,7 @@ class Definition
     }
 
     /**
-     * Gets the service that this service is decorating.
+     * Gets the service that decorates this service.
      *
      * @return null|array An array composed of the decorated service id, the new id for it and the priority of decoration, null if no service is decorated
      */
@@ -185,7 +183,7 @@ class Definition
     public function getFactoryMethod($triggerDeprecationError = true)
     {
         if ($triggerDeprecationError) {
-            @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.6 and will be removed in 3.0.', E_USER_DEPRECATED);
+            @trigger_error('The '.__METHOD__.' method is deprecated since version 2.6 and will be removed in 3.0.', E_USER_DEPRECATED);
         }
 
         return $this->factoryMethod;
@@ -196,14 +194,14 @@ class Definition
      *
      * @param string $factoryService The factory service id
      *
-     * @return $this
+     * @return Definition The current instance
      *
      * @deprecated since version 2.6, to be removed in 3.0.
      */
     public function setFactoryService($factoryService, $triggerDeprecationError = true)
     {
         if ($triggerDeprecationError) {
-            @trigger_error(sprintf('%s(%s) is deprecated since Symfony 2.6 and will be removed in 3.0. Use Definition::setFactory() instead.', __METHOD__, $factoryService), E_USER_DEPRECATED);
+            @trigger_error(sprintf('%s(%s) is deprecated since version 2.6 and will be removed in 3.0. Use Definition::setFactory() instead.', __METHOD__, $factoryService), E_USER_DEPRECATED);
         }
 
         $this->factoryService = $factoryService;
@@ -221,7 +219,7 @@ class Definition
     public function getFactoryService($triggerDeprecationError = true)
     {
         if ($triggerDeprecationError) {
-            @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.6 and will be removed in 3.0.', E_USER_DEPRECATED);
+            @trigger_error('The '.__METHOD__.' method is deprecated since version 2.6 and will be removed in 3.0.', E_USER_DEPRECATED);
         }
 
         return $this->factoryService;
@@ -232,7 +230,7 @@ class Definition
      *
      * @param string $class The service class
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setClass($class)
     {
@@ -254,7 +252,9 @@ class Definition
     /**
      * Sets the arguments to pass to the service constructor/factory method.
      *
-     * @return $this
+     * @param array $arguments An array of arguments
+     *
+     * @return Definition The current instance
      */
     public function setArguments(array $arguments)
     {
@@ -263,11 +263,6 @@ class Definition
         return $this;
     }
 
-    /**
-     * Sets the properties to define when creating the service.
-     *
-     * @return $this
-     */
     public function setProperties(array $properties)
     {
         $this->properties = $properties;
@@ -275,24 +270,11 @@ class Definition
         return $this;
     }
 
-    /**
-     * Gets the properties to define when creating the service.
-     *
-     * @return array
-     */
     public function getProperties()
     {
         return $this->properties;
     }
 
-    /**
-     * Sets a specific property.
-     *
-     * @param string $name
-     * @param mixed  $value
-     *
-     * @return $this
-     */
     public function setProperty($name, $value)
     {
         $this->properties[$name] = $value;
@@ -305,7 +287,7 @@ class Definition
      *
      * @param mixed $argument An argument
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function addArgument($argument)
     {
@@ -315,21 +297,17 @@ class Definition
     }
 
     /**
-     * Replaces a specific argument.
+     * Sets a specific argument.
      *
      * @param int   $index
      * @param mixed $argument
      *
-     * @return $this
+     * @return Definition The current instance
      *
      * @throws OutOfBoundsException When the replaced argument does not exist
      */
     public function replaceArgument($index, $argument)
     {
-        if (0 === count($this->arguments)) {
-            throw new OutOfBoundsException('Cannot replace arguments if none have been configured yet.');
-        }
-
         if ($index < 0 || $index > count($this->arguments) - 1) {
             throw new OutOfBoundsException(sprintf('The index "%d" is not in the range [0, %d].', $index, count($this->arguments) - 1));
         }
@@ -370,7 +348,9 @@ class Definition
     /**
      * Sets the methods to call after service initialization.
      *
-     * @return $this
+     * @param array $calls An array of method calls
+     *
+     * @return Definition The current instance
      */
     public function setMethodCalls(array $calls = array())
     {
@@ -388,14 +368,14 @@ class Definition
      * @param string $method    The method name to call
      * @param array  $arguments An array of arguments to pass to the method call
      *
-     * @return $this
+     * @return Definition The current instance
      *
      * @throws InvalidArgumentException on empty $method param
      */
     public function addMethodCall($method, array $arguments = array())
     {
         if (empty($method)) {
-            throw new InvalidArgumentException('Method name cannot be empty.');
+            throw new InvalidArgumentException(sprintf('Method name cannot be empty.'));
         }
         $this->calls[] = array($method, $arguments);
 
@@ -407,7 +387,7 @@ class Definition
      *
      * @param string $method The method name to remove
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function removeMethodCall($method)
     {
@@ -452,7 +432,9 @@ class Definition
     /**
      * Sets tags for this definition.
      *
-     * @return $this
+     * @param array $tags
+     *
+     * @return Definition the current instance
      */
     public function setTags(array $tags)
     {
@@ -489,7 +471,7 @@ class Definition
      * @param string $name       The tag name
      * @param array  $attributes An array of attributes
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function addTag($name, array $attributes = array())
     {
@@ -515,7 +497,7 @@ class Definition
      *
      * @param string $name The tag name
      *
-     * @return $this
+     * @return Definition
      */
     public function clearTag($name)
     {
@@ -527,7 +509,7 @@ class Definition
     /**
      * Clears the tags for this definition.
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function clearTags()
     {
@@ -541,7 +523,7 @@ class Definition
      *
      * @param string $file A full pathname to include
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setFile($file)
     {
@@ -565,7 +547,7 @@ class Definition
      *
      * @param bool $shared Whether the service must be shared or not
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setShared($shared)
     {
@@ -589,14 +571,14 @@ class Definition
      *
      * @param string $scope Whether the service must be shared or not
      *
-     * @return $this
+     * @return Definition The current instance
      *
      * @deprecated since version 2.8, to be removed in 3.0.
      */
     public function setScope($scope, $triggerDeprecationError = true)
     {
         if ($triggerDeprecationError) {
-            @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
+            @trigger_error('The '.__METHOD__.' method is deprecated since version 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
         }
 
         if (ContainerInterface::SCOPE_PROTOTYPE === $scope) {
@@ -618,7 +600,7 @@ class Definition
     public function getScope($triggerDeprecationError = true)
     {
         if ($triggerDeprecationError) {
-            @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
+            @trigger_error('The '.__METHOD__.' method is deprecated since version 2.8 and will be removed in 3.0.', E_USER_DEPRECATED);
         }
 
         return $this->scope;
@@ -629,7 +611,7 @@ class Definition
      *
      * @param bool $boolean
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setPublic($boolean)
     {
@@ -653,14 +635,14 @@ class Definition
      *
      * @param bool $boolean
      *
-     * @return $this
+     * @return Definition The current instance
      *
      * @deprecated since version 2.7, will be removed in 3.0.
      */
     public function setSynchronized($boolean, $triggerDeprecationError = true)
     {
         if ($triggerDeprecationError) {
-            @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.7 and will be removed in 3.0.', E_USER_DEPRECATED);
+            @trigger_error('The '.__METHOD__.' method is deprecated since version 2.7 and will be removed in 3.0.', E_USER_DEPRECATED);
         }
 
         $this->synchronized = (bool) $boolean;
@@ -678,7 +660,7 @@ class Definition
     public function isSynchronized($triggerDeprecationError = true)
     {
         if ($triggerDeprecationError) {
-            @trigger_error('The '.__METHOD__.' method is deprecated since Symfony 2.7 and will be removed in 3.0.', E_USER_DEPRECATED);
+            @trigger_error('The '.__METHOD__.' method is deprecated since version 2.7 and will be removed in 3.0.', E_USER_DEPRECATED);
         }
 
         return $this->synchronized;
@@ -689,7 +671,7 @@ class Definition
      *
      * @param bool $lazy
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setLazy($lazy)
     {
@@ -714,7 +696,7 @@ class Definition
      *
      * @param bool $boolean
      *
-     * @return $this
+     * @return Definition the current instance
      */
     public function setSynthetic($boolean)
     {
@@ -740,7 +722,7 @@ class Definition
      *
      * @param bool $boolean
      *
-     * @return $this
+     * @return Definition the current instance
      */
     public function setAbstract($boolean)
     {
@@ -767,9 +749,9 @@ class Definition
      * @param bool   $status
      * @param string $template Template message to use if the definition is deprecated
      *
-     * @return $this
+     * @return Definition the current instance
      *
-     * @throws InvalidArgumentException when the message template is invalid
+     * @throws InvalidArgumentException When the message template is invalid.
      */
     public function setDeprecated($status = true, $template = null)
     {
@@ -810,7 +792,7 @@ class Definition
      */
     public function getDeprecationMessage($id)
     {
-        return str_replace('%service_id%', $id, $this->deprecationTemplate ?: self::$defaultDeprecationTemplate);
+        return str_replace('%service_id%', $id, $this->deprecationTemplate);
     }
 
     /**
@@ -818,7 +800,7 @@ class Definition
      *
      * @param callable $callable A PHP callable
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setConfigurator($callable)
     {
@@ -842,7 +824,7 @@ class Definition
      *
      * @param string[] $types
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setAutowiringTypes(array $types)
     {
@@ -866,11 +848,11 @@ class Definition
     }
 
     /**
-     * Enables/disables autowiring.
+     * Sets autowired.
      *
-     * @param bool $autowired
+     * @param $autowired
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function setAutowired($autowired)
     {
@@ -894,7 +876,7 @@ class Definition
      *
      * @param string $type
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function addAutowiringType($type)
     {
@@ -908,7 +890,7 @@ class Definition
      *
      * @param string $type
      *
-     * @return $this
+     * @return Definition The current instance
      */
     public function removeAutowiringType($type)
     {

@@ -11,7 +11,6 @@
 
 namespace Symfony\Component\Stopwatch\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Stopwatch\Stopwatch;
 
 /**
@@ -21,7 +20,7 @@ use Symfony\Component\Stopwatch\Stopwatch;
  *
  * @group time-sensitive
  */
-class StopwatchTest extends TestCase
+class StopwatchTest extends \PHPUnit_Framework_TestCase
 {
     const DELTA = 20;
 
@@ -100,18 +99,6 @@ class StopwatchTest extends TestCase
         $stopwatch->stop('foo');
     }
 
-    public function testMorePrecision()
-    {
-        $stopwatch = new Stopwatch(true);
-
-        $stopwatch->start('foo');
-        $event = $stopwatch->stop('foo');
-
-        $this->assertInternalType('float', $event->getStartTime());
-        $this->assertInternalType('float', $event->getEndTime());
-        $this->assertInternalType('float', $event->getDuration());
-    }
-
     public function testSection()
     {
         $stopwatch = new Stopwatch();
@@ -164,17 +151,5 @@ class StopwatchTest extends TestCase
     {
         $stopwatch = new Stopwatch();
         $stopwatch->openSection('section');
-    }
-
-    public function testReset()
-    {
-        $stopwatch = new Stopwatch();
-
-        $stopwatch->openSection();
-        $stopwatch->start('foo', 'cat');
-
-        $stopwatch->reset();
-
-        $this->assertEquals(new Stopwatch(), $stopwatch);
     }
 }

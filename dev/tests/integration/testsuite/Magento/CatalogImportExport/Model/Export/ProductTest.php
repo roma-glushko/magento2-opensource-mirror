@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\CatalogImportExport\Model\Export;
@@ -50,7 +50,7 @@ class ProductTest extends \PHPUnit_Framework_TestCase
         'qty_increments',
         'use_config_enable_qty_inc',
         'enable_qty_increments',
-        'is_decimal_divided',
+        'is_decimal_divided'
     ];
 
     protected function setUp()
@@ -70,13 +70,32 @@ class ProductTest extends \PHPUnit_Framework_TestCase
     public function testExport()
     {
         $this->model->setWriter(
-            \Magento\TestFramework\Helper\Bootstrap::getObjectManager()->create(
+            $this->objectManager->create(
                 \Magento\ImportExport\Model\Export\Adapter\Csv::class
             )
         );
         $exportData = $this->model->export();
-        $this->assertContains('text_attribute=!@#$%^&*()_+1234567890-=|\\:;""\'<,>.?/', $exportData);
-        $this->assertNotEmpty($exportData);
+        $this->assertContains('New Product', $exportData);
+
+        $this->assertContains('Option 1 & Value 1"', $exportData);
+        $this->assertContains('Option 1 & Value 2"', $exportData);
+        $this->assertContains('Option 1 & Value 3"', $exportData);
+        $this->assertContains('Option 4 ""!@#$%^&*', $exportData);
+        $this->assertContains('test_option_code_2', $exportData);
+        $this->assertContains('max_characters=10', $exportData);
+    }
+
+    /**
+     * @magentoDataFixture Magento/CatalogImportExport/_files/product_export_with_product_links_data.php
+     */
+    public function testExportWithProductLinks()
+    {
+        $this->model->setWriter(
+            \Magento\TestFramework\Helper\Bootstrap::getObjectManager()->create(
+                'Magento\ImportExport\Model\Export\Adapter\Csv'
+            )
+        );
+        $this->assertNotEmpty($this->model->export());
     }
 
     /**
@@ -185,29 +204,5 @@ class ProductTest extends \PHPUnit_Framework_TestCase
 
         $data = $model->setWriter($exportAdapter)->export();
         $this->assertEmpty($data);
-    }
-
-    /**
-     * Verify if fields wrapping works correct when "Fields Enclosure" option enabled
-     *
-     * @magentoDataFixture Magento/CatalogImportExport/_files/product_export_data.php
-     */
-    public function testExportWithFieldsEnclosure()
-    {
-        $this->model->setParameters([
-            \Magento\ImportExport\Model\Export::FIELDS_ENCLOSURE => 1
-        ]);
-
-        $this->model->setWriter(
-            $this->objectManager->create(
-                \Magento\ImportExport\Model\Export\Adapter\Csv::class
-            )
-        );
-        $exportData = $this->model->export();
-
-        $this->assertContains('""Option 2""', $exportData);
-        $this->assertContains('""Option 3""', $exportData);
-        $this->assertContains('""Option 4 """"!@#$%^&*""', $exportData);
-        $this->assertContains('text_attribute=""!@#$%^&*()_+1234567890-=|\:;""""\'<,>.?/', $exportData);
     }
 }

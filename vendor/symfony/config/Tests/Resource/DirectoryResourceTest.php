@@ -11,10 +11,9 @@
 
 namespace Symfony\Component\Config\Tests\Resource;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\Config\Resource\DirectoryResource;
 
-class DirectoryResourceTest extends TestCase
+class DirectoryResourceTest extends \PHPUnit_Framework_TestCase
 {
     protected $directory;
 
@@ -97,10 +96,8 @@ class DirectoryResourceTest extends TestCase
     public function testIsFreshDeleteFile()
     {
         $resource = new DirectoryResource($this->directory);
-        $time = time();
-        sleep(1);
         unlink($this->directory.'/tmp.xml');
-        $this->assertFalse($resource->isFresh($time), '->isFresh() returns false if an existing file is removed');
+        $this->assertFalse($resource->isFresh(time()), '->isFresh() returns false if an existing file is removed');
     }
 
     public function testIsFreshDeleteDirectory()
@@ -164,6 +161,6 @@ class DirectoryResourceTest extends TestCase
         $resourceA = new DirectoryResource($this->directory, '/.xml$/');
         $resourceB = new DirectoryResource($this->directory, '/.yaml$/');
 
-        $this->assertCount(2, array_unique(array($resourceA, $resourceB)));
+        $this->assertEquals(2, count(array_unique(array($resourceA, $resourceB))));
     }
 }

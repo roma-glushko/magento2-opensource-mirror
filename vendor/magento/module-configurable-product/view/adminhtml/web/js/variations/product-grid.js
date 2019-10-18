@@ -1,6 +1,6 @@
 // jscs:disable requireDotNotation
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 define([
@@ -8,8 +8,7 @@ define([
     'jquery',
     'Magento_Ui/js/core/app',
     'underscore',
-    'notification',
-    'mage/translate'
+    'notification'
 ], function (Component, $, bootstrap, _) {
     'use strict';
 
@@ -30,8 +29,7 @@ define([
             listens: {
                 '${ $.productsProvider }:data': '_showMessageAssociatedGrid _handleManualGridOpening',
                 '${ $.productsMassAction }:selected': '_handleManualGridSelect',
-                '${ $.configurableVariations }:productMatrix': '_switchProductType',
-                '${ $.configurableVariations }:isShowAddProductButton': '_showButtonAddManual'
+                '${ $.configurableVariations }:productMatrix': '_showButtonAddManual _switchProductType'
             }
         },
 
@@ -66,7 +64,7 @@ define([
                 this.productsModal.notification();
             }.bind(this));
             this.variationsComponent(function (variation) {
-                this._showButtonAddManual(variation.attributes());
+                this._showButtonAddManual(variation.productMatrix());
             }.bind(this));
 
             this._initGrid = _.once(this._initGrid);
@@ -194,12 +192,12 @@ define([
 
         /**
          * Show button add manual
-         * @param {Array} attributes
+         * @param {Array} variations
          * @returns {*}
          * @private
          */
-        _showButtonAddManual: function (attributes) {
-            return this.button(attributes.length);
+        _showButtonAddManual: function (variations) {
+            return this.button(variations.length);
         },
 
         _switchProductType: function (variations) {
@@ -223,7 +221,9 @@ define([
 
             if (data.items.length) {
                 this.productsModal.notification('add', {
-                    message: $.mage.__('Choose a new product to delete and replace the current product configuration.'),
+                    message: $.mage.__(
+                        'Choose a new product to delete and replace the current product configuration.'
+                    ),
                     messageContainer: this.gridSelector
                 });
             } else {
@@ -245,7 +245,7 @@ define([
                 }),
                 usedProductIds = _.values(this.variationsComponent().productAttributesMap);
 
-            if (usedProductIds) {
+            if (usedProductIds && usedProductIds.length > 0) {
                 filterModifier['entity_id'] = {
                     'condition_type': 'nin', value: usedProductIds
                 };

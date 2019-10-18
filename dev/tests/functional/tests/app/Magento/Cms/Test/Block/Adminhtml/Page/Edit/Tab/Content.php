@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -50,14 +50,21 @@ class Content extends Tab
      *
      * @var string
      */
-    protected $content = '#page_content';
+    protected $content = '#cms_page_form_content';
 
     /**
      * Content Heading input locator.
      *
      * @var string
      */
-    protected $contentHeading = '#page_content_heading';
+    protected $contentHeading = '[name="content_heading"]';
+
+    /**
+     * Header locator.
+     *
+     * @var string
+     */
+    protected $header = 'header.page-header';
 
     /**
      * Clicking in content tab 'Insert Variable' button.
@@ -85,7 +92,12 @@ class Content extends Tab
         $context = $element === null ? $this->_rootElement : $element;
         $addWidgetButton = $context->find($this->addWidgetButton);
         if ($addWidgetButton->isVisible()) {
-            $addWidgetButton->click();
+            try {
+                $addWidgetButton->click();
+            } catch (\PHPUnit_Extensions_Selenium2TestCase_WebDriverException $e) {
+                $this->browser->find($this->header)->hover();
+                $addWidgetButton->click();
+            }
         }
     }
 
@@ -122,11 +134,10 @@ class Content extends Tab
      * @param SimpleElement|null $element
      * @return $this
      */
-    public function fillFormTab(array $fields, SimpleElement $element = null)
+    public function setFieldsData(array $fields, SimpleElement $element = null)
     {
-        if (isset($fields['content']['value']['content'])) {
-            $element->find($this->content)->setValue($fields['content']['value']['content']);
-        }
+        $context = $element === null ? $this->_rootElement : $element;
+        $context->find($this->content)->setValue($fields['content']['value']['content']);
         if (isset($fields['content_heading']['value'])) {
             $element->find($this->contentHeading)->setValue($fields['content_heading']['value']);
         }
@@ -153,24 +164,11 @@ class Content extends Tab
      * @return array
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    public function getDataFormTab($fields = null, SimpleElement $element = null)
+    public function getFieldsData($fields = null, SimpleElement $element = null)
     {
         return [
             'content' => [],
             'content_heading' => ''
         ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getContent()
-    {
-        $contentElement = $this->_rootElement->find($this->content);
-        $content = '';
-        if ($contentElement->isVisible()) {
-            $content = $contentElement->getText() ? : $contentElement->getValue();
-        }
-        return $content;
     }
 }

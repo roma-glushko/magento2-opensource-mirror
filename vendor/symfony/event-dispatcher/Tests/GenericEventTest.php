@@ -11,13 +11,12 @@
 
 namespace Symfony\Component\EventDispatcher\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\EventDispatcher\GenericEvent;
 
 /**
  * Test class for Event.
  */
-class GenericEventTest extends TestCase
+class GenericEventTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var GenericEvent
@@ -96,7 +95,7 @@ class GenericEventTest extends TestCase
         $this->assertEquals('Event', $this->event['name']);
 
         // test getting invalid arg
-        $this->{method_exists($this, $_ = 'expectException') ? $_ : 'setExpectedException'}('InvalidArgumentException');
+        $this->setExpectedException('InvalidArgumentException');
         $this->assertFalse($this->event['nameNotExist']);
     }
 
@@ -114,8 +113,8 @@ class GenericEventTest extends TestCase
 
     public function testOffsetIsset()
     {
-        $this->assertArrayHasKey('name', $this->event);
-        $this->assertArrayNotHasKey('nameNotExist', $this->event);
+        $this->assertTrue(isset($this->event['name']));
+        $this->assertFalse(isset($this->event['nameNotExist']));
     }
 
     public function testHasArgument()

@@ -1,16 +1,15 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magento\Framework\View\Asset;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
+use Magento\Framework\Filesystem\Directory\ReadFactory;
 use Magento\Framework\View\Asset\PreProcessor\ChainFactoryInterface;
 use Magento\Framework\View\Design\FileResolution\Fallback\Resolver\Simple;
-use Magento\Framework\View\Design\Theme\ThemeProviderInterface;
-use Magento\Framework\App\ObjectManager;
 
 /**
  * A service for preprocessing content of assets
@@ -46,14 +45,8 @@ class Source
 
     /**
      * @var \Magento\Framework\View\Design\Theme\ListInterface
-     * @deprecated
      */
     private $themeList;
-
-    /**
-     * @var ThemeProviderInterface
-     */
-    private $themeProvider;
 
     /**
      * @var ChainFactoryInterface
@@ -61,7 +54,15 @@ class Source
     private $chainFactory;
 
     /**
+     * @var ReadFactory
+     */
+    private $readFactory;
+
+    /**
+     * Constructor
+     *
      * @param \Magento\Framework\Filesystem $filesystem
+     * @param ReadFactory $readFactory
      * @param PreProcessor\Pool $preProcessorPool
      * @param \Magento\Framework\View\Design\FileResolution\Fallback\StaticFile $fallback
      * @param \Magento\Framework\View\Design\Theme\ListInterface $themeList
@@ -69,12 +70,14 @@ class Source
      */
     public function __construct(
         \Magento\Framework\Filesystem $filesystem,
+        ReadFactory $readFactory,
         PreProcessor\Pool $preProcessorPool,
         \Magento\Framework\View\Design\FileResolution\Fallback\StaticFile $fallback,
         \Magento\Framework\View\Design\Theme\ListInterface $themeList,
         ChainFactoryInterface $chainFactory
     ) {
         $this->filesystem = $filesystem;
+        $this->readFactory = $readFactory;
         $this->rootDir = $filesystem->getDirectoryRead(DirectoryList::ROOT);
         $this->varDir = $filesystem->getDirectoryWrite(DirectoryList::VAR_DIR);
         $this->preProcessorPool = $preProcessorPool;
@@ -95,8 +98,8 @@ class Source
         if (!$result) {
             return false;
         }
-        list($dirCode, $path) = $result;
-        return $this->filesystem->getDirectoryRead($dirCode)->getAbsolutePath($path);
+        list($dir, $path) = $result;
+        return $this->readFactory->create($dir)->getAbsolutePath($path);
     }
 
     /**
@@ -111,15 +114,15 @@ class Source
         if (!$result) {
             return false;
         }
-        list($dirCode, $path) = $result;
-        return $this->filesystem->getDirectoryRead($dirCode)->readFile($path);
+        list($dir, $path) = $result;
+        return $this->readFactory->create($dir)->readFile($path);
     }
 
     /**
      * Perform necessary preprocessing and materialization when the specified asset is requested
      *
      * Returns an array of two elements:
-     * - directory code where the file is supposed to be found
+     * - directory where the file is supposed to be found
      * - relative path to the file
      *
      * returns false if source file was not found
@@ -130,18 +133,26 @@ class Source
     private function preProcess(LocalInterface $asset)
     {
         $sourceFile = $this->findSourceFile($asset);
-        $path = $this->rootDir->getRelativePath($sourceFile);
+        $dir = $this->rootDir->getAbsolutePath();
+        $path = '';
+        if ($sourceFile) {
+            $path = basename($sourceFile);
+            $dir = dirname($sourceFile);
+        }
 
-        $chain = $this->createChain($asset, $path);
+        $chain = $this->createChain($asset, $dir, $path);
         $this->preProcessorPool->process($chain);
         $chain->assertValid();
-        $dirCode = DirectoryList::ROOT;
         if ($chain->isChanged()) {
-            $dirCode = DirectoryList::VAR_DIR;
+            $dir = $this->varDir->getAbsolutePath();
             $path = DirectoryList::TMP_MATERIALIZATION_DIR . '/source/' . $chain->getTargetAssetPath();
             $this->varDir->writeFile($path, $chain->getContent());
         }
-        $result = [$dirCode, $path];
+        if (empty($path)) {
+            $result = false;
+        } else {
+            $result = [$dir, $path];
+        }
         return $result;
     }
 
@@ -197,9 +208,7 @@ class Source
         LocalInterface $asset,
         \Magento\Framework\View\Asset\File\FallbackContext $context
     ) {
-        $themeModel = $this->getThemeProvider()->getThemeByFullPath(
-            $context->getAreaCode() . '/' . $context->getThemePath()
-        );
+        $themeModel = $this->themeList->getThemeByFullPath($context->getAreaCode() . '/' . $context->getThemePath());
         $sourceFile = $this->fallback->getFile(
             $context->getAreaCode(),
             $themeModel,
@@ -208,19 +217,6 @@ class Source
             $asset->getModule()
         );
         return $sourceFile;
-    }
-
-    /**
-     * @return ThemeProviderInterface
-     * @deprecated
-     */
-    private function getThemeProvider()
-    {
-        if (null === $this->themeProvider) {
-            $this->themeProvider = ObjectManager::getInstance()->get(ThemeProviderInterface::class);
-        }
-
-        return $this->themeProvider;
     }
 
     /**
@@ -241,6 +237,7 @@ class Source
      * @param \Magento\Framework\View\Asset\LocalInterface $asset
      *
      * @return bool|string
+     * @deprecated If custom vendor directory is outside Magento root, then this method will return unexpected result
      */
     public function findRelativeSourceFilePath(LocalInterface $asset)
     {
@@ -255,13 +252,14 @@ class Source
      * Creates a chain for pre-processing
      *
      * @param LocalInterface $asset
+     * @param string|bool $dir
      * @param string|bool $path
      * @return PreProcessor\Chain
      */
-    private function createChain(LocalInterface $asset, $path)
+    private function createChain(LocalInterface $asset, $dir, $path)
     {
         if ($path) {
-            $origContent = $this->rootDir->readFile($path);
+            $origContent = $this->readFactory->create($dir)->readFile($path);
             $origContentType = $this->getContentType($path);
         } else {
             $origContent = '';
@@ -273,7 +271,7 @@ class Source
                 'asset' => $asset,
                 'origContent' => $origContent,
                 'origContentType' => $origContentType,
-                'origAssetPath' => $path
+                'origAssetPath' => $dir . '/' . $path
             ]
         );
         return $chain;

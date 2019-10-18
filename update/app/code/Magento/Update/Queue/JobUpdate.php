@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -65,7 +65,16 @@ class JobUpdate extends AbstractJob
         $this->queue = $queue ? $queue : new Queue();
         $this->backup = $backup ? $backup : new Backup();
         $this->rollback = $rollback ? $rollback : new Rollback();
-        $this->composerApp = $composerApp;
+
+        $vendorPath = MAGENTO_BP . '/' . (include (MAGENTO_BP . '/app/etc/vendor_path.php'));
+        $composerPath = $vendorPath . '/../composer.json';
+        $composerPath = realpath($composerPath);
+
+        $this->composerApp = $composerApp ? $composerApp :
+            new MagentoComposerApplication(
+                MAGENTO_BP . '/var/composer_home',
+                $composerPath
+            );
     }
 
     /**
@@ -74,7 +83,6 @@ class JobUpdate extends AbstractJob
     public function execute()
     {
         try {
-            $this->composerApp = $this->composerApp ? : $this->getComposerApp();
             $this->status->add('Starting composer update...', \Psr\Log\LogLevel::INFO);
             if (isset($this->params['components'])) {
                 $packages = [];
@@ -123,19 +131,5 @@ class JobUpdate extends AbstractJob
     {
         $jobs = [['name' => 'setup:upgrade', 'params' => []]];
         $this->queue->addJobs($jobs);
-    }
-
-    /**
-     * Get composer application
-     *
-     * @return MagentoComposerApplication
-     */
-    private function getComposerApp()
-    {
-        $vendorPath = MAGENTO_BP . '/' . (include (MAGENTO_BP . '/app/etc/vendor_path.php'));
-        $composerPath = $vendorPath . '/../composer.json';
-        $composerPath = realpath($composerPath);
-
-        return new MagentoComposerApplication(MAGENTO_BP . '/var/composer_home', $composerPath);
     }
 }

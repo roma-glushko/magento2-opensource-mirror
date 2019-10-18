@@ -59,19 +59,17 @@ class CliPrompt
                 $exe = $tmpExe;
             }
 
-            $output = shell_exec($exe);
+            $answer = self::trimAnswer(shell_exec($exe));
 
             // clean up
             if (isset($tmpExe)) {
                 unlink($tmpExe);
             }
 
-            if ($output !== null) {
-                // output a newline to be on par with the regular prompt()
-                echo PHP_EOL;
+            // output a newline to be on par with the regular prompt()
+            echo PHP_EOL;
 
-                return self::trimAnswer($output);
-            }
+            return $answer;
         }
 
         if (file_exists('/usr/bin/env')) {
@@ -87,14 +85,12 @@ class CliPrompt
             if (isset($shell)) {
                 $readCmd = ($shell === 'csh') ? 'set mypassword = $<' : 'read -r mypassword';
                 $command = sprintf("/usr/bin/env %s -c 'stty -echo; %s; stty echo; echo \$mypassword'", $shell, $readCmd);
-                $output = shell_exec($command);
+                $value = self::trimAnswer(shell_exec($command));
 
-                if ($output !== null) {
-                    // output a newline to be on par with the regular prompt()
-                    echo PHP_EOL;
+                // output a newline to be on par with the regular prompt()
+                echo PHP_EOL;
 
-                    return self::trimAnswer($output);
-                }
+                return $value;
             }
         }
 

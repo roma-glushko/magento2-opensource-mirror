@@ -1,32 +1,15 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Widget\Helper;
-
-use Magento\Framework\App\ObjectManager;
-use Magento\Framework\Unserialize\SecureUnserializer;
 
 /**
  * Widget Conditions helper
  */
 class Conditions
 {
-    /**
-     * @var SecureUnserializer
-     */
-    private $unserializer;
-
-    /**
-     * @param SecureUnserializer|null $unserializer
-     */
-    public function __construct(
-        SecureUnserializer $unserializer = null
-    ) {
-        $this->unserializer = $unserializer ?: ObjectManager::getInstance()->get(SecureUnserializer::class);
-    }
-
     /**
      * Encode widget conditions to be used with WYSIWIG
      *
@@ -48,7 +31,7 @@ class Conditions
     public function decode($value)
     {
         $value = str_replace(['[', ']', '`', '|'], ['{', '}', '"', '\\'], $value);
-
-        return $this->unserializer->unserialize($value);
+        $value = unserialize($value);
+        return $value;
     }
 }

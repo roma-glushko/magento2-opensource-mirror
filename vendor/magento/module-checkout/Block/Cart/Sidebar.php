@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Checkout\Block\Cart;
@@ -16,6 +16,11 @@ class Sidebar extends AbstractCart
      * Xml pah to checkout sidebar display value
      */
     const XML_PATH_CHECKOUT_SIDEBAR_DISPLAY = 'checkout/sidebar/display';
+
+    /**
+     * Xml pah to checkout sidebar count value
+     */
+    const XML_PATH_CHECKOUT_SIDEBAR_COUNT = 'checkout/sidebar/count';
 
     /**
      * @var \Magento\Catalog\Helper\Image
@@ -64,8 +69,7 @@ class Sidebar extends AbstractCart
             'removeItemUrl' => $this->getRemoveItemUrl(),
             'imageTemplate' => $this->getImageHtmlTemplate(),
             'baseUrl' => $this->getBaseUrl(),
-            'minicartMaxItemsVisible' => $this->getMiniCartMaxItemsCount(),
-            'websiteId' => $this->_storeManager->getStore()->getWebsiteId()
+            'minicartMaxItemsVisible' => $this->getMiniCartMaxItemsCount()
         ];
     }
 

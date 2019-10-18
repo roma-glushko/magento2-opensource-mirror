@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\CatalogImportExport\Test\Unit\Model\Import;
@@ -167,6 +167,16 @@ class ProductTest extends \Magento\ImportExport\Test\Unit\Model\Import\AbstractI
     {
         parent::setUp();
 
+        $metadataPoolMock = $this->getMock(\Magento\Framework\EntityManager\MetadataPool::class, [], [], '', false);
+        $entityMetadataMock = $this->getMock(\Magento\Framework\EntityManager\EntityMetadata::class, [], [], '', false);
+        $metadataPoolMock->expects($this->any())
+            ->method('getMetadata')
+            ->with(\Magento\Catalog\Api\Data\ProductInterface::class)
+            ->willReturn($entityMetadataMock);
+        $entityMetadataMock->expects($this->any())
+            ->method('getLinkField')
+            ->willReturn('entity_id');
+
         /* For parent object construct */
         $this->jsonHelper =
             $this->getMockBuilder(\Magento\Framework\Json\Helper\Data::class)
@@ -299,6 +309,11 @@ class ProductTest extends \Magento\ImportExport\Test\Unit\Model\Import\AbstractI
             $this->getMockBuilder(\Magento\CatalogImportExport\Model\Import\Product\SkuProcessor::class)
                 ->disableOriginalConstructor()
                 ->getMock();
+        $reflection = new \ReflectionClass(\Magento\CatalogImportExport\Model\Import\Product\SkuProcessor::class);
+        $reflectionProperty = $reflection->getProperty('metadataPool');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue($this->skuProcessor, $metadataPoolMock);
+
         $this->categoryProcessor =
             $this->getMockBuilder(\Magento\CatalogImportExport\Model\Import\Product\CategoryProcessor::class)
                 ->disableOriginalConstructor()
@@ -383,6 +398,10 @@ class ProductTest extends \Magento\ImportExport\Test\Unit\Model\Import\AbstractI
                 'data' => $this->data
             ]
         );
+        $reflection = new \ReflectionClass('\Magento\CatalogImportExport\Model\Import\Product');
+        $reflectionProperty = $reflection->getProperty('metadataPool');
+        $reflectionProperty->setAccessible(true);
+        $reflectionProperty->setValue($this->importProduct, $metadataPoolMock);
     }
 
     /**
@@ -391,7 +410,7 @@ class ProductTest extends \Magento\ImportExport\Test\Unit\Model\Import\AbstractI
     protected function _objectConstructor()
     {
         $this->optionFactory = $this->getMock(
-            \Magento\CatalogImportExport\Model\Import\Product\OptionFactory::class,
+            '\Magento\CatalogImportExport\Model\Import\Product\OptionFactory',
             ['create'],
             [],
             '',
@@ -518,10 +537,21 @@ class ProductTest extends \Magento\ImportExport\Test\Unit\Model\Import\AbstractI
                 ]
             ]
         ];
-        $this->skuProcessor->expects($this->once())
-            ->method('getNewSku')
-            ->with($testSku)
-            ->willReturn(['entity_id' => self::ENTITY_ID]);
+        $entityTable = 'catalog_product_entity';
+        $resource = $this->getMockBuilder(\Magento\CatalogImportExport\Model\Import\Proxy\Product\ResourceModel::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['getTable'])
+            ->getMock();
+        $resource->expects($this->once())->method('getTable')->with($entityTable)->willReturnArgument(0);
+        $this->_resourceFactory->expects($this->once())->method('create')->willReturn($resource);
+        $selectMock = $this->getMockBuilder(\Magento\Framework\DB\Select::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $selectMock->expects($this->once())->method('from')->with($entityTable, '*', null)->willReturnSelf();
+        $selectMock->expects($this->once())->method('where')->with('sku = ?', $testSku)->willReturnSelf();
+        $selectMock->expects($this->once())->method('columns')->with('entity_id')->willReturnSelf();
+        $this->_connection->expects($this->any())->method('fetchOne')->willReturn(self::ENTITY_ID);
+        $this->_connection->expects($this->any())->method('select')->willReturn($selectMock);
         $this->_connection->expects($this->any())
             ->method('quoteInto')
             ->willReturnCallback([$this, 'returnQuoteCallback']);
@@ -1044,6 +1074,7 @@ class ProductTest extends \Magento\ImportExport\Test\Unit\Model\Import\AbstractI
             'attr_set_id' =>
                 $_attrSetNameToId[$rowData[\Magento\CatalogImportExport\Model\Import\Product::COL_ATTR_SET]],
             'attr_set_code' => $rowData[\Magento\CatalogImportExport\Model\Import\Product::COL_ATTR_SET],//value
+            'row_id' => null
         ];
         $importProduct = $this->createModelMockWithErrorAggregator(
             ['addRowError', 'getOptionEntity'],
@@ -1247,46 +1278,6 @@ class ProductTest extends \Magento\ImportExport\Test\Unit\Model\Import\AbstractI
         $importProduct->expects($this->once())->method('getOptionEntity')->willReturn($option);
 
         $importProduct->validateRow($rowData, $rowNum);
-    }
-
-    /**
-     * @dataProvider getImagesFromRowDataProvider
-     */
-    public function testGetImagesFromRow($rowData, $expectedResult)
-    {
-        $this->assertEquals(
-            $this->importProduct->getImagesFromRow($rowData),
-            $expectedResult
-        );
-    }
-
-    /**
-     * @return array
-     */
-    public function getImagesFromRowDataProvider()
-    {
-        return [
-            [
-                [],
-                [[], []]
-            ],
-            [
-                [
-                    'image' => 'image3.jpg',
-                    '_media_image' => 'image1.jpg,image2.png',
-                    '_media_image_label' => 'label1,label2'
-                ],
-                [
-                    [
-                        'image' => ['image3.jpg'],
-                        '_media_image' => ['image1.jpg', 'image2.png']
-                    ],
-                    [
-                        '_media_image' => ['label1', 'label2']
-                    ],
-                ]
-            ]
-        ];
     }
 
     public function validateRowValidateNewProductTypeAddRowErrorCallDataProvider()

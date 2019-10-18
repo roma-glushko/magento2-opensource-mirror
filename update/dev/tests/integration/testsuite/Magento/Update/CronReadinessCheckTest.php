@@ -1,50 +1,17 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Update;
 
 class CronReadinessCheckTest extends \PHPUnit_Framework_TestCase
 {
-    /**
-     * @var bool
-     */
     static public $writable = true;
-
-    /**
-     * @var string
-     */
-    private $setupCronJobStatusFilePath;
-
-    /**
-     * @var string
-     */
-    private $cronJobStatusFilePath;
-
-    protected function setUp()
-    {
-        $this->setupCronJobStatusFilePath = MAGENTO_BP . '/var/' . CronReadinessCheck::SETUP_CRON_JOB_STATUS_FILE;
-        file_put_contents(
-            $this->setupCronJobStatusFilePath,
-            json_encode([CronReadinessCheck::KEY_FILE_PATHS => [CronReadinessCheck::KEY_LIST => [__FILE__]]])
-        );
-
-        $this->cronJobStatusFilePath = MAGENTO_BP . '/var/' . CronReadinessCheck::CRON_JOB_STATUS_FILE;
-        file_put_contents(
-            $this->cronJobStatusFilePath,
-            json_encode([CronReadinessCheck::KEY_CURRENT_TIMESTAMP => 150])
-        );
-    }
 
     public function tearDown()
     {
-        if (file_exists($this->setupCronJobStatusFilePath)) {
-            unlink($this->setupCronJobStatusFilePath);
-        }
-        if (file_exists($this->cronJobStatusFilePath)) {
-            unlink($this->cronJobStatusFilePath);
-        }
+        unlink(__DIR__ . '/_files/readiness_check');
     }
 
     public function testRunReadinessCheckNotWritable()
@@ -52,9 +19,8 @@ class CronReadinessCheckTest extends \PHPUnit_Framework_TestCase
         $cronReadinessCheck = new CronReadinessCheck();
         self::$writable = false;
         $this->assertFalse($cronReadinessCheck->runReadinessCheck());
-
-        $file = fopen($this->cronJobStatusFilePath, 'r');
-        $data = fread($file, filesize($this->cronJobStatusFilePath));
+        $file = fopen(__DIR__ . '/_files/readiness_check', 'r');
+        $data = fread($file, filesize(__DIR__ . '/_files/readiness_check'));
         $json = json_decode($data, true);
         $expected = [
             CronReadinessCheck::KEY_READINESS_CHECKS => [
@@ -74,8 +40,8 @@ class CronReadinessCheckTest extends \PHPUnit_Framework_TestCase
         $cronReadinessCheck = new CronReadinessCheck();
         self::$writable = true;
         $this->assertTrue($cronReadinessCheck->runReadinessCheck());
-        $file = fopen($this->cronJobStatusFilePath, 'r');
-        $data = fread($file, filesize($this->cronJobStatusFilePath));
+        $file = fopen(__DIR__ . '/_files/readiness_check', 'r');
+        $data = fread($file, filesize(__DIR__ . '/_files/readiness_check'));
         $json = json_decode($data, true);
         $expected = [
             CronReadinessCheck::KEY_READINESS_CHECKS => [CronReadinessCheck::KEY_FILE_PERMISSIONS_VERIFIED => true],
@@ -91,6 +57,27 @@ class CronReadinessCheckTest extends \PHPUnit_Framework_TestCase
 function time()
 {
     return 200;
+}
+
+function file_put_contents($filename, $data)
+{
+    $file = fopen(__DIR__ . '/_files/readiness_check', 'w+');
+    fwrite($file, $data);
+    fclose($file);
+}
+
+function file_exists($filename)
+{
+    return true;
+}
+
+function file_get_contents($filename)
+{
+    if ($filename === MAGENTO_BP . '/var/' . CronReadinessCheck::SETUP_CRON_JOB_STATUS_FILE) {
+        return json_encode([CronReadinessCheck::KEY_FILE_PATHS => [CronReadinessCheck::KEY_LIST => [__FILE__]]]);
+    } else {
+        return json_encode([CronReadinessCheck::KEY_CURRENT_TIMESTAMP => 150]);
+    }
 }
 
 function is_writable()

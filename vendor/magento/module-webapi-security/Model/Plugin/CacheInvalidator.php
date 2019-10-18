@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\WebapiSecurity\Model\Plugin;
@@ -34,10 +34,10 @@ class CacheInvalidator
         \Magento\Framework\App\Config\Value $subject,
         \Magento\Framework\App\Config\Value $result
     ) {
-        if ($subject->getPath() == \Magento\WebapiSecurity\Model\Plugin\AnonymousResourceSecurity::XML_ALLOW_INSECURE
-            && $subject->isValueChanged()
+        if ($result->getPath() == \Magento\WebapiSecurity\Model\Plugin\AnonymousResourceSecurity::XML_ALLOW_INSECURE
+            && $result->isValueChanged()
         ) {
-            $this->cacheTypeList->invalidate(\Magento\Framework\App\Cache\Type\Webapi::TYPE_IDENTIFIER);
+            $this->cacheTypeList->invalidate(\Magento\Webapi\Model\Cache\Type\Webapi::TYPE_IDENTIFIER);
         }
 
         return $result;

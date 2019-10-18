@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Widget\Model;
@@ -52,8 +52,6 @@ class Widget
     protected $conditionsHelper;
 
     /**
-     * Random data generator.
-     *
      * @var \Magento\Framework\Math\Random
      */
     private $mathRandom;
@@ -91,9 +89,8 @@ class Widget
     {
         if ($this->mathRandom === null) {
             $this->mathRandom = \Magento\Framework\App\ObjectManager::getInstance()
-                ->get(\Magento\Framework\Math\Random::class);
+                ->get('\Magento\Framework\Math\Random');
         }
-        
         return $this->mathRandom;
     }
 
@@ -317,7 +314,7 @@ class Widget
                 }
             }
             if ($value) {
-                $directive .= sprintf(' %s="%s"', $name, $this->escaper->escapeQuote($value));
+                $directive .= sprintf(' %s="%s"', $name, $value);
             }
         }
 
@@ -335,13 +332,10 @@ class Widget
             $this->getPlaceholderImageUrl($type),
             $this->escaper->escapeUrl($directive)
         );
-        
         return $html;
     }
 
     /**
-     * Returns var name for widget page.
-     *
      * @param array $params
      * @return string
      * @throws \Magento\Framework\Exception\LocalizedException
@@ -356,7 +350,6 @@ class Widget
                 'p' . $this->getMathRandom()->getRandomString(5, \Magento\Framework\Math\Random::CHARS_LOWERS)
             );
         }
-        
         return $pageVarName;
     }
 

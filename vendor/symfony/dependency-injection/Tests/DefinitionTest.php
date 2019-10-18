@@ -11,11 +11,10 @@
 
 namespace Symfony\Component\DependencyInjection\Tests;
 
-use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
-class DefinitionTest extends TestCase
+class DefinitionTest extends \PHPUnit_Framework_TestCase
 {
     public function testConstructor()
     {
@@ -67,14 +66,7 @@ class DefinitionTest extends TestCase
         $this->assertNull($def->getDecoratedService());
 
         $def = new Definition('stdClass');
-
-        if (method_exists($this, 'expectException')) {
-            $this->expectException('InvalidArgumentException');
-            $this->expectExceptionMessage('The decorated service inner name for "foo" must be different than the service name itself.');
-        } else {
-            $this->setExpectedException('InvalidArgumentException', 'The decorated service inner name for "foo" must be different than the service name itself.');
-        }
-
+        $this->setExpectedException('InvalidArgumentException', 'The decorated service inner name for "foo" must be different than the service name itself.');
         $def->setDecoratedService('foo', 'foo');
     }
 
@@ -202,7 +194,7 @@ class DefinitionTest extends TestCase
 
     /**
      * @dataProvider invalidDeprecationMessageProvider
-     * @expectedException \Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
+     * @expectedException Symfony\Component\DependencyInjection\Exception\InvalidArgumentException
      */
     public function testSetDeprecatedWithInvalidDeprecationTemplate($message)
     {
@@ -300,7 +292,6 @@ class DefinitionTest extends TestCase
 
     /**
      * @expectedException \OutOfBoundsException
-     * @expectedExceptionMessage The index "1" is not in the range [0, 0].
      */
     public function testReplaceArgumentShouldCheckBounds()
     {
@@ -308,16 +299,6 @@ class DefinitionTest extends TestCase
 
         $def->addArgument('foo');
         $def->replaceArgument(1, 'bar');
-    }
-
-    /**
-     * @expectedException \OutOfBoundsException
-     * @expectedExceptionMessage Cannot replace arguments if none have been configured yet.
-     */
-    public function testReplaceArgumentWithoutExistingArgumentsShouldCheckBounds()
-    {
-        $def = new Definition('stdClass');
-        $def->replaceArgument(0, 'bar');
     }
 
     public function testSetGetProperties()

@@ -45,7 +45,7 @@ class ServiceReferenceGraph
      *
      * @param string $id The id to retrieve
      *
-     * @return ServiceReferenceGraphNode
+     * @return ServiceReferenceGraphNode The node matching the supplied identifier
      *
      * @throws InvalidArgumentException if no node matches the supplied identifier
      */
@@ -61,7 +61,7 @@ class ServiceReferenceGraph
     /**
      * Returns all nodes.
      *
-     * @return ServiceReferenceGraphNode[]
+     * @return ServiceReferenceGraphNode[] An array of all ServiceReferenceGraphNode objects
      */
     public function getNodes()
     {
@@ -80,16 +80,13 @@ class ServiceReferenceGraph
      * Connects 2 nodes together in the Graph.
      *
      * @param string $sourceId
-     * @param mixed  $sourceValue
+     * @param string $sourceValue
      * @param string $destId
-     * @param mixed  $destValue
+     * @param string $destValue
      * @param string $reference
      */
     public function connect($sourceId, $sourceValue, $destId, $destValue = null, $reference = null)
     {
-        if (null === $sourceId || null === $destId) {
-            return;
-        }
         $sourceNode = $this->createNode($sourceId, $sourceValue);
         $destNode = $this->createNode($destId, $destValue);
         $edge = new ServiceReferenceGraphEdge($sourceNode, $destNode, $reference);
@@ -102,7 +99,7 @@ class ServiceReferenceGraph
      * Creates a graph node.
      *
      * @param string $id
-     * @param mixed  $value
+     * @param string $value
      *
      * @return ServiceReferenceGraphNode
      */

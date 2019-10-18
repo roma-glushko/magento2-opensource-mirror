@@ -22,8 +22,11 @@ use Symfony\Component\Process\Process;
  */
 class UnixPipes extends AbstractPipes
 {
+    /** @var bool */
     private $ttyMode;
+    /** @var bool */
     private $ptyMode;
+    /** @var bool */
     private $disableOutput;
 
     public function __construct($ttyMode, $ptyMode, $input, $disableOutput)
@@ -99,7 +102,7 @@ class UnixPipes extends AbstractPipes
         unset($r[0]);
 
         // let's have a look if something changed in streams
-        if (($r || $w) && false === @stream_select($r, $w, $e, 0, $blocking ? Process::TIMEOUT_PRECISION * 1E6 : 0)) {
+        if (($r || $w) && false === $n = @stream_select($r, $w, $e, 0, $blocking ? Process::TIMEOUT_PRECISION * 1E6 : 0)) {
             // if a system call has been interrupted, forget about it, let's try again
             // otherwise, an error occurred, let's reset pipes
             if (!$this->hasSystemCallBeenInterrupted()) {
@@ -117,7 +120,7 @@ class UnixPipes extends AbstractPipes
             do {
                 $data = fread($pipe, self::CHUNK_SIZE);
                 $read[$type] .= $data;
-            } while (isset($data[0]) && ($close || isset($data[self::CHUNK_SIZE - 1])));
+            } while (isset($data[0]));
 
             if (!isset($read[$type][0])) {
                 unset($read[$type]);
@@ -146,7 +149,7 @@ class UnixPipes extends AbstractPipes
      * @param Process         $process
      * @param string|resource $input
      *
-     * @return static
+     * @return UnixPipes
      */
     public static function create(Process $process, $input)
     {

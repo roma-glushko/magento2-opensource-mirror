@@ -1,11 +1,10 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Backend\Block\Widget\Grid;
 
-use Magento\Backend\Block\Widget;
 use Magento\Backend\Block\Widget\Grid\Column\Filter\AbstractFilter;
 
 /**
@@ -13,7 +12,7 @@ use Magento\Backend\Block\Widget\Grid\Column\Filter\AbstractFilter;
  *
  * @author     Magento Core Team <core@magentocommerce.com>
  */
-class Column extends Widget
+class Column extends \Magento\Backend\Block\Widget
 {
     /**
      * Parent grid
@@ -288,27 +287,10 @@ class Column extends Widget
          */
         $frameCallback = $this->getFrameCallback();
         if (is_array($frameCallback)) {
-            $this->validateFrameCallback($frameCallback);
             $renderedValue = call_user_func($frameCallback, $renderedValue, $row, $this, false);
         }
 
         return $renderedValue;
-    }
-
-    /**
-     * Validate frame callback.
-     *
-     * @param array $callback
-     * @return void
-     * @throws \InvalidArgumentException
-     */
-    private function validateFrameCallback(array $callback)
-    {
-        if (!is_object($callback[0]) || !$callback[0] instanceof Widget) {
-            throw new \InvalidArgumentException(
-                "Frame callback host must be instance of " . Widget::class
-            );
-        }
     }
 
     /**
@@ -330,7 +312,6 @@ class Column extends Widget
          */
         $frameCallback = $this->getFrameCallback();
         if (is_array($frameCallback)) {
-            $this->validateFrameCallback($frameCallback);
             $renderedValue = call_user_func($frameCallback, $renderedValue, $row, $this, true);
         }
 

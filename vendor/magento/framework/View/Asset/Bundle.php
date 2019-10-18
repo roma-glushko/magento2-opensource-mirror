@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -26,7 +26,7 @@ class Bundle
      */
     protected $assetsContent = [];
 
-    /** @var Bundle\ConfigInterface */
+    /** @var  Bundle\Config */
     protected $bundleConfig;
 
     /**
@@ -261,7 +261,6 @@ class Bundle
             $assetsParts = reset($parts);
             $context = reset($assetsParts['assets'])->getContext();
             $bundlePath = empty($bundlePath) ? $context->getPath() . Manager::BUNDLE_PATH : $bundlePath;
-            $dir->delete($context->getPath() . DIRECTORY_SEPARATOR . Manager::BUNDLE_JS_DIR);
             $this->fillContent($parts, $context);
         }
 

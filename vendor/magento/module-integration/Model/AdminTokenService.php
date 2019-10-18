@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -96,20 +96,17 @@ class AdminTokenService implements \Magento\Integration\Api\AdminTokenServiceInt
     }
 
     /**
-     * Revoke token by admin id.
-     *
-     * The function will delete the token from the oauth_token table.
-     *
-     * @param int $adminId
-     * @return bool
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * {@inheritdoc}
      */
     public function revokeAdminAccessToken($adminId)
     {
         $tokenCollection = $this->tokenModelCollectionFactory->create()->addFilterByAdminId($adminId);
+        if ($tokenCollection->getSize() == 0) {
+            throw new LocalizedException(__('This user has no tokens.'));
+        }
         try {
             foreach ($tokenCollection as $token) {
-                $token->delete();
+                $token->setRevoked(1)->save();
             }
         } catch (\Exception $e) {
             throw new LocalizedException(__('The tokens could not be revoked.'));

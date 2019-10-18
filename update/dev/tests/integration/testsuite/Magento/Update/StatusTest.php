@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Update;
@@ -16,11 +16,6 @@ class StatusTest extends \PHPUnit_Framework_TestCase
      * @var string
      */
     protected $statusFilePath;
-
-    /**
-     * @var string
-     */
-    private $statusScrubbedFilePath;
 
     /**
      * @var string
@@ -42,16 +37,10 @@ class StatusTest extends \PHPUnit_Framework_TestCase
      */
     protected $updateErrorFlagFilePath;
 
-    /**
-     * @var string
-     */
-    private $somePath = '/someDir/someFile.ext';
-
     protected function setUp()
     {
         parent::setUp();
         $this->statusFilePath = __DIR__ . '/_files/update_status.txt';
-        $this->statusScrubbedFilePath = __DIR__ . '/_files/update_status_scrubbed.txt';
         $this->tmpStatusFilePath = TESTS_TEMP_DIR . '/update_status.txt';
         $this->tmpStatusLogFilePath = TESTS_TEMP_DIR . '/update.log';
         $this->updateInProgressFlagFilePath = TESTS_TEMP_DIR . '/update_in_progress.flag';
@@ -86,24 +75,11 @@ class StatusTest extends \PHPUnit_Framework_TestCase
 
     public function testGet()
     {
-        $tmpFileStatus = TESTS_TEMP_DIR . 'tmpStatus.txt';
-
-        $statusContent = file_get_contents($this->statusFilePath);
-        $statusContent .= PHP_EOL . MAGENTO_BP . $this->somePath;
-        file_put_contents($tmpFileStatus, $statusContent);
-
-        $status = new \Magento\Update\Status($tmpFileStatus);
+        $status = new \Magento\Update\Status($this->statusFilePath);
         $actualStatusText = $status->get();
         /** Ensure that actual status text is correct */
-        $statusContent = file_get_contents($this->statusFilePath);
-        $statusScrubbedContent = file_get_contents($this->statusScrubbedFilePath);
-        $statusScrubbedContent .= PHP_EOL . '{magento_root}' . $this->somePath;
-        $this->assertNotEquals($statusContent, $actualStatusText);
-        $this->assertEquals($statusScrubbedContent, $actualStatusText);
-
-        if (file_exists($tmpFileStatus)) {
-            unlink($tmpFileStatus);
-        }
+        $statusArray = file_get_contents($this->statusFilePath);
+        $this->assertEquals($statusArray, $actualStatusText);
     }
 
     public function testGetFileDoesNotExixt()
@@ -131,8 +107,7 @@ FIRST_UPDATE;
         $status->add($firstUpdate);
         $textAfterFirstUpdate = "$originalStatus\n{$firstUpdate}";
         $this->verifyAddedStatus($textAfterFirstUpdate, $this->tmpStatusFilePath, 1);
-        $textAfterFirstUpdate = $originalStatus . $this->getLogFilePattern($firstUpdate);
-        $this->verifyAddedStatus($textAfterFirstUpdate, $this->tmpStatusLogFilePath, 3*1);
+        $this->verifyAddedStatus($textAfterFirstUpdate, $this->tmpStatusLogFilePath, 1);
 
         $secondUpdate = <<<SECOND_UPDATE
 Donec lacus nunc, viverra nec, blandit vel, egestas et, augue.
@@ -143,9 +118,7 @@ SECOND_UPDATE;
         $this->assertInstanceOf('Magento\Update\Status', $status->add($secondUpdate));
         $textAfterSecondUpdate = "{$originalStatus}\n{$firstUpdate}\n{$secondUpdate}";
         $this->verifyAddedStatus($textAfterSecondUpdate, $this->tmpStatusFilePath, 2);
-        $textAfterSecondUpdate = $originalStatus .
-            $this->getLogFilePattern($firstUpdate) . ' ' . $this->getLogFilePattern($secondUpdate);
-        $this->verifyAddedStatus($textAfterSecondUpdate, $this->tmpStatusLogFilePath, 3*2);
+        $this->verifyAddedStatus($textAfterSecondUpdate, $this->tmpStatusLogFilePath, 2);
     }
 
     public function testAddToNotExistingFile()
@@ -158,7 +131,7 @@ SECOND_UPDATE;
 Praesent blandit dolor.
 Sed non quam.
 STATUS_UPDATE;
-        $status->add($statusUpdate);
+        $status->add($statusUpdate, $this->tmpStatusFilePath);
         $this->verifyAddedStatus($statusUpdate, $this->tmpStatusFilePath, 1);
     }
 
@@ -234,18 +207,7 @@ STATUS_UPDATE;
         $this->assertCount($expectedNumberOfTimeEntries, $matches[0]);
 
         /** Eliminate current date/time entries from the actual status content before text comparison */
-        $actualStatusText = trim(preg_replace('/\[.*?\]\s/', '', $actualStatusText));
+        $actualStatusText = preg_replace('/\[.*?\]\s/', '', $actualStatusText);
         $this->assertEquals($expectedTextAfterUpdate, $actualStatusText);
-    }
-
-    /**
-     * Get log pattern
-     *
-     * @param string $msg
-     * @return string
-     */
-    private function getLogFilePattern($msg)
-    {
-        return 'update-cron.INFO: ' . preg_replace('/' . PHP_EOL . '/', ' ', $msg);
     }
 }

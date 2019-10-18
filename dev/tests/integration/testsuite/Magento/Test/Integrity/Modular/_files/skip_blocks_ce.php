@@ -4,7 +4,7 @@
  *
  * Format: array('Block_Class_Name', ...)
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 return [
@@ -20,11 +20,5 @@ return [
     // Fails because of dependence on registry
     'Magento\Reminder\Block\Adminhtml\Reminder\Edit\Tab\Customers',
     'Magento\LayeredNavigation\Block\Navigation',
-    'Magento\LayeredNavigation\Block\Navigation\State',
-    // Other failures
-    'Magento\ProductAlert\Block\Email\Price',
-    'Magento\ProductAlert\Block\Email\Stock',
-    'Magento\ProductAlert\Block\Product\View',
-    'Magento\ProductAlert\Block\Product\View\Price',
-    'Magento\ProductAlert\Block\Product\View\Stock'
+    'Magento\LayeredNavigation\Block\Navigation\State'
 ];

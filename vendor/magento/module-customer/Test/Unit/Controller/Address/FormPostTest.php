@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Customer\Test\Unit\Controller\Address;
@@ -157,11 +157,6 @@ class FormPostTest extends \PHPUnit_Framework_TestCase
      */
     protected $messageManager;
 
-    /**
-     * @var \Magento\Customer\Model\Address\Mapper|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $customerAddressMapper;
-
     protected function setUp()
     {
         $this->prepareContext();
@@ -202,10 +197,6 @@ class FormPostTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->customerAddressMapper = $this->getMockBuilder('Magento\Customer\Model\Address\Mapper')
-            ->disableOriginalConstructor()
-            ->getMock();
-
         $this->model = new FormPost(
             $this->context,
             $this->session,
@@ -221,11 +212,6 @@ class FormPostTest extends \PHPUnit_Framework_TestCase
             $this->regionFactory,
             $this->helperData
         );
-
-        $reflection = new \ReflectionClass(get_class($this->model));
-        $reflectionProperty = $reflection->getProperty('customerAddressMapper');
-        $reflectionProperty->setAccessible(true);
-        $reflectionProperty->setValue($this->model, $this->customerAddressMapper);
     }
 
     protected function prepareContext()
@@ -425,7 +411,6 @@ class FormPostTest extends \PHPUnit_Framework_TestCase
         $addressId,
         $countryId,
         $customerId,
-        $isRegionRequired,
         $regionId,
         $region,
         $regionCode,
@@ -473,10 +458,21 @@ class FormPostTest extends \PHPUnit_Framework_TestCase
             ->with($this->addressData)
             ->willReturnSelf();
 
-        $this->customerAddressMapper->expects($this->once())
-            ->method('toFlatArray')
-            ->with($this->addressData)
+        $this->dataProcessor->expects($this->once())
+            ->method('buildOutputDataArray')
+            ->with($this->addressData, '\Magento\Customer\Api\Data\AddressInterface')
             ->willReturn($existingAddressData);
+
+        $this->addressData->expects($this->any())
+            ->method('getRegion')
+            ->willReturn($this->regionData);
+
+        $this->regionData->expects($this->once())
+            ->method('getRegionCode')
+            ->willReturn($regionCode);
+        $this->regionData->expects($this->once())
+            ->method('getRegion')
+            ->willReturn($region);
 
         $this->formFactory->expects($this->once())
             ->method('create')
@@ -491,11 +487,6 @@ class FormPostTest extends \PHPUnit_Framework_TestCase
             ->method('compactData')
             ->with($newAddressData)
             ->willReturn($newAddressData);
-
-        $this->helperData->expects($this->once())
-            ->method('isRegionRequired')
-            ->with($countryId)
-            ->willReturn($isRegionRequired);
 
         $this->region->expects($this->any())
             ->method('load')
@@ -584,31 +575,31 @@ class FormPostTest extends \PHPUnit_Framework_TestCase
     public function dataProviderTestExecute()
     {
         return [
-            [1, 1, 1, true, null, '', null, '', null, ''],
-            [1, 1, 1, false, '', null, '', null, '', null],
+            [1, 1, 1, null, '', null, '', null, ''],
+            [1, 1, 1, '', null, '', null, '', null],
 
-            [1, 1, 1, true, null, null, null, 12, null, null],
-            [1, 1, 1, true, null, null, null, 1, 'California', null],
-            [1, 1, 1, true, null, null, null, 1, 'California', 'CA'],
+            [1, 1, 1, null, null, null, 12, null, null],
+            [1, 1, 1, null, null, null, 1, 'California', null],
+            [1, 1, 1, null, null, null, 1, 'California', 'CA'],
 
-            [1, 1, 1, false, null, null, null, 1, null, 'CA'],
-            [1, 1, 1, false, null, null, null, null, null, 'CA'],
+            [1, 1, 1, null, null, null, 1, null, 'CA'],
+            [1, 1, 1, null, null, null, null, null, 'CA'],
 
-            [1, 1, 1, true, 2, null, null, null, null, null],
-            [1, 1, 1, true, 2, 'Alaska', null, null, null, null],
-            [1, 1, 1, true, 2, 'Alaska', 'AK', null, null, null],
+            [1, 1, 1, 2, null, null, null, null, null],
+            [1, 1, 1, 2, 'Alaska', null, null, null, null],
+            [1, 1, 1, 2, 'Alaska', 'AK', null, null, null],
 
-            [1, 1, 1, false, 2, null, null, null, null, null],
-            [1, 1, 1, false, 2, 'Alaska', null, null, null, null],
-            [1, 1, 1, false, 2, 'Alaska', 'AK', null, null, null],
+            [1, 1, 1, 2, null, null, null, null, null],
+            [1, 1, 1, 2, 'Alaska', null, null, null, null],
+            [1, 1, 1, 2, 'Alaska', 'AK', null, null, null],
 
-            [1, 1, 1, true, 2, null, null, 12, null, null],
-            [1, 1, 1, true, 2, 'Alaska', null, 12, null, 'CA'],
-            [1, 1, 1, true, 2, 'Alaska', 'AK', 12, 'California', null],
+            [1, 1, 1, 2, null, null, 12, null, null],
+            [1, 1, 1, 2, 'Alaska', null, 12, null, 'CA'],
+            [1, 1, 1, 2, 'Alaska', 'AK', 12, 'California', null],
 
-            [1, 1, 1, false, 2, null, null, 12, null, null],
-            [1, 1, 1, false, 2, 'Alaska', null, 12, null, 'CA'],
-            [1, 1, 1, false, 2, 'Alaska', 'AK', 12, 'California', null],
+            [1, 1, 1, 2, null, null, 12, null, null],
+            [1, 1, 1, 2, 'Alaska', null, 12, null, 'CA'],
+            [1, 1, 1, 2, 'Alaska', 'AK', 12, 'California', null],
         ];
     }
 

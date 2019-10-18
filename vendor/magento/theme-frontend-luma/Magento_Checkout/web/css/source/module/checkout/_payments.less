@@ -1,5 +1,5 @@
 // /**
-//  * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+//  * Copyright © 2016 Magento. All rights reserved.
 //  * See COPYING.txt for license details.
 //  */
 
@@ -26,12 +26,14 @@
         .step-title {
             margin-bottom: 0;
         }
+
         .payment-method {
             &:first-child {
                 .payment-method-title {
                     border-top: 0;
                 }
             }
+
             &._active {
                 .payment-method-content {
                     display: block;
@@ -87,7 +89,7 @@
             margin: 0 0 @indent__s;
         }
 
-        .checkout-billing-address {
+        .payment-method-billing-address {
             margin: 0 0 @indent__base;
 
             .primary {
@@ -103,11 +105,15 @@
             .billing-address-details {
                 .lib-css(line-height, @checkout-billing-address-details__line-height);
                 .lib-css(padding, @checkout-billing-address-details__padding);
+
+                .action-edit-address {
+                    &:extend(.abs-action-button-as-link all);
+                }
             }
         }
 
         .payment-method-note {
-            & + .checkout-billing-address {
+            & + .payment-method-billing-address {
                 margin-top: @indent__base;
             }
         }
@@ -117,14 +123,17 @@
                 &:extend(.abs-visually-hidden all);
             }
         }
+
         .payment-method-iframe {
             background-color: transparent;
             display: none;
             width: 100%;
         }
+
         .no-payments-block {
             margin: @indent__base 0;
         }
+
         .payments {
             .legend {
                 &:extend(.abs-visually-hidden all);
@@ -151,7 +160,7 @@
             .lib-css(padding, 0 @checkout-payment-method-title-mobile__padding @indent__base);
         }
 
-        .checkout-billing-address {
+        .payment-method-billing-address {
             .action-cancel {
                 margin-top: @indent__s;
             }
@@ -165,12 +174,15 @@
 
 .media-width(@extremum, @break) when (@extremum = 'min') and (@break = @screen__m) {
     .checkout-payment-method {
-        .actions-toolbar {
-            .primary {
-                float: right;
-                margin: 0;
+        .payment-methods {
+            .actions-toolbar {
+                .primary {
+                    float: right;
+                    margin: 0;
+                }
             }
         }
+
         .fieldset {
             > .field-select-billing {
                 > .control {
@@ -181,10 +193,11 @@
         }
     }
 
-    .checkout-billing-address {
+    .payment-method-billing-address {
         .action-update {
             float: right;
         }
+
         .actions-toolbar {
             .action-cancel {
                 margin: 6px @indent__base 0 0;

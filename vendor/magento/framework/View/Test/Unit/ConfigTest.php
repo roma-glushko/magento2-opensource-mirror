@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -26,11 +26,11 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     protected function setUp()
     {
-        $this->repositoryMock = $this->getMock(\Magento\Framework\View\Asset\Repository::class, [], [], '', false);
-        $this->viewConfigFactoryMock = $this->getMock(\Magento\Framework\Config\ViewFactory::class, [], [], '', false);
+        $this->repositoryMock = $this->getMock('Magento\Framework\View\Asset\Repository', [], [], '', false);
+        $this->viewConfigFactoryMock = $this->getMock('Magento\Framework\Config\ViewFactory', [], [], '', false);
         $this->objectManagerHelper = new ObjectManagerHelper($this);
         $this->config = $this->objectManagerHelper->getObject(
-            \Magento\Framework\View\Config::class,
+            'Magento\Framework\View\Config',
             [
                 'assetRepo' => $this->repositoryMock,
                 'viewConfigFactory' => $this->viewConfigFactoryMock
@@ -40,17 +40,17 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
 
     public function testGetViewConfig()
     {
-        $themeCode = 'area/theme';
+        $themeCode = 2;
 
         $themeMock = $this->getMock(
-            \Magento\Theme\Model\Theme::class,
-            ['getFullPath'],
+            'Magento\Theme\Model\Theme',
+            ['getCode'],
             [],
             '',
             false
         );
         $themeMock->expects($this->atLeastOnce())
-            ->method('getFullPath')
+            ->method('getCode')
             ->will($this->returnValue($themeCode));
         $params = [
             'themeModel' => $themeMock,
@@ -60,12 +60,12 @@ class ConfigTest extends \PHPUnit_Framework_TestCase
             ->method('updateDesignParams')
             ->with($this->equalTo($params))
             ->will($this->returnSelf());
-        $configViewMock = $this->getMock(\Magento\Framework\Config\View::class, [], [], '', false);
+        $configViewMock = $this->getMock('Magento\Framework\Config\View', [], [], '', false);
         $this->viewConfigFactoryMock->expects($this->once())
             ->method('create')
             ->willReturn($configViewMock);
-        $this->assertInstanceOf(\Magento\Framework\Config\View::class, $this->config->getViewConfig($params));
+        $this->assertInstanceOf('Magento\Framework\Config\View', $this->config->getViewConfig($params));
         // lazy load test
-        $this->assertInstanceOf(\Magento\Framework\Config\View::class, $this->config->getViewConfig($params));
+        $this->assertInstanceOf('Magento\Framework\Config\View', $this->config->getViewConfig($params));
     }
 }

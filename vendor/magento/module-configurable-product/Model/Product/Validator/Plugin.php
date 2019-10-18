@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\ConfigurableProduct\Model\Product\Validator;
@@ -69,8 +69,7 @@ class Plugin
             $product->setTypeId(\Magento\ConfigurableProduct\Model\Product\Type\Configurable::TYPE_CODE);
         }
         $result = $proceed($product, $request, $response);
-        $variationProducts = $request->getPost('configurable-matrix-serialized', '[]');
-        $variationProducts = json_decode($variationProducts, true);
+        $variationProducts = (array)$request->getPost('variations-matrix');
         if ($variationProducts) {
             $validationResult = $this->_validateProductVariations($product, $variationProducts, $request);
             if (!empty($validationResult)) {

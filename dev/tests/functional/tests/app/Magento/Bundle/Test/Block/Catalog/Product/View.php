@@ -1,15 +1,16 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
 namespace Magento\Bundle\Test\Block\Catalog\Product;
 
 use Magento\Bundle\Test\Block\Catalog\Product\View\Type\Bundle;
-use Magento\Bundle\Test\Block\Catalog\Product\View\Summary;
+use Magento\Bundle\Test\Fixture\BundleProduct;
 use Magento\Mtf\Client\Locator;
 use Magento\Mtf\Fixture\FixtureInterface;
+use Magento\Mtf\Fixture\InjectableFixture;
 
 /**
  * Class View
@@ -46,13 +47,6 @@ class View extends \Magento\Catalog\Test\Block\Product\View
     protected $newsletterFormSelector = '#newsletter-validate-detail[novalidate="novalidate"]';
 
     /**
-     * Summary Block selector.
-     *
-     * @var string
-     */
-    private $summaryBlockSelector = '#bundleSummary';
-
-    /**
      * Get bundle options block.
      *
      * @return Bundle
@@ -62,19 +56,6 @@ class View extends \Magento\Catalog\Test\Block\Product\View
         return $this->blockFactory->create(
             'Magento\Bundle\Test\Block\Catalog\Product\View\Type\Bundle',
             ['element' => $this->_rootElement->find($this->bundleBlock, Locator::SELECTOR_XPATH)]
-        );
-    }
-
-    /**
-     * Get bundle Summary block.
-     *
-     * @return Summary
-     */
-    public function getBundleSummaryBlock()
-    {
-        return $this->blockFactory->create(
-            Summary::class,
-            ['element' => $this->_rootElement->find($this->summaryBlockSelector)]
         );
     }
 

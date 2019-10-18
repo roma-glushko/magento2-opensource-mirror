@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -50,13 +50,15 @@ class Data
                 );
                 $image->setData(
                     'medium_image_url',
-                    $this->imageHelper->init($product, 'product_page_image_medium_no_frame')
+                    $this->imageHelper->init($product, 'product_page_image_medium')
+                        ->constrainOnly(true)->keepAspectRatio(true)->keepFrame(false)
                         ->setImageFile($image->getFile())
                         ->getUrl()
                 );
                 $image->setData(
                     'large_image_url',
-                    $this->imageHelper->init($product, 'product_page_image_large_no_frame')
+                    $this->imageHelper->init($product, 'product_page_image_large')
+                        ->constrainOnly(true)->keepAspectRatio(true)->keepFrame(false)
                         ->setImageFile($image->getFile())
                         ->getUrl()
                 );

@@ -9,6 +9,8 @@ use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBag;
 
 /**
+ * ProjectServiceContainer.
+ *
  * This class has been auto-generated
  * by the Symfony Dependency Injection Component.
  */
@@ -17,6 +19,9 @@ class ProjectServiceContainer extends Container
     private $parameters;
     private $targetDirs = array();
 
+    /**
+     * Constructor.
+     */
     public function __construct()
     {
         parent::__construct(new ParameterBag($this->getDefaultParameters()));
@@ -48,9 +53,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'bar' shared service.
+     * Gets the 'bar' service.
      *
-     * @return \Bar\FooClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \Bar\FooClass A Bar\FooClass instance.
      */
     protected function getBarService()
     {
@@ -64,9 +72,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'baz' shared service.
+     * Gets the 'baz' service.
      *
-     * @return \Baz
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \Baz A Baz instance.
      */
     protected function getBazService()
     {
@@ -78,9 +89,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'configured_service' shared service.
+     * Gets the 'configured_service' service.
      *
-     * @return \stdClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \stdClass A stdClass instance.
      */
     protected function getConfiguredServiceService()
     {
@@ -92,9 +106,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'decorated' shared service.
+     * Gets the 'decorated' service.
      *
-     * @return \stdClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \stdClass A stdClass instance.
      */
     protected function getDecoratedService()
     {
@@ -102,9 +119,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'decorator_service' shared service.
+     * Gets the 'decorator_service' service.
      *
-     * @return \stdClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \stdClass A stdClass instance.
      */
     protected function getDecoratorServiceService()
     {
@@ -112,9 +132,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'decorator_service_with_name' shared service.
+     * Gets the 'decorator_service_with_name' service.
      *
-     * @return \stdClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \stdClass A stdClass instance.
      */
     protected function getDecoratorServiceWithNameService()
     {
@@ -122,9 +145,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'deprecated_service' shared service.
+     * Gets the 'deprecated_service' service.
      *
-     * @return \stdClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \stdClass A stdClass instance.
      *
      * @deprecated The "deprecated_service" service is deprecated. You should stop using it, as it will soon be removed.
      */
@@ -136,9 +162,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'factory_service' shared service.
+     * Gets the 'factory_service' service.
      *
-     * @return \Bar
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \Bar A Bar instance.
      */
     protected function getFactoryServiceService()
     {
@@ -146,9 +175,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'foo' shared service.
+     * Gets the 'foo' service.
      *
-     * @return \Bar\FooClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \Bar\FooClass A Bar\FooClass instance.
      */
     protected function getFooService()
     {
@@ -156,20 +188,23 @@ class ProjectServiceContainer extends Container
 
         $this->services['foo'] = $instance = \Bar\FooClass::getInstance('foo', $a, array($this->getParameter('foo') => 'foo is '.$this->getParameter('foo').'', 'foobar' => $this->getParameter('foo')), true, $this);
 
+        $instance->setBar($this->get('bar'));
+        $instance->initialize();
         $instance->foo = 'bar';
         $instance->moo = $a;
         $instance->qux = array($this->getParameter('foo') => 'foo is '.$this->getParameter('foo').'', 'foobar' => $this->getParameter('foo'));
-        $instance->setBar($this->get('bar'));
-        $instance->initialize();
         sc_configure($instance);
 
         return $instance;
     }
 
     /**
-     * Gets the public 'foo.baz' shared service.
+     * Gets the 'foo.baz' service.
      *
-     * @return object A %baz_class% instance
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return object A %baz_class% instance.
      */
     protected function getFoo_BazService()
     {
@@ -181,9 +216,9 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'foo_bar' service.
+     * Gets the 'foo_bar' service.
      *
-     * @return object A %foo_class% instance
+     * @return object A %foo_class% instance.
      */
     protected function getFooBarService()
     {
@@ -193,9 +228,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'foo_with_inline' shared service.
+     * Gets the 'foo_with_inline' service.
      *
-     * @return \Foo
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \Foo A Foo instance.
      */
     protected function getFooWithInlineService()
     {
@@ -207,9 +245,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'method_call1' shared service.
+     * Gets the 'method_call1' service.
      *
-     * @return \Bar\FooClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \Bar\FooClass A Bar\FooClass instance.
      */
     protected function getMethodCall1Service()
     {
@@ -225,15 +266,18 @@ class ProjectServiceContainer extends Container
         if ($this->has('foobaz')) {
             $instance->setBar($this->get('foobaz', ContainerInterface::NULL_ON_INVALID_REFERENCE));
         }
-        $instance->setBar(($this->get("foo")->foo() . (($this->hasParameter("foo")) ? ($this->getParameter("foo")) : ("default"))));
+        $instance->setBar(($this->get("foo")->foo() . (($this->hasparameter("foo")) ? ($this->getParameter("foo")) : ("default"))));
 
         return $instance;
     }
 
     /**
-     * Gets the public 'new_factory_service' shared service.
+     * Gets the 'new_factory_service' service.
      *
-     * @return \FooBarBaz
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \FooBarBaz A FooBarBaz instance.
      */
     protected function getNewFactoryServiceService()
     {
@@ -245,7 +289,10 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'request' shared service.
+     * Gets the 'request' service.
+     *
+     * This service is shared.
+     * This method always returns the same instance of the service.
      *
      * @throws RuntimeException always since this service is expected to be injected dynamically
      */
@@ -255,9 +302,12 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the public 'service_from_static_method' shared service.
+     * Gets the 'service_from_static_method' service.
      *
-     * @return \Bar\FooClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * @return \Bar\FooClass A Bar\FooClass instance.
      */
     protected function getServiceFromStaticMethodService()
     {
@@ -265,9 +315,16 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the private 'configurator_service' shared service.
+     * Gets the 'configurator_service' service.
      *
-     * @return \ConfClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * This service is private.
+     * If you want to be able to request this service from the container directly,
+     * make it public, otherwise you might end up with broken code.
+     *
+     * @return \ConfClass A ConfClass instance.
      */
     protected function getConfiguratorServiceService()
     {
@@ -279,24 +336,38 @@ class ProjectServiceContainer extends Container
     }
 
     /**
-     * Gets the private 'inlined' shared service.
+     * Gets the 'inlined' service.
      *
-     * @return \Bar
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * This service is private.
+     * If you want to be able to request this service from the container directly,
+     * make it public, otherwise you might end up with broken code.
+     *
+     * @return \Bar A Bar instance.
      */
     protected function getInlinedService()
     {
         $this->services['inlined'] = $instance = new \Bar();
 
-        $instance->pub = 'pub';
         $instance->setBaz($this->get('baz'));
+        $instance->pub = 'pub';
 
         return $instance;
     }
 
     /**
-     * Gets the private 'new_factory' shared service.
+     * Gets the 'new_factory' service.
      *
-     * @return \FactoryClass
+     * This service is shared.
+     * This method always returns the same instance of the service.
+     *
+     * This service is private.
+     * If you want to be able to request this service from the container directly,
+     * make it public, otherwise you might end up with broken code.
+     *
+     * @return \FactoryClass A FactoryClass instance.
      */
     protected function getNewFactoryService()
     {

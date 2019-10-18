@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\GiftMessage\Model;
@@ -100,10 +100,11 @@ class GiftMessageConfigProvider implements ConfigProviderInterface
             GiftMessageHelper::XPATH_CONFIG_GIFT_MESSAGE_ALLOW_ITEMS,
             \Magento\Store\Model\ScopeInterface::SCOPE_STORE
         );
-
-        $orderMessages = $this->getOrderLevelGiftMessages();
-        $configuration['isOrderLevelGiftOptionsEnabled'] = $orderLevelGiftMessageConfiguration && ((bool)$this->isQuoteVirtual() ? false : true);
-        $configuration['giftMessage']['orderLevel'] = $orderMessages === null ? true : $orderMessages->getData();
+        if ($orderLevelGiftMessageConfiguration) {
+            $orderMessages = $this->getOrderLevelGiftMessages();
+            $configuration['isOrderLevelGiftOptionsEnabled'] = (bool)$this->isQuoteVirtual() ? false : true;
+            $configuration['giftMessage']['orderLevel'] = $orderMessages === null ? true : $orderMessages->getData();
+        }
 
         $itemMessages = $this->getItemLevelGiftMessages();
         $configuration['isItemLevelGiftOptionsEnabled'] = $itemLevelGiftMessageConfiguration;
@@ -120,7 +121,6 @@ class GiftMessageConfigProvider implements ConfigProviderInterface
         $configuration['baseUrl'] = $store->isFrontUrlSecure()
                 ? $store->getBaseUrl(UrlInterface::URL_TYPE_LINK, true)
                 : $store->getBaseUrl(UrlInterface::URL_TYPE_LINK, false);
-
         return $configuration;
     }
 
@@ -162,32 +162,31 @@ class GiftMessageConfigProvider implements ConfigProviderInterface
     protected function getOrderLevelGiftMessages()
     {
         $cartId = $this->checkoutSession->getQuoteId();
-        
         return $this->cartRepository->get($cartId);
     }
 
     /**
-     * Load already specified item level gift messages.
+     * Load already specified item level gift messages and related configuration.
      *
      * @return \Magento\GiftMessage\Api\Data\MessageInterface[]|null
      */
     protected function getItemLevelGiftMessages()
     {
-        $itemMessages = [];
-        $cartId = $this->checkoutSession->getQuoteId();
-        $items = $this->checkoutSession->getQuote()->getAllVisibleItems();
-        foreach ($items as $item) {
+        $itemLevelConfig = [];
+        $quote = $this->checkoutSession->getQuote();
+        foreach ($quote->getAllVisibleItems() as $item) {
             $itemId = $item->getId();
-            $message = $this->itemRepository->get($cartId, $itemId);
-            $isAvailable = $item->getProduct()->getGiftMessageAvailable();
-            if ($message) {
-                $itemMessages[$itemId]['message'] = $message->getData();
+            $itemLevelConfig[$itemId] = [];
+            $isMessageAvailable = $item->getProduct()->getGiftMessageAvailable();
+            // use gift message product setting if it is available
+            if ($isMessageAvailable !== null) {
+                $itemLevelConfig[$itemId]['is_available'] = (bool)$isMessageAvailable;
             }
-            if ($isAvailable !== null) {
-                $itemMessages[$itemId]['is_available'] = (bool)$isAvailable;
+            $message = $this->itemRepository->get($quote->getId(), $itemId);
+            if ($message) {
+                $itemLevelConfig[$itemId]['message'] = $message->getData();
             }
         }
-        
-        return count($itemMessages) === 0 ? null : $itemMessages;
+        return count($itemLevelConfig) === 0 ? null : $itemLevelConfig;
     }
 }

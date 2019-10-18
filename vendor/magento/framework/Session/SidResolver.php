@@ -2,12 +2,10 @@
 /**
  * SID resolver
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\Session;
-
-use Magento\Framework\App\State;
 
 class SidResolver implements SidResolverInterface
 {
@@ -57,47 +55,33 @@ class SidResolver implements SidResolverInterface
     protected $_scopeType;
 
     /**
-     * @var State
-     */
-    private $appState;
-
-    /**
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\Framework\UrlInterface $urlBuilder
      * @param \Magento\Framework\App\RequestInterface $request
      * @param string $scopeType
      * @param array $sidNameMap
-     * @param State|null $appState
      */
     public function __construct(
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
         \Magento\Framework\UrlInterface $urlBuilder,
         \Magento\Framework\App\RequestInterface $request,
         $scopeType,
-        array $sidNameMap = [],
-        State $appState = null
+        array $sidNameMap = []
     ) {
         $this->scopeConfig = $scopeConfig;
         $this->urlBuilder = $urlBuilder;
         $this->request = $request;
         $this->sidNameMap = $sidNameMap;
         $this->_scopeType = $scopeType;
-        $this->appState = $appState
-            ?: \Magento\Framework\App\ObjectManager::getInstance()->get(State::class);
     }
 
     /**
      * @param SessionManagerInterface $session
-     * @return string|null
+     * @return string
      */
     public function getSid(SessionManagerInterface $session)
     {
-        if ($this->appState->getAreaCode() !== \Magento\Framework\App\Area::AREA_FRONTEND) {
-            return null;
-        }
-
         $sidKey = null;
-
         $useSidOnFrontend = $this->scopeConfig->getValue(
             self::XML_PATH_USE_FRONTEND_SID,
             $this->_scopeType

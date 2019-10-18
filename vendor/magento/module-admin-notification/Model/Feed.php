@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\AdminNotification\Model;
@@ -146,9 +146,9 @@ class Feed extends \Magento\Framework\Model\AbstractModel
                     $feedData[] = [
                         'severity' => (int)$item->severity,
                         'date_added' => date('Y-m-d H:i:s', $itemPublicationDate),
-                        'title' => $this->escapeString($item->title),
-                        'description' => $this->escapeString($item->description),
-                        'url' => $this->escapeString($item->link),
+                        'title' => (string)$item->title,
+                        'description' => (string)$item->description,
+                        'url' => (string)$item->link,
                     ];
                 }
             }
@@ -243,16 +243,5 @@ class Feed extends \Magento\Framework\Model\AbstractModel
         }
 
         return $xml;
-    }
-
-    /**
-     * Converts incoming data to string format and escapes special characters.
-     *
-     * @param \SimpleXMLElement $data
-     * @return string
-     */
-    private function escapeString(\SimpleXMLElement $data)
-    {
-        return htmlspecialchars((string)$data);
     }
 }

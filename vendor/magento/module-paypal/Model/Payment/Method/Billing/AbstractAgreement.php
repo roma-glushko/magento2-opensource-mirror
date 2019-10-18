@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Paypal\Model\Payment\Method\Billing;
@@ -116,6 +116,7 @@ abstract class AbstractAgreement extends \Magento\Payment\Model\Method\AbstractM
         parent::assignData($data);
 
         $additionalData = $data->getData(PaymentInterface::KEY_ADDITIONAL_DATA);
+
         if (!is_array($additionalData) || !isset($additionalData[self::TRANSPORT_BILLING_AGREEMENT_ID])) {
             return $this;
         }
@@ -140,7 +141,7 @@ abstract class AbstractAgreement extends \Magento\Payment\Model\Method\AbstractM
 
     /**
      * @param object $quote
-     * @return void
+     * @return bool
      */
     abstract protected function _isAvailable($quote);
 }

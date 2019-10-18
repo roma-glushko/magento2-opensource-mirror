@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Update;
@@ -77,18 +77,9 @@ class RollbackTest extends \PHPUnit_Framework_TestCase
             unlink($gtzFile);
         }
 
-        if (is_dir($this->backupPath)) {
-            rmdir($this->backupPath);
-        }
-        if (is_dir($this->excludedDir)) {
-            rmdir($this->excludedDir);
-        }
-        if (is_dir($this->archivedDir)) {
-            rmdir($this->archivedDir);
-        }
-        if (file_exists(MAGENTO_BP . '/var/.update_status.txt')) {
-            unlink(MAGENTO_BP . '/var/.update_status.txt');
-        }
+        rmdir($this->backupPath);
+        rmdir($this->excludedDir);
+        rmdir($this->archivedDir);
     }
 
     /**
@@ -111,7 +102,7 @@ class RollbackTest extends \PHPUnit_Framework_TestCase
         $newFile = $this->backupPath . '/' . uniqid() . '_code.tgz';
         copy($this->backupFileName, $newFile);
         if (file_exists($this->backupFileName)) {
-            $this->backupFile = null;
+            unset($this->backupFile);
             unlink($this->backupFileName);
         }
         $gtzFile = str_replace('tar', 'tgz', $this->backupFileName);

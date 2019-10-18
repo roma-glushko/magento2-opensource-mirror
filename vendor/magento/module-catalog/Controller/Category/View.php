@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Catalog\Controller\Category;
@@ -192,6 +192,7 @@ class View extends \Magento\Framework\App\Action\Action
             if ($layoutUpdates && is_array($layoutUpdates)) {
                 foreach ($layoutUpdates as $layoutUpdate) {
                     $page->addUpdate($layoutUpdate);
+                    $page->addPageLayoutHandles(['layout_update' => md5($layoutUpdate)]);
                 }
             }
 

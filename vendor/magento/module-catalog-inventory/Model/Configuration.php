@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\CatalogInventory\Model;
@@ -148,7 +148,9 @@ class Configuration implements StockConfigurationInterface
      */
     public function getDefaultScopeId()
     {
-        return 1;
+        // TODO: should be fixed in MAGETWO-46043
+        // "0" is id of admin website, which is used in backend during save entity
+        return 0;
     }
 
     /**

@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Newsletter\Model;
@@ -174,8 +174,7 @@ class Template extends \Magento\Email\Model\AbstractTemplate
     public function beforeSave()
     {
         $this->validate();
-        parent::beforeSave();
-        return $this;
+        return parent::beforeSave();
     }
 
     /**
@@ -239,6 +238,9 @@ class Template extends \Magento\Email\Model\AbstractTemplate
      */
     public function isValidForSend()
     {
-        return $this->getTemplateSenderName() && $this->getTemplateSenderEmail() && $this->getTemplateSubject();
+        return !$this->scopeConfig->isSetFlag(
+            \Magento\Email\Model\Template::XML_PATH_SYSTEM_SMTP_DISABLE,
+            \Magento\Store\Model\ScopeInterface::SCOPE_STORE
+        ) && $this->getTemplateSenderName() && $this->getTemplateSenderEmail() && $this->getTemplateSubject();
     }
 }

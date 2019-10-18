@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -70,7 +69,7 @@ class ExtraEmptyLinesFixer extends AbstractFixer
      */
     public function getPriority()
     {
-        // should be run after the UnusedUseFixer, DuplicateSemicolonFixer, NoEmptyPhpdocFixer, CombineConsecutiveUnsetsFixer and NoUselessElseFixer.
+        // should be run after the UnusedUseFixer
         return -20;
     }
 }

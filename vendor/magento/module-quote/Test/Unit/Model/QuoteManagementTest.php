@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 
@@ -120,11 +120,6 @@ class QuoteManagementTest extends \PHPUnit_Framework_TestCase
      * @var \PHPUnit_Framework_MockObject_MockObject
      */
     protected $quoteMock;
-
-    /**
-     * @var \PHPUnit_Framework_MockObject_MockObject
-     */
-    protected $quoteFactoryMock;
 
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject
@@ -756,7 +751,7 @@ class QuoteManagementTest extends \PHPUnit_Framework_TestCase
         $this->checkoutSessionMock->expects($this->once())->method('setLastOrderId')->with($orderId);
         $this->checkoutSessionMock->expects($this->once())->method('setLastRealOrderId')->with($orderIncrementId);
         $this->checkoutSessionMock->expects($this->once())->method('setLastOrderStatus')->with($orderStatus);
- 
+
         $this->assertEquals($orderId, $service->placeOrder($cartId));
     }
 
@@ -952,7 +947,7 @@ class QuoteManagementTest extends \PHPUnit_Framework_TestCase
         $order = $this->getMock(
             'Magento\Sales\Model\Order',
             ['setShippingAddress', 'getAddressesCollection', 'getAddresses', 'getBillingAddress', 'addAddresses',
-            'setBillingAddress', 'setAddresses', 'setPayment', 'setItems', 'setQuoteId'],
+                'setBillingAddress', 'setAddresses', 'setPayment', 'setItems', 'setQuoteId'],
             [],
             '',
             false

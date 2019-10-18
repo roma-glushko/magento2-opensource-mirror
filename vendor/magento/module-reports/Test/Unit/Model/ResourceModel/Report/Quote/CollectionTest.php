@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Reports\Test\Unit\Model\ResourceModel\Report\Quote;
@@ -146,6 +146,16 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
             ->method('getAttribute')
             ->willReturnMap([['name', $productAttributeMock], ['price', $priceAttributeMock]]);
         $productResourceMock->expects($this->once())->method('getSelect')->willReturn($this->selectMock);
+        $eavEntity = $this->getMock(
+            'Magento\Eav\Model\Entity\AbstractEntity',
+            [],
+            [],
+            '',
+            false
+        );
+        $eavEntity->expects($this->once())->method('getLinkField')->willReturn('entity_id');
+        $productResourceMock->expects($this->once())->method('getEntity')->willReturn($eavEntity);
+
         $this->selectMock->expects($this->once())->method('reset')->willReturnSelf();
         $this->selectMock->expects($this->once())->method('from')->willReturnSelf();
         $this->selectMock->expects($this->once())->method('useStraightJoin')->willReturnSelf();

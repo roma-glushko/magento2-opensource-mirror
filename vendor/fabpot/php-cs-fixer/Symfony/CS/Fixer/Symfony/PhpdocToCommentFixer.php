@@ -1,10 +1,9 @@
 <?php
 
 /*
- * This file is part of PHP CS Fixer.
+ * This file is part of the PHP CS utility.
  *
  * (c) Fabien Potencier <fabien@symfony.com>
- *     Dariusz Rumiński <dariusz.ruminski@gmail.com>
  *
  * This source file is subject to the MIT license that is bundled
  * with this source code in the file LICENSE.
@@ -110,7 +109,6 @@ class PhpdocToCommentFixer extends AbstractFixer
             T_PRIVATE,
             T_PROTECTED,
             T_PUBLIC,
-            T_VAR,
             T_FUNCTION,
             T_ABSTRACT,
             T_CONST,
@@ -168,7 +166,11 @@ class PhpdocToCommentFixer extends AbstractFixer
     {
         $nextIndex = $tokens->getNextMeaningfulToken($variableIndex);
 
-        return $tokens[$nextIndex]->equals('=');
+        if (!$tokens[$nextIndex]->equals('=')) {
+            return false;
+        }
+
+        return false !== strpos($docsToken->getContent(), $tokens[$variableIndex]->getContent());
     }
 
     /**

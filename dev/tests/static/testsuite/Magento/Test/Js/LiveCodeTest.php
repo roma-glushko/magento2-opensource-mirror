@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Test\Js;
@@ -58,7 +58,7 @@ class LiveCodeTest extends \PHPUnit_Framework_TestCase
      */
     public static function setUpBeforeClass()
     {
-        $reportDir = Files::init()->getPathToSource() . '/dev/tests/static/report';
+        $reportDir = BP . '/dev/tests/static/report';
         if (!is_dir($reportDir)) {
             mkdir($reportDir);
         }

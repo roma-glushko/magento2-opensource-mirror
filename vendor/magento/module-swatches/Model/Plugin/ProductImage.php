@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Swatches\Model\Plugin;
@@ -87,7 +87,7 @@ class ProductImage
     {
         $childProduct = $this->swatchHelperData->loadVariationByFallback($parentProduct, $filterArray);
         if ($childProduct && !$childProduct->getImage()) {
-            $childProduct = $this->swatchHelperData->loadFirstVariationImage($parentProduct, $filterArray);
+            $childProduct = $this->swatchHelperData->loadFirstVariationWithImage($parentProduct, $filterArray);
         }
         if (!$childProduct) {
             $childProduct = $parentProduct;

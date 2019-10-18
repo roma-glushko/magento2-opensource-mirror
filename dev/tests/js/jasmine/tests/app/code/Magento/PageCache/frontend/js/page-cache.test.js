@@ -1,5 +1,5 @@
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 define([
@@ -63,7 +63,7 @@ define([
             expect(iframe.comments().length).toEqual(0);
         });
     });
-
+    
     describe('Testing FormKey Widget', function () {
         var wdContainer,
             msgCookieName,

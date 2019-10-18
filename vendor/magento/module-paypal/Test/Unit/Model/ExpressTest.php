@@ -1,6 +1,6 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Paypal\Test\Unit\Model;
@@ -28,6 +28,7 @@ class ExpressTest extends \PHPUnit_Framework_TestCase
         ApiProcessableException::API_COUNTRY_FILTER_DECLINE,
         ApiProcessableException::API_MAXIMUM_AMOUNT_FILTER_DECLINE,
         ApiProcessableException::API_OTHER_FILTER_DECLINE,
+        ApiProcessableException::API_ADDRESS_MATCH_FAIL
     ];
 
     /**
@@ -195,6 +196,8 @@ class ExpressTest extends \PHPUnit_Framework_TestCase
         $paymentInfo = $this->getMock(InfoInterface::class);
         $this->_model->setInfoInstance($paymentInfo);
 
+        $this->parentAssignDataExpectation($data);
+
         $paymentInfo->expects(static::once())
             ->method('setAdditionalInformation')
             ->with(
@@ -203,5 +206,32 @@ class ExpressTest extends \PHPUnit_Framework_TestCase
             );
 
         $this->_model->assignData($data);
+    }
+
+    /**
+     * @param DataObject $data
+     */
+    private function parentAssignDataExpectation(DataObject $data)
+    {
+        $eventData = [
+            AbstractDataAssignObserver::METHOD_CODE => $this,
+            AbstractDataAssignObserver::MODEL_CODE => $this->_model->getInfoInstance(),
+            AbstractDataAssignObserver::DATA_CODE => $data
+        ];
+
+        $this->eventManagerMock->expects(static::exactly(2))
+            ->method('dispatch')
+            ->willReturnMap(
+                [
+                    [
+                        'payment_method_assign_data_' . $this->_model->getCode(),
+                        $eventData
+                    ],
+                    [
+                        'payment_method_assign_data',
+                        $eventData
+                    ]
+                ]
+            );
     }
 }

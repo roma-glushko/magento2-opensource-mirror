@@ -1,7 +1,7 @@
 <?php
 /**
  *
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © 2016 Magento. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Framework\App\Cache;
@@ -53,17 +53,13 @@ class FlushCacheByTags
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function aroundSave(
-        $subject,
+        \Magento\Framework\Model\ResourceModel\AbstractResource $subject,
         \Closure $proceed,
-        $object = null
+        \Magento\Framework\Model\AbstractModel $object
     ) {
-        $tags = [];
-        if ($object instanceof \Magento\Framework\Model\AbstractModel) {
-            $tags = $object->getIdentities();
-        }
         $result = $proceed($object);
-        if ($object instanceof \Magento\Framework\Model\AbstractModel) {
-            $this->cleanCacheByTags($tags);
+        if ($object instanceof \Magento\Framework\DataObject\IdentityInterface) {
+            $this->cleanCacheByTags($object->getIdentities());
         }
         return $result;
     }
@@ -78,12 +74,12 @@ class FlushCacheByTags
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function aroundDelete(
-        $subject,
+        \Magento\Framework\Model\ResourceModel\AbstractResource $subject,
         \Closure $proceed,
-        $object = null
+        \Magento\Framework\Model\AbstractModel $object
     ) {
         $tags = [];
-        if ($object instanceof \Magento\Framework\Model\AbstractModel) {
+        if ($object instanceof \Magento\Framework\DataObject\IdentityInterface) {
             $tags = $object->getIdentities();
         }
         $result = $proceed($object);
