@@ -2,7 +2,7 @@
     "name": "magento/magento2-base",
     "description": "Magento 2 Base (Community Edition)",
     "type": "magento2-component",
-    "version": "2.0.10",
+    "version": "2.0.11",
     "require": {
         "magento/magento-composer-installer": "*",
         "php": "~5.5.0|~5.6.0|~7.0.0",
@@ -86,6 +86,10 @@
             [
                 ".travis.yml",
                 ".travis.yml"
+            ],
+            [
+                ".user.ini",
+                ".user.ini"
             ],
             [
                 "CHANGELOG.md",
@@ -238,6 +242,10 @@
             [
                 "dev/tests/integration/IntegationTestsForTravis.sh",
                 "dev/tests/integration/IntegationTestsForTravis.sh"
+            ],
+            [
+                "dev/tests/integration/_files",
+                "dev/tests/integration/_files"
             ],
             [
                 "dev/tests/integration/etc",
@@ -474,6 +482,10 @@
             [
                 "pub/.htaccess",
                 "pub/.htaccess"
+            ],
+            [
+                "pub/.user.ini",
+                "pub/.user.ini"
             ],
             [
                 "pub/cron.php",

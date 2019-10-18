@@ -1856,6 +1856,9 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Collection\Abstrac
             return $this;
         }
 
+        // Preventing overriding price loaded from EAV because we want to use the one from index
+        $this->removeAttributeToSelect('price');
+
         $connection = $this->getConnection();
         $select = $this->getSelect();
         $joinCond = join(
@@ -2078,12 +2081,9 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Collection\Abstrac
 
         /** @var $attribute \Magento\Catalog\Model\ResourceModel\Eav\Attribute */
         $attribute = $this->getAttribute('tier_price');
-        if ($attribute->isScopeGlobal()) {
-            $websiteId = 0;
-        } else {
-            if ($this->getStoreId()) {
-                $websiteId = $this->_storeManager->getStore($this->getStoreId())->getWebsiteId();
-            }
+        $websiteId = 0;
+        if ($attribute->isScopeWebsite() && $this->getStoreId() != 0) {
+            $websiteId = $this->_storeManager->getStore($this->getStoreId())->getWebsiteId();
         }
 
         $connection = $this->getConnection();
@@ -2171,6 +2171,7 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Collection\Abstrac
      */
     public function addMediaGalleryData()
     {
+
         if ($this->getFlag('media_gallery_added')) {
             return $this;
         }
@@ -2186,7 +2187,11 @@ class Collection extends \Magento\Catalog\Model\ResourceModel\Collection\Abstrac
             $this->getStoreId(),
             $attribute->getAttributeId()
         );
-        
+
+        $select->where('entity.entity_id IN (?)', array_map(function ($item) {
+            return $item->getId();
+        }, $this->getItems()));
+
         foreach ($this->getConnection()->fetchAll($select) as $row) {
             $mediaGalleries[$row['entity_id']][] = $row;
         }

@@ -15,11 +15,10 @@ use Magento\Sales\Model\Order\OrderValidatorInterface;
 use Magento\Sales\Model\Order\ShipmentDocumentFactory;
 use Magento\Sales\Model\Order\Shipment\NotifierInterface;
 use Magento\Sales\Model\Order\Shipment\ShipmentValidatorInterface;
-use Magento\Sales\Model\Order\Shipment\Validation\QuantityValidator;
-use Magento\Sales\Model\Order\Shipment\Validation\TrackValidator;
-use Magento\Sales\Model\Order\Validation\CanShip;
 use Magento\Sales\Model\Order\Shipment\OrderRegistrarInterface;
+use Magento\Sales\Model\Order\Validation\ShipOrderInterface as ShipOrderValidator;
 use Psr\Log\LoggerInterface;
+use Magento\Framework\App\ObjectManager;
 
 /**
  * Class ShipOrder
@@ -43,11 +42,6 @@ class ShipOrder implements ShipOrderInterface
     private $shipmentDocumentFactory;
 
     /**
-     * @var ShipmentValidatorInterface
-     */
-    private $shipmentValidator;
-
-    /**
      * @var OrderStateResolverInterface
      */
     private $orderStateResolver;
@@ -63,6 +57,11 @@ class ShipOrder implements ShipOrderInterface
     private $shipmentRepository;
 
     /**
+     * @var ShipOrderValidator
+     */
+    private $shipOrderValidator;
+
+    /**
      * @var NotifierInterface
      */
     private $notifierInterface;
@@ -71,11 +70,6 @@ class ShipOrder implements ShipOrderInterface
      * @var LoggerInterface
      */
     private $logger;
-
-    /**
-     * @var OrderValidatorInterface
-     */
-    private $orderValidator;
 
     /**
      * @var OrderRegistrarInterface
@@ -93,8 +87,10 @@ class ShipOrder implements ShipOrderInterface
      * @param ShipmentRepositoryInterface $shipmentRepository
      * @param NotifierInterface $notifierInterface
      * @param OrderRegistrarInterface $orderRegistrar
-     * @param LoggerInterface $logger
+     * @param LoggerInterface $logger,
+     * @param ShipOrderValidator|null $shipOrderValidator
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function __construct(
         ResourceConnection $resourceConnection,
@@ -107,7 +103,8 @@ class ShipOrder implements ShipOrderInterface
         ShipmentRepositoryInterface $shipmentRepository,
         NotifierInterface $notifierInterface,
         OrderRegistrarInterface $orderRegistrar,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        ShipOrderValidator $shipOrderValidator = null
     ) {
         $this->resourceConnection = $resourceConnection;
         $this->orderRepository = $orderRepository;
@@ -120,6 +117,9 @@ class ShipOrder implements ShipOrderInterface
         $this->notifierInterface = $notifierInterface;
         $this->logger = $logger;
         $this->orderRegistrar = $orderRegistrar;
+        $this->shipOrderValidator = $shipOrderValidator ?: ObjectManager::getInstance()->get(
+            ShipOrderValidator::class
+        );
     }
 
     /**
@@ -159,23 +159,19 @@ class ShipOrder implements ShipOrderInterface
             $packages,
             $arguments
         );
-        $orderValidationResult = $this->orderValidator->validate(
+        $validationMessages = $this->shipOrderValidator->validate(
             $order,
-            [
-                CanShip::class
-            ]
-        );
-        $shipmentValidationResult = $this->shipmentValidator->validate(
             $shipment,
-            [
-                QuantityValidator::class,
-                TrackValidator::class
-            ]
+            $items,
+            $notify,
+            $appendComment,
+            $comment,
+            $tracks,
+            $packages
         );
-        $validationMessages = array_merge($orderValidationResult, $shipmentValidationResult);
-        if (!empty($validationMessages)) {
+        if ($validationMessages->hasMessages()) {
             throw new \Magento\Sales\Exception\DocumentValidationException(
-                __("Shipment Document Validation Error(s):\n" . implode("\n", $validationMessages))
+                __("Shipment Document Validation Error(s):\n" . implode("\n", $validationMessages->getMessages()))
             );
         }
         $connection->beginTransaction();

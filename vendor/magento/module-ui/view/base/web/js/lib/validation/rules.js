@@ -4,11 +4,12 @@
  */
 define([
     './utils',
+    'underscore',
     'jquery',
     'jquery/validate',
     'jquery/ui',
     'mage/translate'
-], function (utils, $) {
+], function (utils, _, $) {
     'use strict';
 
     /**
@@ -47,13 +48,13 @@ define([
     return {
         "min_text_length": [
             function (value, params) {
-                return value.length == 0 || value.length >= +params;
+                return _.isUndefined(value) || value.length == 0 || value.length >= +params;
             },
             $.mage.__('Please enter more or equal than {0} symbols.')
         ],
         "max_text_length": [
             function (value, params) {
-                return value.length <= +params;
+                return !_.isUndefined(value) && value.length <= +params;
             },
             $.mage.__('Please enter less or equal than {0} symbols.')
         ],
@@ -786,6 +787,24 @@ define([
                 return value === $(param).val();
             },
             $.validator.messages.equalTo
+        ],
+        'validate-file-type': [
+            function (name, types) {
+                var extension = name.split('.').pop();
+
+                if (types && typeof types === 'string') {
+                    types = types.split(' ');
+                }
+
+                return !types || !types.length || ~types.indexOf(extension);
+            },
+            $.mage.__('We don\'t recognize or support this file extension type.')
+        ],
+        'validate-max-size': [
+            function (size, maxSize) {
+                return maxSize === false || size < maxSize;
+            },
+            $.mage.__('File you are trying to upload exceeds maximum file size limit.')
         ]
     };
 });
