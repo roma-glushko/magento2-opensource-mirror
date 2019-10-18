@@ -60,6 +60,9 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    /**
+     * @requires function Symfony\Bridge\PhpUnit\ErrorAssert::assertDeprecationsAreTriggered
+     */
     public function testCreateDeprecatedService()
     {
         ErrorAssert::assertDeprecationsAreTriggered('The "deprecated_foo" service is deprecated. You should stop using it, as it will soon be removed.', function () {
@@ -112,7 +115,7 @@ class ContainerBuilderTest extends \PHPUnit_Framework_TestCase
         try {
             @$builder->get('baz');
             $this->fail('->get() throws a ServiceCircularReferenceException if the service has a circular reference to itself');
-        } catch (\Symfony\Component\DependencyInjection\Exception\ServiceCircularReferenceException $e) {
+        } catch (ServiceCircularReferenceException $e) {
             $this->assertEquals('Circular reference detected for service "baz", path: "baz".', $e->getMessage(), '->get() throws a LogicException if the service has a circular reference to itself');
         }
 
