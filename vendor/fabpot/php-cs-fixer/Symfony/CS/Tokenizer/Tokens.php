@@ -137,18 +137,10 @@ class Tokens extends \SplFixedArray
             }
         }
 
-        $tokens = token_get_all($code);
+        $tokens = new self();
+        $tokens->setCode($code);
 
-        foreach ($tokens as $index => $tokenPrototype) {
-            $tokens[$index] = new Token($tokenPrototype);
-        }
-
-        $collection = self::fromArray($tokens);
-        $transformers = Transformers::create();
-        $transformers->transform($collection);
-        $collection->changeCodeHash($codeHash);
-
-        return $collection;
+        return $tokens;
     }
 
     /**
@@ -929,6 +921,28 @@ class Tokens extends \SplFixedArray
     }
 
     /**
+     * Check if there is an anonymous class under given index.
+     *
+     * @param int $index
+     *
+     * @return bool
+     */
+    public function isAnonymousClass($index)
+    {
+        $token = $this[$index];
+
+        if (!$token->isClassy()) {
+            throw new \LogicException('No classy token at given index');
+        }
+
+        if (!$token->isGivenKind(T_CLASS)) {
+            return false;
+        }
+
+        return $this[$this->getPrevMeaningfulToken($index)]->isGivenKind(T_NEW);
+    }
+
+    /**
      * Check if there is a lambda function under given index.
      *
      * @param int $index
@@ -952,20 +966,7 @@ class Tokens extends \SplFixedArray
             $nextToken = $this[$nextIndex];
         }
 
-        if (!$nextToken->equals('(')) {
-            return false;
-        }
-
-        $endParenthesisIndex = $this->findBlockEnd(self::BLOCK_TYPE_PARENTHESIS_BRACE, $nextIndex);
-
-        $nextIndex = $this->getNextMeaningfulToken($endParenthesisIndex);
-        $nextToken = $this[$nextIndex];
-
-        if (!$nextToken->equalsAny(array('{', array(T_USE)))) {
-            return false;
-        }
-
-        return true;
+        return $nextToken->equals('(');
     }
 
     /**
@@ -1270,7 +1271,10 @@ class Tokens extends \SplFixedArray
         // clear memory
         $this->setSize(0);
 
-        $tokens = token_get_all($code);
+        $tokens = defined('TOKEN_PARSE')
+            ? token_get_all($code, TOKEN_PARSE)
+            : token_get_all($code);
+
         $this->setSize(count($tokens));
 
         foreach ($tokens as $index => $token) {
@@ -1347,41 +1351,24 @@ class Tokens extends \SplFixedArray
             return false;
         }
 
-        $kinds = $this->findGivenKind(array(T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO, T_INLINE_HTML));
-
-        /*
-         * Fix HHVM incompatibilities
-         */
-        $hhvmOpenTagsWithEcho = array();
-        $hhvmHashBangs = array();
-
-        if (defined('HHVM_VERSION')) {
-            /*
-             * HHVM parses '<?=' as T_ECHO instead of T_OPEN_TAG_WITH_ECHO
-             *
-             * @see https://github.com/facebook/hhvm/issues/4809
-             */
-            $hhvmEchoes = $this->findGivenKind(T_ECHO);
-            foreach ($hhvmEchoes as $token) {
-                if (0 === strpos($token->getContent(), '<?=')) {
-                    $hhvmOpenTagsWithEcho[] = $token;
-                }
-            }
-
-            /*
-             * HHVM parses "#!/usr/bin/env php\n" as T_HASHBANG (not defined in
-             * PHP and T_HASHBANG. Moreover, HHVM does not define T_HASHBANG
-             * as a constant
-             *
-             * @see https://github.com/facebook/hhvm/issues/4810
-             */
-            $tokens = self::fromCode("#!/usr/bin/env php\n");
-            if (!$tokens[0]->isGivenKind(T_INLINE_HTML)) {
-                $hashBangId = $tokens[0]->getId();
-                $hhvmHashBangs = $this->findGivenKind($hashBangId);
+        for ($index = 1; $index < $size; ++$index) {
+            if (
+                $this[$index]->isGivenKind(array(T_INLINE_HTML, T_OPEN_TAG, T_OPEN_TAG_WITH_ECHO))
+                || (
+                    /*
+                     * HHVM parses '<?=' as T_ECHO instead of T_OPEN_TAG_WITH_ECHO
+                     *
+                     * @see https://github.com/facebook/hhvm/issues/4809
+                     * @see https://github.com/facebook/hhvm/issues/7161
+                     */
+                    defined('HHVM_VERSION')
+                    && $this[$index]->equals(array(T_ECHO, '<?='))
+                )
+            ) {
+                return false;
             }
         }
 
-        return 0 === count($kinds[T_INLINE_HTML]) + count($hhvmHashBangs) && 1 === count($kinds[T_OPEN_TAG]) + count($kinds[T_OPEN_TAG_WITH_ECHO]) + count($hhvmOpenTagsWithEcho);
+        return true;
     }
 }
