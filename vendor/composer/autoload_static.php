@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitb51c73a674370a0344cf7798fc8afcdd
+class ComposerStaticInit4023a21ba731aaabcfc2ae9aca48e159
 {
     public static $files = array (
         '07ec02c7e667fdcb3e30c02cc772b743' => __DIR__ . '/..' . '/magento/framework/registration.php',
@@ -1736,11 +1736,11 @@ class ComposerStaticInitb51c73a674370a0344cf7798fc8afcdd
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitb51c73a674370a0344cf7798fc8afcdd::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitb51c73a674370a0344cf7798fc8afcdd::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInitb51c73a674370a0344cf7798fc8afcdd::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInitb51c73a674370a0344cf7798fc8afcdd::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInitb51c73a674370a0344cf7798fc8afcdd::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit4023a21ba731aaabcfc2ae9aca48e159::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit4023a21ba731aaabcfc2ae9aca48e159::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit4023a21ba731aaabcfc2ae9aca48e159::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit4023a21ba731aaabcfc2ae9aca48e159::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit4023a21ba731aaabcfc2ae9aca48e159::$classMap;
 
         }, null, ClassLoader::class);
     }
