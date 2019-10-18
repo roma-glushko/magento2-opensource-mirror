@@ -85,6 +85,14 @@ class AssertConfigurableProductPage extends AssertProductPage
         foreach ($configurableOptions as $key => $configurableOption) {
             $configurableOptions[$key] = $this->sortDataByPath($configurableOption, 'options::title');
         }
+        $formOptions = $this->sortDataByPath($formOptions, '::title');
+        foreach ($formOptions as $key => $formOption) {
+            $formOptions[$key] = $this->sortDataByPath($formOption, 'options::title');
+
+            foreach($formOptions[$key]['options'] as $optKey => $optData){
+                $formOptions[$key]['options'][$optKey]['price'] = 0;
+            }
+        }
         $configurableFormOptions = $formOptions['configurable_options'];
         $configurableFormOptions = $this->sortDataByPath($configurableFormOptions, '::title');
         foreach ($configurableFormOptions as $key => $formOption) {
@@ -92,7 +100,7 @@ class AssertConfigurableProductPage extends AssertProductPage
         }
 
         $errors = array_merge(
-            //Verify Attribute and options
+        //Verify Attribute and options
             $this->verifyData($configurableOptions, $configurableFormOptions, true, false),
             //Verify Attribute options prices
             $this->verifyAttributesMatrix($formOptions['matrix'], $attributesData['matrix'])
@@ -102,7 +110,7 @@ class AssertConfigurableProductPage extends AssertProductPage
     }
 
     /**
-     * Verify displayed product attributes prices on product page(front-end) equals passed from fixture
+     * Verify displayed product attributes prices on product page(front-end) equals passed from fixture.
      *
      * @param array $variationsMatrix
      * @param array $generatedMatrix
@@ -113,6 +121,7 @@ class AssertConfigurableProductPage extends AssertProductPage
         foreach ($generatedMatrix as $key => $value) {
             $generatedMatrix[$key] = array_intersect_key($value, ['price' => 0]);
         }
+        
         return $this->verifyData($generatedMatrix, $variationsMatrix, true, false);
     }
 
@@ -130,6 +139,9 @@ class AssertConfigurableProductPage extends AssertProductPage
             $price = $price === null ? $option['price'] : $price;
             if ($price > $option['price']) {
                 $price = $option['price'];
+            }
+            if (isset($option['special_price']) && $price > $option['special_price']) {
+                $price = $option['special_price'];
             }
         }
 

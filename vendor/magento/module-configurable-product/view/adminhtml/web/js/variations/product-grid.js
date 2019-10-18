@@ -8,7 +8,8 @@ define([
     'jquery',
     'Magento_Ui/js/core/app',
     'underscore',
-    'notification'
+    'notification',
+    'mage/translate'
 ], function (Component, $, bootstrap, _) {
     'use strict';
 
@@ -29,7 +30,8 @@ define([
             listens: {
                 '${ $.productsProvider }:data': '_showMessageAssociatedGrid _handleManualGridOpening',
                 '${ $.productsMassAction }:selected': '_handleManualGridSelect',
-                '${ $.configurableVariations }:productMatrix': '_showButtonAddManual _switchProductType'
+                '${ $.configurableVariations }:productMatrix': '_switchProductType',
+                '${ $.configurableVariations }:isShowAddProductButton': '_showButtonAddManual'
             }
         },
 
@@ -64,7 +66,7 @@ define([
                 this.productsModal.notification();
             }.bind(this));
             this.variationsComponent(function (variation) {
-                this._showButtonAddManual(variation.productMatrix());
+                this._showButtonAddManual(variation.attributes());
             }.bind(this));
 
             this._initGrid = _.once(this._initGrid);
@@ -192,12 +194,12 @@ define([
 
         /**
          * Show button add manual
-         * @param {Array} variations
+         * @param {Array} attributes
          * @returns {*}
          * @private
          */
-        _showButtonAddManual: function (variations) {
-            return this.button(variations.length);
+        _showButtonAddManual: function (attributes) {
+            return this.button(attributes.length);
         },
 
         _switchProductType: function (variations) {
@@ -221,9 +223,7 @@ define([
 
             if (data.items.length) {
                 this.productsModal.notification('add', {
-                    message: $.mage.__(
-                        'Choose a new product to delete and replace the current product configuration.'
-                    ),
+                    message: $.mage.__('Choose a new product to delete and replace the current product configuration.'),
                     messageContainer: this.gridSelector
                 });
             } else {

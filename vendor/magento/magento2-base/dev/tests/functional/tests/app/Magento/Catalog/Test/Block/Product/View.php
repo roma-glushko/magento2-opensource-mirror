@@ -10,7 +10,7 @@ use Magento\Catalog\Test\Block\AbstractConfigureBlock;
 use Magento\Catalog\Test\Fixture\CatalogProductSimple;
 use Magento\Mtf\Client\Locator;
 use Magento\Mtf\Fixture\FixtureInterface;
-use Magento\Mtf\Fixture\InjectableFixture;
+use Magento\Checkout\Test\Block\Cart\Sidebar;
 
 /**
  * Product view block on the product page.
@@ -138,7 +138,14 @@ class View extends AbstractConfigureBlock
      *
      * @var string
      */
-    protected $miniCartBlock = '[data-block="minicart"]';
+    protected $miniCartBlockSelector = '[data-block="minicart"]';
+
+    /**
+     * Minicart block element.
+     *
+     * @var Sidebar
+     */
+    private $miniCartBlock;
 
     /**
      * Success message selector.
@@ -162,6 +169,13 @@ class View extends AbstractConfigureBlock
     protected $ajaxLoading = 'body.ajax-loading';
 
     /**
+     * Video Container selector
+     *
+     * @var string
+     */
+    private $videoContainer = 'div.fotorama-video-container';
+
+    /**
      * Get block price.
      *
      * @return Price
@@ -182,21 +196,44 @@ class View extends AbstractConfigureBlock
      */
     public function addToCart(FixtureInterface $product)
     {
-        /** @var \Magento\Checkout\Test\Block\Cart\Sidebar $miniCart */
-        $miniCart = $this->blockFactory->create(
-            '\Magento\Checkout\Test\Block\Cart\Sidebar',
-            ['element' => $this->browser->find($this->miniCartBlock)]
-        );
+        $this->configure($product);
+        $this->clickAddToCart();
+        $this->getMiniCartBlock()->waitLoader();
+    }
+
+    /**
+     * Configure Product.
+     *
+     * @param FixtureInterface $product
+     * @return void
+     */
+    public function configure(FixtureInterface $product)
+    {
         /** @var CatalogProductSimple $product */
         $checkoutData = $product->getCheckoutData();
 
-        $miniCart->waitInit();
+        $this->getMiniCartBlock()->waitInit();
         $this->fillOptions($product);
         if (isset($checkoutData['qty'])) {
             $this->setQty($checkoutData['qty']);
         }
-        $this->clickAddToCart();
-        $miniCart->waitLoader();
+    }
+
+    /**
+     * Get MiniCart block.
+     *
+     * @return Sidebar
+     */
+    private function getMiniCartBlock()
+    {
+        if ($this->miniCartBlock === null) {
+            $this->miniCartBlock = $this->blockFactory->create(
+                Sidebar::class,
+                ['element' => $this->browser->find($this->miniCartBlockSelector)]
+            );
+        }
+
+        return $this->miniCartBlock;
     }
 
     /**
@@ -445,5 +482,15 @@ class View extends AbstractConfigureBlock
     public function getGalleryElement()
     {
         return $this->_rootElement->find($this->mediaGallery);
+    }
+
+    /**
+     * Check is video is visible on product page
+     *
+     * @return bool
+     */
+    public function isVideoVisible()
+    {
+        return $this->_rootElement->find($this->videoContainer)->isVisible();
     }
 }

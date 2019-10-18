@@ -42,9 +42,6 @@ define([
                         data.intype = optionDefaultInputType;
                     }
 
-                    if (!this.totalItems) {
-                        data.checked = 'checked';
-                    }
                     element = this.template({
                         data: data
                     });
@@ -58,6 +55,7 @@ define([
 
                     if (render) {
                         this.render();
+                        this.updateItemsCountField();
                     }
                 },
                 remove: function (event) {
