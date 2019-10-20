@@ -3,6 +3,7 @@
 namespace Pelago\Tests\Unit;
 
 use Pelago\Emogrifier;
+use Pelago\Tests\Support\Traits\AssertCss;
 
 /**
  * Test case.
@@ -12,10 +13,23 @@ use Pelago\Emogrifier;
  */
 class EmogrifierTest extends \PHPUnit_Framework_TestCase
 {
+    use AssertCss;
+
     /**
-     * @var string
+     * @var string Common HTML markup with a variety of elements and attributes for testing with
      */
-    const LF = "\n";
+    const COMMON_TEST_HTML = '
+        <html>
+            <body>
+                <p class="p-1"><span>some text</span></p>
+                <p class="p-2"><span title="bonjour">some</span> text</p>
+                <p class="p-3"><span title="buenas dias">some</span> more text</p>
+                <p class="p-4" id="p4"><span title="avez-vous">some</span> more <span id="text">text</span></p>
+                <p class="p-5 additional-class"><span title="buenas dias bom dia">some</span> more text</p>
+                <p class="p-6"><span title="title: subtitle; author">some</span> more text</p>
+            </body>
+        </html>
+    ';
 
     /**
      * @var string
@@ -40,6 +54,31 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     */
+    public function getDomDocumentReturnsDomDocument()
+    {
+        $subject = new Emogrifier('<html></html>');
+
+        static::assertInstanceOf(\DOMDocument::class, $subject->getDomDocument());
+    }
+
+    /**
+     * @test
+     */
+    public function getDomDocumentWithNormalizedHtmlRepresentsTheGivenHtml()
+    {
+        $html = "<!DOCTYPE html>\n<html>\n<head>" .
+            '<meta http-equiv="Content-Type" content="text/html; charset=utf-8">' .
+            "</head>\n<body>\n<br>\n</body>\n</html>\n";
+        $subject = new Emogrifier($html);
+
+        $domDocument = $subject->getDomDocument();
+
+        self::assertSame($html, $domDocument->saveHTML());
+    }
+
+    /**
+     * @test
      *
      * @expectedException \BadMethodCallException
      */
@@ -49,16 +88,29 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @test
-     *
-     * @expectedException \BadMethodCallException
+     * @return array[]
      */
-    public function emogrifyForEmptyHtmlAndEmptyCssThrowsException()
+    public function nonHtmlDataProvider()
     {
-        $this->subject->setHtml('');
-        $this->subject->setCss('');
+        return [
+            'empty string' => [''],
+            'null' => [null],
+            'integer' => [2],
+            'float' => [3.14159],
+            'object' => [new \stdClass()],
+        ];
+    }
 
-        $this->subject->emogrify();
+    /**
+     * @test
+     * @expectedException \InvalidArgumentException
+     *
+     * @param mixed $html
+     * @dataProvider nonHtmlDataProvider
+     */
+    public function setHtmlNoHtmlDataThrowsException($html)
+    {
+        $this->subject->setHtml($html);
     }
 
     /**
@@ -68,19 +120,6 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function emogrifyBodyContentForNoDataSetThrowsException()
     {
-        $this->subject->emogrifyBodyContent();
-    }
-
-    /**
-     * @test
-     *
-     * @expectedException \BadMethodCallException
-     */
-    public function emogrifyBodyContentForEmptyHtmlAndEmptyCssThrowsException()
-    {
-        $this->subject->setHtml('');
-        $this->subject->setCss('');
-
         $this->subject->emogrifyBodyContent();
     }
 
@@ -100,7 +139,9 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $html
+     *
      * @dataProvider contentWithoutHtmlTagDataProvider
      */
     public function emogrifyAddsMissingHtmlTag($html)
@@ -109,7 +150,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<html>', $result);
+        static::assertContains('<html>', $result);
     }
 
     /**
@@ -126,7 +167,9 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $html
+     *
      * @dataProvider contentWithoutHeadTagDataProvider
      */
     public function emogrifyAddsMissingHeadTag($html)
@@ -135,7 +178,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<head>', $result);
+        static::assertContains('<head>', $result);
     }
 
     /**
@@ -152,7 +195,9 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $html
+     *
      * @dataProvider contentWithoutBodyTagDataProvider
      */
     public function emogrifyAddsMissingBodyTag($html)
@@ -161,7 +206,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<body>', $result);
+        static::assertContains('<body>', $result);
     }
 
     /**
@@ -173,7 +218,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<body><p>Hello</p></body>', $result);
+        static::assertContains('<body><p>Hello</p></body>', $result);
     }
 
     /**
@@ -190,7 +235,9 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $codeNotToBeChanged
+     *
      * @dataProvider specialCharactersDataProvider
      */
     public function emogrifyKeepsSpecialCharacters($codeNotToBeChanged)
@@ -200,12 +247,14 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains($codeNotToBeChanged, $result);
+        static::assertContains($codeNotToBeChanged, $result);
     }
 
     /**
      * @test
+     *
      * @param string $codeNotToBeChanged
+     *
      * @dataProvider specialCharactersDataProvider
      */
     public function emogrifyBodyContentKeepsSpecialCharacters($codeNotToBeChanged)
@@ -215,7 +264,19 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrifyBodyContent();
 
-        self::assertContains($codeNotToBeChanged, $result);
+        static::assertContains($codeNotToBeChanged, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function addsMissingHtml5DocumentType()
+    {
+        $this->subject->setHtml('<html></html>');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<!DOCTYPE html>', $result);
     }
 
     /**
@@ -227,18 +288,20 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
             'HTML5' => ['<!DOCTYPE html>'],
             'XHTML 1 strict' => [
                 '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ' .
-                '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">'
+                '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">',
             ],
             'HTML 4 transitional' => [
                 '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" ' .
-                '"http://www.w3.org/TR/REC-html40/loose.dtd">'
+                '"http://www.w3.org/TR/REC-html40/loose.dtd">',
             ],
         ];
     }
 
     /**
      * @test
+     *
      * @param string $documentType
+     *
      * @dataProvider documentTypeDataProvider
      */
     public function emogrifyForHtmlWithDocumentTypeKeepsDocumentType($documentType)
@@ -248,7 +311,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains($documentType, $result);
+        static::assertContains($documentType, $result);
     }
 
     /**
@@ -260,7 +323,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">', $result);
+        static::assertContains('<meta http-equiv="Content-Type" content="text/html; charset=utf-8">', $result);
     }
 
     /**
@@ -273,8 +336,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        $numberOfContentTypeMetaTags = substr_count($result, 'Content-Type');
-        self::assertSame(1, $numberOfContentTypeMetaTags);
+        $numberOfContentTypeMetaTags = \substr_count($result, 'Content-Type');
+        static::assertSame(1, $numberOfContentTypeMetaTags);
     }
 
     /**
@@ -287,7 +350,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('<wbr', $result);
+        static::assertNotContains('<wbr', $result);
     }
 
     /**
@@ -300,7 +363,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $this->subject->addUnprocessableHtmlTag('p');
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('<p>', $result);
+        static::assertNotContains('<p>', $result);
     }
 
     /**
@@ -313,7 +376,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $this->subject->addUnprocessableHtmlTag('p');
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p>', $result);
+        static::assertContains('<p>', $result);
     }
 
     /**
@@ -327,7 +390,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $this->subject->removeUnprocessableHtmlTag('p');
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p>', $result);
+        static::assertContains('<p>', $result);
     }
 
     /**
@@ -351,12 +414,13 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
                 '<p class="p-1" style="%1$s %2$s">',
             ],
             'type => one element' => ['html { %1$s }', '<html style="%1$s">'],
+            'type (case-insensitive) => one element' => ['HTML { %1$s }', '<html style="%1$s">'],
             'type => first matching element' => ['p { %1$s }', '<p class="p-1" style="%1$s">'],
             'type => second matching element' => ['p { %1$s }', '<p class="p-2" style="%1$s">'],
             'class => with class' => ['.p-2 { %1$s }', '<p class="p-2" style="%1$s">'],
             'two classes s=> with both classes' => [
                 '.p-5.additional-class { %1$s }',
-                '<p class="p-5 additional-class" style="%1$s">'
+                '<p class="p-5 additional-class" style="%1$s">',
             ],
             'type & class => type with class' => ['p.p-2 { %1$s }', '<p class="p-2" style="%1$s">'],
             'ID => with ID' => ['#p4 { %1$s }', '<p class="p-4" id="p4" style="%1$s">'],
@@ -389,6 +453,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
             // broken: attribute value with *, double quotes => with exact match
             // broken: attribute value with *, single quotes => with exact match
             // broken: attribute value with *, no quotes => with exact match
+            // broken: type & attribute presence => with type & attribute
             'type & attribute exact value, double quotes => with type & exact attribute value match' => [
                 'span[title="bonjour"] { %1$s }',
                 '<span title="bonjour" style="%1$s">',
@@ -544,12 +609,64 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
             ],
             'adjacent => 2nd of many' => ['p + p { %1$s }', '<p class="p-2" style="%1$s">'],
             'adjacent => last of many' => ['p + p { %1$s }', '<p class="p-6" style="%1$s">'],
+            'adjacent (without space after +) => last of many' => ['p +p { %1$s }', '<p class="p-6" style="%1$s">'],
+            'adjacent (without space before +) => last of many' => ['p+ p { %1$s }', '<p class="p-6" style="%1$s">'],
+            'adjacent (without space before or after +) => last of many' => [
+                'p+p { %1$s }',
+                '<p class="p-6" style="%1$s">',
+            ],
             'child (with spaces around >) => direct child' => ['p > span { %1$s }', '<span style="%1$s">'],
             'child (without space after >) => direct child' => ['p >span { %1$s }', '<span style="%1$s">'],
             'child (without space before >) => direct child' => ['p> span { %1$s }', '<span style="%1$s">'],
             'child (without space before or after >) => direct child' => ['p>span { %1$s }', '<span style="%1$s">'],
             'descendant => child' => ['p span { %1$s }', '<span style="%1$s">'],
             'descendant => grandchild' => ['body span { %1$s }', '<span style="%1$s">'],
+            // broken: descendent attribute presence => with attribute
+            // broken: descendent attribute exact value => with exact attribute match
+            // broken: descendent type & attribute presence => with type & attribute
+            'descendent type & attribute exact value => with type & exact attribute match' => [
+                'body span[title="bonjour"] { %1$s }',
+                '<span title="bonjour" style="%1$s">',
+            ],
+            'descendent type & attribute exact two-word value => with type & exact attribute match' => [
+                'body span[title="buenas dias"] { %1$s }',
+                '<span title="buenas dias" style="%1$s">',
+            ],
+            'descendent type & attribute value with ~ => with type & exact attribute match' => [
+                'body span[title~="bonjour"] { %1$s }',
+                '<span title="bonjour" style="%1$s">',
+            ],
+            'descendent type & attribute value with ~ => with type & word as 1st of 2 in attribute' => [
+                'body span[title~="buenas"] { %1$s }',
+                '<span title="buenas dias" style="%1$s">',
+            ],
+            'descendant of type & class: type & attribute exact value, no quotes => with type & exact match (#381)' => [
+                'p.p-2 span[title=bonjour] { %1$s }',
+                '<span title="bonjour" style="%1$s">',
+            ],
+            'descendant of attribute presence => parent with attribute' => [
+                '[class] span { %1$s }',
+                '<p class="p-1"><span style="%1$s">',
+            ],
+            'descendant of attribute exact value => parent with type & exact attribute match' => [
+                '[id="p4"] span { %1$s }',
+                '<p class="p-4" id="p4"><span title="avez-vous" style="%1$s">',
+            ],
+            // broken: descendant of type & attribute presence => parent with type & attribute
+            'descendant of type & attribute exact value => parent with type & exact attribute match' => [
+                'p[id="p4"] span { %1$s }',
+                '<p class="p-4" id="p4"><span title="avez-vous" style="%1$s">',
+            ],
+            // broken: descendant of type & attribute exact two-word value => parent with type & exact attribute match
+            //         (exact match doesn't currently match hyphens, which would be needed to match the class attribute)
+            'descendant of type & attribute value with ~ => parent with type & exact attribute match' => [
+                'p[class~="p-1"] span { %1$s }',
+                '<p class="p-1"><span style="%1$s">',
+            ],
+            'descendant of type & attribute value with ~ => parent with type & word as 1st of 2 in attribute' => [
+                'p[class~="p-5"] span { %1$s }',
+                '<p class="p-5 additional-class"><span title="buenas dias bom dia" style="%1$s">',
+            ],
             // broken: first-child => 1st of many
             'type & :first-child => 1st of many' => ['p:first-child { %1$s }', '<p class="p-1" style="%1$s">'],
             // broken: last-child => last of many
@@ -564,32 +681,22 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $css CSS statements, potentially with %1$s and $2$s placeholders for a CSS declaration
      * @param string $expectedHtml HTML, potentially with %1$s and $2$s placeholders for a CSS declaration
+     *
      * @dataProvider matchedCssDataProvider
      */
     public function emogrifyAppliesCssToMatchingElements($css, $expectedHtml)
     {
         $cssDeclaration1 = 'color: red;';
         $cssDeclaration2 = 'text-align: left;';
-        $html = '
-            <html>
-                <body>
-                    <p class="p-1"><span>some text</span></p>
-                    <p class="p-2"><span title="bonjour">some</span> text</p>
-                    <p class="p-3"><span title="buenas dias">some</span> more text</p>
-                    <p class="p-4" id="p4"><span title="avez-vous">some</span> more text</p>
-                    <p class="p-5 additional-class"><span title="buenas dias bom dia">some</span> more text</p>
-                    <p class="p-6"><span title="title: subtitle; author">some</span> more text</p>
-                </body>
-            </html>
-            ';
-        $this->subject->setHtml($html);
-        $this->subject->setCss(sprintf($css, $cssDeclaration1, $cssDeclaration2));
+        $this->subject->setHtml(static::COMMON_TEST_HTML);
+        $this->subject->setCss(\sprintf($css, $cssDeclaration1, $cssDeclaration2));
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(sprintf($expectedHtml, $cssDeclaration1, $cssDeclaration2), $result);
+        static::assertContains(\sprintf($expectedHtml, $cssDeclaration1, $cssDeclaration2), $result);
     }
 
     /**
@@ -664,56 +771,229 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $css CSS statements, potentially with %1$s and $2$s placeholders for a CSS declaration
      * @param string $expectedHtml HTML, potentially with %1$s and $2$s placeholders for a CSS declaration
+     *
      * @dataProvider nonMatchedCssDataProvider
      */
     public function emogrifyNotAppliesCssToNonMatchingElements($css, $expectedHtml)
     {
         $cssDeclaration1 = 'color: red;';
         $cssDeclaration2 = 'text-align: left;';
-        $html = '
-            <html>
-                <body>
-                    <p class="p-1"><span>some text</span></p>
-                    <p class="p-2"><span title="bonjour">some</span> text</p>
-                    <p class="p-3"><span title="buenas dias">some</span> more text</p>
-                    <p class="p-4" id="p4"><span title="avez-vous">some</span> more text</p>
-                    <p class="p-5 additional-class"><span title="buenas dias bom dia">some</span> more text</p>
-                    <p class="p-6"><span title="title: subtitle; author">some</span> more text</p>
-                </body>
-            </html>
-            ';
-        $this->subject->setHtml($html);
-        $this->subject->setCss(sprintf($css, $cssDeclaration1, $cssDeclaration2));
+        $this->subject->setHtml(static::COMMON_TEST_HTML);
+        $this->subject->setCss(\sprintf($css, $cssDeclaration1, $cssDeclaration2));
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(sprintf($expectedHtml, $cssDeclaration1, $cssDeclaration2), $result);
+        static::assertContains(\sprintf($expectedHtml, $cssDeclaration1, $cssDeclaration2), $result);
     }
 
     /**
-     * Data provider for emogrifyDropsWhitespaceFromCssDeclarations.
+     * Provides data to test the following selector specificity ordering:
+     *     * < t < 2t < . < .+t < .+2t < 2. < 2.+t < 2.+2t
+     *     < # < #+t < #+2t < #+. < #+.+t < #+.+2t < #+2. < #+2.+t < #+2.+2t
+     *     < 2# < 2#+t < 2#+2t < 2#+. < 2#+.+t < 2#+.+2t < 2#+2. < 2#+2.+t < 2#+2.+2t
+     * where '*' is the universal selector, 't' is a type selector, '.' is a class selector, and '#' is an ID selector.
      *
+     * Also confirm up to 99 class selectors are supported (much beyond this would require a more complex comparator).
+     *
+     * Specificity ordering for selectors involving pseudo-classes, attributes and `:not` is covered through the
+     * combination of these tests and the equal specificity tests and thus does not require explicit separate testing.
+     *
+     * @return string[][]
+     */
+    public function differentCssSelectorSpecificityDataProvider()
+    {
+        /**
+         * @var string[] Selectors targeting `<span id="text">` with increasing specificity
+         */
+        $selectors = [
+            'universal' => '*',
+            'type' => 'span',
+            '2 types' => 'p span',
+            'class' => '.p-4 *',
+            'class & type' => '.p-4 span',
+            'class & 2 types' => 'p.p-4 span',
+            '2 classes' => '.p-4.p-4 *',
+            '2 classes & type' => '.p-4.p-4 span',
+            '2 classes & 2 types' => 'p.p-4.p-4 span',
+            'ID' => '#text',
+            'ID & type' => 'span#text',
+            'ID & 2 types' => 'p span#text',
+            'ID & class' => '.p-4 #text',
+            'ID & class & type' => '.p-4 span#text',
+            'ID & class & 2 types' => 'p.p-4 span#text',
+            'ID & 2 classes' => '.p-4.p-4 #text',
+            'ID & 2 classes & type' => '.p-4.p-4 span#text',
+            'ID & 2 classes & 2 types' => 'p.p-4.p-4 span#text',
+            '2 IDs' => '#p4 #text',
+            '2 IDs & type' => '#p4 span#text',
+            '2 IDs & 2 types' => 'p#p4 span#text',
+            '2 IDs & class' => '.p-4#p4 #text',
+            '2 IDs & class & type' => '.p-4#p4 span#text',
+            '2 IDs & class & 2 types' => 'p.p-4#p4 span#text',
+            '2 IDs & 2 classes' => '.p-4.p-4#p4 #text',
+            '2 IDs & 2 classes & type' => '.p-4.p-4#p4 span#text',
+            '2 IDs & 2 classes & 2 types' => 'p.p-4.p-4#p4 span#text',
+        ];
+
+        $datasets = [];
+        $previousSelector = '';
+        $previousDescription = '';
+        foreach ($selectors as $description => $selector) {
+            if ($previousSelector !== '') {
+                $datasets[$description . ' more specific than ' . $previousDescription] = [
+                    '<span id="text"',
+                    $previousSelector,
+                    $selector,
+                ];
+            }
+            $previousSelector = $selector;
+            $previousDescription = $description;
+        }
+
+        // broken: class more specific than 99 types (requires support for chaining `:not(h1):not(h1)...`)
+        $datasets['ID more specific than 99 classes'] = [
+            '<p class="p-4" id="p4"',
+            \str_repeat('.p-4', 99),
+            '#p4',
+        ];
+
+        return $datasets;
+    }
+
+    /**
+     * @test
+     *
+     * @param string $matchedTagPart Tag expected to be matched by both selectors, without the closing '>',
+     *                               e.g. '<p class="p-1"'
+     * @param string $lessSpecificSelector A selector expression
+     * @param string $moreSpecificSelector Some other, more specific selector expression
+     *
+     * @dataProvider differentCssSelectorSpecificityDataProvider
+     */
+    public function emogrifyAppliesMoreSpecificCssSelectorToMatchingElements(
+        $matchedTagPart,
+        $lessSpecificSelector,
+        $moreSpecificSelector
+    ) {
+        $this->subject->setHtml(static::COMMON_TEST_HTML);
+        $this->subject->setCss(
+            $lessSpecificSelector . ' { color: red; } ' .
+            $moreSpecificSelector . ' { color: green; } ' .
+            $moreSpecificSelector . ' { background-color: green; } ' .
+            $lessSpecificSelector . ' { background-color: red; }'
+        );
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains($matchedTagPart . ' style="color: green; background-color: green;"', $result);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function equalCssSelectorSpecificityDataProvider()
+    {
+        return [
+            // pseudo-class
+            'pseudo-class as specific as class' => ['<p class="p-1"', '*:first-child', '.p-1'],
+            'type & pseudo-class as specific as type & class' => ['<p class="p-1"', 'p:first-child', 'p.p-1'],
+            'class & pseudo-class as specific as two classes' => ['<p class="p-1"', '.p-1:first-child', '.p-1.p-1'],
+            'ID & pseudo-class as specific as ID & class' => [
+                '<span title="avez-vous"',
+                '#p4 *:first-child',
+                '#p4.p-4 *',
+            ],
+            '2 types & 2 classes & 2 IDs & pseudo-class as specific as 2 types & 3 classes & 2 IDs' => [
+                '<span id="text"',
+                'p.p-4.p-4#p4 span#text:last-child',
+                'p.p-4.p-4.p-4#p4 span#text',
+            ],
+            // attribute
+            'attribute as specific as class' => ['<span title="bonjour"', '[title="bonjour"]', '.p-2 *'],
+            'type & attribute as specific as type & class' => [
+                '<span title="bonjour"',
+                'span[title="bonjour"]',
+                '.p-2 span',
+            ],
+            'class & attribute as specific as two classes' => ['<p class="p-4" id="p4"', '.p-4[id="p4"]', '.p-4.p-4'],
+            'ID & attribute as specific as ID & class' => ['<p class="p-4" id="p4"', '#p4[id="p4"]', '#p4.p-4'],
+            '2 types & 2 classes & 2 IDs & attribute as specific as 2 types & 3 classes & 2 IDs' => [
+                '<span id="text"',
+                'p.p-4.p-4#p4[id="p4"] span#text',
+                'p.p-4.p-4.p-4#p4 span#text',
+            ],
+            // :not
+            // ideally these tests would be more minimal with just combinators and universal selectors in the :not
+            // argument, however Symfony CssSelector only supports simple (single-element) selectors here
+            ':not with type as specific as type and universal' => ['<p class="p-1"', '*:not(html)', 'html *'],
+            'type & :not with type as specific as 2 types' => ['<p class="p-1"', 'p:not(html)', 'html p'],
+            'class & :not with type as specific as type & class' => ['<p class="p-1"', '.p-1:not(html)', 'html .p-1'],
+            'ID & :not with type as specific as type & ID' => ['<p class="p-4" id="p4"', '#p4:not(html)', 'html #p4'],
+            '2 types & 2 classes & 2 IDs & :not with type as specific as 3 types & 2 classes & 2 IDs' => [
+                '<span id="text"',
+                'p.p-4.p-4#p4 span#text:not(html)',
+                'html p.p-4.p-4#p4 span#text',
+            ],
+            // argument of :not
+            ':not with type as specific as type' => ['<p class="p-1"', '*:not(h1)', 'p'],
+            ':not with class as specific as class' => ['<p class="p-1"', '*:not(.p-2)', '.p-1'],
+            ':not with ID as specific as ID' => ['<p class="p-4" id="p4"', '*:not(#p1)', '#p4'],
+            // broken: :not with 2 types & 2 classes & 2 IDs as specific as 2 types & 2 classes & 2 IDs
+            //         (`*:not(.p-1 #p1)`, i.e. with both class and ID, causes "Invalid type in selector")
+        ];
+    }
+
+    /**
+     * @test
+     *
+     * @param string $matchedTagPart Tag expected to be matched by both selectors, without the closing '>',
+     *                               e.g. '<p class="p-1"'
+     * @param string $selector1 A selector expression
+     * @param string $selector2 Some other, equally specific selector expression
+     *
+     * @dataProvider equalCssSelectorSpecificityDataProvider
+     */
+    public function emogrifyAppliesLaterEquallySpecificCssSelectorToMatchingElements(
+        $matchedTagPart,
+        $selector1,
+        $selector2
+    ) {
+        $this->subject->setHtml(static::COMMON_TEST_HTML);
+        $this->subject->setCss(
+            $selector1 . ' { color: red; } ' .
+            $selector2 . ' { color: green; } ' .
+            $selector2 . ' { background-color: red; } ' .
+            $selector1 . ' { background-color: green; }'
+        );
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains($matchedTagPart . ' style="color: green; background-color: green;"', $result);
+    }
+
+    /**
      * @return string[][]
      */
     public function cssDeclarationWhitespaceDroppingDataProvider()
     {
         return [
-            'no whitespace, trailing semicolon' => ['color:#000;', 'color: #000;'],
-            'no whitespace, no trailing semicolon' => ['color:#000', 'color: #000;'],
-            'space after colon, no trailing semicolon' => ['color: #000', 'color: #000;'],
-            'space before colon, no trailing semicolon' => ['color :#000', 'color: #000;'],
-            'space before property name, no trailing semicolon' => [' color:#000', 'color: #000;'],
-            'space before trailing semicolon' => [' color:#000 ;', 'color: #000;'],
-            'space after trailing semicolon' => [' color:#000; ', 'color: #000;'],
-            'space after property value, no trailing semicolon' => [' color:#000 ', 'color: #000;'],
-            'space after property value, trailing semicolon' => [' color:#000; ', 'color: #000;'],
-            'newline before property name, trailing semicolon' => ["\ncolor:#222;", 'color: #222;'],
-            'newline after property semicolon' => ["color:#222;\n", 'color: #222;'],
-            'newline before colon, trailing semicolon' => ["color\n:#333;", 'color: #333;'],
-            'newline after colon, trailing semicolon' => ["color:\n#333;", 'color: #333;'],
-            'newline after semicolon' => ["color:#333\n;", 'color: #333;'],
+            'no whitespace, trailing semicolon' => ['color:#000;'],
+            'no whitespace, no trailing semicolon' => ['color:#000'],
+            'space after colon, no trailing semicolon' => ['color: #000'],
+            'space before colon, no trailing semicolon' => ['color :#000'],
+            'space before property name, no trailing semicolon' => [' color:#000'],
+            'space before trailing semicolon' => [' color:#000 ;'],
+            'space after trailing semicolon' => [' color:#000; '],
+            'space after property value, no trailing semicolon' => [' color:#000 '],
+            'space after property value, trailing semicolon' => [' color:#000; '],
+            'newline before property name, trailing semicolon' => ["\ncolor:#000;"],
+            'newline after property semicolon' => ["color:#000;\n"],
+            'newline before colon, trailing semicolon' => ["color\n:#000;"],
+            'newline after colon, trailing semicolon' => ["color:\n#000;"],
+            'newline after semicolon' => ["color:#000\n;"],
         ];
     }
 
@@ -721,28 +1001,20 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      * @test
      *
      * @param string $cssDeclaration the CSS declaration block (without the curly braces)
-     * @param string $expectedStyleAttributeContent the expected value of the style attribute
      *
      * @dataProvider cssDeclarationWhitespaceDroppingDataProvider
      */
-    public function emogrifyDropsLeadingAndTrailingWhitespaceFromCssDeclarations(
-        $cssDeclaration,
-        $expectedStyleAttributeContent
-    ) {
+    public function emogrifyTrimsWhitespaceFromCssDeclarations($cssDeclaration)
+    {
         $this->subject->setHtml('<html></html>');
         $this->subject->setCss('html {' . $cssDeclaration . '}');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            'html style="' . $expectedStyleAttributeContent . '">',
-            $result
-        );
+        static::assertContains('<html style="color: #000;">', $result);
     }
 
     /**
-     * Data provider for emogrifyFormatsCssDeclarations.
-     *
      * @return string[][]
      */
     public function formattedCssDeclarationDataProvider()
@@ -755,16 +1027,24 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
             'two declarations separated by semicolon & space'
             => ['color: #000; width: 3px;', 'color: #000; width: 3px;'],
             'two declarations separated by semicolon & linefeed' => [
-                'color: #000;' . self::LF . 'width: 3px;',
-                'color: #000; width: 3px;'
+                "color: #000;\nwidth: 3px;",
+                'color: #000; width: 3px;',
             ],
             'two declarations separated by semicolon & Windows line ending' => [
                 "color: #000;\r\nwidth: 3px;",
-                'color: #000; width: 3px;'
+                'color: #000; width: 3px;',
             ],
             'one declaration with leading dash in property name' => [
                 '-webkit-text-size-adjust:none;',
-                '-webkit-text-size-adjust: none;'
+                '-webkit-text-size-adjust: none;',
+            ],
+            'one declaration with linefeed in property value' => [
+                "text-shadow:\n1px 1px 3px #000,\n1px 1px 1px #000;",
+                "text-shadow: 1px 1px 3px #000,\n1px 1px 1px #000;",
+            ],
+            'one declaration with Windows line ending in property value' => [
+                "text-shadow:\r\n1px 1px 3px #000,\r\n1px 1px 1px #000;",
+                "text-shadow: 1px 1px 3px #000,\r\n1px 1px 1px #000;",
             ],
         ];
     }
@@ -784,15 +1064,10 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            'html style="' . $expectedStyleAttributeContent . '">',
-            $result
-        );
+        static::assertContains('<html style="' . $expectedStyleAttributeContent . '">', $result);
     }
 
     /**
-     * Data provider for emogrifyInvalidDeclaration.
-     *
      * @return string[][]
      */
     public function invalidDeclarationDataProvider()
@@ -812,14 +1087,14 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      *
      * @dataProvider invalidDeclarationDataProvider
      */
-    public function emogrifyDropsInvalidDeclaration($cssDeclarationBlock)
+    public function emogrifyDropsInvalidCssDeclaration($cssDeclarationBlock)
     {
         $this->subject->setHtml('<html></html>');
         $this->subject->setCss('html {' . $cssDeclarationBlock . '}');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<html style="">', $result);
+        static::assertContains('<html style="">', $result);
     }
 
     /**
@@ -832,13 +1107,13 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains($styleAttribute, $result);
+        static::assertContains($styleAttribute, $result);
     }
 
     /**
      * @test
      */
-    public function emogrifyAddsCssBeforeExistingStyle()
+    public function emogrifyAddsNewCssBeforeExistingStyle()
     {
         $styleAttributeValue = 'color: #ccc;';
         $this->subject->setHtml('<html style="' . $styleAttributeValue . '"></html>');
@@ -848,10 +1123,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            'style="' . $cssDeclarations . ' ' . $styleAttributeValue . '"',
-            $result
-        );
+        static::assertContains('style="' . $cssDeclarations . ' ' . $styleAttributeValue . '"', $result);
     }
 
     /**
@@ -864,7 +1136,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<html style="color: red;">', $result);
+        static::assertContains('<html style="color: red;">', $result);
     }
 
     /**
@@ -876,20 +1148,20 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('style="color: #ccc;"', $result);
+        static::assertContains('style="color: #ccc;"', $result);
     }
 
     /**
      * @test
      */
-    public function emogrifyLowerCasesAttributeNames()
+    public function emogrifyLowercasesAttributeNamesFromPassedInCss()
     {
         $this->subject->setHtml('<html></html>');
         $this->subject->setCss('html {mArGiN:0 2pX;}');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('style="margin: 0 2pX;"', $result);
+        static::assertContains('style="margin: 0 2pX;"', $result);
     }
 
     /**
@@ -897,16 +1169,13 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function emogrifyPreservesCaseForAttributeValuesFromPassedInCss()
     {
-        $cssDeclaration = 'content: \'Hello World\';';
+        $cssDeclaration = "content: 'Hello World';";
         $this->subject->setHtml('<html><body><p>target</p></body></html>');
         $this->subject->setCss('p {' . $cssDeclaration . '}');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<p style="' . $cssDeclaration . '">target</p>',
-            $result
-        );
+        static::assertContains('<p style="' . $cssDeclaration . '">target</p>', $result);
     }
 
     /**
@@ -914,17 +1183,14 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function emogrifyPreservesCaseForAttributeValuesFromParsedStyleBlock()
     {
-        $cssDeclaration = 'content: \'Hello World\';';
+        $cssDeclaration = "content: 'Hello World';";
         $this->subject->setHtml(
             '<html><head><style>p {' . $cssDeclaration . '}</style></head><body><p>target</p></body></html>'
         );
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<p style="' . $cssDeclaration . '">target</p>',
-            $result
-        );
+        static::assertContains('<p style="' . $cssDeclaration . '">target</p>', $result);
     }
 
     /**
@@ -936,7 +1202,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('<style', $result);
+        static::assertNotContains('<style', $result);
     }
 
     /**
@@ -969,8 +1235,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $html = $this->subject->emogrify();
 
-        self::assertContains('color: red', $html);
-        self::assertContains('background-color: blue', $html);
+        static::assertContains('color: red', $html);
+        static::assertContains('background-color: blue', $html);
     }
 
     /**
@@ -986,8 +1252,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $subject->setHtml($html);
 
         $html = $subject->emogrify();
-        self::assertContains('color: red', $html);
-        self::assertContains('background-color: blue', $html);
+        static::assertContains('color: red', $html);
+        static::assertContains('background-color: blue', $html);
     }
 
     /**
@@ -1001,6 +1267,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
             'CSS comments with one asterisk' => ['p {color: #000;/* black */}', 'black'],
             'CSS comments with two asterisks' => ['p {color: #000;/** black */}', 'black'],
             '@import directive' => ['@import "foo.css";', '@import'],
+            'two @import directives, minified' => ['@import "foo.css";@import "bar.css";', '@import'],
+            '@charset directive' => ['@charset "UTF-8";', '@charset'],
             'style in "aural" media type rule' => ['@media aural {p {color: #000;}}', '#000'],
             'style in "braille" media type rule' => ['@media braille {p {color: #000;}}', '#000'],
             'style in "embossed" media type rule' => ['@media embossed {p {color: #000;}}', '#000'],
@@ -1009,25 +1277,67 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
             'style in "speech" media type rule' => ['@media speech {p {color: #000;}}', '#000'],
             'style in "tty" media type rule' => ['@media tty {p {color: #000;}}', '#000'],
             'style in "tv" media type rule' => ['@media tv {p {color: #000;}}', '#000'],
+            'style in "tv" media type rule with extra spaces' => [
+                '  @media  tv  {  p  {  color  :  #000  ;  }  }  ',
+                '#000',
+            ],
+            'style in "tv" media type rule with linefeeds' => [
+                "\n@media\ntv\n{\np\n{\ncolor\n:\n#000\n;\n}\n}\n",
+                '#000',
+            ],
+            'style in "tv" media type rule with Windows line endings' => [
+                "\r\n@media\r\ntv\r\n{\r\np\r\n{\r\ncolor\r\n:\r\n#000\r\n;\r\n}\r\n}\r\n",
+                '#000',
+            ],
+            'style in "only tv" media type rule' => ['@media only tv {p {color: #000;}}', '#000'],
+            'style in "only tv" media type rule with extra spaces' => [
+                '  @media  only  tv  {  p  {  color  :  #000  ;  }  }  ',
+                '#000',
+            ],
+            'style in "only tv" media type rule with linefeeds' => [
+                "\n@media\nonly\ntv\n{\np\n{\ncolor\n:\n#000\n;\n}\n}\n",
+                '#000',
+            ],
+            'style in "only tv" media type rule with Windows line endings' => [
+                "\r\n@media\r\nonly\r\ntv\r\n{\r\np\r\n{\r\ncolor\r\n:\r\n#000\r\n;\r\n}\r\n}\r\n",
+                '#000',
+            ],
         ];
     }
 
     /**
      * @test
      *
-     * @param string $css
+     * @param string $unneededCss
      * @param string $markerNotExpectedInHtml
      *
      * @dataProvider unneededCssThingsDataProvider
      */
-    public function emogrifyFiltersUnneededCssThings($css, $markerNotExpectedInHtml)
+    public function emogrifyFiltersUnneededCssThings($unneededCss, $markerNotExpectedInHtml)
     {
         $this->subject->setHtml('<html><p>foo</p></html>');
-        $this->subject->setCss($css);
+        $this->subject->setCss($unneededCss);
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains($markerNotExpectedInHtml, $result);
+        static::assertNotContains($markerNotExpectedInHtml, $result);
+    }
+
+    /**
+     * @test
+     *
+     * @param string $unneededCss
+     *
+     * @dataProvider unneededCssThingsDataProvider
+     */
+    public function emogrifyMatchesRuleAfterUnneededCssThing($unneededCss)
+    {
+        $this->subject->setHtml('<html><body></body></html>');
+        $this->subject->setCss($unneededCss . ' body { color: green; }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<body style="color: green;">', $result);
     }
 
     /**
@@ -1040,8 +1350,24 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         return [
             'style in "only all" media type rule' => ['@media only all {p {color: #000;}}'],
             'style in "only screen" media type rule' => ['@media only screen {p {color: #000;}}'],
+            'style in "only screen" media type rule with extra spaces'
+            => ['  @media  only  screen  {  p  {  color  :  #000;  }  }  '],
+            'style in "only screen" media type rule with linefeeds'
+            => ["\n@media\nonly\nscreen\n{\np\n{\ncolor\n:\n#000;\n}\n}\n"],
+            'style in "only screen" media type rule with Windows line endings'
+            => ["\r\n@media\r\nonly\r\nscreen\r\n{\r\np\r\n{\r\ncolor\r\n:\r\n#000;\r\n}\r\n}\r\n"],
             'style in media type rule' => ['@media {p {color: #000;}}'],
+            'style in media type rule with extra spaces' => ['  @media  {  p  {  color  :  #000;  }  }  '],
+            'style in media type rule with linefeeds' => ["\n@media\n{\np\n{\ncolor\n:\n#000;\n}\n}\n"],
+            'style in media type rule with Windows line endings'
+            => ["\r\n@media\r\n{\r\np\r\n{\r\ncolor\r\n:\r\n#000;\r\n}\r\n}\r\n"],
             'style in "screen" media type rule' => ['@media screen {p {color: #000;}}'],
+            'style in "screen" media type rule with extra spaces'
+            => ['  @media  screen  {  p  {  color  :  #000;  }  }  '],
+            'style in "screen" media type rule with linefeeds'
+            => ["\n@media\nscreen\n{\np\n{\ncolor\n:\n#000;\n}\n}\n"],
+            'style in "screen" media type rule with Windows line endings'
+            => ["\r\n@media\r\nscreen\r\n{\r\np\r\n{\r\ncolor\r\n:\r\n#000;\r\n}\r\n}\r\n"],
             'style in "print" media type rule' => ['@media print {p {color: #000;}}'],
             'style in "all" media type rule' => ['@media all {p {color: #000;}}'],
         ];
@@ -1061,7 +1387,102 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains($css, $result);
+        static::assertContainsCss($css, $result);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function orderedRulesAndSurroundingCssDataProvider()
+    {
+        $possibleSurroundingCss = [
+            'nothing' => '',
+            'space' => ' ',
+            'linefeed' => "\n",
+            'Windows line ending' => "\r\n",
+            'comment' => '/* hello */',
+            'other non-matching CSS' => 'h6 { color: #f00; }',
+            'other matching CSS' => 'p { color: #f00; }',
+            'disallowed media rule' => '@media tv { p { color: #f00; } }',
+            'allowed but non-matching media rule' => '@media screen { h6 { color: #f00; } }',
+            'non-matching CSS with pseudo-component' => 'h6:hover { color: #f00; }',
+        ];
+        $possibleCssBefore = $possibleSurroundingCss + [
+                '@import' => '@import "foo.css";',
+                '@charset' => '@charset "UTF-8";',
+            ];
+
+        $datasetsSurroundingCss = [];
+        foreach ($possibleCssBefore as $descriptionBefore => $cssBefore) {
+            foreach ($possibleSurroundingCss as $descriptionBetween => $cssBetween) {
+                foreach ($possibleSurroundingCss as $descriptionAfter => $cssAfter) {
+                    // every combination would be a ridiculous c.1000 datasets - choose a select few
+                    // test all possible CSS before once
+                    if (($cssBetween === '' && $cssAfter === '')
+                        // test all possible CSS between once
+                        || ($cssBefore === '' && $cssAfter === '')
+                        // test all possible CSS after once
+                        || ($cssBefore === '' && $cssBetween === '')
+                        // test with each possible CSS in all three positions
+                        || ($cssBefore === $cssBetween && $cssBetween === $cssAfter)
+                    ) {
+                        $description = ' with ' . $descriptionBefore . ' before, '
+                            . $descriptionBetween . ' between, '
+                            . $descriptionAfter . ' after';
+                        $datasetsSurroundingCss[$description] = [$cssBefore, $cssBetween, $cssAfter];
+                    }
+                }
+            }
+        }
+
+        $datasets = [];
+        foreach ($datasetsSurroundingCss as $description => $datasetSurroundingCss) {
+            $datasets += [
+                'two media rules' . $description => \array_merge(
+                    ['@media all { p { color: #333; } }', '@media print { p { color: #000; } }'],
+                    $datasetSurroundingCss
+                ),
+                'two rules involving pseudo-components' . $description => \array_merge(
+                    ['a:hover { color: blue; }', 'a:active { color: green; }'],
+                    $datasetSurroundingCss
+                ),
+                'media rule followed by rule involving pseudo-components' . $description => \array_merge(
+                    ['@media screen { p { color: #000; } }', 'a:hover { color: green; }'],
+                    $datasetSurroundingCss
+                ),
+                'rule involving pseudo-components followed by media rule' . $description => \array_merge(
+                    ['a:hover { color: green; }', '@media screen { p { color: #000; } }'],
+                    $datasetSurroundingCss
+                ),
+            ];
+        }
+        return $datasets;
+    }
+
+    /**
+     * @test
+     *
+     * @param string $rule1
+     * @param string $rule2
+     * @param string $cssBefore CSS to insert before the first rule
+     * @param string $cssBetween CSS to insert between the rules
+     * @param string $cssAfter CSS to insert after the second rule
+     *
+     * @dataProvider orderedRulesAndSurroundingCssDataProvider
+     */
+    public function emogrifyKeepsRulesCopiedToStyleElementInSpecifiedOrder(
+        $rule1,
+        $rule2,
+        $cssBefore,
+        $cssBetween,
+        $cssAfter
+    ) {
+        $this->subject->setHtml('<html><p><a>foo</a></p></html>');
+        $this->subject->setCss($cssBefore . $rule1 . $cssBetween . $rule2 . $cssAfter);
+
+        $result = $this->subject->emogrify();
+
+        static::assertContainsCss($rule1 . $rule2, $result);
     }
 
     /**
@@ -1069,14 +1490,14 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function removeAllowedMediaTypeRemovesStylesForTheGivenMediaType()
     {
-        $css = '@media screen { html {} }';
+        $css = '@media screen { html { some-property: value; } }';
         $this->subject->setHtml('<html></html>');
         $this->subject->setCss($css);
         $this->subject->removeAllowedMediaType('screen');
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains($css, $result);
+        static::assertNotContains('@media', $result);
     }
 
     /**
@@ -1091,47 +1512,62 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains($css, $result);
+        static::assertContainsCss($css, $result);
     }
 
     /**
      * @test
      */
-    public function emogrifyAddsMissingHeadElement()
-    {
-        $this->subject->setHtml('<html></html>');
-        $this->subject->setCss('@media all { html {} }');
-
-        $result = $this->subject->emogrify();
-
-        self::assertContains('<head>', $result);
-    }
-
-    /**
-     * @test
-     */
-    public function emogrifyKeepExistingHeadElementContent()
+    public function emogrifyKeepsExistingHeadElementContent()
     {
         $this->subject->setHtml('<html><head><!-- original content --></head></html>');
-        $this->subject->setCss('@media all { html {} }');
+        $this->subject->setCss('@media all { html { some-property: value; } }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<!-- original content -->', $result);
+        static::assertContains('<!-- original content -->', $result);
     }
 
     /**
      * @test
      */
-    public function emogrifyAddsStyleElementToBody()
+    public function emogrifyKeepsExistingStyleElementWithMedia()
     {
-        $html = $this->html5DocumentType . '<html><head><!-- original content --></head></html>';
+        $html = $this->html5DocumentType . '<html><head><!-- original content --></head><body></body></html>';
         $this->subject->setHtml($html);
-        $this->subject->setCss('@media all { html {} }');
+        $this->subject->setCss('@media all { html { some-property: value; } }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<body><style type="text/css">', $result);
+        static::assertContains('<style type="text/css">', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyKeepsExistingStyleElementWithMediaInHead()
+    {
+        $style = '<style type="text/css">@media all { html {  color: red; } }</style>';
+        $html = '<html><head>' . $style . '</head><body></body></html>';
+        $this->subject->setHtml($html);
+
+        $result = $this->subject->emogrify();
+
+        static::assertRegExp('/<head>.*<style.*<\\/head>/s', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyKeepsExistingStyleElementWithMediaOutOfBody()
+    {
+        $style = '<style type="text/css">@media all { html {  color: red; } }</style>';
+        $html = '<html><head>' . $style . '</head><body></body></html>';
+        $this->subject->setHtml($html);
+
+        $result = $this->subject->emogrify();
+
+        static::assertNotRegExp('/<body>.*<style/s', $result);
     }
 
     /**
@@ -1168,7 +1604,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
                 '@media only screen { h1 { color:red; } }' .
                 '@media only all { h1 { color:red; } }' .
                 '@media print { * { color:#000 !important; } }' .
-                '@media { h1 { color:red; } }'
+                '@media { h1 { color:red; } }',
             ],
         ];
     }
@@ -1187,7 +1623,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<style type="text/css">' . $css . '</style>', $result);
+        static::assertContainsCss('<style type="text/css">' . $css . '</style>', $result);
     }
 
     /**
@@ -1200,16 +1636,16 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
     public function emogrifyWithValidMinifiedMediaQueryContainsInnerCss($css)
     {
         // Minify CSS by removing unnecessary whitespace.
-        $css = preg_replace('/\\s*{\\s*/', '{', $css);
-        $css = preg_replace('/;?\\s*}\\s*/', '}', $css);
-        $css = preg_replace('/@media{/', '@media {', $css);
+        $css = \preg_replace('/\\s*{\\s*/', '{', $css);
+        $css = \preg_replace('/;?\\s*}\\s*/', '}', $css);
+        $css = \preg_replace('/@media{/', '@media {', $css);
 
         $this->subject->setHtml('<html><h1></h1><p></p></html>');
         $this->subject->setCss($css);
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<style type="text/css">' . $css . '</style>', $result);
+        static::assertContains('<style type="text/css">' . $css . '</style>', $result);
     }
 
     /**
@@ -1225,7 +1661,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<style type="text/css">' . $css . '</style>', $result);
+        static::assertContainsCss('<style type="text/css">' . $css . '</style>', $result);
     }
 
     /**
@@ -1242,7 +1678,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('style="color:red"', $result);
+        static::assertNotContains('style=', $result);
     }
 
     /**
@@ -1277,7 +1713,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains($css, $result);
+        static::assertNotContainsCss($css, $result);
     }
 
     /**
@@ -1294,7 +1730,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('style="color: red"', $result);
+        static::assertNotContains('style=', $result);
     }
 
     /**
@@ -1310,7 +1746,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains($css, $result);
+        static::assertNotContainsCss($css, $result);
     }
 
     /**
@@ -1326,7 +1762,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('style="color: red"', $result);
+        static::assertNotContains('style=', $result);
     }
 
     /**
@@ -1339,8 +1775,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('style="color: red"', $result);
-        self::assertNotContains('@media screen', $result);
+        static::assertNotContains('style=', $result);
+        static::assertNotContains('@media screen', $result);
     }
 
     /**
@@ -1353,8 +1789,312 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('style="color: red"', $result);
-        self::assertNotContains('@media screen', $result);
+        static::assertNotContains('style=', $result);
+        static::assertNotContains('@media screen', $result);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function mediaTypeDataProvider()
+    {
+        return [
+            'disallowed type' => ['tv'],
+            'allowed type' => ['screen'],
+        ];
+    }
+
+    /**
+     * @test
+     *
+     * @param string $emptyRuleMediaType
+     *
+     * @dataProvider mediaTypeDataProvider
+     */
+    public function emogrifyKeepsMediaRuleAfterEmptyMediaRule($emptyRuleMediaType)
+    {
+        $this->subject->setHtml('<html><h1></h1></html>');
+        $this->subject->setCss('@media ' . $emptyRuleMediaType . ' {} @media all { h1 { color: red; } }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContainsCss('@media all { h1 { color: red; } }', $result);
+    }
+
+    /**
+     * @test
+     *
+     * @param string $emptyRuleMediaType
+     *
+     * @dataProvider mediaTypeDataProvider
+     */
+    public function emogrifyNotKeepsUnneededMediaRuleAfterEmptyMediaRule($emptyRuleMediaType)
+    {
+        $this->subject->setHtml('<html><h1></h1></html>');
+        $this->subject->setCss('@media ' . $emptyRuleMediaType . ' {} @media speech { h1 { color: red; } }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertNotContains('@media', $result);
+    }
+
+    /**
+     * @param string[] $precedingSelectorComponents Array of selectors to which each type of pseudo-component is
+     *                                              appended to create a selector for a CSS rule.
+     *                                              Keys are human-readable descriptions.
+     *
+     * @return string[][]
+     */
+    private function getCssRuleDatasetsWithSelectorPseudoComponents(array $precedingSelectorComponents)
+    {
+        $rulesComponents = [
+            'pseudo-element' => [
+                'selectorPseudoComponent' => '::after',
+                'declarationsBlock' => 'content: "bar";',
+            ],
+            'CSS2 pseudo-element' => [
+                'selectorPseudoComponent' => ':after',
+                'declarationsBlock' => 'content: "bar";',
+            ],
+            'hyphenated pseudo-element' => [
+                'selectorPseudoComponent' => '::first-letter',
+                'declarationsBlock' => 'color: green;',
+            ],
+            'pseudo-class' => [
+                'selectorPseudoComponent' => ':hover',
+                'declarationsBlock' => 'color: green;',
+            ],
+            'hyphenated pseudo-class' => [
+                'selectorPseudoComponent' => ':read-only',
+                'declarationsBlock' => 'color: green;',
+            ],
+            'pseudo-class with parameter' => [
+                'selectorPseudoComponent' => ':lang(en)',
+                'declarationsBlock' => 'color: green;',
+            ],
+        ];
+
+        $datasets = [];
+        foreach ($precedingSelectorComponents as $precedingComponentDescription => $precedingSelectorComponent) {
+            foreach ($rulesComponents as $pseudoComponentDescription => $ruleComponents) {
+                $datasets[$precedingComponentDescription . ' ' . $pseudoComponentDescription] = [
+                    $precedingSelectorComponent . $ruleComponents['selectorPseudoComponent']
+                    . ' { ' . $ruleComponents['declarationsBlock'] . ' }',
+                ];
+            }
+        }
+        return $datasets;
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function matchingSelectorWithPseudoComponentCssRuleDataProvider()
+    {
+        $datasetsWithSelectorPseudoComponents = $this->getCssRuleDatasetsWithSelectorPseudoComponents(
+            [
+                'lone' => '',
+                'type &' => 'a',
+                'class &' => '.a',
+                'ID &' => '#a',
+                'attribute &' => 'a[href="a"]',
+                'static pseudo-class &' => 'a:first-child',
+                'ancestor &' => 'p ',
+                'ancestor & type &' => 'p a',
+            ]
+        );
+        $datasetsWithCombinedPseudoSelectors = [
+            'pseudo-class & descendant' => ['p:hover a { color: green; }'],
+            'pseudo-class & pseudo-element' => ['a:hover::after { content: "bar"; }'],
+            'pseudo-element & pseudo-class' => ['a::after:hover { content: "bar"; }'],
+            'two pseudo-classes' => ['a:focus:hover { color: green; }'],
+        ];
+
+        return \array_merge($datasetsWithSelectorPseudoComponents, $datasetsWithCombinedPseudoSelectors);
+    }
+
+    /**
+     * @test
+     *
+     * @param string $css
+     *
+     * @dataProvider matchingSelectorWithPseudoComponentCssRuleDataProvider
+     */
+    public function emogrifyKeepsRuleWithPseudoComponentInMatchingSelector($css)
+    {
+        $this->subject->setHtml('<html><p><a id="a" class="a" href="a">foo</a></p></html>');
+        $this->subject->setCss($css);
+
+        $result = $this->subject->emogrify();
+
+        self::assertContainsCss($css, $result);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function nonMatchingSelectorWithPseudoComponentCssRuleDataProvider()
+    {
+        $datasetsWithSelectorPseudoComponents = $this->getCssRuleDatasetsWithSelectorPseudoComponents(
+            [
+                'type &' => 'b',
+                'class &' => '.b',
+                'ID &' => '#b',
+                'attribute &' => 'a[href="b"]',
+                'static pseudo-class &' => 'a:not(.a)',
+                'ancestor &' => 'ul ',
+                'ancestor & type &' => 'p b',
+            ]
+        );
+        $datasetsWithCombinedPseudoSelectors = [
+            'pseudo-class & descendant' => ['ul:hover a { color: green; }'],
+            'pseudo-class & pseudo-element' => ['b:hover::after { content: "bar"; }'],
+            'pseudo-element & pseudo-class' => ['b::after:hover { content: "bar"; }'],
+            'two pseudo-classes' => ['input:focus:hover { color: green; }'],
+        ];
+
+        return \array_merge($datasetsWithSelectorPseudoComponents, $datasetsWithCombinedPseudoSelectors);
+    }
+
+    /**
+     * @test
+     *
+     * @param string $css
+     *
+     * @dataProvider nonMatchingSelectorWithPseudoComponentCssRuleDataProvider
+     */
+    public function emogrifyNotKeepsRuleWithPseudoComponentInNonMatchingSelector($css)
+    {
+        $this->subject->setHtml('<html><p><a id="a" class="a" href="#">foo</a></p></html>');
+        $this->subject->setCss($css);
+
+        $result = $this->subject->emogrify();
+
+        self::assertNotContainsCss($css, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyKeepsRuleInMediaQueryWithPseudoComponentInMatchingSelector()
+    {
+        $this->subject->setHtml('<html><a>foo</a></html>');
+        $css = '@media screen { a:hover { color: green; } }';
+        $this->subject->setCss($css);
+
+        $result = $this->subject->emogrify();
+
+        self::assertContainsCss($css, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyNotKeepsRuleInMediaQueryWithPseudoComponentInNonMatchingSelector()
+    {
+        $this->subject->setHtml('<html><a>foo</a></html>');
+        $css = '@media screen { b:hover { color: green; } }';
+        $this->subject->setCss($css);
+
+        $result = $this->subject->emogrify();
+
+        self::assertNotContainsCss($css, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyKeepsRuleWithPseudoComponentInMultipleMatchingSelectorsFromSingleRule()
+    {
+        $this->subject->setHtml('<html><p>foo</p><a>bar</a></html>');
+        $css = 'p:hover, a:hover { color: green; }';
+        $this->subject->setCss($css);
+
+        $result = $this->subject->emogrify();
+
+        static::assertContainsCss($css, $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyKeepsOnlyMatchingSelectorsWithPseudoComponentFromSingleRule()
+    {
+        $this->subject->setHtml('<html><a>foo</a></html>');
+        $this->subject->setCss('p:hover, a:hover { color: green; }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContainsCss('<style type="text/css">a:hover { color: green; }</style>', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyAppliesCssToMatchingElementsAndKeepsRuleWithPseudoComponentFromSingleRule()
+    {
+        $this->subject->setHtml('<html><p>foo</p><a>bar</a></html>');
+        $this->subject->setCss('p, a:hover { color: green; }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<p style="color: green;">', $result);
+        static::assertContainsCss('<style type="text/css">a:hover { color: green; }</style>', $result);
+    }
+
+    /**
+     * @return string[][]
+     */
+    public function mediaTypesDataProvider()
+    {
+        return [
+            'disallowed type after disallowed type' => ['tv', 'speech'],
+            'allowed type after disallowed type' => ['tv', 'all'],
+            'disallowed type after allowed type' => ['screen', 'tv'],
+            'allowed type after allowed type' => ['screen', 'all'],
+        ];
+    }
+
+    /**
+     * @test
+     *
+     * @param string $emptyRuleMediaType
+     * @param string $mediaType
+     *
+     * @dataProvider mediaTypesDataProvider
+     */
+    public function emogrifyAppliesCssBetweenEmptyMediaRuleAndMediaRule($emptyRuleMediaType, $mediaType)
+    {
+        $this->subject->setHtml('<html><h1></h1></html>');
+        $this->subject->setCss(
+            '@media ' . $emptyRuleMediaType . ' {} h1 { color: green; } @media ' . $mediaType
+            . ' { h1 { color: red; } }'
+        );
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<h1 style="color: green;">', $result);
+    }
+
+    /**
+     * @test
+     *
+     * @param string $emptyRuleMediaType
+     * @param string $mediaType
+     *
+     * @dataProvider mediaTypesDataProvider
+     */
+    public function emogrifyAppliesCssBetweenEmptyMediaRuleAndMediaRuleWithCssAfter($emptyRuleMediaType, $mediaType)
+    {
+        $this->subject->setHtml('<html><h1></h1></html>');
+        $this->subject->setCss(
+            '@media ' . $emptyRuleMediaType . ' {} h1 { color: green; } @media ' . $mediaType
+            . ' { h1 { color: red; } } h1 { font-size: 24px; }'
+        );
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<h1 style="color: green; font-size: 24px;">', $result);
     }
 
     /**
@@ -1367,10 +2107,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<html style="' . $styleAttributeValue . '">',
-            $result
-        );
+        static::assertContains('<html style="' . $styleAttributeValue . '">', $result);
     }
 
     /**
@@ -1384,10 +2121,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains(
-            '<html style="' . $styleAttributeValue . '">',
-            $result
-        );
+        static::assertNotContains('style=', $result);
     }
 
     /**
@@ -1404,10 +2138,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<p style="' . $styleAttributeValue . '">',
-            $result
-        );
+        static::assertContains('<p style="' . $styleAttributeValue . '">', $result);
     }
 
     /**
@@ -1420,7 +2151,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains('<html style', $result);
+        static::assertNotContains('<html style', $result);
     }
 
     /**
@@ -1437,28 +2168,11 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<p style="' . $styleAttributeValue . '">',
-            $result
-        );
+        static::assertContains('<p style="' . $styleAttributeValue . '">', $result);
     }
 
     /**
-     * @test
-     */
-    public function emogrifyAppliesCssWithUpperCaseSelector()
-    {
-        $this->subject->setHtml(
-            '<html><style type="text/css">P { color:#ccc; }</style><body><p>paragraph</p></body></html>'
-        );
-
-        $result = $this->subject->emogrify();
-
-        self::assertContains('<p style="color: #ccc;">', $result);
-    }
-
-    /**
-     * Emogrify was handling case differently for passed in CSS vs CSS parsed from style blocks.
+     * Emogrify was handling case differently for passed-in CSS vs. CSS parsed from style blocks.
      *
      * @test
      */
@@ -1471,11 +2185,11 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="padding-bottom: 1px; padding-top: 0; text-align: center;">', $result);
+        static::assertContains('<p style="padding-bottom: 1px; padding-top: 0; text-align: center;">', $result);
     }
 
     /**
-     * Passed in CSS sets the order, but style block CSS overrides values.
+     * Style block CSS overrides values.
      *
      * @test
      */
@@ -1489,8 +2203,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<p style="margin: 0; padding-top: 1px; padding-bottom: 3px; text-align: center;">',
+        static::assertContains(
+            '<p style="margin: 0; padding-bottom: 3px; padding-top: 1px; text-align: center;">',
             $result
         );
     }
@@ -1508,7 +2222,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="margin: 0; padding-bottom: 1px; text-align: center;">', $result);
+        static::assertContains('<p style="margin: 0; padding-bottom: 1px; text-align: center;">', $result);
     }
 
     /**
@@ -1516,12 +2230,12 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function emogrifyByDefaultRemovesElementsWithDisplayNoneFromExternalCss()
     {
-        $this->subject->setHtml('<html><body><div class="bar"></div><div class="foo"></div></body></html>');
+        $this->subject->setHtml('<html><body><div class="foo"></div></body></html>');
         $this->subject->setCss('div.foo { display: none; }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<div class="bar"></div>', $result);
+        static::assertNotContains('<div class="foo"></div>', $result);
     }
 
     /**
@@ -1530,13 +2244,13 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
     public function emogrifyByDefaultRemovesElementsWithDisplayNoneInStyleAttribute()
     {
         $this->subject->setHtml(
-            '<html><body><div class="bar"></div><div class="foobar" style="display: none;"></div>' .
+            '<html><body><div class="foobar" style="display: none;"></div>' .
             '</body></html>'
         );
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<div class="bar"></div>', $result);
+        static::assertNotContains('<div', $result);
     }
 
     /**
@@ -1544,13 +2258,13 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function emogrifyAfterDisableInvisibleNodeRemovalPreservesInvisibleElements()
     {
-        $this->subject->setHtml('<html><body><div class="bar"></div><div class="foo"></div></body></html>');
+        $this->subject->setHtml('<html><body><div class="foo"></div></body></html>');
         $this->subject->setCss('div.foo { display: none; }');
 
         $this->subject->disableInvisibleNodeRemoval();
         $result = $this->subject->emogrify();
 
-        self::assertContains('<div class="foo" style="display: none;">', $result);
+        static::assertContains('<div class="foo" style="display: none;">', $result);
     }
 
     /**
@@ -1565,47 +2279,25 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('@media only screen and (max-width: 480px)', $result);
+        static::assertContains('@media only screen and (max-width: 480px)', $result);
     }
 
     /**
      * @test
+     *
+     * @param string $documentType
+     *
+     * @dataProvider documentTypeDataProvider
      */
-    public function emogrifyForXhtmlDocumentTypeConvertsXmlSelfClosingTagsToNonXmlSelfClosingTag()
+    public function emogrifyConvertsXmlSelfClosingTagsToNonXmlSelfClosingTag($documentType)
     {
         $this->subject->setHtml(
-            '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" ' .
-            '"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">' .
-            '<html><body><br/></body></html>'
+            $documentType . '<html><body><br/></body></html>'
         );
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<body><br></body>', $result);
-    }
-
-    /**
-     * @test
-     */
-    public function emogrifyForHtml5DocumentTypeKeepsNonXmlSelfClosingTagsAsNonXmlSelfClosing()
-    {
-        $this->subject->setHtml($this->html5DocumentType . '<html><body><br></body></html>');
-
-        $result = $this->subject->emogrify();
-
-        self::assertContains('<body><br></body>', $result);
-    }
-
-    /**
-     * @test
-     */
-    public function emogrifyForHtml5DocumentTypeConvertXmlSelfClosingTagsToNonXmlSelfClosingTag()
-    {
-        $this->subject->setHtml($this->html5DocumentType . '<html><body><br/></body></html>');
-
-        $result = $this->subject->emogrify();
-
-        self::assertContains('<body><br></body>', $result);
+        static::assertContains('<br>', $result);
     }
 
     /**
@@ -1617,7 +2309,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<body><p></p></body>', $result);
+        static::assertContains('<body><p></p></body>', $result);
     }
 
     /**
@@ -1629,12 +2321,12 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertSame(
-            $this->html5DocumentType . self::LF .
-            '<html>' . self::LF .
-            '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>' . self::LF .
-            '<body><p></p></body>' . self::LF .
-            '</html>' . self::LF,
+        static::assertSame(
+            $this->html5DocumentType . "\n" .
+            "<html>\n" .
+            '<head><meta http-equiv="Content-Type" content="text/html; charset=utf-8"></head>' . "\n" .
+            "<body><p></p></body>\n" .
+            "</html>\n",
             $result
         );
     }
@@ -1648,19 +2340,36 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrifyBodyContent();
 
-        self::assertSame('<p></p>', $result);
+        static::assertSame('<p></p>', $result);
     }
 
     /**
      * @test
      */
-    public function emogrifyBodyContentReturnsBodyContentFromContent()
+    public function emogrifyBodyContentReturnsBodyContentFromPartialContent()
     {
         $this->subject->setHtml('<p></p>');
 
         $result = $this->subject->emogrifyBodyContent();
 
-        self::assertSame('<p></p>', $result);
+        static::assertSame('<p></p>', $result);
+    }
+
+    /**
+     * Sets HTML of subject to boilerplate HTML with a single `<p>` in `<body>` and empty `<head>`
+     *
+     * @param string $style Optional value for the style attribute of the `<p>` element
+     *
+     * @return void
+     */
+    private function setSubjectBoilerplateHtml($style = '')
+    {
+        $html = '<html><head></head><body><p';
+        if ($style !== '') {
+            $html .= ' style="' . $style . '"';
+        }
+        $html .= '>some content</p></body></html>';
+        $this->subject->setHtml($html);
     }
 
     /**
@@ -1668,12 +2377,12 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function importantInExternalCssOverwritesInlineCss()
     {
-        $this->subject->setHtml('<html><head</head><body><p style="margin: 2px;">some content</p></body></html>');
+        $this->setSubjectBoilerplateHtml('margin: 2px;');
         $this->subject->setCss('p { margin: 1px !important; }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="margin: 1px;">', $result);
+        static::assertContains('<p style="margin: 1px;">', $result);
     }
 
     /**
@@ -1681,27 +2390,25 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function importantInExternalCssKeepsInlineCssForOtherAttributes()
     {
-        $this->subject->setHtml(
-            '<html><head</head><body><p style="margin: 2px; text-align: center;">some content</p></body></html>'
-        );
+        $this->setSubjectBoilerplateHtml('margin: 2px; text-align: center;');
         $this->subject->setCss('p { margin: 1px !important; }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="text-align: center; margin: 1px;">', $result);
+        static::assertContains('<p style="text-align: center; margin: 1px;">', $result);
     }
 
     /**
      * @test
      */
-    public function emogrifyHandlesImportantStyleTagCaseInsensitive()
+    public function importantIsCaseInsensitive()
     {
-        $this->subject->setHtml('<html><head</head><body><p style="margin: 2px;">some content</p></body></html>');
+        $this->setSubjectBoilerplateHtml('margin: 2px;');
         $this->subject->setCss('p { margin: 1px !ImPorTant; }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="margin: 1px !ImPorTant;">', $result);
+        static::assertContains('<p style="margin: 1px !ImPorTant;">', $result);
     }
 
     /**
@@ -1709,15 +2416,12 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function secondImportantStyleOverwritesFirstOne()
     {
-        $this->subject->setHtml('<html><head</head><body><p>some content</p></body></html>');
+        $this->setSubjectBoilerplateHtml();
         $this->subject->setCss('p { margin: 1px !important; } p { margin: 2px !important; }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<p style="margin: 2px;">',
-            $result
-        );
+        static::assertContains('<p style="margin: 2px;">', $result);
     }
 
     /**
@@ -1725,15 +2429,12 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function secondNonImportantStyleOverwritesFirstOne()
     {
-        $this->subject->setHtml('<html><head</head><body><p>some content</p></body></html>');
+        $this->setSubjectBoilerplateHtml();
         $this->subject->setCss('p { margin: 1px; } p { margin: 2px; }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<p style="margin: 2px;">',
-            $result
-        );
+        static::assertContains('<p style="margin: 2px;">', $result);
     }
 
     /**
@@ -1741,15 +2442,64 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function secondNonImportantStyleNotOverwritesFirstImportantOne()
     {
-        $this->subject->setHtml('<html><head</head><body><p>some content</p></body></html>');
+        $this->setSubjectBoilerplateHtml();
         $this->subject->setCss('p { margin: 1px !important; } p { margin: 2px; }');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
-            '<p style="margin: 1px;">',
-            $result
-        );
+        static::assertContains('<p style="margin: 1px;">', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyAppliesLaterShorthandStyleAfterIndividualStyle()
+    {
+        $this->setSubjectBoilerplateHtml();
+        $this->subject->setCss('p { margin-top: 1px; } p { margin: 2px; }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<p style="margin-top: 1px; margin: 2px;">', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyAppliesLaterOverridingStyleAfterStyleAfterOverriddenStyle()
+    {
+        $this->setSubjectBoilerplateHtml();
+        $this->subject->setCss('p { margin-top: 1px; } p { margin: 2px; } p { margin-top: 3px; }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<p style="margin: 2px; margin-top: 3px;">', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyAppliesInlineOverridingStyleAfterCssStyleAfterOverriddenCssStyle()
+    {
+        $this->setSubjectBoilerplateHtml('margin-top: 3px;');
+        $this->subject->setCss('p { margin-top: 1px; } p { margin: 2px; }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<p style="margin: 2px; margin-top: 3px;">', $result);
+    }
+
+    /**
+     * @test
+     */
+    public function emogrifyAppliesLaterInlineOverridingStyleAfterEarlierInlineStyle()
+    {
+        $this->setSubjectBoilerplateHtml('margin: 2px; margin-top: 3px;');
+        $this->subject->setCss('p { margin-top: 1px; }');
+
+        $result = $this->subject->emogrify();
+
+        static::assertContains('<p style="margin: 2px; margin-top: 3px;">', $result);
     }
 
     /**
@@ -1763,7 +2513,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains($uselessQuery, $result);
+        static::assertNotContains('@media', $result);
     }
 
     /**
@@ -1777,7 +2527,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains($usefulQuery, $result);
+        static::assertContainsCss($usefulQuery, $result);
     }
 
     /**
@@ -1785,16 +2535,12 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     public function importantStyleRuleFromInlineCssOverwritesImportantStyleRuleFromExternalCss()
     {
-        $this->subject->setHtml(
-            '<html><head</head><body>' .
-            '<p style="margin: 2px !important; text-align: center;">some content</p>' .
-            '</body></html>'
-        );
+        $this->setSubjectBoilerplateHtml('margin: 2px !important; text-align: center;');
         $this->subject->setCss('p { margin: 1px !important; padding: 1px;}');
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="padding: 1px; text-align: center; margin: 2px;">', $result);
+        static::assertContains('<p style="padding: 1px; text-align: center; margin: 2px;">', $result);
     }
 
     /**
@@ -1808,7 +2554,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $this->subject->addExcludedSelector('p.x');
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p class="x"></p>', $result);
+        static::assertContains('<p class="x"></p>', $result);
     }
 
     /**
@@ -1822,7 +2568,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $this->subject->addExcludedSelector(' p.x ');
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p class="x"></p>', $result);
+        static::assertContains('<p class="x"></p>', $result);
     }
 
     /**
@@ -1836,7 +2582,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $this->subject->addExcludedSelector('p.x');
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="margin: 0;"></p>', $result);
+        static::assertContains('<p style="margin: 0;"></p>', $result);
     }
 
     /**
@@ -1852,7 +2598,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p class="x" style="margin: 0;"></p>', $result);
+        static::assertContains('<p class="x" style="margin: 0;"></p>', $result);
     }
 
     /**
@@ -1860,7 +2606,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      *
      * @expectedException \InvalidArgumentException
      */
-    public function emogrifyInDebugModeThrowsInvalidArgumentExceptionForInvalidExcludedSelector()
+    public function emogrifyInDebugModeForInvalidExcludedSelectorThrowsException()
     {
         $this->subject->setDebug(true);
 
@@ -1882,7 +2628,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p class="x"></p>', $result);
+        static::assertContains('<p class="x"></p>', $result);
     }
 
     /**
@@ -1900,9 +2646,9 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p class="x"></p>', $result);
-        self::assertContains('<p class="y" style="color: red;"></p>', $result);
-        self::assertContains('<p class="z"></p>', $result);
+        static::assertContains('<p class="x"></p>', $result);
+        static::assertContains('<p class="y" style="color: red;"></p>', $result);
+        static::assertContains('<p class="z"></p>', $result);
     }
 
     /**
@@ -1916,7 +2662,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertNotContains($emptyQuery, $result);
+        static::assertNotContains('@media', $result);
     }
 
     /**
@@ -1938,10 +2684,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertSame(
-            1,
-            substr_count($result, '<style type="text/css">' . $css . '</style>')
-        );
+        static::assertContainsCssCount(1, $css, $result);
     }
 
     /**
@@ -1963,10 +2706,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertSame(
-            1,
-            substr_count($result, '<style type="text/css">' . $css . '</style>')
-        );
+        static::assertContainsCssCount(1, $css, $result);
     }
 
     /**
@@ -1992,10 +2732,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertSame(
-            1,
-            substr_count($result, '<style type="text/css">' . $css . '</style>')
-        );
+        static::assertContainsCssCount(1, $css, $result);
     }
 
     /**
@@ -2013,7 +2750,9 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $dataUriMediaType
+     *
      * @dataProvider dataUriMediaTypeDataProvider
      */
     public function dataUrisAreConserved($dataUriMediaType)
@@ -2030,7 +2769,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains(
+        static::assertContains(
             '<html style="' . $styleRule . '">',
             $result
         );
@@ -2107,6 +2846,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $body The HTML
      * @param string $css The complete CSS
      * @param string $tagName The name of the tag that should be modified
@@ -2122,7 +2862,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $this->subject->enableCssToHtmlMapping();
         $html = $this->subject->emogrify();
 
-        self::assertRegExp('/<' . preg_quote($tagName, '/') . '[^>]+' . preg_quote($attributes, '/') . '/', $html);
+        static::assertRegExp('/<' . \preg_quote($tagName, '/') . '[^>]+' . \preg_quote($attributes, '/') . '/', $html);
     }
 
     /**
@@ -2164,6 +2904,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @test
+     *
      * @param string $body the HTML
      * @param string $css the complete CSS
      * @param string $attribute the attribute that must not be present on this element
@@ -2178,8 +2919,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         $this->subject->enableCssToHtmlMapping();
         $html = $this->subject->emogrify();
 
-        self::assertNotContains(
-            $attribute . '="',
+        static::assertNotContains(
+            $attribute . '=',
             $html
         );
     }
@@ -2194,8 +2935,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $html = $this->subject->emogrify();
 
-        self::assertNotContains(
-            '<img align="right',
+        static::assertNotContains(
+            'align=',
             $html
         );
     }
@@ -2210,7 +2951,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $html = $this->subject->emogrify();
 
-        self::assertContains('<div></div>', $html);
+        static::assertContains('<div></div>', $html);
     }
 
     /**
@@ -2224,24 +2965,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="padding: 10px; padding-left: 20px;">', $result);
-    }
-
-    /**
-     * @test
-     */
-    public function emogrifyMovesStyleElementFromHeadToBody()
-    {
-        $style = '<style type="text/css">@media all { html {  color: red; } }</style>';
-        $html = '<html><head>' . $style . '</head></html>';
-        $this->subject->setHtml($html);
-
-        $result = $this->subject->emogrify();
-
-        self::assertContains(
-            '<body>' . $style . '</body>',
-            $result
-        );
+        static::assertContains('<p style="padding: 10px; padding-left: 20px;">', $result);
     }
 
     /**
@@ -2253,8 +2977,8 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      */
     private function assertHtmlStringContainsTagWithAttribute($html, $tagName, $attribute)
     {
-        self::assertTrue(
-            preg_match('/<' . preg_quote($tagName, '/') . '[^>]+' . preg_quote($attribute, '/') . '/', $html) > 0
+        static::assertTrue(
+            \preg_match('/<' . \preg_quote($tagName, '/') . '[^>]+' . \preg_quote($attribute, '/') . '/', $html) > 0
         );
     }
 
@@ -2286,7 +3010,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p class="autoWidth" style="width: auto;">', $result);
+        static::assertContains('<p class="autoWidth" style="width: auto;">', $result);
     }
 
     /**
@@ -2297,43 +3021,43 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
         return [
             'one !important rule only' => [
                 'width: 1px !important',
-                'width: 1px;'
+                'width: 1px;',
             ],
             'multiple !important rules only' => [
                 'width: 1px !important; height: 1px !important',
-                'width: 1px; height: 1px;'
+                'width: 1px; height: 1px;',
             ],
             'multiple declarations, one !important rule at the beginning' => [
                 'width: 1px !important; height: 1px; color: red',
-                'height: 1px; color: red; width: 1px;'
+                'height: 1px; color: red; width: 1px;',
             ],
             'multiple declarations, one !important rule somewhere in the middle' => [
                 'height: 1px; width: 1px !important; color: red',
-                'height: 1px; color: red; width: 1px;'
+                'height: 1px; color: red; width: 1px;',
             ],
             'multiple declarations, one !important rule at the end' => [
                 'height: 1px; color: red; width: 1px !important',
-                'height: 1px; color: red; width: 1px;'
+                'height: 1px; color: red; width: 1px;',
             ],
             'multiple declarations, multiple !important rules at the beginning' => [
                 'width: 1px !important; height: 1px !important; color: red; float: left',
-                'color: red; float: left; width: 1px; height: 1px;'
+                'color: red; float: left; width: 1px; height: 1px;',
             ],
             'multiple declarations, multiple consecutive !important rules somewhere in the middle (#1)' => [
                 'color: red; width: 1px !important; height: 1px !important; float: left',
-                'color: red; float: left; width: 1px; height: 1px;'
+                'color: red; float: left; width: 1px; height: 1px;',
             ],
             'multiple declarations, multiple consecutive !important rules somewhere in the middle (#2)' => [
                 'color: red; width: 1px !important; height: 1px !important; float: left; clear: both',
-                'color: red; float: left; clear: both; width: 1px; height: 1px;'
+                'color: red; float: left; clear: both; width: 1px; height: 1px;',
             ],
             'multiple declarations, multiple not consecutive !important rules somewhere in the middle' => [
                 'color: red; width: 1px !important; clear: both; height: 1px !important; float: left',
-                'color: red; clear: both; float: left; width: 1px; height: 1px;'
+                'color: red; clear: both; float: left; width: 1px; height: 1px;',
             ],
             'multiple declarations, multiple !important rules at the end' => [
                 'color: red; float: left; width: 1px !important; height: 1px !important',
-                'color: red; float: left; width: 1px; height: 1px;'
+                'color: red; float: left; width: 1px; height: 1px;',
             ],
         ];
     }
@@ -2354,7 +3078,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        self::assertContains('<p style="' . $expectedStyleAttributeContent . '">', $result);
+        static::assertContains('<p style="' . $expectedStyleAttributeContent . '">', $result);
     }
 
     /**
@@ -2362,7 +3086,7 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
      *
      * @expectedException \InvalidArgumentException
      */
-    public function emogrifyInDebugModeThrowsInvalidArgumentExceptionForInvalidSelectorsInMediaQueryBlocks()
+    public function emogrifyInDebugModeForInvalidSelectorsInMediaQueryBlocksThrowsException()
     {
         $this->subject->setDebug(true);
 
@@ -2385,6 +3109,6 @@ class EmogrifierTest extends \PHPUnit_Framework_TestCase
 
         $result = $this->subject->emogrify();
 
-        $this->assertContains($css, $result);
+        static::assertContainsCss($css, $result);
     }
 }

@@ -4,18 +4,25 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
+class ComposerStaticInit02a8343e65882e99a896e06053e9a421
 {
     public static $files = array (
-        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
+        '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => __DIR__ . '/..' . '/symfony/polyfill-mbstring/bootstrap.php',
         '5255c38a0faeba867671b61dfda6d864' => __DIR__ . '/..' . '/paragonie/random_compat/lib/random.php',
         '023d27dca8066ef29e6739335ea73bad' => __DIR__ . '/..' . '/symfony/polyfill-php70/bootstrap.php',
         'e40631d46120a9c38ea139981f8dab26' => __DIR__ . '/..' . '/ircmaxell/password-compat/lib/password.php',
         'edc6464955a37aa4d5fbf39d40fb6ee7' => __DIR__ . '/..' . '/symfony/polyfill-php55/bootstrap.php',
         '3e2471375464aac821502deb0ac64275' => __DIR__ . '/..' . '/symfony/polyfill-php54/bootstrap.php',
         '25072dd6e2470089de65ae7bf11d3109' => __DIR__ . '/..' . '/symfony/polyfill-php72/bootstrap.php',
-        '34901568a1e26d13dd475cb2c85e0284' => __DIR__ . '/..' . '/zendframework/zend-form/autoload/formElementManagerPolyfill.php',
+        'cf97c57bfe0f23854afd2f3818abb7a0' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/create_uploaded_file.php',
+        '9bf37a3d0dad93e29cb4e1b1bfab04e9' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/marshal_headers_from_sapi.php',
+        'ce70dccb4bcc2efc6e94d2ee526e6972' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/marshal_method_from_sapi.php',
+        'f86420df471f14d568bfcb71e271b523' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/marshal_protocol_version_from_sapi.php',
+        'b87481e008a3700344428ae089e7f9e5' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/marshal_uri_from_sapi.php',
+        '0b0974a5566a1077e4f2e111341112c1' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/normalize_server.php',
+        '1ca3bc274755662169f9629d5412a1da' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/normalize_uploaded_files.php',
+        '40360c0b9b437e69bcbb7f1349ce029e' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/parse_cookie_header.php',
         '3a505b5f7faaefce1a399e528c23742b' => __DIR__ . '/..' . '/zendframework/zend-mvc/src/autoload.php',
         '07ec02c7e667fdcb3e30c02cc772b743' => __DIR__ . '/..' . '/magento/framework/registration.php',
         '6c89c3a060d2d522c8a81f44a7918e32' => __DIR__ . '/..' . '/magento/module-sales-sequence/registration.php',
@@ -56,10 +63,12 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         '53814a716d73013b1489c928a2cb4164' => __DIR__ . '/..' . '/magento/module-shipping/registration.php',
         '108fd301b720a30c9ec42a785ee00656' => __DIR__ . '/..' . '/magento/module-gift-message/registration.php',
         '08592fdd5b9e829727a7db2f953d82b2' => __DIR__ . '/..' . '/magento/module-vault/registration.php',
+        '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
         '19b03cc33c349b5e5fbc6577c2f9dc87' => __DIR__ . '/..' . '/magento/module-catalog-url-rewrite/registration.php',
         '44e7790b83e1936666da9a3a94daac39' => __DIR__ . '/..' . '/magento/module-downloadable/registration.php',
         'ff4a42fb48f753f6d1e6177223059e3d' => __DIR__ . '/..' . '/magento/module-msrp/registration.php',
+        '9b847ffefadc507b5f1aa851d341f914' => __DIR__ . '/..' . '/magento/module-captcha/registration.php',
         'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
         '3ce6447b6ef8a0e6e2a3cec20fba30e3' => __DIR__ . '/..' . '/magento/module-instant-purchase/registration.php',
         '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
@@ -77,6 +86,7 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         '2d0debaab8ec34dfba214036a43af24e' => __DIR__ . '/..' . '/magento/module-url-rewrite/registration.php',
         '9d3c0cffdf7ae2ab7dc3179a4aeef794' => __DIR__ . '/..' . '/magento/module-checkout-agreements/registration.php',
         'b2a251005c112dee4a8e7f7580a475f5' => __DIR__ . '/..' . '/magento/module-cookie/registration.php',
+        '34901568a1e26d13dd475cb2c85e0284' => __DIR__ . '/..' . '/zendframework/zend-form/autoload/formElementManagerPolyfill.php',
         'cf44f9b1253939f955772534aabbf624' => __DIR__ . '/..' . '/magento/module-grouped-product/registration.php',
         '814a46999bb03138827ea41c6c97733f' => __DIR__ . '/..' . '/magento/module-product-alert/registration.php',
         '157e241791c95df2d41c00e4314f115e' => __DIR__ . '/..' . '/magento/module-search/registration.php',
@@ -92,14 +102,6 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         '61d0a92e63ed94984ecdc51c7a060d96' => __DIR__ . '/..' . '/magento/module-offline-shipping/registration.php',
         'f0a367f3327072458afd08ec8891b227' => __DIR__ . '/..' . '/magento/module-google-analytics/registration.php',
         'decc78cc4436b1292c6c0d151b19445c' => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib/bootstrap.php',
-        'cf97c57bfe0f23854afd2f3818abb7a0' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/create_uploaded_file.php',
-        '9bf37a3d0dad93e29cb4e1b1bfab04e9' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/marshal_headers_from_sapi.php',
-        'ce70dccb4bcc2efc6e94d2ee526e6972' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/marshal_method_from_sapi.php',
-        'f86420df471f14d568bfcb71e271b523' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/marshal_protocol_version_from_sapi.php',
-        'b87481e008a3700344428ae089e7f9e5' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/marshal_uri_from_sapi.php',
-        '0b0974a5566a1077e4f2e111341112c1' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/normalize_server.php',
-        '1ca3bc274755662169f9629d5412a1da' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/normalize_uploaded_files.php',
-        '40360c0b9b437e69bcbb7f1349ce029e' => __DIR__ . '/..' . '/zendframework/zend-diactoros/src/functions/parse_cookie_header.php',
         'de1a3b54687292d8e2d1a62f46195bf7' => __DIR__ . '/..' . '/magento/module-deploy/cli_commands.php',
         '6ee1cd128090ab96a8b44cf40b66dcb4' => __DIR__ . '/..' . '/magento/module-deploy/registration.php',
         '87bb82aba4e6954227316088ec049d42' => __DIR__ . '/..' . '/magento/module-translation/registration.php',
@@ -159,7 +161,6 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         '49be64f161d7f7e3617b7936edeeb6d3' => __DIR__ . '/..' . '/magento/module-catalog-widget/registration.php',
         'f4f69bd33414e7f1f59bdac584820374' => __DIR__ . '/..' . '/magento/module-catalog-rule-configurable/registration.php',
         'fbde087476e8a7fd20ef89a7f2886cd9' => __DIR__ . '/..' . '/magento/module-catalog-analytics/registration.php',
-        '9b847ffefadc507b5f1aa851d341f914' => __DIR__ . '/..' . '/magento/module-captcha/registration.php',
         '9e0caea6fa38df38076224e2c284a06d' => __DIR__ . '/..' . '/magento/module-cache-invalidate/registration.php',
         '3f7befdb3fd10d6e2a914b0320605b6e' => __DIR__ . '/..' . '/magento/module-bundle-import-export/registration.php',
         '8bdf0196411074f729314d3aa8a79d2c' => __DIR__ . '/..' . '/magento/module-braintree/registration.php',
@@ -197,7 +198,9 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
             'Zend\\Psr7Bridge\\' => 16,
             'Zend\\Mvc\\' => 9,
             'Zend\\ModuleManager\\' => 19,
+            'Zend\\Mime\\' => 10,
             'Zend\\Math\\' => 10,
+            'Zend\\Mail\\' => 10,
             'Zend\\Log\\' => 9,
             'Zend\\Loader\\' => 12,
             'Zend\\Json\\' => 10,
@@ -229,6 +232,7 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         ),
         'T' => 
         array (
+            'TrueBV\\' => 7,
             'Temando\\Shipping\\' => 17,
         ),
         'S' => 
@@ -459,6 +463,7 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
             'Composer\\Semver\\' => 16,
             'Composer\\CaBundle\\' => 18,
             'Composer\\' => 9,
+            'Codeception\\PHPUnit\\' => 20,
             'Codeception\\Extension\\' => 22,
             'Codeception\\' => 12,
         ),
@@ -542,9 +547,17 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         array (
             0 => __DIR__ . '/..' . '/zendframework/zend-modulemanager/src',
         ),
+        'Zend\\Mime\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/zendframework/zend-mime/src',
+        ),
         'Zend\\Math\\' => 
         array (
             0 => __DIR__ . '/..' . '/zendframework/zend-math/src',
+        ),
+        'Zend\\Mail\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/zendframework/zend-mail/src',
         ),
         'Zend\\Log\\' => 
         array (
@@ -633,6 +646,10 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         'Vertex\\' => 
         array (
             0 => __DIR__ . '/..' . '/vertex/sdk/src',
+        ),
+        'TrueBV\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/true/punycode/src',
         ),
         'Temando\\Shipping\\' => 
         array (
@@ -764,7 +781,7 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         ),
         'Pelago\\' => 
         array (
-            0 => __DIR__ . '/..' . '/pelago/emogrifier/Classes',
+            0 => __DIR__ . '/..' . '/pelago/emogrifier/src',
         ),
         'PDepend\\' => 
         array (
@@ -1398,6 +1415,10 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
         'Composer\\' => 
         array (
             0 => __DIR__ . '/..' . '/composer/composer/src/Composer',
+        ),
+        'Codeception\\PHPUnit\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/codeception/phpunit-wrapper/src',
         ),
         'Codeception\\Extension\\' => 
         array (
@@ -2148,11 +2169,11 @@ class ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit7c95414c6e60c0262c9e3d50d126fa2d::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$classMap;
 
         }, null, ClassLoader::class);
     }
