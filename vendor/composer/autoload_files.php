@@ -7,6 +7,7 @@ $baseDir = dirname($vendorDir);
 
 return array(
     '320cde22f66dd4f5d3fd621d3e88b98f' => $vendorDir . '/symfony/polyfill-ctype/bootstrap.php',
+    '0e6d7bf4a5811bfa5cf40c5ccd6fae6a' => $vendorDir . '/symfony/polyfill-mbstring/bootstrap.php',
     '07ec02c7e667fdcb3e30c02cc772b743' => $vendorDir . '/magento/framework/registration.php',
     '84c81d78e866655512cb7e51abfb2dc2' => $vendorDir . '/magento/module-media-storage/registration.php',
     '8751700fbc137cc374c0c964e6f7a3d1' => $vendorDir . '/magento/module-config/registration.php',
