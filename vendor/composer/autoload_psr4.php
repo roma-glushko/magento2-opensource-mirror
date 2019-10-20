@@ -90,6 +90,7 @@ return array(
     'Magento\\SalesInventory\\' => array($vendorDir . '/magento/module-sales-inventory'),
     'Magento\\Rule\\' => array($vendorDir . '/magento/module-rule'),
     'Magento\\Rss\\' => array($vendorDir . '/magento/module-rss'),
+    'Magento\\Robots\\' => array($vendorDir . '/magento/module-robots'),
     'Magento\\Review\\' => array($vendorDir . '/magento/module-review'),
     'Magento\\RequireJs\\' => array($vendorDir . '/magento/module-require-js'),
     'Magento\\Reports\\' => array($vendorDir . '/magento/module-reports'),
