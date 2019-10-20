@@ -10,7 +10,7 @@ use Magento\Store\Model\ScopeInterface;
 use Magento\Theme\Ui\Component\Listing\Column\EditAction;
 
 /**
- * Unit tests for  \Magento\Theme\Ui\Component\Listing\Column\EditAction.
+ * Class EditActionTest
  */
 class EditActionTest extends \PHPUnit\Framework\TestCase
 {

@@ -33,6 +33,7 @@ class Zip extends Csv
             throw new ValidatorException(__('Sorry, but the data is invalid or the file is not uploaded.'));
         }
         $directory->delete($directory->getRelativePath($file));
+
         try {
             parent::__construct($csvFile, $directory, $options);
         } catch (\LogicException $e) {

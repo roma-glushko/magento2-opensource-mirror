@@ -1,18 +1,19 @@
 <?php
 /**
+ * Import entity of downloadable product type
+ *
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\DownloadableImportExport\Model\Import\Product\Type;
 
 use Magento\CatalogImportExport\Model\Import\Product as ImportProduct;
 use Magento\Downloadable\Model\Url\DomainValidator;
 use Magento\Framework\EntityManager\MetadataPool;
-use Magento\Store\Model\Store;
+use \Magento\Store\Model\Store;
 
 /**
- * Import entity of downloadable product type.
+ * Class Downloadable
  *
  * @SuppressWarnings(PHPMD.TooManyFields)
  */
@@ -102,10 +103,11 @@ class Downloadable extends \Magento\CatalogImportExport\Model\Import\Product\Typ
     const ERROR_COLS_IS_EMPTY = 'emptyOptions';
 
     private const ERROR_LINK_URL_NOT_IN_DOMAIN_WHITELIST = 'linkUrlNotInDomainWhitelist';
+
     private const ERROR_SAMPLE_URL_NOT_IN_DOMAIN_WHITELIST = 'sampleUrlNotInDomainWhitelist';
 
     /**
-     * Validation failure message template definitions.
+     * Validation failure message template definitions
      *
      * @var array
      */
@@ -344,7 +346,7 @@ class Downloadable extends \Magento\CatalogImportExport\Model\Import\Product\Typ
     }
 
     /**
-     * Validation sample options.
+     * Validation sample options
      *
      * @param array $rowData
      * @return bool
@@ -385,7 +387,7 @@ class Downloadable extends \Magento\CatalogImportExport\Model\Import\Product\Typ
     }
 
     /**
-     * Validation links option.
+     * Validation links option
      *
      * @param array $rowData
      * @return bool

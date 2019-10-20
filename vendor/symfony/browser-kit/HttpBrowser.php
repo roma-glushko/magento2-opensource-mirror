@@ -23,6 +23,8 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
  * to make real HTTP requests.
  *
  * @author Fabien Potencier <fabien@symfony.com>
+ *
+ * @final
  */
 class HttpBrowser extends AbstractBrowser
 {
@@ -30,7 +32,7 @@ class HttpBrowser extends AbstractBrowser
 
     public function __construct(HttpClientInterface $client = null, History $history = null, CookieJar $cookieJar = null)
     {
-        if (!$client && !class_exists(HttpClient::class)) {
+        if (!class_exists(HttpClient::class)) {
             throw new \LogicException(sprintf('You cannot use "%s" as the HttpClient component is not installed. Try running "composer require symfony/http-client".', __CLASS__));
         }
 

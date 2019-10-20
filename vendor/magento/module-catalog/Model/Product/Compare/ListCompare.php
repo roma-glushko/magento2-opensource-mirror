@@ -68,6 +68,7 @@ class ListCompare extends \Magento\Framework\DataObject
      * @param \Magento\Customer\Model\Session $customerSession
      * @param \Magento\Customer\Model\Visitor $customerVisitor
      * @param array $data
+     * @param ProductRepository|null $productRepository
      */
     public function __construct(
         \Magento\Catalog\Model\Product\Compare\ItemFactory $compareItemFactory,
@@ -75,14 +76,15 @@ class ListCompare extends \Magento\Framework\DataObject
         \Magento\Catalog\Model\ResourceModel\Product\Compare\Item $catalogProductCompareItem,
         \Magento\Customer\Model\Session $customerSession,
         \Magento\Customer\Model\Visitor $customerVisitor,
-        array $data = []
+        array $data = [],
+        ProductRepository $productRepository = null
     ) {
         $this->_compareItemFactory = $compareItemFactory;
         $this->_itemCollectionFactory = $itemCollectionFactory;
         $this->_catalogProductCompareItem = $catalogProductCompareItem;
         $this->_customerSession = $customerSession;
         $this->_customerVisitor = $customerVisitor;
-        $this->productRepository = ObjectManager::getInstance()->get(ProductRepository::class);
+        $this->productRepository = $productRepository ?: ObjectManager::getInstance()->create(ProductRepository::class);
         parent::__construct($data);
     }
 

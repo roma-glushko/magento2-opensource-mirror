@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\Validator;
@@ -24,13 +26,11 @@ class IsFloat extends AbstractValidator
     const NOT_FLOAT = 'notFloat';
 
     /**
-     * Validation failure message template definitions
-     *
-     * @var string[]
+     * @var array
      */
     protected $messageTemplates = [
-        self::INVALID   => 'Invalid type given. String, integer or float expected',
-        self::NOT_FLOAT => 'The input does not appear to be a float',
+        self::INVALID   => "Invalid type given. String, integer or float expected",
+        self::NOT_FLOAT => "The input does not appear to be a float",
     ];
 
     /**
@@ -67,7 +67,7 @@ class IsFloat extends AbstractValidator
             $options = ArrayUtils::iteratorToArray($options);
         }
 
-        if (isset($options['locale'])) {
+        if (array_key_exists('locale', $options)) {
             $this->setLocale($options['locale']);
         }
 
@@ -91,7 +91,7 @@ class IsFloat extends AbstractValidator
      * Sets the locale to use
      *
      * @param string|null $locale
-     * @return $this
+     * @return Float
      */
     public function setLocale($locale)
     {
@@ -101,9 +101,9 @@ class IsFloat extends AbstractValidator
 
     /**
      * Returns true if and only if $value is a floating-point value. Uses the formal definition of a float as described
-     * in the PHP manual: {@link https://www.php.net/float}
+     * in the PHP manual: {@link http://www.php.net/float}
      *
-     * @param  float|int|string $value
+     * @param  string $value
      * @return bool
      * @throws Exception\InvalidArgumentException
      */
@@ -151,15 +151,15 @@ class IsFloat extends AbstractValidator
         $decSeparator   = $formatter->getSymbol(NumberFormatter::DECIMAL_SEPARATOR_SYMBOL);
 
         //NO-BREAK SPACE and ARABIC THOUSANDS SEPARATOR
-        if ($groupSeparator === "\xC2\xA0") {
+        if ($groupSeparator == "\xC2\xA0") {
             $value = str_replace(' ', $groupSeparator, $value);
-        } elseif ($groupSeparator === "\xD9\xAC") {
+        } elseif ($groupSeparator == "\xD9\xAC") {
             //NumberFormatter doesn't have grouping at all for Arabic-Indic
             $value = str_replace(['\'', $groupSeparator], '', $value);
         }
 
         //ARABIC DECIMAL SEPARATOR
-        if ($decSeparator === "\xD9\xAB") {
+        if ($decSeparator == "\xD9\xAB") {
             $value = str_replace(',', $decSeparator, $value);
         }
 
@@ -214,7 +214,7 @@ class IsFloat extends AbstractValidator
          *       the integer and decimal notations so add that.  This also checks
          *       that a grouping sperator is not in the last GROUPING_SIZE graphemes
          *       of the string - i.e. 10,6 is not valid for en-US.
-         * @see https://www.php.net/float
+         * @see http://www.php.net/float
          */
 
         $lnum    = '[' . $numberRange . ']+';
@@ -233,7 +233,9 @@ class IsFloat extends AbstractValidator
 
         // No strrpos() in wrappers yet. ICU 4.x doesn't have grouping size for
         // everything. ICU 52 has 3 for ALL locales.
-        $groupSize = $formatter->getAttribute(NumberFormatter::GROUPING_SIZE) ?: 3;
+        $groupSize = ($formatter->getAttribute(NumberFormatter::GROUPING_SIZE))
+            ? $formatter->getAttribute(NumberFormatter::GROUPING_SIZE)
+            : 3;
         $lastStringGroup = $this->wrapper->substr($value, -$groupSize);
 
         if ((preg_match($lnumSearch, $unGroupedValue)

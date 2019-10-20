@@ -1,8 +1,11 @@
 <?php
+
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\View\Helper;
@@ -75,12 +78,12 @@ class NumberFormat extends AbstractHelper
     /**
      * Format a number
      *
-     * @param  int|float   $number
-     * @param  int|null    $formatStyle
-     * @param  int|null    $formatType
-     * @param  string|null $locale
-     * @param  int|null    $decimals
-     * @param  array|null  $textAttributes
+     * @param  int|float $number
+     * @param  int       $formatStyle
+     * @param  int       $formatType
+     * @param  string    $locale
+     * @param  int       $decimals
+     * @param  array|null $textAttributes
      * @return string
      */
     public function __invoke(
@@ -136,7 +139,7 @@ class NumberFormat extends AbstractHelper
      * Set format style to use instead of the default
      *
      * @param  int $formatStyle
-     * @return $this
+     * @return NumberFormat
      */
     public function setFormatStyle($formatStyle)
     {
@@ -162,7 +165,7 @@ class NumberFormat extends AbstractHelper
      * Set format type to use instead of the default
      *
      * @param  int $formatType
-     * @return $this
+     * @return NumberFormat
      */
     public function setFormatType($formatType)
     {
@@ -187,7 +190,7 @@ class NumberFormat extends AbstractHelper
      * Set number of decimals to use instead of the default.
      *
      * @param  int $decimals
-     * @return $this
+     * @return NumberFormat
      */
     public function setDecimals($decimals)
     {
@@ -209,7 +212,7 @@ class NumberFormat extends AbstractHelper
      * Set locale to use instead of the default.
      *
      * @param  string $locale
-     * @return $this
+     * @return NumberFormat
      */
     public function setLocale($locale)
     {
@@ -220,7 +223,7 @@ class NumberFormat extends AbstractHelper
     /**
      * Get the locale to use
      *
-     * @return string
+     * @return string|null
      */
     public function getLocale()
     {
@@ -241,7 +244,7 @@ class NumberFormat extends AbstractHelper
 
     /**
      * @param array $textAttributes
-     * @return $this
+     * @return NumberFormat
      */
     public function setTextAttributes(array $textAttributes)
     {

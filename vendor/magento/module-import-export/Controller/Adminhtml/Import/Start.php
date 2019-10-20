@@ -49,7 +49,7 @@ class Start extends ImportResultController implements HttpPostActionInterface
         \Magento\ImportExport\Helper\Report $reportHelper,
         Import $importModel,
         \Magento\Framework\Message\ExceptionMessageFactoryInterface $exceptionMessageFactory,
-        Import\ImageDirectoryBaseProvider $imageDirectoryBaseProvider = null
+        ?Import\ImageDirectoryBaseProvider $imageDirectoryBaseProvider = null
     ) {
         parent::__construct($context, $reportProcessor, $historyModel, $reportHelper);
 

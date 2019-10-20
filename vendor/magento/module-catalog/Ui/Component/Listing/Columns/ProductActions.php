@@ -60,7 +60,7 @@ class ProductActions extends Column
                     ),
                     'label' => __('Edit'),
                     'hidden' => false,
-                    '__disableTmpl' => true,
+                    '__disableTmpl' => true
                 ];
             }
         }

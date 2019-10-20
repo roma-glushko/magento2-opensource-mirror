@@ -22,8 +22,6 @@ use Magento\Backend\App\Area\FrontNameResolver;
 
 /**
  * Adding base url as allowed downloadable domain.
- *
- * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class AddDownloadableHostsConfig implements DataPatchInterface
 {
@@ -58,6 +56,8 @@ class AddDownloadableHostsConfig implements DataPatchInterface
     private $whitelist = [];
 
     /**
+     * AddDownloadableHostsConfig constructor.
+     *
      * @param UriHandler $uriHandler
      * @param ScopeResolverInterface $scopeResolver
      * @param ScopeConfigInterface $scopeConfig
@@ -83,21 +83,72 @@ class AddDownloadableHostsConfig implements DataPatchInterface
      */
     public function apply()
     {
-        $this->resolveScopeUrls();
-        $this->resolveCustomAdminUrl();
-        $this->resolveDownloadableLinkUrls();
-        $this->resolveDownloadableSampleUrls();
+        $customStoreScope = $this->scopeResolver->getScope(Custom::CONFIG_SCOPE_ID);
+        $storeScopes = $this->scopeResolver->getScopes();
+        $allStoreScopes = array_merge($storeScopes, [$customStoreScope]);
+
+        foreach ($allStoreScopes as $scope) {
+            $this->addStoreAndWebsiteUrlsFromScope($scope);
+        }
+
+        $customAdminUrl = $this->scopeConfig->getValue(
+            FrontNameResolver::XML_PATH_CUSTOM_ADMIN_URL,
+            ScopeInterface::SCOPE_STORE
+        );
+
+        if ($customAdminUrl) {
+            $this->addHost($customAdminUrl);
+        }
+
+        if ($this->moduleDataSetup->tableExists('downloadable_link')) {
+            $select = $this->moduleDataSetup->getConnection()
+                ->select()
+                ->from(
+                    $this->moduleDataSetup->getTable('downloadable_link'),
+                    ['link_url']
+                )
+                ->where('link_type = ?', 'url');
+
+            foreach ($this->moduleDataSetup->getConnection()->fetchAll($select) as $link) {
+                $this->addHost($link['link_url']);
+            }
+
+            $select = $this->moduleDataSetup->getConnection()
+                ->select()
+                ->from(
+                    $this->moduleDataSetup->getTable('downloadable_link'),
+                    ['sample_url']
+                )
+                ->where('sample_type = ?', 'url');
+
+            foreach ($this->moduleDataSetup->getConnection()->fetchAll($select) as $link) {
+                $this->addHost($link['sample_url']);
+            }
+        }
+
+        if ($this->moduleDataSetup->tableExists('downloadable_sample')) {
+            $select = $this->moduleDataSetup->getConnection()
+                ->select()
+                ->from(
+                    $this->moduleDataSetup->getTable('downloadable_sample'),
+                    ['sample_url']
+                )
+                ->where('sample_type = ?', 'url');
+
+            foreach ($this->moduleDataSetup->getConnection()->fetchAll($select) as $link) {
+                $this->addHost($link['sample_url']);
+            }
+        }
 
         $this->domainManager->addDomains($this->whitelist);
     }
 
     /**
-     * Add stores and website urls from store scope.
+     * Add stores and website urls from store scope
      *
      * @param Store $scope
-     * @return void
      */
-    private function addStoreAndWebsiteUrlsFromScope(Store $scope): void
+    private function addStoreAndWebsiteUrlsFromScope(Store $scope)
     {
         $this->addHost($scope->getBaseUrl(UrlInterface::URL_TYPE_WEB, false));
         $this->addHost($scope->getBaseUrl(UrlInterface::URL_TYPE_WEB, true));
@@ -111,9 +162,7 @@ class AddDownloadableHostsConfig implements DataPatchInterface
         try {
             $this->addHost($scope->getBaseUrl(UrlInterface::URL_TYPE_STATIC, false));
             $this->addHost($scope->getBaseUrl(UrlInterface::URL_TYPE_STATIC, true));
-            // phpcs:ignore Magento2.CodeAnalysis.EmptyBlock.DetectedCatch
-        } catch (\UnexpectedValueException $e) {
-        }
+        } catch (\UnexpectedValueException $e) {} //@codingStandardsIgnoreLine
 
         try {
             $website = $scope->getWebsite();
@@ -134,12 +183,11 @@ class AddDownloadableHostsConfig implements DataPatchInterface
     }
 
     /**
-     * Add host to whitelist.
+     * Add host to whitelist
      *
-     * @param string|bool $url
-     * @return void
+     * @param string $url
      */
-    private function addHost($url): void
+    private function addHost($url)
     {
         if (!is_string($url)) {
             return;
@@ -165,91 +213,5 @@ class AddDownloadableHostsConfig implements DataPatchInterface
     public function getAliases()
     {
         return [];
-    }
-
-    /**
-     * Add urls from scope.
-     *
-     * @return void
-     */
-    private function resolveScopeUrls(): void
-    {
-        $customStoreScope = $this->scopeResolver->getScope(Custom::CONFIG_SCOPE_ID);
-        $storeScopes = $this->scopeResolver->getScopes();
-        $storeScopes[] = $customStoreScope;
-
-        foreach ($storeScopes as $scope) {
-            $this->addStoreAndWebsiteUrlsFromScope($scope);
-        }
-    }
-
-    /**
-     * Add custom admin url to whitelist.
-     *
-     * @return void
-     */
-    private function resolveCustomAdminUrl(): void
-    {
-        $customAdminUrl = $this->scopeConfig->getValue(
-            FrontNameResolver::XML_PATH_CUSTOM_ADMIN_URL,
-            ScopeInterface::SCOPE_STORE
-        );
-
-        if ($customAdminUrl) {
-            $this->addHost($customAdminUrl);
-        }
-    }
-
-    /**
-     * Add downloadable links urls to whitelist.
-     *
-     * @return void
-     */
-    private function resolveDownloadableLinkUrls(): void
-    {
-        if ($this->moduleDataSetup->tableExists('downloadable_link')) {
-            $select = $this->moduleDataSetup->getConnection()
-                ->select()
-                ->from(
-                    $this->moduleDataSetup->getTable('downloadable_link'),
-                    ['link_url', 'sample_url']
-                )
-                ->where('link_type = ? OR sample_type = ?', 'url');
-
-            $linkUrls = $this->moduleDataSetup->getConnection()->fetchAll($select);
-            foreach ($linkUrls as $url) {
-                if (!empty($url['link_url'])) {
-                    $this->addHost($url['link_url']);
-                }
-                if (!empty($url['sample_url'])) {
-                    $this->addHost($url['sample_url']);
-                }
-            }
-        }
-    }
-
-    /**
-     * Add downloadable sample urls to whitelist.
-     *
-     * @return void
-     */
-    private function resolveDownloadableSampleUrls(): void
-    {
-        if ($this->moduleDataSetup->tableExists('downloadable_sample')) {
-            $select = $this->moduleDataSetup->getConnection()
-                ->select()
-                ->from(
-                    $this->moduleDataSetup->getTable('downloadable_sample'),
-                    ['sample_url']
-                )
-                ->where('sample_type = ?', 'url');
-
-            $sampleUrls = $this->moduleDataSetup->getConnection()->fetchCol($select);
-            foreach ($sampleUrls as $url) {
-                if (!empty($url)) {
-                    $this->addHost($url);
-                }
-            }
-        }
     }
 }

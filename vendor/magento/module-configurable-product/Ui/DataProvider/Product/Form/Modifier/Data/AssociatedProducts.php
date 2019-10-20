@@ -215,7 +215,7 @@ class AssociatedProducts
                 'code' => $attribute['code'],
                 'label' => $attribute['label'],
                 'position' => $attribute['position'],
-                '__disableTmpl' => true,
+                '__disableTmpl' => true
             ];
 
             foreach ($attribute['chosen'] as $chosenOption) {
@@ -265,7 +265,7 @@ class AssociatedProducts
                                 'id' => $attribute->getAttributeId(),
                                 'position' => $configurableAttributes[$attribute->getAttributeId()]['position'],
                                 'chosen' => [],
-                                '__disableTmpl' => true,
+                                '__disableTmpl' => true
                             ];
                             foreach ($attribute->getOptions() as $option) {
                                 if (!empty($option->getValue())) {
@@ -275,7 +275,7 @@ class AssociatedProducts
                                         'id' => $option->getValue(),
                                         'label' => $option->getLabel(),
                                         'value' => $option->getValue(),
-                                        '__disableTmpl' => true,
+                                        '__disableTmpl' => true
                                     ];
                                 }
                             }
@@ -287,7 +287,7 @@ class AssociatedProducts
                             'id' => $optionId,
                             'label' => $variation[$attribute->getId()]['label'],
                             'value' => $optionId,
-                            '__disableTmpl' => true,
+                            '__disableTmpl' => true
                         ];
                         $variationOptions[] = $variationOption;
                         $attributes[$attribute->getAttributeId()]['chosen'][$optionId] = $variationOption;
@@ -313,7 +313,7 @@ class AssociatedProducts
                         'newProduct' => 0,
                         'attributes' => $this->getTextAttributes($variationOptions),
                         'thumbnail_image' => $this->imageHelper->init($product, 'product_thumbnail_image')->getUrl(),
-                        '__disableTmpl' => true,
+                        '__disableTmpl' => true
                     ];
                     $productIds[] = $product->getId();
                 }

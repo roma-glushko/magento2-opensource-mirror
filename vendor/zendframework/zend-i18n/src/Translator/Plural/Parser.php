@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\Translator\Plural;
@@ -41,7 +43,7 @@ class Parser
     /**
      * Table of symbols.
      *
-     * @var Symbol[]
+     * @var array
      */
     protected $symbolTable = [];
 
@@ -63,15 +65,13 @@ class Parser
     {
         // Ternary operators
         $this->registerSymbol('?', 20)->setLeftDenotationGetter(
-            // @codingStandardsIgnoreStart Generic.WhiteSpace.ScopeIndent.IncorrectExact
-            static function (Symbol $self, Symbol $left) {
+            function (Symbol $self, Symbol $left) {
                 $self->first  = $left;
                 $self->second = $self->parser->expression();
                 $self->parser->advance(':');
                 $self->third  = $self->parser->expression();
                 return $self;
             }
-            // @codingStandardsIgnoreEnd
         );
         $this->registerSymbol(':');
 
@@ -103,29 +103,23 @@ class Parser
 
         // Literals
         $this->registerSymbol('n')->setNullDenotationGetter(
-            // @codingStandardsIgnoreStart Generic.WhiteSpace.ScopeIndent.IncorrectExact
-            static function (Symbol $self) {
+            function (Symbol $self) {
                 return $self;
             }
-            // @codingStandardsIgnoreEnd
         );
         $this->registerSymbol('number')->setNullDenotationGetter(
-            // @codingStandardsIgnoreStart Generic.WhiteSpace.ScopeIndent.IncorrectExact
-            static function (Symbol $self) {
+            function (Symbol $self) {
                 return $self;
             }
-            // @codingStandardsIgnoreEnd
         );
 
         // Parentheses
         $this->registerSymbol('(')->setNullDenotationGetter(
-            // @codingStandardsIgnoreStart Generic.WhiteSpace.ScopeIndent.IncorrectExact
-            static function (Symbol $self) {
+            function (Symbol $self) {
                 $expression = $self->parser->expression();
                 $self->parser->advance(')');
                 return $expression;
             }
-            // @codingStandardsIgnoreEnd
         );
         $this->registerSymbol(')');
 
@@ -143,13 +137,11 @@ class Parser
     protected function registerLeftInfixSymbol($id, $leftBindingPower)
     {
         $this->registerSymbol($id, $leftBindingPower)->setLeftDenotationGetter(
-            // @codingStandardsIgnoreStart Generic.WhiteSpace.ScopeIndent.IncorrectExact
-            static function (Symbol $self, Symbol $left) use ($leftBindingPower) {
+            function (Symbol $self, Symbol $left) use ($leftBindingPower) {
                 $self->first  = $left;
                 $self->second = $self->parser->expression($leftBindingPower);
                 return $self;
             }
-            // @codingStandardsIgnoreEnd
         );
     }
 
@@ -163,13 +155,11 @@ class Parser
     protected function registerRightInfixSymbol($id, $leftBindingPower)
     {
         $this->registerSymbol($id, $leftBindingPower)->setLeftDenotationGetter(
-            // @codingStandardsIgnoreStart Generic.WhiteSpace.ScopeIndent.IncorrectExact
-            static function (Symbol $self, Symbol $left) use ($leftBindingPower) {
+            function (Symbol $self, Symbol $left) use ($leftBindingPower) {
                 $self->first  = $left;
                 $self->second = $self->parser->expression($leftBindingPower - 1);
                 return $self;
             }
-            // @codingStandardsIgnoreEnd
         );
     }
 
@@ -183,13 +173,11 @@ class Parser
     protected function registerPrefixSymbol($id, $leftBindingPower)
     {
         $this->registerSymbol($id, $leftBindingPower)->setNullDenotationGetter(
-            // @codingStandardsIgnoreStart Generic.WhiteSpace.ScopeIndent.IncorrectExact
-            static function (Symbol $self) use ($leftBindingPower) {
+            function (Symbol $self) use ($leftBindingPower) {
                 $self->first  = $self->parser->expression($leftBindingPower);
                 $self->second = null;
                 return $self;
             }
-            // @codingStandardsIgnoreEnd
         );
     }
 
@@ -220,7 +208,6 @@ class Parser
      * Get a new symbol.
      *
      * @param string $id
-     * @return Symbol
      */
     protected function getSymbol($id)
     {
@@ -288,7 +275,7 @@ class Parser
     /**
      * Get the next token.
      *
-     * @return Symbol
+     * @return array
      * @throws Exception\ParseException
      */
     protected function getNextToken()

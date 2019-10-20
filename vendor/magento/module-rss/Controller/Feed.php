@@ -6,9 +6,7 @@
 namespace Magento\Rss\Controller;
 
 /**
- * Class Feed.
- *
- * @SuppressWarnings(PHPMD.AllPurposeAction)
+ * Class Feed
  */
 abstract class Feed extends \Magento\Framework\App\Action\Action
 {

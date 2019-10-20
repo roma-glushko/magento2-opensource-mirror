@@ -1238,3 +1238,11 @@ HTML;
         return $domxpath->query('//div');
     }
 }
+
+class ClassThatInheritCrawler extends Crawler
+{
+    public function children()
+    {
+        parent::children();
+    }
+}

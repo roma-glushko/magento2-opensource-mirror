@@ -60,7 +60,7 @@ class BlockActionsTest extends \PHPUnit\Framework\TestCase
             BlockActions::class,
             [
                 'context' => $context,
-                'urlBuilder' => $this->urlBuilder,
+                'urlBuilder' => $this->urlBuilder
             ]
         );
 
@@ -104,7 +104,6 @@ class BlockActionsTest extends \PHPUnit\Framework\TestCase
                         'confirm' => [
                             'title' => __('Delete %1', $title),
                             'message' => __('Are you sure you want to delete a %1 record?', $title),
-                            '__disableTmpl' => true,
                         ],
                         'post' => true,
                         '__disableTmpl' => true,

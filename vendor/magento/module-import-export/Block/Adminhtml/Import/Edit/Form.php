@@ -56,7 +56,7 @@ class Form extends \Magento\Backend\Block\Widget\Form\Generic
         \Magento\ImportExport\Model\Source\Import\EntityFactory $entityFactory,
         \Magento\ImportExport\Model\Source\Import\Behavior\Factory $behaviorFactory,
         array $data = [],
-        Import\ImageDirectoryBaseProvider $imageDirProvider = null
+        ?Import\ImageDirectoryBaseProvider $imageDirProvider = null
     ) {
         $this->_entityFactory = $entityFactory;
         $this->_behaviorFactory = $behaviorFactory;

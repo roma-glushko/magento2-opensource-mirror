@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\Validator;
@@ -21,17 +23,17 @@ class Alnum extends AbstractValidator
      *
      * @var AlnumFilter
      */
-    protected static $filter;
+    protected static $filter = null;
 
     /**
      * Validation failure message template definitions
      *
-     * @var string[]
+     * @var array
      */
     protected $messageTemplates = [
-        self::INVALID      => 'Invalid type given. String, integer or float expected',
-        self::NOT_ALNUM    => 'The input contains characters which are non alphabetic and no digits',
-        self::STRING_EMPTY => 'The input is an empty string',
+        self::INVALID      => "Invalid type given. String, integer or float expected",
+        self::NOT_ALNUM    => "The input contains characters which are non alphabetic and no digits",
+        self::STRING_EMPTY => "The input is an empty string",
     ];
 
     /**
@@ -46,7 +48,7 @@ class Alnum extends AbstractValidator
     /**
      * Sets default option values for this instance
      *
-     * @param array|bool $allowWhiteSpace
+     * @param bool $allowWhiteSpace
      */
     public function __construct($allowWhiteSpace = false)
     {
@@ -72,7 +74,7 @@ class Alnum extends AbstractValidator
      * Sets the allowWhiteSpace option
      *
      * @param  bool $allowWhiteSpace
-     * @return $this
+     * @return AlnumFilter Provides a fluent interface
      */
     public function setAllowWhiteSpace($allowWhiteSpace)
     {
@@ -83,7 +85,7 @@ class Alnum extends AbstractValidator
     /**
      * Returns true if and only if $value contains only alphabetic and digit characters
      *
-     * @param  int|float|string $value
+     * @param  string $value
      * @return bool
      */
     public function isValid($value)

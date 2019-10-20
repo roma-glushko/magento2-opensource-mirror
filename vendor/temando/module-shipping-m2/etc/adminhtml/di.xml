@@ -13,11 +13,6 @@
         <plugin name="temando-shipping-addViewShipmentToolbarButton" type="Temando\Shipping\Plugin\Shipping\AddShipmentViewToolbarButtonPlugin" />
     </type>
 
-    <type name="Temando\Shipping\Rest\Authentication">
-        <arguments>
-            <argument name="session" xsi:type="object">Magento\Backend\Model\Session</argument>
-        </arguments>
-    </type>
     <type name="Temando\Shipping\Rest\EntityMapper\ShippingExperienceMapper">
         <arguments>
             <argument name="session" xsi:type="object">Magento\Backend\Model\Session\Quote</argument>
@@ -37,9 +32,9 @@
     <virtualType name="Magento\Catalog\Ui\DataProvider\Product\Form\Modifier\Pool">
         <arguments>
             <argument name="modifiers" xsi:type="array">
-                <item name="temandoDimensions" xsi:type="array">
-                    <item name="class" xsi:type="string">Temando\Shipping\Ui\DataProvider\Product\Form\Modifier\Dimensions</item>
-                    <item name="sortOrder" xsi:type="number">100</item>
+                <item name="shippingPanel" xsi:type="array">
+                    <item name="class" xsi:type="string">Temando\Shipping\Ui\DataProvider\Product\Form\Modifier\ShippingPanel</item>
+                    <item name="sortOrder" xsi:type="number">1000</item>
                 </item>
             </argument>
         </arguments>

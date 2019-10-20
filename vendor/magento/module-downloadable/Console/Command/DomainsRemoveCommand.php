@@ -1,10 +1,9 @@
 <?php
 /**
+ *
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
-
 namespace Magento\Downloadable\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -14,14 +13,16 @@ use Symfony\Component\Console\Input\InputArgument;
 use Magento\Downloadable\Api\DomainManagerInterface as DomainManager;
 
 /**
- * Command for removing downloadable domain from the whitelist.
+ * Class DomainsRemoveCommand
+ *
+ * Command for removing downloadable domain from the whitelist
  */
 class DomainsRemoveCommand extends Command
 {
     /**
-     * Name of domains input argument.
+     * Name of domains input argument
      */
-    const INPUT_KEY_DOMAINS = 'domains';
+    public const INPUT_KEY_DOMAINS = 'domains';
 
     /**
      * @var DomainManager
@@ -29,6 +30,8 @@ class DomainsRemoveCommand extends Command
     private $domainManager;
 
     /**
+     * DomainsRemoveCommand constructor.
+     *
      * @param DomainManager $domainManager
      */
     public function __construct(
@@ -70,6 +73,7 @@ class DomainsRemoveCommand extends Command
                 $removeDomains = $input->getArgument(self::INPUT_KEY_DOMAINS);
                 $removeDomains = array_filter(array_map('trim', $removeDomains), 'strlen');
                 $this->domainManager->removeDomains($removeDomains);
+
                 foreach (array_diff($whitelistBefore, $this->domainManager->getDomains()) as $removedHost) {
                     $output->writeln(
                         $removedHost . ' was removed from the whitelist.'
@@ -81,6 +85,7 @@ class DomainsRemoveCommand extends Command
             if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $output->writeln($e->getTraceAsString());
             }
+            return;
         }
     }
 }

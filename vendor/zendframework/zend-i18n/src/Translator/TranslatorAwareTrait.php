@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\Translator;
@@ -10,9 +12,9 @@ namespace Zend\I18n\Translator;
 trait TranslatorAwareTrait
 {
     /**
-     * @var TranslatorInterface|null
+     * @var TranslatorInterface
      */
-    protected $translator;
+    protected $translator = null;
 
     /**
      * @var bool
@@ -27,9 +29,9 @@ trait TranslatorAwareTrait
     /**
      * Sets translator to use in helper
      *
-     * @param TranslatorInterface|null $translator
-     * @param string|null              $textDomain
-     * @return $this
+     * @param TranslatorInterface $translator
+     * @param string              $textDomain
+     * @return mixed
      */
     public function setTranslator(TranslatorInterface $translator = null, $textDomain = null)
     {
@@ -45,7 +47,7 @@ trait TranslatorAwareTrait
     /**
      * Returns translator used in object
      *
-     * @return TranslatorInterface|null
+     * @return TranslatorInterface
      */
     public function getTranslator()
     {
@@ -66,7 +68,7 @@ trait TranslatorAwareTrait
      * Sets whether translator is enabled and should be used
      *
      * @param bool $enabled
-     * @return $this
+     * @return mixed
      */
     public function setTranslatorEnabled($enabled = true)
     {
@@ -89,7 +91,7 @@ trait TranslatorAwareTrait
      * Set translation text domain
      *
      * @param string $textDomain
-     * @return $this
+     * @return mixed
      */
     public function setTranslatorTextDomain($textDomain = 'default')
     {

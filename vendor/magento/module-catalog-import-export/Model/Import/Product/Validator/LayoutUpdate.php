@@ -16,11 +16,13 @@ use Magento\Framework\View\Model\Layout\Update\ValidatorFactory;
  */
 class LayoutUpdate extends AbstractImportValidator
 {
+    private const ERROR_INVALID_LAYOUT_UPDATE = 'invalidLayoutUpdate';
+
     /**
      * @var ValidatorFactory
      */
     private $layoutValidatorFactory;
-
+    
     /**
      * @var ValidationStateInterface
      */
@@ -46,7 +48,7 @@ class LayoutUpdate extends AbstractImportValidator
         if (!empty($value['custom_layout_update']) && !$this->validateXml($value['custom_layout_update'])) {
             $this->_addMessages(
                 [
-                    $this->context->retrieveMessageTemplate('invalidLayoutUpdate')
+                    $this->context->retrieveMessageTemplate(self::ERROR_INVALID_LAYOUT_UPDATE)
                 ]
             );
             return false;

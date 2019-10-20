@@ -95,15 +95,11 @@ class AttributeSetTest extends AbstractModifierTest
      */
     public function testModifyMetaLocked($locked)
     {
-        $this->productMock->expects($this->once())
+        $this->productMock->expects($this->any())
             ->method('isLockedAttribute')
             ->willReturn($locked);
-        $this->attributeSetCollectionMock->expects($this->once())
-            ->method('getData')
-            ->willReturn([]);
         $modifyMeta = $this->getModel()->modifyMeta([AbstractModifier::DEFAULT_GENERAL_PANEL => []]);
         $children = $modifyMeta[AbstractModifier::DEFAULT_GENERAL_PANEL]['children'];
-
         $this->assertEquals(
             $locked,
             $children['attribute_set_id']['arguments']['data']['config']['disabled']

@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\Validator;
@@ -20,17 +22,17 @@ class Alpha extends Alnum
      *
      * @var AlphaFilter
      */
-    protected static $filter;
+    protected static $filter = null;
 
     /**
      * Validation failure message template definitions
      *
-     * @var string[]
+     * @var array
      */
     protected $messageTemplates = [
-        self::INVALID      => 'Invalid type given. String expected',
-        self::NOT_ALPHA    => 'The input contains non alphabetic characters',
-        self::STRING_EMPTY => 'The input is an empty string'
+        self::INVALID      => "Invalid type given. String expected",
+        self::NOT_ALPHA    => "The input contains non alphabetic characters",
+        self::STRING_EMPTY => "The input is an empty string"
     ];
 
     /**

@@ -378,6 +378,7 @@ class InlineEditTest extends \PHPUnit\Framework\TestCase
             ->method('save')
             ->with($this->customerData)
             ->willThrowException($exception);
+
         $this->messageManager->expects($this->once())
             ->method('addError')
             ->with('[Customer ID: 12] Exception message');

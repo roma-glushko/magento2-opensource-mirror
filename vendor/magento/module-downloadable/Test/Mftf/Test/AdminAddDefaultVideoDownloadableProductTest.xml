@@ -19,10 +19,10 @@
             <group value="Downloadable"/>
         </annotations>
         <before>
-            <magentoCLI command="downloadable:domains:add" arguments="static.magento.com" before="enableAdminAccountSharing" stepKey="addDownloadableDomain"/>
+            <magentoCLI stepKey="addDownloadableDomain" command="downloadable:domains:add static.magento.com" before="enableAdminAccountSharing"/>
         </before>
         <after>
-            <magentoCLI command="downloadable:domains:remove" arguments="static.magento.com" before="setStoreDefaultConfig" stepKey="removeDownloadableDomain"/>
+            <magentoCLI stepKey="removeDownloadableDomain" command="downloadable:domains:remove static.magento.com" before="setStoreDefaultConfig"/>
         </after>
         <!-- Create a downloadable product -->
         <!-- Replacing steps in base AdminAddDefaultVideoSimpleProductTest -->

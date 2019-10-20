@@ -2,14 +2,12 @@
 
 namespace Symfony\Component\DependencyInjection\Tests\Fixtures;
 
-use Psr\Container\ContainerInterface;
-
 /**
  * @author Kévin Dunglas <dunglas@gmail.com>
  */
 class NamedArgumentsDummy
 {
-    public function __construct(CaseSensitiveClass $c, $apiKey, $hostName, ContainerInterface $interface)
+    public function __construct(CaseSensitiveClass $c, $apiKey, $hostName)
     {
     }
 

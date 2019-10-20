@@ -1,10 +1,9 @@
 <?php
 /**
+ *
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
-
 namespace Magento\Downloadable\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -13,7 +12,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Magento\Downloadable\Api\DomainManagerInterface as DomainManager;
 
 /**
- * Command for listing allowed downloadable domains.
+ * Class DomainsShowCommand
+ *
+ * Command for listing allowed downloadable domains
  */
 class DomainsShowCommand extends Command
 {
@@ -23,6 +24,7 @@ class DomainsShowCommand extends Command
     private $domainManager;
 
     /**
+     * DomainsShowCommand constructor.
      * @param DomainManager $domainManager
      */
     public function __construct(
@@ -59,6 +61,7 @@ class DomainsShowCommand extends Command
             if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $output->writeln($e->getTraceAsString());
             }
+            return;
         }
     }
 }

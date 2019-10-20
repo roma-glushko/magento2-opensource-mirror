@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\Translator\Loader;
@@ -65,9 +67,9 @@ class Gettext extends AbstractFileLoader
         // Verify magic number
         $magic = fread($this->file, 4);
 
-        if ($magic === "\x95\x04\x12\xde") {
+        if ($magic == "\x95\x04\x12\xde") {
             $this->littleEndian = false;
-        } elseif ($magic === "\xde\x12\x04\x95") {
+        } elseif ($magic == "\xde\x12\x04\x95") {
             $this->littleEndian = true;
         } else {
             fclose($this->file);
@@ -120,7 +122,7 @@ class Gettext extends AbstractFileLoader
                 fseek($this->file, $translationStringOffset);
                 $translationString = explode("\0", fread($this->file, $translationStringSize));
 
-                if (isset($originalString[1], $translationString[1])) {
+                if (count($originalString) > 1 && count($translationString) > 1) {
                     $textDomain[$originalString[0]] = $translationString;
 
                     array_shift($originalString);
@@ -137,13 +139,13 @@ class Gettext extends AbstractFileLoader
         }
 
         // Read header entries
-        if ($textDomain->offsetExists('')) {
+        if (array_key_exists('', $textDomain)) {
             $rawHeaders = explode("\n", trim($textDomain['']));
 
             foreach ($rawHeaders as $rawHeader) {
                 list($header, $content) = explode(':', $rawHeader, 2);
 
-                if (strtolower(trim($header)) === 'plural-forms') {
+                if (trim(strtolower($header)) === 'plural-forms') {
                     $textDomain->setPluralRule(PluralRule::fromString($content));
                 }
             }

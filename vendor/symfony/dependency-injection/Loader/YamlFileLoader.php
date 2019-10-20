@@ -726,23 +726,25 @@ class YamlFileLoader extends FileLoader
             if (\in_array($value->getTag(), ['tagged', 'tagged_locator'], true)) {
                 $forLocator = 'tagged_locator' === $value->getTag();
 
+                if (\is_string($argument) && $argument) {
+                    return new TaggedIteratorArgument($argument, null, null, $forLocator);
+                }
+
                 if (\is_array($argument) && isset($argument['tag']) && $argument['tag']) {
                     if ($diff = array_diff(array_keys($argument), ['tag', 'index_by', 'default_index_method'])) {
                         throw new InvalidArgumentException(sprintf('"!%s" tag contains unsupported key "%s"; supported ones are "tag", "index_by" and "default_index_method".', $value->getTag(), implode('"", "', $diff)));
                     }
 
                     $argument = new TaggedIteratorArgument($argument['tag'], $argument['index_by'] ?? null, $argument['default_index_method'] ?? null, $forLocator);
-                } elseif (\is_string($argument) && $argument) {
-                    $argument = new TaggedIteratorArgument($argument, null, null, $forLocator);
-                } else {
-                    throw new InvalidArgumentException(sprintf('"!%s" tags only accept a non empty string or an array with a key "tag" in "%s".', $value->getTag(), $file));
+
+                    if ($forLocator) {
+                        $argument = new ServiceLocatorArgument($argument);
+                    }
+
+                    return $argument;
                 }
 
-                if ($forLocator) {
-                    $argument = new ServiceLocatorArgument($argument);
-                }
-
-                return $argument;
+                throw new InvalidArgumentException(sprintf('"!%s" tags only accept a non empty string or an array with a key "tag" in "%s".', $value->getTag(), $file));
             }
             if ('service' === $value->getTag()) {
                 if ($isParameter) {

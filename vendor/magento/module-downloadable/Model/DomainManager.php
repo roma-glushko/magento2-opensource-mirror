@@ -7,18 +7,20 @@ declare(strict_types=1);
 
 namespace Magento\Downloadable\Model;
 
+use Magento\Framework\App\DeploymentConfig\Writer as ConfigWriter;
 use Magento\Downloadable\Api\DomainManagerInterface;
 use Magento\Framework\App\DeploymentConfig;
-use Magento\Framework\App\DeploymentConfig\Writer as ConfigWriter;
 use Magento\Framework\Config\File\ConfigFilePool;
 
 /**
+ * Class DomainManager
+ *
  * Manage downloadable domains whitelist in the environment config.
  */
 class DomainManager implements DomainManagerInterface
 {
     /**
-     * Path to the allowed domains in the deployment config.
+     * Path to the allowed domains in the deployment config
      */
     private const PARAM_DOWNLOADABLE_DOMAINS = 'downloadable_domains';
 
@@ -33,6 +35,8 @@ class DomainManager implements DomainManagerInterface
     private $deploymentConfig;
 
     /**
+     * DomainManager constructor.
+     *
      * @param ConfigWriter $configWriter
      * @param DeploymentConfig $deploymentConfig
      */
@@ -67,8 +71,8 @@ class DomainManager implements DomainManagerInterface
         $this->configWriter->saveConfig(
             [
                 ConfigFilePool::APP_ENV => [
-                    self::PARAM_DOWNLOADABLE_DOMAINS => $whitelist,
-                ],
+                    self::PARAM_DOWNLOADABLE_DOMAINS => $whitelist
+                ]
             ],
             true
         );
@@ -92,8 +96,8 @@ class DomainManager implements DomainManagerInterface
         $this->configWriter->saveConfig(
             [
                 ConfigFilePool::APP_ENV => [
-                    self::PARAM_DOWNLOADABLE_DOMAINS => $whitelist,
-                ],
+                    self::PARAM_DOWNLOADABLE_DOMAINS => $whitelist
+                ]
             ],
             true
         );

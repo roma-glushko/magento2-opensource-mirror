@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\Translator\Loader;
@@ -23,7 +25,7 @@ class Ini extends AbstractFileLoader
      * @see    FileLoaderInterface::load()
      * @param  string $locale
      * @param  string $filename
-     * @return TextDomain
+     * @return TextDomain|null
      * @throws Exception\InvalidArgumentException
      */
     public function load($locale, $filename)
@@ -52,7 +54,7 @@ class Ini extends AbstractFileLoader
                     'Each INI row must be an array with message and translation'
                 );
             }
-            if (isset($message['message'], $message['translation'])) {
+            if (isset($message['message']) && isset($message['translation'])) {
                 $messages[$message['message']] = $message['translation'];
                 continue;
             }
@@ -68,7 +70,9 @@ class Ini extends AbstractFileLoader
 
         $textDomain = new TextDomain($messages);
 
-        if (isset($messagesNamespaced['plural']['plural_forms'])) {
+        if (array_key_exists('plural', $messagesNamespaced)
+            && isset($messagesNamespaced['plural']['plural_forms'])
+        ) {
             $textDomain->setPluralRule(
                 PluralRule::fromString($messagesNamespaced['plural']['plural_forms'])
             );

@@ -99,7 +99,9 @@ class Template implements \Zend_Filter_Interface
      * @var array[]
      */
     private $restrictedMethodsByInstanceType = [
-        \Magento\Framework\DB\Adapter\AdapterInterface::class => ['*'],
+        \Magento\Framework\DB\Adapter\AdapterInterface::class => [
+            '*'
+        ]
     ];
 
     /**

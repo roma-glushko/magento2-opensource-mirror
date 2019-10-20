@@ -67,7 +67,7 @@ class Options implements OptionSourceInterface
 
         return $this->options;
     }
-    
+
     /**
      * Sanitize website/store option name
      *
@@ -84,6 +84,7 @@ class Options implements OptionSourceInterface
         } else {
             $name = $this->escaper->escapeHtml($name);
         }
+
         return $name;
     }
 

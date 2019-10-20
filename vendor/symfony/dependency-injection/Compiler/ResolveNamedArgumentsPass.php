@@ -53,7 +53,7 @@ class ResolveNamedArgumentsPass extends AbstractRecursivePass
                     $parameters = $r->getParameters();
                 }
 
-                if (isset($key[0]) && '$' !== $key[0] && !class_exists($key) && !interface_exists($key, false)) {
+                if (isset($key[0]) && '$' !== $key[0] && !class_exists($key)) {
                     throw new InvalidArgumentException(sprintf('Invalid service "%s": did you forget to add the "$" prefix to argument "%s"?', $this->currentId, $key));
                 }
 

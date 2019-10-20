@@ -8,7 +8,7 @@ namespace Magento\Customer\Test\Unit\Ui\Component\Listing\Column;
 use Magento\Customer\Ui\Component\Listing\Column\Actions;
 
 /**
- * Unit tests for \Magento\Customer\UI\Component\Listing\Column\Actions.
+ * Class ActionsTest
  */
 class ActionsTest extends \PHPUnit\Framework\TestCase
 {

@@ -38,7 +38,7 @@ class InflectorTest extends TestCase
             ['bases', ['bas', 'base', 'basis']],
             ['batches', ['batch', 'batche']],
             ['beaux', 'beau'],
-            ['bees', 'bee'],
+            ['bees', ['be', 'bee']],
             ['boxes', 'box'],
             ['boys', 'boy'],
             ['bureaus', 'bureau'],
@@ -68,9 +68,7 @@ class InflectorTest extends TestCase
             ['echoes', ['echo', 'echoe']],
             ['elves', ['elf', 'elve', 'elff']],
             ['emphases', ['emphas', 'emphase', 'emphasis']],
-            ['employees', 'employee'],
             ['faxes', 'fax'],
-            ['fees', 'fee'],
             ['feet', 'foot'],
             ['feedback', 'feedback'],
             ['foci', 'focus'],
@@ -145,14 +143,14 @@ class InflectorTest extends TestCase
             ['theses', ['thes', 'these', 'thesis']],
             ['thieves', ['thief', 'thieve', 'thieff']],
             ['treasons', 'treason'],
-            ['trees', 'tree'],
+            ['trees', ['tre', 'tree']],
             ['waltzes', ['waltz', 'waltze']],
             ['wives', 'wife'],
 
             // test casing: if the first letter was uppercase, it should remain so
             ['Men', 'Man'],
             ['GrandChildren', 'GrandChild'],
-            ['SubTrees', 'SubTree'],
+            ['SubTrees', ['SubTre', 'SubTree']],
 
             // Known issues
             //['insignia', 'insigne'],

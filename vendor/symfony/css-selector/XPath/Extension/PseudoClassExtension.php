@@ -123,13 +123,11 @@ class PseudoClassExtension extends AbstractExtension
      */
     public function translateOnlyOfType(XPathExpr $xpath)
     {
-        $element = $xpath->getElement();
-
-        if ('*' === $element) {
+        if ('*' === $xpath->getElement()) {
             throw new ExpressionErrorException('"*:only-of-type" is not implemented.');
         }
 
-        return $xpath->addCondition(sprintf('count(preceding-sibling::%s)=0 and count(following-sibling::%s)=0', $element, $element));
+        return $xpath->addCondition('last() = 1');
     }
 
     /**

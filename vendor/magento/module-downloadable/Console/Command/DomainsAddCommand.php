@@ -1,10 +1,9 @@
 <?php
 /**
+ *
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
-
 namespace Magento\Downloadable\Console\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -14,14 +13,16 @@ use Symfony\Component\Console\Input\InputArgument;
 use Magento\Downloadable\Api\DomainManagerInterface as DomainManager;
 
 /**
- * Command for adding downloadable domain to the whitelist.
+ * Class DomainsAddCommand
+ *
+ * Command for adding downloadable domain to the whitelist
  */
 class DomainsAddCommand extends Command
 {
     /**
-     * Name of domains input argument.
+     * Name of domains input argument
      */
-    const INPUT_KEY_DOMAINS = 'domains';
+    public const INPUT_KEY_DOMAINS = 'domains';
 
     /**
      * @var DomainManager
@@ -29,6 +30,7 @@ class DomainsAddCommand extends Command
     private $domainManager;
 
     /**
+     * DomainsAddCommand constructor.
      * @param DomainManager $domainManager
      */
     public function __construct(
@@ -69,7 +71,9 @@ class DomainsAddCommand extends Command
                 $whitelistBefore = $this->domainManager->getDomains();
                 $newDomains = $input->getArgument(self::INPUT_KEY_DOMAINS);
                 $newDomains = array_filter(array_map('trim', $newDomains), 'strlen');
+
                 $this->domainManager->addDomains($newDomains);
+
                 foreach (array_diff($this->domainManager->getDomains(), $whitelistBefore) as $newHost) {
                     $output->writeln(
                         $newHost . ' was added to the whitelist.'
@@ -81,6 +85,7 @@ class DomainsAddCommand extends Command
             if ($output->getVerbosity() >= OutputInterface::VERBOSITY_VERBOSE) {
                 $output->writeln($e->getTraceAsString());
             }
+            return;
         }
     }
 }

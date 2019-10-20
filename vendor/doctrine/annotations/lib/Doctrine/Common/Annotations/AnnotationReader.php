@@ -101,12 +101,7 @@ class AnnotationReader implements Reader
         // PlantUML
         'startuml' => true, 'enduml' => true,
         // Symfony 3.3 Cache Adapter
-        'experimental' => true,
-        // Slevomat Coding Standard
-        'phpcsSuppress' => true,
-        // PHP CodeSniffer
-        'codingStandardsIgnoreStart' => true,
-        'codingStandardsIgnoreEnd' => true,
+        'experimental' => true
     ];
 
     /**
@@ -200,7 +195,6 @@ class AnnotationReader implements Reader
 
         $this->preParser->setImports(self::$globalImports);
         $this->preParser->setIgnoreNotImportedAnnotations(true);
-        $this->preParser->setIgnoredAnnotationNames(self::$globalIgnoredNames);
 
         $this->phpParser = new PhpParser;
     }

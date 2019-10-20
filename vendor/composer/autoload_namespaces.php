@@ -17,7 +17,7 @@ return array(
     'Mustache' => array($vendorDir . '/mustache/mustache/src'),
     'Metadata\\' => array($vendorDir . '/jms/metadata/src'),
     'MagentoHackathon\\Composer\\Magento' => array($vendorDir . '/magento/magento-composer-installer/src'),
-    'Less' => array($vendorDir . '/oyejorge/less.php/lib'),
+    'Less' => array($vendorDir . '/wikimedia/less.php/lib'),
     'JShrink' => array($vendorDir . '/tedivm/jshrink/src'),
     'JMS\\Serializer' => array($vendorDir . '/jms/serializer/src'),
     'JMS\\' => array($vendorDir . '/jms/parser-lib/src'),

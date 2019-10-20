@@ -148,21 +148,25 @@ class SampleRepositoryTest extends \PHPUnit\Framework\TestCase
         if (isset($sampleData['id'])) {
             $sampleMock->expects($this->any())->method('getId')->willReturn($sampleData['id']);
         }
-        $sampleMock->expects($this->any())->method('getTitle')->willReturn($sampleData['title']);
-        $sampleMock->expects($this->any())->method('getSortOrder')->willReturn($sampleData['sort_order']);
+        $sampleMock->expects($this->any())->method('getTitle')->will($this->returnValue($sampleData['title']));
+        $sampleMock->expects($this->any())->method('getSortOrder')->will(
+            $this->returnValue($sampleData['sort_order'])
+        );
 
         if (isset($sampleData['sample_type'])) {
-            $sampleMock->expects($this->any())
-                ->method('getSampleType')
-                ->willReturn($sampleData['sample_type']);
+            $sampleMock->expects($this->any())->method('getSampleType')->will(
+                $this->returnValue($sampleData['sample_type'])
+            );
         }
         if (isset($sampleData['sample_url'])) {
-            $sampleMock->expects($this->any())->method('getSampleUrl')->willReturn($sampleData['sample_url']);
+            $sampleMock->expects($this->any())->method('getSampleUrl')->will(
+                $this->returnValue($sampleData['sample_url'])
+            );
         }
         if (isset($sampleData['sample_file'])) {
-            $sampleMock->expects($this->any())
-                ->method('getSampleFile')
-                ->willReturn($sampleData['sample_file']);
+            $sampleMock->expects($this->any())->method('getSampleFile')->will(
+                $this->returnValue($sampleData['sample_file'])
+            );
         }
 
         return $sampleMock;

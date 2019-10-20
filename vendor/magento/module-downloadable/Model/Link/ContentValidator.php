@@ -8,17 +8,27 @@ namespace Magento\Downloadable\Model\Link;
 use Magento\Downloadable\Api\Data\LinkInterface;
 use Magento\Downloadable\Helper\File;
 use Magento\Downloadable\Model\File\ContentValidator as FileContentValidator;
-use Magento\Downloadable\Model\Url\DomainValidator;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\ValidatorException;
 use Magento\Framework\Url\Validator as UrlValidator;
+use Magento\Downloadable\Model\Url\DomainValidator;
 
 /**
  * Class to validate Link Content.
  */
 class ContentValidator
 {
+    /**
+     * @var DomainValidator
+     */
+    private $domainValidator;
+
+    /**
+     * @var File
+     */
+    private $fileHelper;
+
     /**
      * @var FileContentValidator
      */
@@ -30,31 +40,21 @@ class ContentValidator
     protected $urlValidator;
 
     /**
-     * @var File
-     */
-    private $fileHelper;
-
-    /**
-     * @var DomainValidator
-     */
-    private $domainValidator;
-
-    /**
      * @param FileContentValidator $fileContentValidator
      * @param UrlValidator $urlValidator
+     * @param DomainValidator $domainValidator
      * @param File|null $fileHelper
-     * @param DomainValidator|null $domainValidator
      */
     public function __construct(
         FileContentValidator $fileContentValidator,
         UrlValidator $urlValidator,
-        File $fileHelper = null,
-        DomainValidator $domainValidator = null
+        DomainValidator $domainValidator,
+        File $fileHelper = null
     ) {
         $this->fileContentValidator = $fileContentValidator;
         $this->urlValidator = $urlValidator;
+        $this->domainValidator = $domainValidator;
         $this->fileHelper = $fileHelper ?? ObjectManager::getInstance()->get(File::class);
-        $this->domainValidator = $domainValidator ?? ObjectManager::getInstance()->get(DomainValidator::class);
     }
 
     /**
@@ -103,6 +103,7 @@ class ContentValidator
             if (!$this->urlValidator->isValid($link->getLinkUrl())) {
                 throw new InputException(__('Link URL must have valid format.'));
             }
+
             if (!$this->domainValidator->isValid($link->getLinkUrl())) {
                 throw new InputException(__('Link URL\'s domain is not in list of downloadable_domains in env.php.'));
             }
@@ -128,6 +129,7 @@ class ContentValidator
             if (!$this->urlValidator->isValid($link->getSampleUrl())) {
                 throw new InputException(__('Sample URL must have valid format.'));
             }
+
             if (!$this->domainValidator->isValid($link->getSampleUrl())) {
                 throw new InputException(__('Sample URL\'s domain is not in list of downloadable_domains in env.php.'));
             }

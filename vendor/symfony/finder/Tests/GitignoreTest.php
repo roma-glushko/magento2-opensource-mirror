@@ -107,31 +107,7 @@ class GitignoreTest extends TestCase
                 #IamComment
                 /app/cache/',
                 ['app/cache/file.txt', 'app/cache/subdir/ile.txt'],
-                ['a/app/cache/file.txt', '#IamComment', 'IamComment'],
-            ],
-            [
-                '
-                /app/cache/
-                #LastLineIsComment',
-                ['app/cache/file.txt', 'app/cache/subdir/ile.txt'],
-                ['a/app/cache/file.txt', '#LastLineIsComment', 'LastLineIsComment'],
-            ],
-            [
-                '
-                /app/cache/
-                \#file.txt
-                #LastLineIsComment',
-                ['app/cache/file.txt', 'app/cache/subdir/ile.txt', '#file.txt'],
-                ['a/app/cache/file.txt', '#LastLineIsComment', 'LastLineIsComment'],
-            ],
-            [
-                '
-                /app/cache/
-                \#file.txt
-                #IamComment
-                another_file.txt',
-                ['app/cache/file.txt', 'app/cache/subdir/ile.txt', '#file.txt', 'another_file.txt'],
-                ['a/app/cache/file.txt', 'IamComment', '#IamComment'],
+                ['a/app/cache/file.txt'],
             ],
         ];
     }

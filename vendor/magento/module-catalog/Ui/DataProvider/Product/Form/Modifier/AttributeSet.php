@@ -78,19 +78,20 @@ class AttributeSet extends AbstractModifier
                 \Magento\Eav\Model\ResourceModel\Entity\Attribute\Set\Collection::SORT_ORDER_ASC
             );
 
-        $options = $collection->getData();
+        $collectionData = $collection->getData() ?? [];
+
         array_walk(
-            $options,
-            function (&$option) {
-                $option['__disableTmpl'] = true;
+            $collectionData,
+            function (&$attribute) {
+                $attribute['__disableTmpl'] = true;
             }
         );
-        return $options;
+
+        return $collectionData;
     }
 
     /**
      * @inheritdoc
-     *
      * @since 101.0.0
      */
     public function modifyMeta(array $meta)
@@ -125,17 +126,19 @@ class AttributeSet extends AbstractModifier
 
     /**
      * @inheritdoc
-     *
      * @since 101.0.0
      */
     public function modifyData(array $data)
     {
-        return array_replace_recursive($data, [
-            $this->locator->getProduct()->getId() => [
-                self::DATA_SOURCE_DEFAULT => [
-                    'attribute_set_id' => $this->locator->getProduct()->getAttributeSetId()
-                ],
+        return array_replace_recursive(
+            $data,
+            [
+                $this->locator->getProduct()->getId() => [
+                    self::DATA_SOURCE_DEFAULT => [
+                        'attribute_set_id' => $this->locator->getProduct()->getAttributeSetId()
+                    ],
+                ]
             ]
-        ]);
+        );
     }
 }

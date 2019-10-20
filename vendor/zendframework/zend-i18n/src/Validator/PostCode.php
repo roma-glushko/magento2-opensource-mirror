@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-i18n for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (https://www.zend.com)
- * @license   https://github.com/zendframework/zend-i18n/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\I18n\Validator;
@@ -23,15 +25,13 @@ class PostCode extends AbstractValidator
     const SERVICEFAILURE = 'postcodeServiceFailure';
 
     /**
-     * Validation failure message template definitions
-     *
-     * @var string[]
+     * @var array
      */
     protected $messageTemplates = [
-        self::INVALID        => 'Invalid type given. String or integer expected',
-        self::NO_MATCH       => 'The input does not appear to be a postal code',
-        self::SERVICE        => 'The input does not appear to be a postal code',
-        self::SERVICEFAILURE => 'An exception has been raised while validating the input',
+        self::INVALID        => "Invalid type given. String or integer expected",
+        self::NO_MATCH       => "The input does not appear to be a postal code",
+        self::SERVICE        => "The input does not appear to be a postal code",
+        self::SERVICEFAILURE => "An exception has been raised while validating the input",
     ];
 
     /**
@@ -134,7 +134,7 @@ class PostCode extends AbstractValidator
         'LA' => '\d{5}',
         'LV' => '(LV-)?\d{4}',
         'LB' => '(\d{4}([ ]?\d{4})?)?',
-        'LI' => '(948[5-9])|(949[0-8])',
+        'LI' => '(948[5-9])|(949[0-7])',
         'LT' => '\d{5}',
         'LU' => '\d{4}',
         'MK' => '\d{4}',
@@ -250,10 +250,10 @@ class PostCode extends AbstractValidator
         } else {
             $this->setLocale(Locale::getDefault());
         }
-        if (isset($options['format'])) {
+        if (array_key_exists('format', $options)) {
             $this->setFormat($options['format']);
         }
-        if (isset($options['service'])) {
+        if (array_key_exists('service', $options)) {
             $this->setService($options['service']);
         }
 
@@ -274,7 +274,7 @@ class PostCode extends AbstractValidator
      * Sets the locale to use
      *
      * @param  string|null $locale
-     * @return $this
+     * @return PostCode  Provides fluid interface
      */
     public function setLocale($locale)
     {
@@ -295,8 +295,8 @@ class PostCode extends AbstractValidator
     /**
      * Sets a self defined postal format as regex
      *
-     * @param  string|null $format
-     * @return $this
+     * @param  string $format
+     * @return PostCode  Provides fluid interface
      */
     public function setFormat($format)
     {
@@ -317,8 +317,8 @@ class PostCode extends AbstractValidator
     /**
      * Sets a new callback for service validation
      *
-     * @param mixed|null $service
-     * @return $this
+     * @param mixed $service
+     * @return PostCode  Provides fluid interface
      */
     public function setService($service)
     {
@@ -329,7 +329,7 @@ class PostCode extends AbstractValidator
     /**
      * Returns true if and only if $value is a valid postalcode
      *
-     * @param  string|int $value
+     * @param  string $value
      * @return bool
      * @throws Exception\InvalidArgumentException
      */
@@ -348,14 +348,14 @@ class PostCode extends AbstractValidator
         if ((null === $format || '' === $format) && ! empty($locale)) {
             $region = Locale::getRegion($locale);
             if ('' === $region) {
-                throw new Exception\InvalidArgumentException('Locale must contain a region');
+                throw new Exception\InvalidArgumentException("Locale must contain a region");
             }
             if (isset(static::$postCodeRegex[$region])) {
                 $format = static::$postCodeRegex[$region];
             }
         }
         if (null === $format || '' === $format) {
-            throw new Exception\InvalidArgumentException('A postcode-format string has to be given for validation');
+            throw new Exception\InvalidArgumentException("A postcode-format string has to be given for validation");
         }
 
         if ($format[0] !== '/') {

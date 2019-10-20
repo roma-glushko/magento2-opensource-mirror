@@ -59,7 +59,7 @@ class FileTest extends \PHPUnit\Framework\TestCase
             [
                 'filesystem' => $this->filesystemMock,
                 'log' => $this->loggerMock,
-                'fileIo' => $this->fileIoMock,
+                'fileIo' => $this->fileIoMock
             ]
         );
     }
@@ -120,9 +120,11 @@ class FileTest extends \PHPUnit\Framework\TestCase
             $paths
         );
 
-        $this->fileIoMock->expects($this->any())
-            ->method('getPathInfo')
-            ->willReturnMap($pathInfos);
+        $this->fileIoMock->expects(
+            $this->any()
+        )->method(
+            'getPathInfo'
+        )->will($this->returnValueMap($pathInfos));
 
         sort($paths);
         $this->directoryReadMock->expects(

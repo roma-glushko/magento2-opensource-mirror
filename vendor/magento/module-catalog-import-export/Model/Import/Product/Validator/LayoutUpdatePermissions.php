@@ -17,6 +17,8 @@ use Magento\CatalogImportExport\Model\Import\Product\Validator\AbstractImportVal
  */
 class LayoutUpdatePermissions extends AbstractImportValidator
 {
+    private const ERROR_INSUFFICIENT_PERMISSIONS = 'insufficientPermissions';
+
     /**
      * @var UserContextInterface
      */
@@ -66,7 +68,7 @@ class LayoutUpdatePermissions extends AbstractImportValidator
         if (!$isValid) {
             $this->_addMessages(
                 [
-                    $this->context->retrieveMessageTemplate('insufficientPermissions'),
+                    $this->context->retrieveMessageTemplate(self::ERROR_INSUFFICIENT_PERMISSIONS),
                 ]
             );
         }

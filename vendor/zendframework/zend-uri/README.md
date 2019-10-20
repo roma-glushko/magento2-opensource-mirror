@@ -8,20 +8,5 @@ zend-uri aids in manipulating and validating Uniform Resource Identifiers
 assist other components, such as zend-http, but is also useful as a standalone
 utility.
 
-## Installation
-
-Run the following to install this library:
-
-```bash
-$ composer require zendframework/zend-uri
-```
-
-## Documentation
-
-Browse the documentation online at https://docs.zendframework.com/zend-uri/
-
-## Support
-
-* [Issues](https://github.com/zendframework/zend-uri/issues/)
-* [Chat](https://zendframework-slack.herokuapp.com/)
-* [Forum](https://discourse.zendframework.com/)
+- File issues at https://github.com/zendframework/zend-uri/issues
+- Documentation is at https://docs.zendframework.com/zend-uri/

@@ -1,8 +1,10 @@
 <?php
 /**
- * @see       https://github.com/zendframework/zend-barcode for the canonical source repository
- * @copyright Copyright (c) 2005-2019 Zend Technologies USA Inc. (http://www.zend.com)
- * @license   https://github.com/zendframework/zend-barcode/blob/master/LICENSE.md New BSD License
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/zf2 for the canonical source repository
+ * @copyright Copyright (c) 2005-2015 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
 namespace Zend\Barcode\Renderer;
@@ -68,7 +70,7 @@ abstract class AbstractRenderer implements RendererInterface
 
     /**
      * Barcode object
-     * @var ObjectInterface
+     * @var Object\ObjectInterface
      */
     protected $barcode;
 
@@ -465,7 +467,7 @@ abstract class AbstractRenderer implements RendererInterface
                     break;
                 default:
                     throw new Exception\UnexpectedValueException(
-                        'Unknown drawing command'
+                        'Unkown drawing command'
                     );
             }
         }

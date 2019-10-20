@@ -108,6 +108,9 @@ class LinkRepository implements \Magento\Downloadable\Api\LinkRepositoryInterfac
 
     /**
      * @inheritdoc
+     *
+     * @param \Magento\Catalog\Api\Data\ProductInterface $product
+     * @return array
      */
     public function getLinksByProduct(\Magento\Catalog\Api\Data\ProductInterface $product)
     {

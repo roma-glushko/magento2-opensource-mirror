@@ -11,6 +11,9 @@
 
 namespace Symfony\Component\HttpFoundation\Session\Storage;
 
+use Symfony\Component\HttpFoundation\Session\Storage\Handler\NativeSessionHandler;
+use Symfony\Component\HttpFoundation\Session\Storage\Proxy\AbstractProxy;
+
 /**
  * Allows session to be started by PHP and managed by Symfony.
  *
@@ -19,15 +22,11 @@ namespace Symfony\Component\HttpFoundation\Session\Storage;
 class PhpBridgeSessionStorage extends NativeSessionStorage
 {
     /**
-     * @param \SessionHandlerInterface|null $handler
-     * @param MetadataBag                   $metaBag MetadataBag
+     * @param AbstractProxy|NativeSessionHandler|\SessionHandlerInterface|null $handler
+     * @param MetadataBag                                                      $metaBag MetadataBag
      */
     public function __construct($handler = null, MetadataBag $metaBag = null)
     {
-        if (!\extension_loaded('session')) {
-            throw new \LogicException('PHP extension "session" is required.');
-        }
-
         $this->setMetadataBag($metaBag);
         $this->setSaveHandler($handler);
     }
@@ -42,6 +41,10 @@ class PhpBridgeSessionStorage extends NativeSessionStorage
         }
 
         $this->loadSession();
+        if (!$this->saveHandler->isWrapper() && !$this->saveHandler->isSessionHandlerInterface()) {
+            // This condition matches only PHP 5.3 + internal save handlers
+            $this->saveHandler->setActive(true);
+        }
 
         return true;
     }

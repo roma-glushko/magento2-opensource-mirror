@@ -37,14 +37,14 @@ class UpsUrlTest extends TestCase
     public function testBeforeSave($data = null)
     {
         $this->config->setValue($data);
-        $this->assertInstanceOf(UpsUrl::class, $this->config->beforeSave());
+        $this->config->beforeSave();
     }
 
     /**
      * @dataProvider invalidDataProvider
      * @param string $data The invalid data
      * @expectedException \Magento\Framework\Exception\ValidatorException
-     * @expectedExceptionMessage Invalid request
+     * @expectedExceptionMessage UPS API endpoint URL's must use ups.com
      */
     public function testBeforeSaveErrors($data)
     {

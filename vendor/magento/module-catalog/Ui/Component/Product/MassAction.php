@@ -13,7 +13,7 @@ use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Ui\Component\AbstractComponent;
 
 /**
- * Prepare catalog MassAction configuration.
+ * Class MassAction
  */
 class MassAction extends AbstractComponent
 {
@@ -25,6 +25,8 @@ class MassAction extends AbstractComponent
     private $authorization;
 
     /**
+     * Constructor
+     *
      * @param AuthorizationInterface $authorization
      * @param ContextInterface $context
      * @param UiComponentInterface[] $components
@@ -42,8 +44,6 @@ class MassAction extends AbstractComponent
 
     /**
      * @inheritdoc
-     *
-     * @return void
      */
     public function prepare() : void
     {

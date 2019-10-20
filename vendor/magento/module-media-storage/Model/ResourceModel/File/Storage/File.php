@@ -33,7 +33,7 @@ class File
     /**
      * @param \Magento\Framework\Filesystem $filesystem
      * @param \Psr\Log\LoggerInterface $log
-     * @param FileIo|null $fileIo
+     * @param FileIo $fileIo
      */
     public function __construct(
         \Magento\Framework\Filesystem $filesystem,
@@ -78,7 +78,7 @@ class File
     }
 
     /**
-     * Clear all files in storage $dir.
+     * Clear all files in storage $dir
      *
      * @param string $dir
      * @return $this

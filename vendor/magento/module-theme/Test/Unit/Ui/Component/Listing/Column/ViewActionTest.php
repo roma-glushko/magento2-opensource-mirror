@@ -104,14 +104,10 @@ class ViewActionTest extends \PHPUnit\Framework\TestCase
                     'config' => []
                 ],
                 [
-                    [
-                        'entity_id' => 1,
-                        'itemName' => '',
-                    ],
+                    ['itemName' => '', 'entity_id' => 1]
                 ],
                 [
                     [
-                        'entity_id' => 1,
                         'itemName' => [
                             'view' => [
                                 'href' => 'url',
@@ -119,10 +115,11 @@ class ViewActionTest extends \PHPUnit\Framework\TestCase
                                 '__disableTmpl' => true,
                             ]
                         ],
-                    ],
+                        'entity_id' => 1
+                    ]
                 ],
                 '#',
-                ['id' => 1],
+                ['id' => 1]
             ],
             [
                 [
@@ -130,30 +127,27 @@ class ViewActionTest extends \PHPUnit\Framework\TestCase
                     'config' => [
                         'viewUrlPath' => 'url_path',
                         'urlEntityParamName' => 'theme_id',
-                        'indexField' => 'theme_id',
-                    ],
+                        'indexField' => 'theme_id'
+                    ]
+                ],
+                [
+                    ['itemName' => '', 'theme_id' => 2]
                 ],
                 [
                     [
-                        'theme_id' => 2,
-                        'itemName' => '',
-                    ],
-                ],
-                [
-                    [
-                        'theme_id' => 2,
                         'itemName' => [
                             'view' => [
                                 'href' => 'url',
                                 'label' => __('View'),
                                 '__disableTmpl' => true,
-                            ],
+                            ]
                         ],
-                    ],
+                        'theme_id' => 2
+                    ]
                 ],
                 'url_path',
-                ['theme_id' => 2],
-            ],
+                ['theme_id' => 2]
+            ]
         ];
     }
 }
