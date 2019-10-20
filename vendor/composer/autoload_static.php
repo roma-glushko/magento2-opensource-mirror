@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29
+class ComposerStaticInit4cc426092fca4bd3f88a79ac813ae75c
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -130,6 +130,10 @@ class ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29
     );
 
     public static $prefixLengthsPsr4 = array (
+        't' => 
+        array (
+            'tubalmartin\\CssMin\\' => 19,
+        ),
         'p' => 
         array (
             'phpseclib\\' => 10,
@@ -329,6 +333,10 @@ class ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29
     );
 
     public static $prefixDirsPsr4 = array (
+        'tubalmartin\\CssMin\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/tubalmartin/cssmin/src',
+        ),
         'phpseclib\\' => 
         array (
             0 => __DIR__ . '/..' . '/phpseclib/phpseclib/phpseclib',
@@ -1071,7 +1079,6 @@ class ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29
     );
 
     public static $classMap = array (
-        'CSSmin' => __DIR__ . '/..' . '/tubalmartin/cssmin/cssmin.php',
         'Cm_Cache_Backend_File' => __DIR__ . '/..' . '/colinmollenhour/cache-backend-file/File.php',
         'Cm_Cache_Backend_Redis' => __DIR__ . '/..' . '/colinmollenhour/cache-backend-redis/Cm/Cache/Backend/Redis.php',
         'CredisException' => __DIR__ . '/..' . '/colinmollenhour/credis/Client.php',
@@ -1788,11 +1795,11 @@ class ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit8c1307cf9da622cc49f259031d4e9e29::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit4cc426092fca4bd3f88a79ac813ae75c::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit4cc426092fca4bd3f88a79ac813ae75c::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit4cc426092fca4bd3f88a79ac813ae75c::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit4cc426092fca4bd3f88a79ac813ae75c::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit4cc426092fca4bd3f88a79ac813ae75c::$classMap;
 
         }, null, ClassLoader::class);
     }

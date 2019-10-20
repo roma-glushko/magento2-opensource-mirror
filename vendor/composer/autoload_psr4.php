@@ -6,6 +6,7 @@ $vendorDir = dirname(dirname(__FILE__));
 $baseDir = dirname($vendorDir);
 
 return array(
+    'tubalmartin\\CssMin\\' => array($vendorDir . '/tubalmartin/cssmin/src'),
     'phpseclib\\' => array($vendorDir . '/phpseclib/phpseclib/phpseclib'),
     'Zend\\View\\' => array($vendorDir . '/zendframework/zend-view/src'),
     'Zend\\Validator\\' => array($vendorDir . '/zendframework/zend-validator/src'),
