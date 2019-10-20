@@ -28,7 +28,7 @@ class YamlDumperTest extends TestCase
 {
     protected static $fixturesPath;
 
-    public static function setUpBeforeClass()
+    public static function setUpBeforeClass(): void
     {
         self::$fixturesPath = realpath(__DIR__.'/../Fixtures/');
     }
@@ -104,6 +104,7 @@ class YamlDumperTest extends TestCase
         $container->register('foo_service', 'Foo')->addTag('foo');
         $container->register('foo_service_tagged_iterator', 'Bar')->addArgument($taggedIterator);
         $container->register('foo_service_tagged_locator', 'Bar')->addArgument(new ServiceLocatorArgument($taggedIterator));
+        $container->register('bar_service_tagged_locator', 'Bar')->addArgument(new ServiceLocatorArgument(new TaggedIteratorArgument('foo')));
 
         $dumper = new YamlDumper($container);
         $this->assertStringEqualsFile(self::$fixturesPath.'/yaml/services_with_tagged_argument.yml', $dumper->dump());

@@ -25,6 +25,11 @@ class Escaper
     private $logger;
 
     /**
+     * @var \Magento\Framework\Translate\InlineInterface
+     */
+    private $translateInline;
+
+    /**
      * @var string[]
      */
     private $notAllowedTags = ['script', 'img', 'embed', 'iframe', 'video', 'source', 'object', 'audio'];
@@ -75,6 +80,7 @@ class Escaper
                 $domDocument = new \DOMDocument('1.0', 'UTF-8');
                 set_error_handler(
                     function ($errorNumber, $errorString) {
+                        // phpcs:ignore Magento2.Exceptions.DirectThrow
                         throw new \Exception($errorString, $errorNumber);
                     }
                 );
@@ -84,6 +90,7 @@ class Escaper
                     $domDocument->loadHTML(
                         '<html><body id="' . $wrapperElementId . '">' . $string . '</body></html>'
                     );
+                    // phpcs:disable Magento2.Exceptions.ThrowCatch
                 } catch (\Exception $e) {
                     restore_error_handler();
                     $this->getLogger()->critical($e);
@@ -313,8 +320,11 @@ class Escaper
      */
     public function escapeXssInUrl($data)
     {
+        $data = html_entity_decode((string)$data);
+        $this->getTranslateInline()->processResponseBody($data);
+
         return htmlspecialchars(
-            $this->escapeScriptIdentifiers((string)$data),
+            $this->escapeScriptIdentifiers($data),
             ENT_COMPAT | ENT_HTML5 | ENT_HTML401,
             'UTF-8',
             false
@@ -407,5 +417,20 @@ class Escaper
         }
 
         return $allowedTags;
+    }
+
+    /**
+     * Resolve inline translator.
+     *
+     * @return \Magento\Framework\Translate\InlineInterface
+     */
+    private function getTranslateInline()
+    {
+        if ($this->translateInline === null) {
+            $this->translateInline = \Magento\Framework\App\ObjectManager::getInstance()
+                ->get(\Magento\Framework\Translate\InlineInterface::class);
+        }
+
+        return $this->translateInline;
     }
 }

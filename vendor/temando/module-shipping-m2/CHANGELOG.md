@@ -1,3 +1,8 @@
+## [1.5.4] - 2019-08-26
+### Fixed
+
+- Add context to configurable object whitelist
+
 ## [1.5.3] - 2019-05-20
 ### Fixed
 

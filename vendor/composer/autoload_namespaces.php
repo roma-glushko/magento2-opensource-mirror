@@ -9,7 +9,6 @@ return array(
     'org\\bovigo\\vfs\\' => array($vendorDir . '/mikey179/vfsstream/src/main/php'),
     'Zend_' => array($vendorDir . '/magento/zendframework1/library'),
     'Yandex' => array($vendorDir . '/allure-framework/allure-php-api/src', $vendorDir . '/allure-framework/allure-php-api/test', $vendorDir . '/allure-framework/allure-codeception/src', $vendorDir . '/allure-framework/allure-phpunit/src'),
-    'Prophecy\\' => array($vendorDir . '/phpspec/prophecy/src'),
     'PhpOption\\' => array($vendorDir . '/phpoption/phpoption/src'),
     'PhpCollection' => array($vendorDir . '/phpcollection/phpcollection/src'),
     'PHPMD\\' => array($vendorDir . '/phpmd/phpmd/src/main/php'),

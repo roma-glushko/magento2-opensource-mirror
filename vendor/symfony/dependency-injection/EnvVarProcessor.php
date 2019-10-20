@@ -120,7 +120,7 @@ class EnvVarProcessor implements EnvVarProcessorInterface
 
         if (false !== $i || 'string' !== $prefix) {
             if (null === $env = $getEnv($name)) {
-                return;
+                return null;
             }
         } elseif (isset($_ENV[$name])) {
             $env = $_ENV[$name];
@@ -132,7 +132,7 @@ class EnvVarProcessor implements EnvVarProcessorInterface
             }
 
             if (null === $env = $this->container->getParameter("env($name)")) {
-                return;
+                return null;
             }
         }
 
@@ -236,7 +236,7 @@ class EnvVarProcessor implements EnvVarProcessorInterface
         }
 
         if ('csv' === $prefix) {
-            return str_getcsv($env);
+            return str_getcsv($env, ',', '"', \PHP_VERSION_ID >= 70400 ? '' : '\\');
         }
 
         if ('trim' === $prefix) {
