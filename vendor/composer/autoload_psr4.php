@@ -94,6 +94,7 @@ return array(
     'Magento\\Store\\' => array($vendorDir . '/magento/module-store'),
     'Magento\\Sniffs\\' => array($baseDir . '/dev/tests/static/framework/Magento/Sniffs'),
     'Magento\\Sitemap\\' => array($vendorDir . '/magento/module-sitemap'),
+    'Magento\\Signifyd\\' => array($vendorDir . '/magento/module-signifyd'),
     'Magento\\Shipping\\' => array($vendorDir . '/magento/module-shipping'),
     'Magento\\Setup\\' => array($baseDir . '/setup/src/Magento/Setup'),
     'Magento\\SendFriend\\' => array($vendorDir . '/magento/module-send-friend'),
