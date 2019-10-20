@@ -17,8 +17,7 @@
         <?php if (!$_order->getIsVirtual()) : ?>
             <div class="box box-order-shipping-address">
                 <strong class="box-title"><span><?= $block->escapeHtml(__('Shipping Address')) ?></span></strong>
-                <?php $deliveryLocationAddressHtml = $viewModel->getCollectionPointAddressHtml($_order); ?>
-                <?php if (!$deliveryLocationAddressHtml) : ?>
+                <?php if (!$viewModel->hasDeliveryLocation($_order)) : ?>
                     <?php // render original shipping address ?>
                     <div class="box-content">
                         <address>
@@ -28,11 +27,11 @@
                 <?php else : ?>
                     <?php // render delivery point and destination address ?>
                     <div class="box-subtitle order-shipping-primary-address">
-                        <?= $block->escapeHtml(__('Collection Point')) ?>
+                        <?= $block->escapeHtml($viewModel->getDeliveryLocationTitle($_order)) ?>
                     </div>
                     <div class="box-content">
                         <address>
-                            <?= /* @noEscape */ $deliveryLocationAddressHtml ?>
+                            <?= /* @noEscape */ $viewModel->getDeliveryLocationAddressHtml($_order) ?>
                         </address>
                     </div>
 

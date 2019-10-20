@@ -12,7 +12,7 @@ use Magento\Framework\View\Element\UiComponent\DataProvider\DataProviderInterfac
  * @api
  * @since 100.0.2
  */
-abstract class AbstractDataProvider implements DataProviderInterface
+abstract class AbstractDataProvider implements DataProviderInterface, \Countable
 {
     /**
      * Data Provider name
@@ -288,7 +288,7 @@ abstract class AbstractDataProvider implements DataProviderInterface
      * Retrieve all ids from collection
      *
      * @return int[]
-     * @since 100.2.0
+     * @since 101.0.0
      */
     public function getAllIds()
     {

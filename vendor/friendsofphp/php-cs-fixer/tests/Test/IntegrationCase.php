@@ -21,9 +21,6 @@ use PhpCsFixer\RuleSet;
  */
 final class IntegrationCase
 {
-    /**
-     * @var array
-     */
     private $config;
 
     /**
@@ -42,7 +39,7 @@ final class IntegrationCase
     private $inputCode;
 
     /**
-     * Env requirements (possible keys: php, hhvm).
+     * Env requirements (possible keys: php).
      *
      * @var array
      */
@@ -127,10 +124,10 @@ final class IntegrationCase
      */
     public function getRequirement($name)
     {
-        if (!is_string($name)) {
+        if (!\is_string($name)) {
             throw new \InvalidArgumentException(sprintf(
                 'Requirement key must be a string, got "%s".',
-                is_object($name) ? get_class($name) : gettype($name).'#'.$name
+                \is_object($name) ? \get_class($name) : \gettype($name).'#'.$name
             ));
         }
 

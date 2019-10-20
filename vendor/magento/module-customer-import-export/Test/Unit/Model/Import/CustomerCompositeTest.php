@@ -4,8 +4,6 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\CustomerImportExport\Test\Unit\Model\Import;
 
 use Magento\CustomerImportExport\Model\Import\CustomerComposite;
@@ -116,18 +114,28 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
         $this->_importFactory = $this->createMock(\Magento\ImportExport\Model\ImportFactory::class);
         $this->_resource = $this->createMock(\Magento\Framework\App\ResourceConnection::class);
         $this->_resourceHelper = $this->createMock(\Magento\ImportExport\Model\ResourceModel\Helper::class);
-        $this->_dataFactory = $this->createMock(\Magento\CustomerImportExport\Model\ResourceModel\Import\CustomerComposite\DataFactory::class);
+        $this->_dataFactory = $this->createMock(
+            \Magento\CustomerImportExport\Model\ResourceModel\Import\CustomerComposite\DataFactory::class
+        );
         $this->_customerFactory = $this->createMock(\Magento\CustomerImportExport\Model\Import\CustomerFactory::class);
         $this->_addressFactory = $this->createMock(\Magento\CustomerImportExport\Model\Import\AddressFactory::class);
 
-        $this->errorFactory = $this->createPartialMock(\Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingErrorFactory::class, ['create']);
+        $this->errorFactory = $this->createPartialMock(
+            \Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingErrorFactory::class,
+            ['create']
+        );
 
-        $this->error = $this->createPartialMock(\Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingError::class, ['init']);
+        $this->error = $this->createPartialMock(
+            \Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingError::class,
+            ['init']
+        );
 
         $this->errorFactory->expects($this->any())->method('create')->will($this->returnValue($this->error));
         $this->error->expects($this->any())->method('init')->will($this->returnValue(true));
 
-        $this->errorAggregator = $this->getMockBuilder(\Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingErrorAggregator::class)
+        $this->errorAggregator = $this->getMockBuilder(
+            \Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingErrorAggregator::class
+        )
             ->setMethods(['hasToBeTerminated'])
             ->setConstructorArgs([$this->errorFactory])
             ->getMock();
@@ -177,38 +185,26 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
             'stdClass',
             ['getCustomerId', 'prepareCustomers', 'addCustomer']
         );
-        $customerStorage->expects($this->any())->method('getCustomerId')->will($this->returnValue(1));
+        $customerStorage->expects($this->any())->method('getCustomerId')->willReturn(1);
         $customerEntity = $this->_getCustomerEntityMock();
-        $customerEntity->expects($this->any())->method('validateRow')->will($this->returnValue(true));
-        $customerEntity->expects(
-            $this->any()
-        )->method(
-            'getCustomerStorage'
-        )->will(
-            $this->returnValue($customerStorage)
-        );
+        $customerEntity->expects($this->any())->method('validateRow')->willReturn(true);
+        $customerEntity->expects($this->any())
+            ->method('getCustomerStorage')
+            ->willReturn($customerStorage);
         $customerEntity->expects($this->any())
             ->method('getValidColumnNames')
             ->willReturn(['cols']);
 
         $addressEntity = $this->_getAddressEntityMock();
-        $addressEntity->expects($this->any())->method('validateRow')->will($this->returnValue(true));
-        $addressEntity->expects(
-            $this->any()
-        )->method(
-            'getCustomerStorage'
-        )->will(
-            $this->returnValue($customerStorage)
-        );
+        $addressEntity->expects($this->any())->method('validateRow')->willReturn(true);
+        $addressEntity->expects($this->any())
+            ->method('getCustomerStorage')
+            ->willReturn($customerStorage);
 
         $dataSourceMock = $this->createPartialMock(\stdClass::class, ['cleanBunches', 'saveBunch']);
-        $dataSourceMock->expects(
-            $this->any()
-        )->method(
-            'saveBunch'
-        )->will(
-            $this->returnCallback([$this, 'verifyPrepareRowForDbData'])
-        );
+        $dataSourceMock->expects($this->any())
+            ->method('saveBunch')
+            ->willReturnCallback([$this, 'verifyPrepareRowForDbData']);
 
         $data = $this->_getModelDependencies();
         $data['customer_entity'] = $customerEntity;
@@ -229,14 +225,15 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
     protected function _getModelMockForImportData($isDeleteBehavior, $customerImport, $addressImport)
     {
         $customerEntity = $this->_getCustomerEntityMock();
-        $customerEntity->expects($this->once())->method('importData')->will($this->returnValue($customerImport));
+        $customerEntity->expects($this->once())->method('importData')->willReturn($customerImport);
 
         $addressEntity = $this->_getAddressEntityMock();
         // address import starts only if customer import finished successfully
         if ($isDeleteBehavior || !$customerImport) {
             $addressEntity->expects($this->never())->method('importData');
         } else {
-            $addressEntity->expects($this->once())->method('importData')->will($this->returnValue($addressImport));
+            $addressEntity->expects($this->once())->method('setCustomerAttributes')->willReturnSelf();
+            $addressEntity->expects($this->once())->method('importData')->willReturn($addressImport);
         }
 
         $data = $this->_getModelDependencies();
@@ -258,13 +255,9 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
             $attribute = new \Magento\Framework\DataObject(['attribute_code' => $code]);
             $attributeList[] = $attribute;
         }
-        $customerEntity->expects(
-            $this->once()
-        )->method(
-            'getAttributeCollection'
-        )->will(
-            $this->returnValue($attributeList)
-        );
+        $customerEntity->expects($this->once())
+            ->method('getAttributeCollection')
+            ->willReturn($attributeList);
 
         return $customerEntity;
     }
@@ -272,7 +265,7 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
     /**
      * @return Address|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected function _getAddressEntityMock()
+    private function _getAddressEntityMock()
     {
         $addressEntity = $this->createMock(Address::class);
 
@@ -281,13 +274,9 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
             $attribute = new \Magento\Framework\DataObject(['attribute_code' => $code]);
             $attributeList[] = $attribute;
         }
-        $addressEntity->expects(
-            $this->once()
-        )->method(
-            'getAttributeCollection'
-        )->will(
-            $this->returnValue($attributeList)
-        );
+        $addressEntity->expects($this->once())
+            ->method('getAttributeCollection')
+            ->willReturn($attributeList);
 
         return $addressEntity;
     }
@@ -345,29 +334,22 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
 
         $customerEntity->expects($this->exactly($calls['customerValidationCalls']))
             ->method('validateRow')
-            ->will($this->returnValue($validationReturn));
+            ->willReturn($validationReturn);
 
         $addressEntity
             ->expects($this->exactly($calls['addressValidationCalls']))
             ->method('validateRow')
-            ->will($this->returnValue($validationReturn));
+            ->willReturn($validationReturn);
 
         $customerStorage = $this->createPartialMock(\stdClass::class, ['getCustomerId']);
-        $customerStorage->expects($this->any())->method('getCustomerId')->will($this->returnValue(true));
-        $addressEntity->expects(
-            $this->any()
-        )->method(
-            'getCustomerStorage'
-        )->will(
-            $this->returnValue($customerStorage)
-        );
-        $customerEntity->expects(
-            $this->any()
-        )->method(
-            'getCustomerStorage'
-        )->will(
-            $this->returnValue($customerStorage)
-        );
+        $customerStorage->expects($this->any())->method('getCustomerId')->willReturn(true);
+        $addressEntity->expects($this->any())
+            ->method('getCustomerStorage')
+            ->willReturn($customerStorage);
+
+        $customerEntity->expects($this->any())
+            ->method('getCustomerStorage')
+            ->willReturn($customerStorage);
 
         $data = $this->_getModelDependencies();
         $data['customer_entity'] = $customerEntity;
@@ -389,24 +371,20 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
         $customerEntity = $this->_getCustomerEntityMock();
         $addressEntity = $this->_getAddressEntityMock();
 
-        $customerEntity->expects($this->once())->method('validateRow')->will($this->returnValue(true));
+        $customerEntity->expects($this->once())->method('validateRow')->willReturn(true);
 
-        $addressEntity->expects(
-            $this->once()
-        )->method(
-            'validateRow'
-        )->will(
-            $this->returnCallback([$this, 'validateAddressRowParams'])
-        );
+        $addressEntity->expects($this->once())
+            ->method('validateRow')
+            ->willReturnCallback([$this, 'validateAddressRowParams']);
 
         $customerStorage = $this->createPartialMock(\stdClass::class, ['getCustomerId']);
-        $customerStorage->expects($this->any())->method('getCustomerId')->will($this->returnValue(true));
+        $customerStorage->expects($this->any())->method('getCustomerId')->willReturn(true);
         $addressEntity->expects($this->any())
             ->method('getCustomerStorage')
-            ->will($this->returnValue($customerStorage));
+            ->willReturn($customerStorage);
         $customerEntity->expects($this->any())
             ->method('getCustomerStorage')
-            ->will($this->returnValue($customerStorage));
+            ->willReturn($customerStorage);
 
         $data = $this->_getModelDependencies();
         $data['customer_entity'] = $customerEntity;
@@ -521,20 +499,12 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
         $customerEntity = $this->_getCustomerEntityMock();
         $addressEntity = $this->_getAddressEntityMock();
 
-        $customerEntity->expects(
-            $this->once()
-        )->method(
-            'setParameters'
-        )->will(
-            $this->returnCallback([$this, 'callbackCheckParameters'])
-        );
-        $addressEntity->expects(
-            $this->once()
-        )->method(
-            'setParameters'
-        )->will(
-            $this->returnCallback([$this, 'callbackCheckParameters'])
-        );
+        $customerEntity->expects($this->once())
+            ->method('setParameters')
+            ->willReturnCallback([$this, 'callbackCheckParameters']);
+        $addressEntity->expects($this->once())
+            ->method('setParameters')
+            ->willReturnCallback([$this, 'callbackCheckParameters']);
         $data = $this->_getModelDependencies();
         $data['customer_entity'] = $customerEntity;
         $data['address_entity'] = $addressEntity;
@@ -582,9 +552,8 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
         $pathToCsvFile = __DIR__ . '/_files/customer_composite_prepare_row_for_db.csv';
         $directoryMock = $this->createMock(\Magento\Framework\Filesystem\Directory\Write::class);
         $directoryMock->expects($this->any())
-            ->method('openFile')->will(
-                $this->returnValue(new Read($pathToCsvFile, new File()))
-            );
+            ->method('openFile')
+            ->will($this->returnValue(new Read($pathToCsvFile, new File())));
         $source = new Csv($pathToCsvFile, $directoryMock);
         $modelUnderTest->setSource($source);
         $modelUnderTest->validateData();
@@ -670,7 +639,6 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
      */
     public function testImportData($behavior, $customerImport, $addressImport, $result)
     {
-        return;
         $isDeleteBehavior = $behavior == Import::BEHAVIOR_DELETE;
         $entityMock = $this->_getModelMockForImportData($isDeleteBehavior, $customerImport, $addressImport);
         $entityMock->setParameters(['behavior' => $behavior]);
@@ -702,8 +670,8 @@ class CustomerCompositeTest extends \PHPUnit\Framework\TestCase
         $customerEntity = $this->_getCustomerEntityMock();
         $addressEntity = $this->_getAddressEntityMock();
 
-        $customerEntity->expects($this->once())->method($method)->will($this->returnValue($customerReturnData));
-        $addressEntity->expects($this->once())->method($method)->will($this->returnValue($addressReturnData));
+        $customerEntity->expects($this->once())->method($method)->willReturn($customerReturnData);
+        $addressEntity->expects($this->once())->method($method)->willReturn($addressReturnData);
 
         $data = $this->_getModelDependencies();
         $data['customer_entity'] = $customerEntity;

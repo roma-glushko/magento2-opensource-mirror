@@ -7,12 +7,11 @@ namespace Magento\Newsletter\Model;
 
 use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Customer\Api\CustomerRepositoryInterface;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\MailException;
 use Magento\Framework\Exception\NoSuchEntityException;
-use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Customer\Api\Data\CustomerInterfaceFactory;
 use Magento\Framework\Api\DataObjectHelper;
+use Magento\Framework\App\ObjectManager;
 
 /**
  * Subscriber model
@@ -100,7 +99,7 @@ class Subscriber extends \Magento\Framework\Model\AbstractModel
 
     /**
      * Date
-     * @var DateTime
+     * @var \Magento\Framework\Stdlib\DateTime\DateTime
      */
     private $dateTime;
 
@@ -157,7 +156,7 @@ class Subscriber extends \Magento\Framework\Model\AbstractModel
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource|null $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb|null $resourceCollection
      * @param array $data
-     * @param DateTime|null $dateTime
+     * @param \Magento\Framework\Stdlib\DateTime\DateTime|null $dateTime
      * @param CustomerInterfaceFactory|null $customerFactory
      * @param DataObjectHelper|null $dataObjectHelper
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
@@ -176,7 +175,7 @@ class Subscriber extends \Magento\Framework\Model\AbstractModel
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = [],
-        DateTime $dateTime = null,
+        \Magento\Framework\Stdlib\DateTime\DateTime $dateTime = null,
         CustomerInterfaceFactory $customerFactory = null,
         DataObjectHelper $dataObjectHelper = null
     ) {
@@ -185,12 +184,16 @@ class Subscriber extends \Magento\Framework\Model\AbstractModel
         $this->_transportBuilder = $transportBuilder;
         $this->_storeManager = $storeManager;
         $this->_customerSession = $customerSession;
+        $this->dateTime = $dateTime ?: \Magento\Framework\App\ObjectManager::getInstance()->get(
+            \Magento\Framework\Stdlib\DateTime\DateTime::class
+        );
+        $this->customerFactory = $customerFactory ?: ObjectManager::getInstance()
+            ->get(CustomerInterfaceFactory::class);
+        $this->dataObjectHelper = $dataObjectHelper ?: ObjectManager::getInstance()
+            ->get(DataObjectHelper::class);
         $this->customerRepository = $customerRepository;
         $this->customerAccountManagement = $customerAccountManagement;
         $this->inlineTranslation = $inlineTranslation;
-        $this->dateTime = $dateTime ?: ObjectManager::getInstance()->get(DateTime::class);
-        $this->customerFactory = $customerFactory ?: ObjectManager::getInstance()->get(CustomerInterfaceFactory::class);
-        $this->dataObjectHelper = $dataObjectHelper ?: ObjectManager::getInstance()->get(DataObjectHelper::class);
         parent::__construct($context, $registry, $resource, $resourceCollection, $data);
     }
 
@@ -525,7 +528,7 @@ class Subscriber extends \Magento\Framework\Model\AbstractModel
     }
 
     /**
-     * unsubscribe the customer with the id provided
+     * Unsubscribe the customer with the id provided
      *
      * @param int $customerId
      * @return $this
@@ -856,6 +859,7 @@ class Subscriber extends \Magento\Framework\Model\AbstractModel
      * Set date of last changed status
      *
      * @return $this
+     * @since 100.2.1
      */
     public function beforeSave()
     {

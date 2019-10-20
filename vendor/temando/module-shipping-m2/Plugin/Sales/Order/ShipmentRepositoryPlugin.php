@@ -4,20 +4,21 @@
  */
 namespace Temando\Shipping\Plugin\Sales\Order;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\ShipmentExtensionFactory;
 use Magento\Sales\Api\Data\ShipmentInterface;
-use Magento\Sales\Api\ShipmentRepositoryInterface as SalesShipmentRepositoryInterface;
+use Magento\Sales\Api\ShipmentRepositoryInterface;
 use Temando\Shipping\Api\Data\Shipment\ShipmentReferenceInterface;
 use Temando\Shipping\Api\Data\Shipment\ShipmentReferenceInterfaceFactory;
-use Temando\Shipping\Model\ResourceModel\Repository\ShipmentRepositoryInterface;
+use Temando\Shipping\Model\ResourceModel\Repository\ShipmentReferenceRepositoryInterface;
 
 /**
  * Save and load external shipment reference to/from shipment
  *
- * @package  Temando\Shipping\Plugin
- * @author   Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\Plugin
+ * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class ShipmentRepositoryPlugin
 {
@@ -32,35 +33,35 @@ class ShipmentRepositoryPlugin
     private $shipmentReferenceFactory;
 
     /**
-     * @var ShipmentRepositoryInterface
+     * @var ShipmentReferenceRepositoryInterface
      */
-    private $shipmentRepository;
+    private $shipmentReferenceRepository;
 
     /**
      * ShipmentRepositoryPlugin constructor.
      * @param ShipmentExtensionFactory $extensionFactory
      * @param ShipmentReferenceInterfaceFactory $shipmentReferenceFactory
-     * @param ShipmentRepositoryInterface $shipmentRepository
+     * @param ShipmentReferenceRepositoryInterface $shipmentReferenceRepository
      */
     public function __construct(
         ShipmentExtensionFactory $extensionFactory,
         ShipmentReferenceInterfaceFactory $shipmentReferenceFactory,
-        ShipmentRepositoryInterface $shipmentRepository
+        ShipmentReferenceRepositoryInterface $shipmentReferenceRepository
     ) {
         $this->shipmentExtensionFactory = $extensionFactory;
         $this->shipmentReferenceFactory = $shipmentReferenceFactory;
-        $this->shipmentRepository = $shipmentRepository;
+        $this->shipmentReferenceRepository = $shipmentReferenceRepository;
     }
 
     /**
      * Load extension attributes to shipment.
      *
-     * @param SalesShipmentRepositoryInterface $subject
+     * @param ShipmentRepositoryInterface $subject
      * @param ShipmentInterface $shipment
      * @return ShipmentInterface
      */
     public function afterGet(
-        SalesShipmentRepositoryInterface $subject,
+        ShipmentRepositoryInterface $subject,
         ShipmentInterface $shipment
     ) {
         $extensionAttributes = $shipment->getExtensionAttributes();
@@ -70,13 +71,13 @@ class ShipmentRepositoryPlugin
 
         try {
             /** @var \Temando\Shipping\Api\Data\Shipment\ShipmentReferenceInterface $extShipment */
-            $extShipment = $this->shipmentRepository->getReferenceByShipmentId($shipment->getEntityId());
+            $extShipment = $this->shipmentReferenceRepository->getByShipmentId($shipment->getEntityId());
             $extensionAttributes->setExtShipmentId($extShipment->getExtShipmentId());
             $extensionAttributes->setExtReturnShipmentId($extShipment->getExtReturnShipmentId());
             $extensionAttributes->setExtLocationId($extShipment->getExtLocationId());
             $extensionAttributes->setExtTrackingUrl($extShipment->getExtTrackingUrl());
             $extensionAttributes->setExtTrackingReference($extShipment->getExtTrackingReference());
-        } catch (\Magento\Framework\Exception\LocalizedException $e) {
+        } catch (LocalizedException $e) {
             $extensionAttributes->setExtShipmentId(null);
             $extensionAttributes->setExtLocationId(null);
             $extensionAttributes->setExtTrackingUrl(null);
@@ -97,23 +98,24 @@ class ShipmentRepositoryPlugin
      * @see \Magento\Sales\Api\ShipOrderInterface::execute
      * @see ShipmentReferenceInterface
      *
-     * @param SalesShipmentRepositoryInterface $subject
+     * @param ShipmentRepositoryInterface $subject
      * @param callable $proceed
      * @param ShipmentInterface|\Magento\Sales\Model\Order\Shipment $shipment
      * @return ShipmentInterface
      */
     public function aroundSave(
-        SalesShipmentRepositoryInterface $subject,
+        ShipmentRepositoryInterface $subject,
         callable $proceed,
         ShipmentInterface $shipment
     ) {
-        $saveShipmentReference = $shipment->isObjectNew();
+        $canSave = $shipment->isObjectNew();
 
         /** @var ShipmentInterface $shipment */
         $shipment = $proceed($shipment);
-
         $extensionAttributes = $shipment->getExtensionAttributes();
-        if ($saveShipmentReference && ($extensionAttributes !== null)) {
+
+        $canSave = $canSave && $extensionAttributes && $extensionAttributes->getExtShipmentId();
+        if ($canSave) {
             /** @var \Temando\Shipping\Api\Data\Shipment\ShipmentReferenceInterface $shipmentReference */
             $shipmentReference = $this->shipmentReferenceFactory->create();
             $shipmentReference->setShipmentId($shipment->getEntityId());
@@ -123,7 +125,7 @@ class ShipmentRepositoryPlugin
             $shipmentReference->setExtTrackingUrl($extensionAttributes->getExtTrackingUrl());
             $shipmentReference->setExtTrackingReference($extensionAttributes->getExtTrackingReference());
 
-            $this->shipmentRepository->saveReference($shipmentReference);
+            $this->shipmentReferenceRepository->save($shipmentReference);
         }
 
         return $shipment;

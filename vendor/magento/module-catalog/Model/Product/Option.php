@@ -159,7 +159,7 @@ class Option extends AbstractExtensibleModel implements ProductCustomOptionInter
      * Get resource instance
      *
      * @return \Magento\Framework\Model\ResourceModel\Db\AbstractDb
-     * @deprecated 101.1.0 because resource models should be used directly
+     * @deprecated 102.0.0 because resource models should be used directly
      */
     protected function _getResource()
     {
@@ -207,7 +207,7 @@ class Option extends AbstractExtensibleModel implements ProductCustomOptionInter
      *
      * @param string $type
      * @return bool
-     * @since 101.1.0
+     * @since 102.0.0
      */
     public function hasValues($type = null)
     {
@@ -388,7 +388,6 @@ class Option extends AbstractExtensibleModel implements ProductCustomOptionInter
                 }
             }
         }
-
         if ($this->getGroupByType($this->getData('type')) === self::OPTION_GROUP_FILE) {
             $this->cleanFileExtensions();
         }
@@ -918,6 +917,8 @@ class Option extends AbstractExtensibleModel implements ProductCustomOptionInter
         return $this->metadataPool;
     }
 
+    //@codeCoverageIgnoreEnd
+
     /**
      * Clears all non-accepted characters from file_extension field.
      *
@@ -925,7 +926,6 @@ class Option extends AbstractExtensibleModel implements ProductCustomOptionInter
      */
     private function cleanFileExtensions()
     {
-        $extensions = '';
         $rawExtensions = $this->getFileExtension();
         $matches = [];
         preg_match_all('/(?<extensions>[a-z0-9]+)/i', strtolower($rawExtensions), $matches);
@@ -934,6 +934,4 @@ class Option extends AbstractExtensibleModel implements ProductCustomOptionInter
         }
         $this->setFileExtension($extensions);
     }
-
-    //@codeCoverageIgnoreEnd
 }

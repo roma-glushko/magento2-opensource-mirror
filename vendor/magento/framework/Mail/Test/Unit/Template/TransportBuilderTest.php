@@ -8,10 +8,9 @@ namespace Magento\Framework\Mail\Test\Unit\Template;
 
 use Magento\Framework\App\TemplateTypesInterface;
 use Magento\Framework\Mail\MessageInterface;
+use Magento\Framework\Mail\MessageInterfaceFactory;
 
 /**
- * Tests \Magento\Framework\Mail\Template\TransportBuilder.
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class TransportBuilderTest extends \PHPUnit\Framework\TestCase
@@ -84,7 +83,7 @@ class TransportBuilderTest extends \PHPUnit\Framework\TestCase
                 'objectManager' => $this->objectManagerMock,
                 'senderResolver' => $this->senderResolverMock,
                 'mailTransportFactory' => $this->mailTransportFactoryMock,
-                'messageFactory' => $this->messageFactoryMock,
+                'messageFactory' => $this->messageFactoryMock
             ]
         );
     }
@@ -120,12 +119,14 @@ class TransportBuilderTest extends \PHPUnit\Framework\TestCase
             ->method('setSubject')
             ->with($this->equalTo('Email Subject'))
             ->willReturnSelf();
-        $this->messageMock->expects($this->once())
-            ->method('setMessageType')
-            ->with($this->equalTo($messageType))
+
+        $this->messageMock->expects($this->exactly(intval($messageType == MessageInterface::TYPE_TEXT)))
+            ->method('setBodyText')
+            ->with($this->equalTo($bodyText))
             ->willReturnSelf();
-        $this->messageMock->expects($this->once())
-            ->method('setBody')
+
+        $this->messageMock->expects($this->exactly(intval($messageType == MessageInterface::TYPE_HTML)))
+            ->method('setBodyHtml')
             ->with($this->equalTo($bodyText))
             ->willReturnSelf();
 
@@ -135,6 +136,8 @@ class TransportBuilderTest extends \PHPUnit\Framework\TestCase
             ->method('create')
             ->with($this->equalTo(['message' => $this->messageMock]))
             ->willReturn($transport);
+
+        $this->messageFactoryMock->expects($this->once())->method('create')->willReturn($transport);
 
         $this->builder->setTemplateIdentifier('identifier')->setTemplateVars($vars)->setTemplateOptions($options);
         $this->assertInstanceOf(\Magento\Framework\Mail\TransportInterface::class, $this->builder->getTransport());

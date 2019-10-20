@@ -7,6 +7,11 @@
 namespace Magento\Bundle\Test\Unit\Pricing\Price;
 
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager as ObjectManagerHelper;
+use Magento\Framework\Pricing\Amount\AmountInterface;
+use Magento\Catalog\Model\Product;
+use Magento\Bundle\Pricing\Price\BundleOptions;
+use Magento\Bundle\Pricing\Adjustment\Calculator;
+use \Magento\Bundle\Model\Selection;
 
 class BundleOptionPriceTest extends \PHPUnit\Framework\TestCase
 {
@@ -31,7 +36,7 @@ class BundleOptionPriceTest extends \PHPUnit\Framework\TestCase
     private $bundleCalculatorMock;
 
     /**
-     * @var \Magento\Bundle\Pricing\Price\BundleOptions|\PHPUnit_Framework_MockObject_MockObject
+     * @var BundleOptions|\PHPUnit_Framework_MockObject_MockObject
      */
     private $bundleOptionsMock;
 
@@ -40,9 +45,9 @@ class BundleOptionPriceTest extends \PHPUnit\Framework\TestCase
      */
     protected function setUp()
     {
-        $this->bundleOptionsMock = $this->createMock(\Magento\Bundle\Pricing\Price\BundleOptions::class);
-        $this->saleableItemMock = $this->createMock(\Magento\Catalog\Model\Product::class);
-        $this->bundleCalculatorMock = $this->createMock(\Magento\Bundle\Pricing\Adjustment\Calculator::class);
+        $this->bundleOptionsMock = $this->createMock(BundleOptions::class);
+        $this->saleableItemMock = $this->createMock(Product::class);
+        $this->bundleCalculatorMock = $this->createMock(Calculator::class);
 
         $this->objectManagerHelper = new ObjectManagerHelper($this);
         $this->bundleOptionPrice = $this->objectManagerHelper->getObject(
@@ -51,7 +56,7 @@ class BundleOptionPriceTest extends \PHPUnit\Framework\TestCase
                 'saleableItem' => $this->saleableItemMock,
                 'quantity' => 1.,
                 'calculator' => $this->bundleCalculatorMock,
-                'bundleOptions' => $this->bundleOptionsMock
+                'bundleOptions' => $this->bundleOptionsMock,
             ]
         );
     }
@@ -77,9 +82,9 @@ class BundleOptionPriceTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetOptionSelectionAmount()
     {
-        $selectionAmount = $this->createMock(\Magento\Framework\Pricing\Amount\AmountInterface::class);
-        $product = $this->createMock(\Magento\Catalog\Model\Product::class);
-        $selection = $this->createMock(\Magento\Bundle\Model\Selection::class);
+        $selectionAmount = $this->createMock(AmountInterface::class);
+        $product = $this->createMock(Product::class);
+        $selection = $this->createMock(Selection::class);
         $this->bundleOptionsMock->expects($this->any())
             ->method('getOptionSelectionAmount')
             ->will($this->returnValue($selectionAmount))
@@ -94,7 +99,7 @@ class BundleOptionPriceTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetAmount()
     {
-        $amountMock = $this->createMock(\Magento\Framework\Pricing\Amount\AmountInterface::class);
+        $amountMock = $this->createMock(AmountInterface::class);
         $this->bundleCalculatorMock->expects($this->once())
             ->method('getOptionsAmount')
             ->with($this->equalTo($this->saleableItemMock))

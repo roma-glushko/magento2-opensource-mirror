@@ -43,13 +43,6 @@ class View extends AbstractConfigureBlock
     protected $addToCart = '.tocart';
 
     /**
-     * Locator for "Update Cart" button.
-     *
-     * @var string
-     */
-    protected $updateCart = '#product-updatecart-button';
-
-    /**
      * Quantity input id.
      *
      * @var string
@@ -256,7 +249,7 @@ class View extends AbstractConfigureBlock
      */
     public function getPriceBlock(FixtureInterface $product = null)
     {
-        $typeId = null;
+        $typeId = '';
 
         if ($product) {
             $dataConfig = $product->getDataConfig();
@@ -322,23 +315,13 @@ class View extends AbstractConfigureBlock
     }
 
     /**
-     * Click "Add to Cart" button.
+     * Click link.
      *
      * @return void
      */
     public function clickAddToCart()
     {
-        $this->_rootElement->find($this->addToCart)->click();
-    }
-
-    /**
-     * Click "Update Cart" button.
-     *
-     * @return void
-     */
-    public function clickUpdateCart()
-    {
-        $this->_rootElement->find($this->updateCart)->click();
+        $this->_rootElement->find($this->addToCart, Locator::SELECTOR_CSS)->click();
     }
 
     /**
@@ -405,10 +388,8 @@ class View extends AbstractConfigureBlock
     public function braintreePaypalCheckout()
     {
         $currentWindow = $this->browser->getCurrentWindow();
-        $this->getMiniCartBlock()->waitInit();
         $this->getMiniCartBlock()->openMiniCart();
         $this->getMiniCartBlock()->clickBraintreePaypalButton();
-
         return $currentWindow;
     }
 
@@ -682,7 +663,6 @@ class View extends AbstractConfigureBlock
      */
     public function isVideoVisible()
     {
-        $this->waitForElementNotVisible($this->galleryLoader);
         return $this->_rootElement->find($this->videoContainer)->isVisible();
     }
 

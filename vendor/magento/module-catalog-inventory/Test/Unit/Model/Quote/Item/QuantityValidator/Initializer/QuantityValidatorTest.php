@@ -119,9 +119,6 @@ class QuantityValidatorTest extends \PHPUnit\Framework\TestCase
      */
     private $stockStatusMock;
 
-    /**
-     * @inheritdoc
-     */
     protected function setUp()
     {
         $objectManagerHelper = new ObjectManager($this);
@@ -553,9 +550,6 @@ class QuantityValidatorTest extends \PHPUnit\Framework\TestCase
             ->willReturn($this->resultMock);
     }
 
-    /**
-     * @return void
-     */
     private function setUpStubForRemoveError()
     {
         $quoteItems = [$this->quoteItemMock];

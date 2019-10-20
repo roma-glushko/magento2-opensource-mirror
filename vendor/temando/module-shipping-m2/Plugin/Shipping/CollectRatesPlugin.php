@@ -8,19 +8,19 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Model\Quote\Address\RateCollectorInterface;
 use Magento\Quote\Model\Quote\Address\RateRequest;
+use Temando\Shipping\Model\Checkout\RateRequest\Extractor;
 use Temando\Shipping\Model\Config\ModuleConfigInterface;
 use Temando\Shipping\Model\ResourceModel\Repository\CollectionPointSearchRepositoryInterface;
-use Temando\Shipping\Model\ResourceModel\Repository\QuoteCollectionPointRepositoryInterface;
+use Temando\Shipping\Model\ResourceModel\Repository\PickupLocationSearchRepositoryInterface;
 use Temando\Shipping\Model\Shipping\Carrier;
-use Temando\Shipping\Model\Shipping\RateRequest\Extractor;
 
 /**
  * CollectRatesPlugin
  *
  * @package Temando\Shipping\Plugin
  * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link    http://www.temando.com/
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class CollectRatesPlugin
 {
@@ -37,30 +37,30 @@ class CollectRatesPlugin
     /**
      * @var CollectionPointSearchRepositoryInterface
      */
-    private $searchRequestRepository;
+    private $collectionPointSearchRequestRepository;
 
     /**
-     * @var QuoteCollectionPointRepositoryInterface
+     * @var PickupLocationSearchRepositoryInterface
      */
-    private $collectionPointRepository;
+    private $pickupLocationSearchRequestRepository;
 
     /**
      * CollectRatesPlugin constructor.
      * @param ModuleConfigInterface $moduleConfig
      * @param Extractor $rateRequestExtractor
-     * @param CollectionPointSearchRepositoryInterface $searchRequestRepository
-     * @param QuoteCollectionPointRepositoryInterface $collectionPointRepository
+     * @param CollectionPointSearchRepositoryInterface $collectionPointSearchRequestRepository
+     * @param PickupLocationSearchRepositoryInterface $pickupLocationSearchRequestRepository
      */
     public function __construct(
         ModuleConfigInterface $moduleConfig,
         Extractor $rateRequestExtractor,
-        CollectionPointSearchRepositoryInterface $searchRequestRepository,
-        QuoteCollectionPointRepositoryInterface $collectionPointRepository
+        CollectionPointSearchRepositoryInterface $collectionPointSearchRequestRepository,
+        PickupLocationSearchRepositoryInterface $pickupLocationSearchRequestRepository
     ) {
         $this->moduleConfig = $moduleConfig;
         $this->rateRequestExtractor = $rateRequestExtractor;
-        $this->searchRequestRepository = $searchRequestRepository;
-        $this->collectionPointRepository = $collectionPointRepository;
+        $this->collectionPointSearchRequestRepository = $collectionPointSearchRequestRepository;
+        $this->pickupLocationSearchRequestRepository = $pickupLocationSearchRequestRepository;
     }
 
     /**
@@ -72,7 +72,7 @@ class CollectRatesPlugin
     private function isCollectionPointDelivery($addressId)
     {
         try {
-            $collectionPointSearch = $this->searchRequestRepository->get($addressId);
+            $collectionPointSearch = $this->collectionPointSearchRequestRepository->get($addressId);
             $isCollectionPointDelivery = (bool) $collectionPointSearch->getShippingAddressId();
         } catch (NoSuchEntityException $exception) {
             $isCollectionPointDelivery = false;
@@ -82,25 +82,26 @@ class CollectRatesPlugin
     }
 
     /**
-     * Check if a collection point was selected for quoting (rates request)
+     * Check if store pickup delivery option was chosen.
      *
      * @param int $addressId
      * @return bool
      */
-    private function isCollectionPointRequest($addressId)
+    private function isPickupLocationDelivery($addressId)
     {
         try {
-            $collectionPoint = $this->collectionPointRepository->getSelected($addressId);
-            $isCollectionPointRequest = (bool) $collectionPoint->getEntityId();
+            $pickupLocationSearch = $this->pickupLocationSearchRequestRepository->get($addressId);
+            $isPickupLocationDelivery = (bool) $pickupLocationSearch->getShippingAddressId();
         } catch (NoSuchEntityException $exception) {
-            $isCollectionPointRequest = false;
+            $isPickupLocationDelivery = false;
         }
 
-        return $isCollectionPointRequest;
+        return $isPickupLocationDelivery;
     }
 
     /**
-     * Disable other carriers if current shipping destination is a collection point.
+     * Disable other carriers if current shipping destination is
+     * a collection point or store pickup location.
      *
      * @param RateCollectorInterface $subject
      * @param RateRequest $rateRequest
@@ -115,18 +116,20 @@ class CollectRatesPlugin
             return null;
         }
 
-        if (!$this->moduleConfig->isEnabled($quote->getStoreId())
-            || !$this->moduleConfig->isCollectionPointsEnabled($quote->getStoreId())
-        ) {
-            // certainly no collection point delivery
+        $isCheckoutEnabled = $this->moduleConfig->isEnabled($quote->getStoreId());
+        $isDeliveryLocationEnabled = $this->moduleConfig->isCollectionPointsEnabled($quote->getStoreId())
+            || $this->moduleConfig->isClickAndCollectEnabled($quote->getStoreId());
+
+        if (!$isCheckoutEnabled || !$isDeliveryLocationEnabled) {
+            // certainly no collection point or click&collect delivery
             return null;
         }
 
         $addressId = $shippingAddress->getId();
         $isCollectionPointDelivery = $this->isCollectionPointDelivery($addressId);
-        $isCollectionPointRequest = $this->isCollectionPointRequest($addressId);
+        $isPickupLocationDelivery = $this->isPickupLocationDelivery($addressId);
 
-        if ($isCollectionPointDelivery || $isCollectionPointRequest) {
+        if ($isCollectionPointDelivery || $isPickupLocationDelivery) {
             $rateRequest->setLimitCarrier(Carrier::CODE);
         }
 

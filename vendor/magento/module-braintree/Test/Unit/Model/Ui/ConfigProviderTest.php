@@ -52,11 +52,11 @@ class ConfigProviderTest extends \PHPUnit\Framework\TestCase
         $this->braintreeAdapter = $this->getMockBuilder(BraintreeAdapter::class)
             ->disableOriginalConstructor()
             ->getMock();
-        /** @var BraintreeAdapterFactory|MockObject $adapterFactory */
-        $adapterFactory = $this->getMockBuilder(BraintreeAdapterFactory::class)
+        /** @var BraintreeAdapterFactory|MockObject $adapterFactoryMock */
+        $adapterFactoryMock = $this->getMockBuilder(BraintreeAdapterFactory::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $adapterFactory->method('create')
+        $adapterFactoryMock->method('create')
             ->willReturn($this->braintreeAdapter);
 
         $this->session = $this->getMockBuilder(Session::class)
@@ -68,7 +68,7 @@ class ConfigProviderTest extends \PHPUnit\Framework\TestCase
 
         $this->configProvider = new ConfigProvider(
             $this->config,
-            $adapterFactory,
+            $adapterFactoryMock,
             $this->session
         );
     }
@@ -82,30 +82,35 @@ class ConfigProviderTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetConfig($config, $expected)
     {
-        $this->braintreeAdapter->method('generate')
+        $this->braintreeAdapter->expects(static::once())
+            ->method('generate')
             ->willReturn(self::CLIENT_TOKEN);
 
         foreach ($config as $method => $value) {
-            $this->config->method($method)
+            $this->config->expects(static::once())
+                ->method($method)
                 ->willReturn($value);
         }
 
-        self::assertEquals($expected, $this->configProvider->getConfig());
+        static::assertEquals($expected, $this->configProvider->getConfig());
     }
 
     /**
+     * @covers \Magento\Braintree\Model\Ui\ConfigProvider::getClientToken
      * @dataProvider getClientTokenDataProvider
      */
     public function testGetClientToken($merchantAccountId, $params)
     {
-        $this->config->method('getMerchantAccountId')
+        $this->config->expects(static::once())
+            ->method('getMerchantAccountId')
             ->willReturn($merchantAccountId);
 
-        $this->braintreeAdapter->method('generate')
+        $this->braintreeAdapter->expects(static::once())
+            ->method('generate')
             ->with($params)
             ->willReturn(self::CLIENT_TOKEN);
 
-        self::assertEquals(self::CLIENT_TOKEN, $this->configProvider->getClientToken());
+        static::assertEquals(self::CLIENT_TOKEN, $this->configProvider->getClientToken());
     }
 
     /**

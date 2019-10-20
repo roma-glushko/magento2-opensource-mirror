@@ -22,8 +22,12 @@ use Magento\Framework\Search\RequestInterface;
 
 /**
  * Mapper class. Maps library request to specific adapter dependent query
+ *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @api
+ * @deprecated
+ * @see \Magento\ElasticSearch
+ * @since 100.0.2
  */
 class Mapper
 {
@@ -344,6 +348,8 @@ class Mapper
     }
 
     /**
+     * Add match queries to select.
+     *
      * @param RequestInterface $request
      * @param QueryContainer $queryContainer
      * @param ScoreBuilder $scoreBuilder
@@ -380,6 +386,8 @@ class Mapper
     }
 
     /**
+     * Get connection.
+     *
      * @return false|\Magento\Framework\DB\Adapter\AdapterInterface
      */
     private function getConnection()
@@ -388,6 +396,8 @@ class Mapper
     }
 
     /**
+     * Add match queries to select.
+     *
      * @param RequestInterface $request
      * @param Select $select
      * @param IndexBuilderInterface $indexBuilder
@@ -424,6 +434,8 @@ class Mapper
     }
 
     /**
+     * Join previous result to select.
+     *
      * @param Select $query
      * @param Table $previousResultTable
      * @param ScoreBuilder $scoreBuilder

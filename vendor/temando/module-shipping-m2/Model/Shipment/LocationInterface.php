@@ -14,6 +14,7 @@ namespace Temando\Shipping\Model\Shipment;
  */
 interface LocationInterface
 {
+    const NAME = 'name';
     const COMPANY = 'company';
     const PERSON_FIRST_NAME = 'person_first_name';
     const PERSON_LAST_NAME = 'person_last_name';
@@ -25,6 +26,12 @@ interface LocationInterface
     const REGION_CODE = 'region_code';
     const COUNTRY_CODE = 'country_code';
     const TYPE = 'type';
+    const OPENING_HOURS = 'opening_hours';
+
+    /**
+     * @return string
+     */
+    public function getName();
 
     /**
      * Get organisation name.
@@ -95,8 +102,15 @@ interface LocationInterface
     public function getCountryCode();
 
     /**
-     * Get address type.
+     * Get address type, e.g. "Store", "Warehouse", etc.
      * @return string
      */
     public function getType();
+
+    /**
+     * Get location opening hours
+     *
+     * @return string[][]
+     */
+    public function getOpeningHours();
 }

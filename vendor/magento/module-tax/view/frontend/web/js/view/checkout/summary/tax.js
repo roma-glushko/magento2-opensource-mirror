@@ -11,10 +11,8 @@ define([
     'ko',
     'Magento_Checkout/js/view/summary/abstract-total',
     'Magento_Checkout/js/model/quote',
-    'Magento_Checkout/js/model/totals',
-    'jquery',
-    'mage/translate'
-], function (ko, Component, quote, totals, $) {
+    'Magento_Checkout/js/model/totals'
+], function (ko, Component, quote, totals) {
     'use strict';
 
     var isTaxDisplayedInGrandTotal = window.checkoutConfig.includeTaxInGrandTotal,
@@ -24,7 +22,7 @@ define([
     return Component.extend({
         defaults: {
             isTaxDisplayedInGrandTotal: isTaxDisplayedInGrandTotal,
-            notCalculatedMessage: $.mage.__('Not yet calculated'),
+            notCalculatedMessage: 'Not yet calculated',
             template: 'Magento_Tax/checkout/summary/tax'
         },
         totals: quote.getTotals(),
@@ -67,7 +65,7 @@ define([
                 }
             }
 
-            return parseFloat(amount);
+            return amount;
         },
 
         /**

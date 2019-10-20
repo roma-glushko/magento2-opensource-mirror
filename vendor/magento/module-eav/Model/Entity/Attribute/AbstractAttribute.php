@@ -128,7 +128,7 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
      * Serializer Instance.
      *
      * @var Json
-     * @since 100.2.0
+     * @since 101.0.0
      */
     protected $serializer;
 
@@ -147,6 +147,11 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
     ];
 
     /**
+     * @var \Magento\Eav\Api\Data\AttributeExtensionFactory
+     */
+    private $eavExtensionFactory;
+
+    /**
      * @param \Magento\Framework\Model\Context $context
      * @param \Magento\Framework\Registry $registry
      * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
@@ -162,6 +167,7 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
      * @param \Magento\Framework\Model\ResourceModel\AbstractResource $resource
      * @param \Magento\Framework\Data\Collection\AbstractDb $resourceCollection
      * @param array $data
+     * @param \Magento\Eav\Api\Data\AttributeExtensionFactory|null $eavExtensionFactory
      * @param FrontendLabelFactory|null $frontendLabelFactory
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      * @codeCoverageIgnore
@@ -182,6 +188,7 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
         \Magento\Framework\Model\ResourceModel\AbstractResource $resource = null,
         \Magento\Framework\Data\Collection\AbstractDb $resourceCollection = null,
         array $data = [],
+        \Magento\Eav\Api\Data\AttributeExtensionFactory $eavExtensionFactory = null,
         FrontendLabelFactory $frontendLabelFactory = null
     ) {
         parent::__construct(
@@ -201,16 +208,18 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
         $this->optionDataFactory = $optionDataFactory;
         $this->dataObjectProcessor = $dataObjectProcessor;
         $this->dataObjectHelper = $dataObjectHelper;
+        $this->eavExtensionFactory = $eavExtensionFactory ?: \Magento\Framework\App\ObjectManager::getInstance()
+            ->get(\Magento\Eav\Api\Data\AttributeExtensionFactory::class);
         $this->frontendLabelFactory = $frontendLabelFactory
             ?: \Magento\Framework\App\ObjectManager::getInstance()->get(FrontendLabelFactory::class);
     }
 
     /**
      * Get Serializer instance.
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      *
      * @return Json
-     * @since 100.2.0
+     * @since 101.0.0
      */
     protected function getSerializer()
     {
@@ -252,7 +261,7 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
             $entityTypeId = $entityType->getId();
         }
         if (empty($entityTypeId)) {
-            throw new LocalizedException(__('Invalid entity supplied'));
+            throw new LocalizedException(__('The entity supplied is invalid. Verify the entity and try again.'));
         }
         $this->_getResource()->loadByCode($this, $entityTypeId, $code);
         $this->_afterLoad();
@@ -559,7 +568,12 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
             }
             $backend = $this->_universalFactory->create($this->getBackendModel());
             if (!$backend) {
-                throw new LocalizedException(__('Invalid backend model specified: %1', $this->getBackendModel()));
+                throw new LocalizedException(
+                    __(
+                        'The "%1" backend model is invalid. Verify the backend model and try again.',
+                        $this->getBackendModel()
+                    )
+                );
             }
             $this->_backend = $backend->setAttribute($this);
         }
@@ -879,7 +893,7 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
      * Retrieve flat columns definition in old format (before MMDB support)
      * Used in database compatible mode
      *
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @return array
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
@@ -1331,7 +1345,13 @@ abstract class AbstractAttribute extends \Magento\Framework\Model\AbstractExtens
      */
     public function getExtensionAttributes()
     {
-        return $this->_getExtensionAttributes();
+        $extensionAttributes = $this->_getExtensionAttributes();
+        if (!($extensionAttributes instanceof \Magento\Eav\Api\Data\AttributeExtensionInterface)) {
+            /** @var \Magento\Eav\Api\Data\AttributeExtensionInterface $extensionAttributes */
+            $extensionAttributes = $this->eavExtensionFactory->create();
+            $this->setExtensionAttributes($extensionAttributes);
+        }
+        return $extensionAttributes;
     }
 
     /**

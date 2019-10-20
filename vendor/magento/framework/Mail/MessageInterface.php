@@ -9,14 +9,21 @@ namespace Magento\Framework\Mail;
  * Mail Message interface
  *
  * @api
+ * @deprecated in favor of MailMessageInterface to avoid temporal coupling (setMessageType + setBody)
+ * @see \Magento\Framework\Mail\MailMessageInterface
+ * @since 100.0.2
  */
 interface MessageInterface
 {
     /**
      * Types of message
+     * @deprecated
      */
     const TYPE_TEXT = 'text/plain';
 
+    /**
+     * @deprecated
+     */
     const TYPE_HTML = 'text/html';
 
     /**
@@ -39,13 +46,17 @@ interface MessageInterface
      *
      * @param mixed $body
      * @return $this
+     *
+     * @deprecated
+     * @see \Magento\Framework\Mail\MailMessageInterface::setBodyHtml
+     * @see \Magento\Framework\Mail\MailMessageInterface::setBodyText()
      */
     public function setBody($body);
 
     /**
      * Get message body
      *
-     * @return mixed
+     * @return string
      */
     public function getBody();
 
@@ -94,6 +105,12 @@ interface MessageInterface
      *
      * @param string $type
      * @return $this
+     *
+     * @deprecated
+     * @see \Magento\Framework\Mail\MailMessageInterface::setBodyHtml
+     * @see \Magento\Framework\Mail\MailMessageInterface::getBodyHtml
+     * @see \Magento\Framework\Mail\MailMessageInterface::setBodyText()
+     * @see \Magento\Framework\Mail\MailMessageInterface::getBodyText()
      */
     public function setMessageType($type);
 }

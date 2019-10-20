@@ -20,14 +20,8 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Helper\ProgressBar;
 
-/**
- * @author    Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright Sebastian Bergmann <sebastian@phpunit.de>
- * @license   http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @link      http://github.com/sebastianbergmann/phpcpd/tree
- * @since     Class available since Release 2.0.0
- */
 class Command extends AbstractCommand
 {
     /**
@@ -37,27 +31,34 @@ class Command extends AbstractCommand
     {
         $this->setName('phpcpd')
              ->setDefinition(
-                 array(
+                 [
                      new InputArgument(
                          'values',
                          InputArgument::IS_ARRAY,
                          'Files and directories to analyze'
                      )
-                 )
+                 ]
              )
              ->addOption(
                  'names',
                  null,
                  InputOption::VALUE_REQUIRED,
                  'A comma-separated list of file names to check',
-                 array('*.php')
+                 ['*.php']
              )
              ->addOption(
                  'names-exclude',
                  null,
                  InputOption::VALUE_REQUIRED,
                  'A comma-separated list of file names to exclude',
-                 array()
+                 []
+             )
+             ->addOption(
+                 'regexps-exclude',
+                 null,
+                 InputOption::VALUE_REQUIRED,
+                 'A comma-separated list of paths regexps to exclude (example: "#var/.*_tmp#")',
+                 []
              )
              ->addOption(
                  'exclude',
@@ -105,7 +106,7 @@ class Command extends AbstractCommand
      * @param InputInterface  $input  An InputInterface instance
      * @param OutputInterface $output An OutputInterface instance
      *
-     * @return null|integer null or 0 if everything went fine, or an error code
+     * @return null|int null or 0 if everything went fine, or an error code
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -113,25 +114,26 @@ class Command extends AbstractCommand
             $input->getArgument('values'),
             $input->getOption('exclude'),
             $this->handleCSVOption($input, 'names'),
-            $this->handleCSVOption($input, 'names-exclude')
+            $this->handleCSVOption($input, 'names-exclude'),
+            $this->handleCSVOption($input, 'regexps-exclude')
         );
 
         $files = $finder->findFiles();
 
         if (empty($files)) {
             $output->writeln('No files found to scan');
-            exit(1);
+            exit(0);
         }
 
-        $progressHelper = null;
+        $progressBar = null;
 
         if ($input->getOption('progress')) {
-            $progressHelper = $this->getHelperSet()->get('progress');
-            $progressHelper->start($output, count($files));
+            $progressBar = new ProgressBar($output, \count($files));
+            $progressBar->start();
         }
 
         $strategy = new DefaultStrategy;
-        $detector = new Detector($strategy, $progressHelper);
+        $detector = new Detector($strategy, $progressBar);
         $quiet    = $output->getVerbosity() == OutputInterface::VERBOSITY_QUIET;
 
         $clones = $detector->copyPasteDetection(
@@ -142,8 +144,8 @@ class Command extends AbstractCommand
         );
 
         if ($input->getOption('progress')) {
-            $progressHelper->finish();
-            $output->writeln('');
+            $progressBar->finish();
+            $output->writeln("\n");
         }
 
         if (!$quiet) {
@@ -164,23 +166,24 @@ class Command extends AbstractCommand
             print \PHP_Timer::resourceUsage() . "\n";
         }
 
-        if (count($clones) > 0) {
+        if (\count($clones) > 0) {
             exit(1);
         }
     }
 
     /**
-     * @param  Symfony\Component\Console\Input\InputOption $input
-     * @param  string                                      $option
+     * @param \Symfony\Component\Console\Input\InputInterface $input
+     * @param string                                          $option
+     *
      * @return array
      */
     private function handleCSVOption(InputInterface $input, $option)
     {
         $result = $input->getOption($option);
 
-        if (!is_array($result)) {
-            $result = explode(',', $result);
-            array_map('trim', $result);
+        if (!\is_array($result)) {
+            $result = \explode(',', $result);
+            \array_map('trim', $result);
         }
 
         return $result;

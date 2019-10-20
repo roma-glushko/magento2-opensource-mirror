@@ -4,30 +4,22 @@
  */
 namespace Temando\Shipping\Model\CollectionPoint;
 
-use Magento\Framework\Model\AbstractModel;
+use Magento\Framework\DataObject;
 use Temando\Shipping\Api\Data\CollectionPoint\SearchRequestInterface;
-use Temando\Shipping\Model\ResourceModel\CollectionPoint\SearchRequest as SearchRequestResource;
 
 /**
  * Temando Collection Point Search Request
  *
- * @package  Temando\Shipping\Model
- * @author   Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @deprecated since 1.4.0
+ * @see \Temando\Shipping\Model\Delivery\CollectionPointSearchRequest
+ *
+ * @package Temando\Shipping\Model
+ * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
-class SearchRequest extends AbstractModel implements SearchRequestInterface
+class SearchRequest extends DataObject implements SearchRequestInterface
 {
-    /**
-     * Init resource model.
-     * @return void
-     */
-    protected function _construct()
-    {
-        parent::_construct();
-        $this->_init(SearchRequestResource::class);
-    }
-
     /**
      * @return int
      */

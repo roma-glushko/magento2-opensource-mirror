@@ -3,8 +3,13 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\Framework\Image\Adapter;
 
+/**
+ * Image config provider.
+ */
 class Config implements ConfigInterface, UploadConfigInterface
 {
     const XML_PATH_IMAGE_ADAPTER = 'dev/image/default_adapter';
@@ -49,22 +54,22 @@ class Config implements ConfigInterface, UploadConfigInterface
     }
 
     /**
-     * Get Maximum Image Width resolution in pixels. For image resizing on client side
+     * Get Maximum Image Width resolution in pixels. For image resizing on client side.
      *
      * @return int
      */
-    public function getMaxWidth()
+    public function getMaxWidth(): int
     {
-        return $this->config->getValue(self::XML_PATH_MAX_WIDTH_IMAGE);
+        return (int)$this->config->getValue(self::XML_PATH_MAX_WIDTH_IMAGE);
     }
 
     /**
-     * Get Maximum Image Height resolution in pixels. For image resizing on client side
+     * Get Maximum Image Height resolution in pixels. For image resizing on client side.
      *
      * @return int
      */
-    public function getMaxHeight()
+    public function getMaxHeight(): int
     {
-        return $this->config->getValue(self::XML_PATH_MAX_HEIGHT_IMAGE);
+        return (int)$this->config->getValue(self::XML_PATH_MAX_HEIGHT_IMAGE);
     }
 }

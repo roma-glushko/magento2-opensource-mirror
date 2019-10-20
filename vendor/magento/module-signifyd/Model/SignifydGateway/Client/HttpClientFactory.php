@@ -75,9 +75,8 @@ class HttpClientFactory
      * @param array $params
      * @param int|null $storeId
      * @return ZendClient
-     * @throws \Zend_Http_Client_Exception
      */
-    public function create($url, $method, array $params = [], $storeId = null)
+    public function create($url, $method, array $params = [], $storeId = null): ZendClient
     {
         $apiKey = $this->getApiKey($storeId);
         $apiUrl = $this->buildFullApiUrl($url, $storeId);
@@ -112,7 +111,7 @@ class HttpClientFactory
      * @param int|null $storeId
      * @return string
      */
-    private function getApiKey($storeId)
+    private function getApiKey($storeId): string
     {
         return $this->config->getApiKey($storeId);
     }
@@ -124,7 +123,7 @@ class HttpClientFactory
      * @param int|null $storeId
      * @return string
      */
-    private function buildFullApiUrl($url, $storeId)
+    private function buildFullApiUrl($url, $storeId): string
     {
         $baseApiUrl = $this->getBaseApiUrl($storeId);
         $fullUrl = $baseApiUrl . self::$urlSeparator . ltrim($url, self::$urlSeparator);
@@ -138,7 +137,7 @@ class HttpClientFactory
      * @param int|null $storeId
      * @return string
      */
-    private function getBaseApiUrl($storeId)
+    private function getBaseApiUrl($storeId): string
     {
         $baseApiUrl = $this->config->getApiUrl($storeId);
 

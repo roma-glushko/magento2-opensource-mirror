@@ -12,9 +12,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\InputArgument;
 
-/**
- * CLI Command to enable Magento profiler.
- */
 class ProfilerEnableCommand extends Command
 {
     /**
@@ -51,12 +48,11 @@ class ProfilerEnableCommand extends Command
      * Initialize dependencies.
      *
      * @param File $filesystem
-     * @param string|null $name The name of the command; passing null means it must be set in configure()
      * @internal param ConfigInterface $resourceConfig
      */
-    public function __construct(File $filesystem, $name = null)
+    public function __construct(File $filesystem)
     {
-        parent::__construct($name ?: self::COMMAND_NAME);
+        parent::__construct();
         $this->filesystem = $filesystem;
     }
 
@@ -65,8 +61,9 @@ class ProfilerEnableCommand extends Command
      */
     protected function configure()
     {
-        $this->setDescription('Enable the profiler.')
-            ->addArgument('type', InputArgument::OPTIONAL, 'Profiler type', self::TYPE_DEFAULT);
+        $this->setName(self::COMMAND_NAME)
+            ->setDescription('Enable the profiler.')
+            ->addArgument('type', InputArgument::OPTIONAL, 'Profiler type');
 
         parent::configure();
     }
@@ -78,11 +75,16 @@ class ProfilerEnableCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $type = $input->getArgument('type');
-        if (!in_array($type, self::BUILT_IN_TYPES)) {
+        if (!$type) {
+            $type = self::TYPE_DEFAULT;
+        }
+
+        if (!in_array($type, self::BUILT_IN_TYPES, true)) {
             $builtInTypes = implode(', ', self::BUILT_IN_TYPES);
             $output->writeln(
-                '<comment>' . sprintf('Type %s is not one of the built-in output types (%s).', $type) .
-                sprintf('Make sure the necessary class exists.', $type, $builtInTypes) . '</comment>'
+                '<comment>'
+                . sprintf('Type %s is not one of the built-in output types (%s).', $type, $builtInTypes) .
+                '</comment>'
             );
         }
 
@@ -99,9 +101,9 @@ class ProfilerEnableCommand extends Command
                 );
             }
             $output->write(PHP_EOL);
+
             return;
         }
-
         $output->writeln('<error>Something went wrong while enabling the profiler.</error>');
     }
 }

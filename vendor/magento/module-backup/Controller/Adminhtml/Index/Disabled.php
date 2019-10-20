@@ -10,12 +10,13 @@ namespace Magento\Backup\Controller\Adminhtml\Index;
 
 use Magento\Backend\App\Action;
 use Magento\Backend\App\Action\Context;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\View\Result\PageFactory;
 
 /**
  * Inform that backup is disabled.
  */
-class Disabled extends Action
+class Disabled extends Action implements HttpGetActionInterface
 {
     /**
      * @see _isAllowed()

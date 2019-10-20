@@ -12,7 +12,7 @@ namespace Magento\Framework\App\DeploymentConfig\Writer;
 class PhpFormatter implements FormatterInterface
 {
     /**
-     * 4 space indentation for array formatting
+     * 4 space indentation for array formatting.
      */
     const INDENT = '    ';
 
@@ -75,10 +75,10 @@ class PhpFormatter implements FormatterInterface
      * default var_export functionality.
      *
      * @param mixed $var
-     * @param int $depth
+     * @param integer $depth
      * @return string
      */
-    private function varExportShort($var, int $depth = 0): string
+    private function varExportShort($var, int $depth = 0)
     {
         if (!is_array($var)) {
             return var_export($var, true);

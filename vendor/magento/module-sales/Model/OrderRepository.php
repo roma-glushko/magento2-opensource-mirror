@@ -3,11 +3,10 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Sales\Model;
 
-use Magento\Framework\Api\ExtensionAttribute\JoinProcessorInterface;
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Exception\InputException;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Sales\Api\Data\OrderExtensionFactory;
@@ -17,6 +16,7 @@ use Magento\Sales\Api\Data\OrderSearchResultInterfaceFactory as SearchResultFact
 use Magento\Sales\Api\Data\ShippingAssignmentInterface;
 use Magento\Sales\Model\Order\ShippingAssignmentBuilder;
 use Magento\Sales\Model\ResourceModel\Metadata;
+use Magento\Framework\App\ObjectManager;
 
 /**
  * Repository class
@@ -56,25 +56,18 @@ class OrderRepository implements \Magento\Sales\Api\OrderRepositoryInterface
     protected $registry = [];
 
     /**
-     * @var JoinProcessorInterface
-     */
-    private $extensionAttributesJoinProcessor;
-
-    /**
      * Constructor
      *
      * @param Metadata $metadata
      * @param SearchResultFactory $searchResultFactory
      * @param CollectionProcessorInterface|null $collectionProcessor
      * @param \Magento\Sales\Api\Data\OrderExtensionFactory|null $orderExtensionFactory
-     * @param JoinProcessorInterface $extensionAttributesJoinProcessor
      */
     public function __construct(
         Metadata $metadata,
         SearchResultFactory $searchResultFactory,
         CollectionProcessorInterface $collectionProcessor = null,
-        \Magento\Sales\Api\Data\OrderExtensionFactory $orderExtensionFactory = null,
-        JoinProcessorInterface $extensionAttributesJoinProcessor = null
+        \Magento\Sales\Api\Data\OrderExtensionFactory $orderExtensionFactory = null
     ) {
         $this->metadata = $metadata;
         $this->searchResultFactory = $searchResultFactory;
@@ -82,8 +75,6 @@ class OrderRepository implements \Magento\Sales\Api\OrderRepositoryInterface
             ->get(\Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface::class);
         $this->orderExtensionFactory = $orderExtensionFactory ?: ObjectManager::getInstance()
             ->get(\Magento\Sales\Api\Data\OrderExtensionFactory::class);
-        $this->extensionAttributesJoinProcessor = $extensionAttributesJoinProcessor
-            ?: ObjectManager::getInstance()->get(JoinProcessorInterface::class);
     }
 
     /**
@@ -97,13 +88,15 @@ class OrderRepository implements \Magento\Sales\Api\OrderRepositoryInterface
     public function get($id)
     {
         if (!$id) {
-            throw new InputException(__('Id required'));
+            throw new InputException(__('An ID is needed. Set the ID and try again.'));
         }
         if (!isset($this->registry[$id])) {
             /** @var OrderInterface $entity */
             $entity = $this->metadata->getNewInstance()->load($id);
             if (!$entity->getEntityId()) {
-                throw new NoSuchEntityException(__('Requested entity doesn\'t exist'));
+                throw new NoSuchEntityException(
+                    __("The entity that was requested doesn't exist. Verify the entity and try again.")
+                );
             }
             $this->setShippingAssignments($entity);
             $this->registry[$id] = $entity;
@@ -122,7 +115,6 @@ class OrderRepository implements \Magento\Sales\Api\OrderRepositoryInterface
         /** @var \Magento\Sales\Api\Data\OrderSearchResultInterface $searchResult */
         $searchResult = $this->searchResultFactory->create();
         $this->collectionProcessor->process($searchCriteria, $searchResult);
-        $this->extensionAttributesJoinProcessor->process($searchResult);
         $searchResult->setSearchCriteria($searchCriteria);
         foreach ($searchResult->getItems() as $order) {
             $this->setShippingAssignments($order);
@@ -221,7 +213,7 @@ class OrderRepository implements \Magento\Sales\Api\OrderRepositoryInterface
      * @param \Magento\Framework\Api\Search\FilterGroup $filterGroup
      * @param \Magento\Sales\Api\Data\OrderSearchResultInterface $searchResult
      * @return void
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @throws \Magento\Framework\Exception\InputException
      */
     protected function addFilterGroupToCollection(

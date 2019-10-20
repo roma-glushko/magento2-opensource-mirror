@@ -10,43 +10,37 @@
 
 namespace SebastianBergmann\PHPCPD;
 
-use SebastianBergmann\PHPCPD\CodeClone;
-
-/**
- * A map of exact clones.
- *
- * @author    Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright Sebastian Bergmann <sebastian@phpunit.de>
- * @license   http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @link      http://github.com/sebastianbergmann/phpcpd/tree
- * @since     Class available since Release 1.1.0
- */
 class CodeCloneMap implements \Countable, \Iterator
 {
     /**
      * @var CodeClone[] The clones in the clone map
      */
-    protected $clones = array();
+    private $clones = [];
 
     /**
      * @var CodeClone[] The clones in the clone map, stored by ID
      */
-    protected $clonesById = array();
+    private $clonesById = [];
 
     /**
-     * @var integer Current position while iterating the clone map
+     * @var int Current position while iterating the clone map
      */
-    protected $position = 0;
+    private $position = 0;
 
     /**
-     * @var integer Number of duplicate lines in the clone map
+     * @var int Number of duplicate lines in the clone map
      */
-    protected $numDuplicateLines = 0;
+    private $numberOfDuplicatedLines = 0;
 
     /**
-     * @var integer Number of lines analyzed
+     * @var int Number of lines analyzed
      */
-    protected $numLines = 0;
+    private $numLines = 0;
+
+    /**
+     * @var array
+     */
+    private $filesWithClones = [];
 
     /**
      * Adds a clone to the map.
@@ -68,7 +62,13 @@ class CodeCloneMap implements \Countable, \Iterator
             }
         }
 
-        $this->numDuplicateLines += $clone->getSize();
+        $this->numberOfDuplicatedLines += $clone->getSize() * (\count($clone->getFiles()) - 1);
+
+        foreach ($clone->getFiles() as $file) {
+            if (!isset($this->filesWithClones[$file->getName()])) {
+                $this->filesWithClones[$file->getName()] = true;
+            }
+        }
     }
 
     /**
@@ -89,18 +89,18 @@ class CodeCloneMap implements \Countable, \Iterator
     public function getPercentage()
     {
         if ($this->numLines > 0) {
-            $percent = ($this->numDuplicateLines / $this->numLines) * 100;
+            $percent = ($this->numberOfDuplicatedLines / $this->numLines) * 100;
         } else {
             $percent = 100;
         }
 
-        return sprintf('%01.2F%%', $percent);
+        return \sprintf('%01.2F%%', $percent);
     }
 
     /**
      * Returns the number of lines analyzed.
      *
-     * @return integer
+     * @return int
      */
     public function getNumLines()
     {
@@ -110,7 +110,7 @@ class CodeCloneMap implements \Countable, \Iterator
     /**
      * Sets the number of physical source code lines in the project.
      *
-     * @param integer $numLines
+     * @param int $numLines
      */
     public function setNumLines($numLines)
     {
@@ -122,7 +122,23 @@ class CodeCloneMap implements \Countable, \Iterator
      */
     public function count()
     {
-        return count($this->clones);
+        return \count($this->clones);
+    }
+
+    /**
+     * @return int
+     */
+    public function getNumberOfFilesWithClones()
+    {
+        return \count($this->filesWithClones);
+    }
+
+    /**
+     * @return int
+     */
+    public function getNumberOfDuplicatedLines()
+    {
+        return $this->numberOfDuplicatedLines;
     }
 
     /**
@@ -136,17 +152,17 @@ class CodeCloneMap implements \Countable, \Iterator
     /**
      * Checks if there is a current element after calls to rewind() or next().
      *
-     * @return boolean
+     * @return bool
      */
     public function valid()
     {
-        return $this->position < count($this->clones);
+        return $this->position < \count($this->clones);
     }
 
     /**
      * Returns the key of the current element.
      *
-     * @return integer
+     * @return int
      */
     public function key()
     {

@@ -252,7 +252,7 @@ class Shipping implements RateCollectorInterface
     public function collectCarrierRates($carrierCode, $request)
     {
         /* @var $carrier \Magento\Shipping\Model\Carrier\AbstractCarrier */
-        $carrier = $this->_carrierFactory->createIfActive($carrierCode, $request->getQuoteStoreId());
+        $carrier = $this->_carrierFactory->createIfActive($carrierCode, $request->getStoreId());
         if (!$carrier) {
             return $this;
         }

@@ -3,13 +3,10 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
-
 namespace Magento\Braintree\Test\Unit\Gateway;
 
 use Braintree\Result\Successful;
 use Braintree\Transaction;
-use InvalidArgumentException;
 use Magento\Braintree\Gateway\SubjectReader;
 
 /**
@@ -22,79 +19,102 @@ class SubjectReaderTest extends \PHPUnit\Framework\TestCase
      */
     private $subjectReader;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->subjectReader = new SubjectReader();
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @covers \Magento\Braintree\Gateway\SubjectReader::readCustomerId
+     * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage The "customerId" field does not exists
+     * @return void
      */
-    public function testReadCustomerIdWithException()
+    public function testReadCustomerIdWithException(): void
     {
         $this->subjectReader->readCustomerId([]);
     }
 
-    public function testReadCustomerId()
+    /**
+     * @covers \Magento\Braintree\Gateway\SubjectReader::readCustomerId
+     * @return void
+     */
+    public function testReadCustomerId(): void
     {
         $customerId = 1;
-        self::assertEquals($customerId, $this->subjectReader->readCustomerId(['customer_id' => $customerId]));
+        $this->assertEquals($customerId, $this->subjectReader->readCustomerId(['customer_id' => $customerId]));
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @covers \Magento\Braintree\Gateway\SubjectReader::readPublicHash
+     * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage The "public_hash" field does not exists
+     * @return void
      */
-    public function testReadPublicHashWithException()
+    public function testReadPublicHashWithException(): void
     {
         $this->subjectReader->readPublicHash([]);
     }
 
-    public function testReadPublicHash()
+    /**
+     * @covers \Magento\Braintree\Gateway\SubjectReader::readPublicHash
+     * @return void
+     */
+    public function testReadPublicHash(): void
     {
         $hash = 'fj23djf2o1fd';
-        self::assertEquals($hash, $this->subjectReader->readPublicHash(['public_hash' => $hash]));
+        $this->assertEquals($hash, $this->subjectReader->readPublicHash(['public_hash' => $hash]));
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @covers \Magento\Braintree\Gateway\SubjectReader::readPayPal
+     * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Transaction has't paypal attribute
+     * @return void
      */
-    public function testReadPayPalWithException()
+    public function testReadPayPalWithException(): void
     {
         $transaction = Transaction::factory([
-            'id' => 'u38rf8kg6vn'
+            'id' => 'u38rf8kg6vn',
         ]);
         $this->subjectReader->readPayPal($transaction);
     }
 
-    public function testReadPayPal()
+    /**
+     * @covers \Magento\Braintree\Gateway\SubjectReader::readPayPal
+     * @return void
+     */
+    public function testReadPayPal(): void
     {
         $paypal = [
             'paymentId' => '3ek7dk7fn0vi1',
-            'payerEmail' => 'payer@example.com'
+            'payerEmail' => 'payer@example.com',
         ];
         $transaction = Transaction::factory([
             'id' => '4yr95vb',
-            'paypal' => $paypal
+            'paypal' => $paypal,
         ]);
 
-        self::assertEquals($paypal, $this->subjectReader->readPayPal($transaction));
+        $this->assertEquals($paypal, $this->subjectReader->readPayPal($transaction));
     }
 
     /**
      * Checks a case when subject reader retrieves successful Braintree transaction.
+     *
+     * @return void
      */
-    public function testReadTransaction()
+    public function testReadTransaction(): void
     {
         $transaction = Transaction::factory(['id' => 1]);
         $response = [
-            'object' => new Successful($transaction, 'transaction')
+            'object' => new Successful($transaction, 'transaction'),
         ];
-
         $actual = $this->subjectReader->readTransaction($response);
-        self::assertSame($transaction, $actual);
+
+        $this->assertSame($transaction, $actual);
     }
 
     /**
@@ -103,11 +123,12 @@ class SubjectReaderTest extends \PHPUnit\Framework\TestCase
      * @param array $response
      * @param string $expectedMessage
      * @dataProvider invalidTransactionResponseDataProvider
-     * @expectedException InvalidArgumentException
+     * @expectedException \InvalidArgumentException
+     * @return void
      */
-    public function testReadTransactionWithInvalidResponse(array $response, string $expectedMessage)
+    public function testReadTransactionWithInvalidResponse(array $response, string $expectedMessage): void
     {
-        self::expectExceptionMessage($expectedMessage);
+        $this->expectExceptionMessage($expectedMessage);
         $this->subjectReader->readTransaction($response);
     }
 
@@ -125,22 +146,22 @@ class SubjectReaderTest extends \PHPUnit\Framework\TestCase
         return [
             [
                 'response' => [
-                    'object' => []
+                    'object' => [],
                 ],
-                'expectedMessage' => 'Response object does not exist.'
+                'expectedMessage' => 'Response object does not exist.',
             ],
             [
                 'response' => [
-                    'object' => new \stdClass()
+                    'object' => new \stdClass(),
                 ],
-                'expectedMessage' => 'The object is not a class \Braintree\Transaction.'
+                'expectedMessage' => 'The object is not a class \Braintree\Transaction.',
             ],
             [
                 'response' => [
-                    'object' => $response
+                    'object' => $response,
                 ],
-                'expectedMessage' => 'The object is not a class \Braintree\Transaction.'
-            ]
+                'expectedMessage' => 'The object is not a class \Braintree\Transaction.',
+            ],
         ];
     }
 }

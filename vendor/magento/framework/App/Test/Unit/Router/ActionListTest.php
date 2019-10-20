@@ -65,7 +65,8 @@ class ActionListTest extends \PHPUnit\Framework\TestCase
             ->method('save');
         $this->readerMock->expects($this->once())
             ->method('getActionFiles')
-            ->willReturn('data');
+            ->willReturn('data')
+        ;
         $this->createActionListInstance();
     }
 

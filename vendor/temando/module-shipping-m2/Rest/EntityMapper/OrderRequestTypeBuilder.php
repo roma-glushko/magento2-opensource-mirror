@@ -4,25 +4,26 @@
  */
 namespace Temando\Shipping\Rest\EntityMapper;
 
-use Temando\Shipping\Api\Data\CollectionPoint\QuoteCollectionPointInterface;
+use Temando\Shipping\Api\Data\Delivery\QuoteCollectionPointInterface;
 use Temando\Shipping\Model\Checkout\Attribute\CheckoutFieldInterface;
 use Temando\Shipping\Model\Order\OrderBillingInterface;
 use Temando\Shipping\Model\Order\OrderItemInterface;
 use Temando\Shipping\Model\Order\OrderRecipientInterface;
 use Temando\Shipping\Model\OrderInterface;
+use Temando\Shipping\Model\ResourceModel\Repository\OrderPickupLocationRepositoryInterface;
 use Temando\Shipping\Rest\Request\Type\ExtensibleTypeAttribute;
 use Temando\Shipping\Rest\Request\Type\ExtensibleTypeAttributeFactory;
 use Temando\Shipping\Rest\Request\Type\Generic\DimensionsFactory;
 use Temando\Shipping\Rest\Request\Type\Generic\MonetaryValueFactory;
 use Temando\Shipping\Rest\Request\Type\Generic\WeightFactory;
+use Temando\Shipping\Rest\Request\Type\Order\CollectionPointSearchFactory;
 use Temando\Shipping\Rest\Request\Type\Order\Customer;
 use Temando\Shipping\Rest\Request\Type\Order\CustomerFactory;
-use Temando\Shipping\Rest\Request\Type\Order\CollectionPointSearchFactory;
-use Temando\Shipping\Rest\Request\Type\Order\ExperienceFactory;
 use Temando\Shipping\Rest\Request\Type\Order\Experience\DescriptionFactory;
+use Temando\Shipping\Rest\Request\Type\Order\ExperienceFactory;
 use Temando\Shipping\Rest\Request\Type\Order\OrderItem;
-use Temando\Shipping\Rest\Request\Type\Order\OrderItemFactory;
 use Temando\Shipping\Rest\Request\Type\Order\OrderItem\ClassificationCodesFactory;
+use Temando\Shipping\Rest\Request\Type\Order\OrderItemFactory;
 use Temando\Shipping\Rest\Request\Type\Order\Recipient;
 use Temando\Shipping\Rest\Request\Type\Order\RecipientFactory;
 use Temando\Shipping\Rest\Request\Type\Order\ShipmentDetails;
@@ -107,6 +108,11 @@ class OrderRequestTypeBuilder
     private $attributeFactory;
 
     /**
+     * @var OrderPickupLocationRepositoryInterface
+     */
+    private $orderPickUpLocation;
+
+    /**
      * OrderRequestTypeBuilder constructor.
      * @param OrderRequestTypeInterfaceFactory $requestTypeFactory
      * @param CustomerFactory $customerFactory
@@ -121,6 +127,7 @@ class OrderRequestTypeBuilder
      * @param DescriptionFactory $descriptionFactory
      * @param ExtensibleTypeAttributeFactory $attributeFactory
      * @param CollectionPointSearchFactory $collectionPointSearchFactory
+     * @param OrderPickupLocationRepositoryInterface $orderPickUpLocation
      */
     public function __construct(
         OrderRequestTypeInterfaceFactory $requestTypeFactory,
@@ -135,7 +142,8 @@ class OrderRequestTypeBuilder
         ExperienceFactory $experienceFactory,
         DescriptionFactory $descriptionFactory,
         ExtensibleTypeAttributeFactory $attributeFactory,
-        CollectionPointSearchFactory $collectionPointSearchFactory
+        CollectionPointSearchFactory $collectionPointSearchFactory,
+        OrderPickupLocationRepositoryInterface $orderPickUpLocation
     ) {
         $this->requestTypeFactory = $requestTypeFactory;
         $this->customerFactory = $customerFactory;
@@ -150,6 +158,7 @@ class OrderRequestTypeBuilder
         $this->descriptionFactory = $descriptionFactory;
         $this->attributeFactory = $attributeFactory;
         $this->collectionPointSearchFactory = $collectionPointSearchFactory;
+        $this->orderPickUpLocation = $orderPickUpLocation;
     }
 
     /**
@@ -183,14 +192,14 @@ class OrderRequestTypeBuilder
      * Build recipient request type from order shipping address entity.
      *
      * @param OrderRecipientInterface $recipient
-     * @param QuoteCollectionPointInterface $collectionPoint
+     * @param QuoteCollectionPointInterface|null $collectionPoint
      * @return Recipient
      */
     private function getRecipientType(
         OrderRecipientInterface $recipient,
-        QuoteCollectionPointInterface $collectionPoint
+        QuoteCollectionPointInterface $collectionPoint = null
     ) {
-        if ($collectionPoint->getCollectionPointId()) {
+        if ($collectionPoint) {
             // collection point recipient
             $recipientType = $this->recipientFactory->create([
                 'organisationName' => $collectionPoint->getName(),
@@ -234,14 +243,14 @@ class OrderRequestTypeBuilder
      * Build shipment details request type from order shipping address entity.
      *
      * @param OrderRecipientInterface $recipient
-     * @param QuoteCollectionPointInterface $collectionPoint
+     * @param QuoteCollectionPointInterface|null $collectionPoint
      * @return ShipmentDetails
      */
     private function getShipmentDetailsType(
         OrderRecipientInterface $recipient,
-        QuoteCollectionPointInterface $collectionPoint
+        QuoteCollectionPointInterface $collectionPoint = null
     ) {
-        if (!$collectionPoint->getCollectionPointId()) {
+        if (!$collectionPoint) {
             // no final recipient required for regular shipments
             $finalRecipientType = $this->recipientFactory->create([
                 'organisationName' => '',
@@ -258,6 +267,7 @@ class OrderRequestTypeBuilder
                 'postalCode' => '',
                 'locality' => '',
             ]);
+            $collectionPointId = '';
         } else {
             $finalRecipientType = $this->recipientFactory->create([
                 'organisationName' => $recipient->getCompany(),
@@ -274,11 +284,12 @@ class OrderRequestTypeBuilder
                 'postalCode' => $recipient->getPostalCode(),
                 'locality' => $recipient->getCity(),
             ]);
+            $collectionPointId = $collectionPoint->getCollectionPointId();
         }
 
         $shipmentDetailsType = $this->shipmentDetailsFactory->create([
             'finalRecipient' => $finalRecipientType,
-            'collectionPointId' => $collectionPoint->getCollectionPointId(),
+            'collectionPointId' => $collectionPointId,
         ]);
 
         return $shipmentDetailsType;
@@ -360,6 +371,23 @@ class OrderRequestTypeBuilder
     }
 
     /**
+     * @param OrderInterface $order
+     *
+     * @return string
+     */
+    private function getPickUpLocationId(OrderInterface $order)
+    {
+        $pickupLocation = $order->getPickupLocation();
+        if (!$order->getExperienceCode() || empty($pickupLocation)) {
+            $pickUpId = '';
+        } else {
+            $pickUpId = $pickupLocation->getPickupLocationId();
+        }
+
+        return $pickUpId;
+    }
+
+    /**
      * Create order request type from order entity. Submitting an order ID to
      * the Temando platform manifests the order.
      *
@@ -398,16 +426,16 @@ class OrderRequestTypeBuilder
                     'language' => $order->getExperienceLanguage(),
                     'text' => $order->getExperienceDescription(),
                 ]),
-            ]),
-            'collectionPointSearch' => $this->collectionPointSearchFactory->create([
-                'postalCode' => $order->getCollectionPointSearchRequest()->getPostcode(),
-                'countryCode' => $order->getCollectionPointSearchRequest()->getCountryId(),
+                'pickUpLocationId' => $this->getPickUpLocationId($order),
             ]),
         ];
 
-        if ($order->getCollectionPoint()->getCollectionPointId()) {
-            // no search if collection point was already selected
-            unset($requestTypeData['collectionPointSearch']);
+        if ($order->getCollectionPointSearchRequest() && !$order->getCollectionPoint()) {
+            // add search request if no collection point was selected yet
+            $requestTypeData['collectionPointSearch'] = $this->collectionPointSearchFactory->create([
+                'postalCode' => $order->getCollectionPointSearchRequest()->getPostcode(),
+                'countryCode' => $order->getCollectionPointSearchRequest()->getCountryId(),
+            ]);
         }
 
         $orderType = $this->requestTypeFactory->create($requestTypeData);

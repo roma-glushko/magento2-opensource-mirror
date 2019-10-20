@@ -63,7 +63,7 @@ class ConfigCommand extends BaseCommand
     {
         $this
             ->setName('config')
-            ->setDescription('Set config options.')
+            ->setDescription('Sets config options.')
             ->setDefinition(array(
                 new InputOption('global', 'g', InputOption::VALUE_NONE, 'Apply command to the global config file'),
                 new InputOption('editor', 'e', InputOption::VALUE_NONE, 'Open editor'),
@@ -75,7 +75,8 @@ class ConfigCommand extends BaseCommand
                 new InputArgument('setting-key', null, 'Setting key'),
                 new InputArgument('setting-value', InputArgument::IS_ARRAY, 'Setting value'),
             ))
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 This command allows you to edit composer config settings and repositories
 in either the local composer.json file or the global config.json file.
 
@@ -146,10 +147,14 @@ EOT
         // passed in a file to use
         $configFile = $input->getOption('global')
             ? ($this->config->get('home') . '/config.json')
-            : ($input->getOption('file') ?: trim(getenv('COMPOSER')) ?: 'composer.json');
+            : ($input->getOption('file') ?: Factory::getComposerFile());
 
         // Create global composer.json if this was invoked using `composer global config`
-        if ($configFile === 'composer.json' && !file_exists($configFile) && realpath(getcwd()) === realpath($this->config->get('home'))) {
+        if (
+            ($configFile === 'composer.json' || $configFile === './composer.json')
+            && !file_exists($configFile)
+            && realpath(getcwd()) === realpath($this->config->get('home'))
+        ) {
             file_put_contents($configFile, "{\n}\n");
         }
 
@@ -402,6 +407,7 @@ EOT
                 },
             ),
             'github-expose-hostname' => array($booleanValidator, $booleanNormalizer),
+            'htaccess-protect' => array($booleanValidator, $booleanNormalizer),
         );
         $multiConfigValues = array(
             'github-protocols' => array(
@@ -571,6 +577,9 @@ EOT
 
             return $this->configSource->addConfigSetting($settingKey, $values[0]);
         }
+        if ($settingKey === 'platform' && $input->getOption('unset')) {
+            return $this->configSource->removeConfigSetting($settingKey);
+        }
 
         // handle auth
         if (preg_match('/^(bitbucket-oauth|github-oauth|gitlab-oauth|gitlab-token|http-basic)\.(.+)/', $settingKey, $matches)) {
@@ -602,6 +611,15 @@ EOT
             }
 
             return;
+        }
+
+        // handle script
+        if (preg_match('/^scripts\.(.+)/', $settingKey, $matches)) {
+            if ($input->getOption('unset')) {
+                return $this->configSource->removeProperty($settingKey);
+            }
+
+            return $this->configSource->addProperty($settingKey, count($values) > 1 ? $values : $values[0]);
         }
 
         throw new \InvalidArgumentException('Setting '.$settingKey.' does not exist or is not supported by this command');

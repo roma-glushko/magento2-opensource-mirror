@@ -12,15 +12,6 @@ namespace SebastianBergmann\PHPCPD\Log;
 
 use SebastianBergmann\PHPCPD\CodeCloneMap;
 
-/**
- * Implementation of AbstractXmlLogger that writes in PMD-CPD format.
- *
- * @author    Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright Sebastian Bergmann <sebastian@phpunit.de>
- * @license   http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @link      http://github.com/sebastianbergmann/phpcpd/tree
- * @since     Class available since Release 1.0.0
- */
 class PMD extends AbstractXmlLogger
 {
     /**
@@ -48,17 +39,12 @@ class PMD extends AbstractXmlLogger
 
                 $file->setAttribute('path', $codeCloneFile->getName());
                 $file->setAttribute('line', $codeCloneFile->getStartLine());
-
             }
 
             $duplication->appendChild(
                 $this->document->createElement(
                     'codefragment',
-                    htmlspecialchars(
-                        $this->convertToUtf8($clone->getLines()),
-                        ENT_COMPAT,
-                        'UTF-8'
-                    )
+                    $this->escapeForXml($clone->getLines())
                 )
             );
         }

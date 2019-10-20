@@ -52,7 +52,6 @@ class RequestTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @param null $uri
-     *
      * @return Request
      */
     private function getModel($uri = null)

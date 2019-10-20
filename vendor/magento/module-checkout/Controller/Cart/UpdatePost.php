@@ -1,14 +1,18 @@
 <?php
 /**
- *
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Checkout\Controller\Cart;
 
 use Magento\Checkout\Model\Cart\RequestQuantityProcessor;
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 
-class UpdatePost extends \Magento\Checkout\Controller\Cart
+/**
+ * Class UpdatePost
+ */
+class UpdatePost extends \Magento\Checkout\Controller\Cart implements HttpPostActionInterface, HttpGetActionInterface
 {
     /**
      * @var RequestQuantityProcessor
@@ -55,9 +59,9 @@ class UpdatePost extends \Magento\Checkout\Controller\Cart
         try {
             $this->cart->truncate()->save();
         } catch (\Magento\Framework\Exception\LocalizedException $exception) {
-            $this->messageManager->addError($exception->getMessage());
+            $this->messageManager->addErrorMessage($exception->getMessage());
         } catch (\Exception $exception) {
-            $this->messageManager->addException($exception, __('We can\'t update the shopping cart.'));
+            $this->messageManager->addExceptionMessage($exception, __('We can\'t update the shopping cart.'));
         }
     }
 
@@ -79,11 +83,11 @@ class UpdatePost extends \Magento\Checkout\Controller\Cart
                 $this->cart->updateItems($cartData)->save();
             }
         } catch (\Magento\Framework\Exception\LocalizedException $e) {
-            $this->messageManager->addError(
+            $this->messageManager->addErrorMessage(
                 $this->_objectManager->get(\Magento\Framework\Escaper::class)->escapeHtml($e->getMessage())
             );
         } catch (\Exception $e) {
-            $this->messageManager->addException($e, __('We can\'t update the shopping cart.'));
+            $this->messageManager->addExceptionMessage($e, __('We can\'t update the shopping cart.'));
             $this->_objectManager->get(\Psr\Log\LoggerInterface::class)->critical($e);
         }
     }

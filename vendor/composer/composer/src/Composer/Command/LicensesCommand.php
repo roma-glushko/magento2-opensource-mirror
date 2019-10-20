@@ -31,12 +31,13 @@ class LicensesCommand extends BaseCommand
     {
         $this
             ->setName('licenses')
-            ->setDescription('Show information about licenses of dependencies.')
+            ->setDescription('Shows information about licenses of dependencies.')
             ->setDefinition(array(
                 new InputOption('format', 'f', InputOption::VALUE_REQUIRED, 'Format of the output: text or json', 'text'),
                 new InputOption('no-dev', null, InputOption::VALUE_NONE, 'Disables search in require-dev packages.'),
             ))
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 The license command displays detailed information about the licenses of
 the installed dependencies.
 
@@ -74,8 +75,9 @@ EOT
 
                 $table = new Table($output);
                 $table->setStyle('compact');
-                $table->getStyle()->setVerticalBorderChar('');
-                $table->getStyle()->setCellRowContentFormat('%s  ');
+                $tableStyle = $table->getStyle();
+                $tableStyle->setVerticalBorderChar('');
+                $tableStyle->setCellRowContentFormat('%s  ');
                 $table->setHeaders(array('Name', 'Version', 'License'));
                 foreach ($packages as $package) {
                     $table->addRow(array(

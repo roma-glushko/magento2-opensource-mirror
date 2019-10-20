@@ -14,7 +14,7 @@ use PHPUnit_Framework_MockObject_MockObject as MockObject;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class TransactionSaleTest
+ * Tests \Magento\Braintree\Gateway\Http\Client\TransactionSale.
  */
 class TransactionSaleTest extends \PHPUnit\Framework\TestCase
 {
@@ -26,35 +26,35 @@ class TransactionSaleTest extends \PHPUnit\Framework\TestCase
     /**
      * @var Logger|MockObject
      */
-    private $logger;
+    private $loggerMock;
 
     /**
      * @var BraintreeAdapter|MockObject
      */
-    private $adapter;
+    private $adapterMock;
 
     /**
      * @inheritdoc
      */
     protected function setUp()
     {
-        /** @var LoggerInterface|MockObject $criticalLogger */
-        $criticalLogger = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->logger = $this->getMockBuilder(Logger::class)
+        /** @var LoggerInterface|MockObject $criticalLoggerMock */
+        $criticalLoggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->getMockBuilder(Logger::class)
             ->disableOriginalConstructor()
             ->getMock();
+        $this->adapterMock = $this->getMockBuilder(BraintreeAdapter::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        /** @var BraintreeAdapterFactory|MockObject $adapterFactoryMock */
+        $adapterFactoryMock = $this->getMockBuilder(BraintreeAdapterFactory::class)
+            ->disableOriginalConstructor()
+            ->getMock();
+        $adapterFactoryMock->expects(self::once())
+            ->method('create')
+            ->willReturn($this->adapterMock);
 
-        $this->adapter = $this->getMockBuilder(BraintreeAdapter::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        /** @var BraintreeAdapterFactory|MockObject $adapterFactory */
-        $adapterFactory = $this->getMockBuilder(BraintreeAdapterFactory::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $adapterFactory->method('create')
-            ->willReturn($this->adapter);
-
-        $this->model = new TransactionSale($criticalLogger, $this->logger, $adapterFactory);
+        $this->model = new TransactionSale($criticalLoggerMock, $this->loggerMock, $adapterFactoryMock);
     }
 
     /**
@@ -67,7 +67,8 @@ class TransactionSaleTest extends \PHPUnit\Framework\TestCase
      */
     public function testPlaceRequestException()
     {
-        $this->logger->method('debug')
+        $this->loggerMock->expects($this->once())
+            ->method('debug')
             ->with(
                 [
                     'request' => $this->getTransferData(),
@@ -76,7 +77,8 @@ class TransactionSaleTest extends \PHPUnit\Framework\TestCase
                 ]
             );
 
-        $this->adapter->method('sale')
+        $this->adapterMock->expects($this->once())
+            ->method('sale')
             ->willThrowException(new \Exception('Test messages'));
 
         /** @var TransferInterface|MockObject $transferObjectMock */
@@ -93,11 +95,13 @@ class TransactionSaleTest extends \PHPUnit\Framework\TestCase
     public function testPlaceRequestSuccess()
     {
         $response = $this->getResponseObject();
-        $this->adapter->method('sale')
+        $this->adapterMock->expects($this->once())
+            ->method('sale')
             ->with($this->getTransferData())
             ->willReturn($response);
 
-        $this->logger->method('debug')
+        $this->loggerMock->expects($this->once())
+            ->method('debug')
             ->with(
                 [
                     'request' => $this->getTransferData(),
@@ -120,7 +124,8 @@ class TransactionSaleTest extends \PHPUnit\Framework\TestCase
     private function getTransferObjectMock()
     {
         $transferObjectMock = $this->createMock(TransferInterface::class);
-        $transferObjectMock->method('getBody')
+        $transferObjectMock->expects($this->once())
+            ->method('getBody')
             ->willReturn($this->getTransferData());
 
         return $transferObjectMock;

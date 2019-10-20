@@ -19,6 +19,7 @@ class ConfiguredOptions
      *
      * @param float $basePrice
      * @param ItemInterface $item
+     *
      * @return float
      */
     public function getItemOptionsValue(float $basePrice, ItemInterface $item): float
@@ -29,7 +30,7 @@ class ConfiguredOptions
         if ($optionIds) {
             foreach (explode(',', $optionIds->getValue()) as $optionId) {
                 $option = $product->getOptionById($optionId);
-                if ($option) {
+                if ($option !== null) {
                     $itemOption = $item->getOptionByCode('option_' . $option->getId());
                     /** @var $group \Magento\Catalog\Model\Product\Option\Type\DefaultType */
                     $group = $option->groupFactory($option->getType())
@@ -40,6 +41,7 @@ class ConfiguredOptions
                 }
             }
         }
+
         return $value;
     }
 }

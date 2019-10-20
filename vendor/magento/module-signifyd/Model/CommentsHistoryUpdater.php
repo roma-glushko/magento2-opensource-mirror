@@ -22,7 +22,6 @@ class CommentsHistoryUpdater
 
     /**
      * @var OrderStatusHistoryRepositoryInterface
-     * @since 2.2.0
      */
     private $historyRepository;
 

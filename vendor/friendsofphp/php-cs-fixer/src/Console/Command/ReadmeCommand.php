@@ -68,7 +68,7 @@ configuration, possible improvements, ideas and questions, please visit us!
 Requirements
 ------------
 
-PHP needs to be a minimum version of PHP 5.3.6.
+PHP needs to be a minimum version of PHP 5.6.0.
 
 Installation
 ------------
@@ -131,6 +131,15 @@ Globally (homebrew)
 
     $ brew install php-cs-fixer
 
+Locally (PHIVE)
+~~~~~~~~~~~~~~~
+
+Install `PHIVE <https://phar.io>`_ and issue the following command:
+
+.. code-block:: bash
+
+    $ phive install php-cs-fixer # use `--global` for global install
+
 Update
 ------
 
@@ -169,6 +178,13 @@ You can update ``php-cs-fixer`` through this command:
 .. code-block:: bash
 
     $ brew upgrade php-cs-fixer
+
+Locally (PHIVE)
+~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    $ phive update php-cs-fixer
 
 Usage
 -----
@@ -233,17 +249,15 @@ EOF;
         $help = Preg::replace("#^\n( +\\$ )#m", "\n.. code-block:: bash\n\n$1", $help);
         $help = Preg::replace("#^\n( +<\\?php)#m", "\n.. code-block:: php\n\n$1", $help);
         $help = Preg::replaceCallback(
-            '#^\\s*<\\?(\\w+).*?\\?>#ms',
-            function ($matches) {
+            '#^\s*<\?(\w+).*?\?>#ms',
+            static function ($matches) {
                 $result = Preg::replace("#^\\.\\. code-block:: bash\n\n#m", '', $matches[0]);
 
                 if ('php' !== $matches[1]) {
                     $result = Preg::replace("#<\\?{$matches[1]}\\s*#", '', $result);
                 }
 
-                $result = Preg::replace("#\n\n +\\?>#", '', $result);
-
-                return $result;
+                return Preg::replace("#\n\n +\\?>#", '', $result);
             },
             $help
         );
@@ -256,7 +270,7 @@ EOF;
 
         $help = Preg::replaceCallback(
            '#`(.+)`\s?\(<url>(.+)<\/url>\)#',
-            function (array $matches) {
+            static function (array $matches) {
                 return sprintf('`%s <%s>`_', str_replace('\\', '\\\\', $matches[1]), $matches[2]);
             },
             $help

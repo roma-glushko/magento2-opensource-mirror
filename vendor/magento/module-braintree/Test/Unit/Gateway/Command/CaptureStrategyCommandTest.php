@@ -24,7 +24,7 @@ use Magento\Sales\Model\ResourceModel\Order\Payment\Transaction\CollectionFactor
 use PHPUnit_Framework_MockObject_MockObject as MockObject;
 
 /**
- * Class CaptureStrategyCommandTest
+ * Tests \Magento\Braintree\Gateway\Command\CaptureStrategyCommand.
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
@@ -38,42 +38,42 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
     /**
      * @var CommandPoolInterface|MockObject
      */
-    private $commandPool;
+    private $commandPoolMock;
 
     /**
      * @var TransactionRepositoryInterface|MockObject
      */
-    private $transactionRepository;
+    private $transactionRepositoryMock;
 
     /**
      * @var FilterBuilder|MockObject
      */
-    private $filterBuilder;
+    private $filterBuilderMock;
 
     /**
      * @var SearchCriteriaBuilder|MockObject
      */
-    private $searchCriteriaBuilder;
+    private $searchCriteriaBuilderMock;
 
     /**
      * @var Payment|MockObject
      */
-    private $payment;
+    private $paymentMock;
 
     /**
      * @var GatewayCommand|MockObject
      */
-    private $command;
+    private $commandMock;
 
     /**
      * @var SubjectReader|MockObject
      */
-    private $subjectReader;
+    private $subjectReaderMock;
 
     /**
      * @var BraintreeAdapter|MockObject
      */
-    private $braintreeAdapter;
+    private $braintreeAdapterMock;
 
     /**
      * @var BraintreeSearchAdapter
@@ -82,12 +82,12 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
 
     protected function setUp()
     {
-        $this->commandPool = $this->getMockBuilder(CommandPoolInterface::class)
+        $this->commandPoolMock = $this->getMockBuilder(CommandPoolInterface::class)
             ->disableOriginalConstructor()
             ->setMethods(['get', '__wakeup'])
             ->getMock();
 
-        $this->subjectReader = $this->getMockBuilder(SubjectReader::class)
+        $this->subjectReaderMock = $this->getMockBuilder(SubjectReader::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -96,87 +96,106 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
         $this->initFilterBuilderMock();
         $this->initSearchCriteriaBuilderMock();
 
-        $this->braintreeAdapter = $this->getMockBuilder(BraintreeAdapter::class)
+        $this->braintreeAdapterMock = $this->getMockBuilder(BraintreeAdapter::class)
             ->disableOriginalConstructor()
             ->getMock();
-        /** @var BraintreeAdapterFactory|MockObject $adapterFactory */
-        $adapterFactory = $this->getMockBuilder(BraintreeAdapterFactory::class)
+        /** @var BraintreeAdapterFactory|MockObject $adapterFactoryMock */
+        $adapterFactoryMock = $this->getMockBuilder(BraintreeAdapterFactory::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $adapterFactory->method('create')
-            ->willReturn($this->braintreeAdapter);
+        $adapterFactoryMock->expects(self::any())
+            ->method('create')
+            ->willReturn($this->braintreeAdapterMock);
 
         $this->braintreeSearchAdapter = new BraintreeSearchAdapter();
 
         $this->strategyCommand = new CaptureStrategyCommand(
-            $this->commandPool,
-            $this->transactionRepository,
-            $this->filterBuilder,
-            $this->searchCriteriaBuilder,
-            $this->subjectReader,
-            $adapterFactory,
+            $this->commandPoolMock,
+            $this->transactionRepositoryMock,
+            $this->filterBuilderMock,
+            $this->searchCriteriaBuilderMock,
+            $this->subjectReaderMock,
+            $adapterFactoryMock,
             $this->braintreeSearchAdapter
         );
     }
 
+    /**
+     * @covers \Magento\Braintree\Gateway\Command\CaptureStrategyCommand::execute
+     */
     public function testSaleExecute()
     {
         $paymentData = $this->getPaymentDataObjectMock();
         $subject['payment'] = $paymentData;
 
-        $this->subjectReader->method('readPayment')
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
             ->with($subject)
             ->willReturn($paymentData);
 
-        $this->payment->method('getAuthorizationTransaction')
+        $this->paymentMock->expects(static::once())
+            ->method('getAuthorizationTransaction')
             ->willReturn(false);
 
-        $this->payment->method('getId')
+        $this->paymentMock->expects(static::once())
+            ->method('getId')
             ->willReturn(1);
 
         $this->buildSearchCriteria();
 
-        $this->transactionRepository->method('getTotalCount')
+        $this->transactionRepositoryMock->expects(static::once())
+            ->method('getTotalCount')
             ->willReturn(0);
 
-        $this->commandPool->method('get')
+        $this->commandPoolMock->expects(static::once())
+            ->method('get')
             ->with(CaptureStrategyCommand::SALE)
-            ->willReturn($this->command);
+            ->willReturn($this->commandMock);
 
         $this->strategyCommand->execute($subject);
     }
 
+    /**
+     * @covers \Magento\Braintree\Gateway\Command\CaptureStrategyCommand::execute
+     */
     public function testCaptureExecute()
     {
         $paymentData = $this->getPaymentDataObjectMock();
         $subject['payment'] = $paymentData;
         $lastTransId = 'txnds';
 
-        $this->subjectReader->method('readPayment')
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
             ->with($subject)
             ->willReturn($paymentData);
 
-        $this->payment->method('getAuthorizationTransaction')
+        $this->paymentMock->expects(static::once())
+            ->method('getAuthorizationTransaction')
             ->willReturn(true);
-        $this->payment->method('getLastTransId')
+        $this->paymentMock->expects(static::once())
+            ->method('getLastTransId')
             ->willReturn($lastTransId);
 
-        $this->payment->method('getId')
+        $this->paymentMock->expects(static::once())
+            ->method('getId')
             ->willReturn(1);
 
         $this->buildSearchCriteria();
 
-        $this->transactionRepository->method('getTotalCount')
+        $this->transactionRepositoryMock->expects(static::once())
+            ->method('getTotalCount')
             ->willReturn(0);
 
         // authorization transaction was not expired
         $collection = $this->getNotExpiredExpectedCollection($lastTransId);
-        $collection->method('maximumCount')
+        $collection->expects(static::once())
+            ->method('maximumCount')
             ->willReturn(0);
 
-        $this->commandPool->method('get')
+        $this->commandPoolMock->expects(static::once())
+            ->method('get')
             ->with(CaptureStrategyCommand::CAPTURE)
-            ->willReturn($this->command);
+            ->willReturn($this->commandMock);
 
         $this->strategyCommand->execute($subject);
     }
@@ -196,9 +215,10 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->braintreeAdapter->method('search')
+        $this->braintreeAdapterMock->expects(static::once())
+            ->method('search')
             ->with(
-                self::callback(
+                static::callback(
                     function (array $filters) use ($isExpectations) {
                         foreach ($filters as $filter) {
                             /** @var IsNode $filter */
@@ -220,64 +240,82 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
         return $collection;
     }
 
+    /**
+     * @covers \Magento\Braintree\Gateway\Command\CaptureStrategyCommand::execute
+     */
     public function testExpiredAuthorizationPerformVaultCaptureExecute()
     {
         $paymentData = $this->getPaymentDataObjectMock();
         $subject['payment'] = $paymentData;
         $lastTransId = 'txnds';
 
-        $this->subjectReader->method('readPayment')
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
             ->with($subject)
             ->willReturn($paymentData);
 
-        $this->payment->method('getAuthorizationTransaction')
+        $this->paymentMock->expects(static::once())
+            ->method('getAuthorizationTransaction')
             ->willReturn(true);
-        $this->payment->method('getLastTransId')
+        $this->paymentMock->expects(static::once())
+            ->method('getLastTransId')
             ->willReturn($lastTransId);
 
-        $this->payment->method('getId')
+        $this->paymentMock->expects(static::once())
+            ->method('getId')
             ->willReturn(1);
 
         $this->buildSearchCriteria();
 
-        $this->transactionRepository->method('getTotalCount')
+        $this->transactionRepositoryMock->expects(static::once())
+            ->method('getTotalCount')
             ->willReturn(0);
 
         // authorization transaction was expired
         $collection = $this->getNotExpiredExpectedCollection($lastTransId);
-        $collection->method('maximumCount')
+        $collection->expects(static::once())
+            ->method('maximumCount')
             ->willReturn(1);
 
-        $this->commandPool->method('get')
+        $this->commandPoolMock->expects(static::once())
+            ->method('get')
             ->with(CaptureStrategyCommand::VAULT_CAPTURE)
-            ->willReturn($this->command);
+            ->willReturn($this->commandMock);
 
         $this->strategyCommand->execute($subject);
     }
 
+    /**
+     * @covers \Magento\Braintree\Gateway\Command\CaptureStrategyCommand::execute
+     */
     public function testVaultCaptureExecute()
     {
         $paymentData = $this->getPaymentDataObjectMock();
         $subject['payment'] = $paymentData;
 
-        $this->subjectReader->method('readPayment')
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
             ->with($subject)
             ->willReturn($paymentData);
 
-        $this->payment->method('getAuthorizationTransaction')
+        $this->paymentMock->expects(static::once())
+            ->method('getAuthorizationTransaction')
             ->willReturn(true);
 
-        $this->payment->method('getId')
+        $this->paymentMock->expects(static::once())
+            ->method('getId')
             ->willReturn(1);
 
         $this->buildSearchCriteria();
 
-        $this->transactionRepository->method('getTotalCount')
+        $this->transactionRepositoryMock->expects(static::once())
+            ->method('getTotalCount')
             ->willReturn(1);
 
-        $this->commandPool->method('get')
+        $this->commandPoolMock->expects(static::once())
+            ->method('get')
             ->with(CaptureStrategyCommand::VAULT_CAPTURE)
-            ->willReturn($this->command);
+            ->willReturn($this->commandMock);
 
         $this->strategyCommand->execute($subject);
     }
@@ -288,7 +326,7 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
      */
     private function getPaymentDataObjectMock()
     {
-        $this->payment = $this->getMockBuilder(Payment::class)
+        $this->paymentMock = $this->getMockBuilder(Payment::class)
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -297,15 +335,16 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $mock->method('getPayment')
-            ->willReturn($this->payment);
+        $mock->expects(static::once())
+            ->method('getPayment')
+            ->willReturn($this->paymentMock);
 
-        $order = $this->getMockBuilder(OrderAdapterInterface::class)
+        $orderMock = $this->getMockBuilder(OrderAdapterInterface::class)
             ->disableOriginalConstructor()
             ->getMock();
 
         $mock->method('getOrder')
-            ->willReturn($order);
+            ->willReturn($orderMock);
 
         return $mock;
     }
@@ -315,12 +354,13 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
      */
     private function initCommandMock()
     {
-        $this->command = $this->getMockBuilder(GatewayCommand::class)
+        $this->commandMock = $this->getMockBuilder(GatewayCommand::class)
             ->disableOriginalConstructor()
             ->setMethods(['execute'])
             ->getMock();
 
-        $this->command->method('execute')
+        $this->commandMock->expects(static::once())
+            ->method('execute')
             ->willReturn([]);
     }
 
@@ -329,7 +369,7 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
      */
     private function initFilterBuilderMock()
     {
-        $this->filterBuilder = $this->getMockBuilder(FilterBuilder::class)
+        $this->filterBuilderMock = $this->getMockBuilder(FilterBuilder::class)
             ->disableOriginalConstructor()
             ->setMethods(['setField', 'setValue', 'create', '__wakeup'])
             ->getMock();
@@ -340,21 +380,23 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
      */
     private function buildSearchCriteria()
     {
-        $this->filterBuilder->expects(self::exactly(2))
+        $this->filterBuilderMock->expects(static::exactly(2))
             ->method('setField')
             ->willReturnSelf();
-        $this->filterBuilder->expects(self::exactly(2))
+        $this->filterBuilderMock->expects(static::exactly(2))
             ->method('setValue')
             ->willReturnSelf();
 
         $searchCriteria = new SearchCriteria();
-        $this->searchCriteriaBuilder->expects(self::exactly(2))
+        $this->searchCriteriaBuilderMock->expects(static::exactly(2))
             ->method('addFilters')
             ->willReturnSelf();
-        $this->searchCriteriaBuilder->method('create')
+        $this->searchCriteriaBuilderMock->expects(static::once())
+            ->method('create')
             ->willReturn($searchCriteria);
 
-        $this->transactionRepository->method('getList')
+        $this->transactionRepositoryMock->expects(static::once())
+            ->method('getList')
             ->with($searchCriteria)
             ->willReturnSelf();
     }
@@ -364,7 +406,7 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
      */
     private function initSearchCriteriaBuilderMock()
     {
-        $this->searchCriteriaBuilder = $this->getMockBuilder(SearchCriteriaBuilder::class)
+        $this->searchCriteriaBuilderMock = $this->getMockBuilder(SearchCriteriaBuilder::class)
             ->disableOriginalConstructor()
             ->setMethods(['addFilters', 'create', '__wakeup'])
             ->getMock();
@@ -375,7 +417,7 @@ class CaptureStrategyCommandTest extends \PHPUnit\Framework\TestCase
      */
     private function initTransactionRepositoryMock()
     {
-        $this->transactionRepository = $this->getMockBuilder(TransactionRepositoryInterface::class)
+        $this->transactionRepositoryMock = $this->getMockBuilder(TransactionRepositoryInterface::class)
             ->disableOriginalConstructor()
             ->setMethods(['getList', 'getTotalCount', 'delete', 'get', 'save', 'create', '__wakeup'])
             ->getMock();

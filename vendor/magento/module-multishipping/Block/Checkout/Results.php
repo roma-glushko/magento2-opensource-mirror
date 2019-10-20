@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\Multishipping\Block\Checkout;
 
 use Magento\Customer\Model\Address\Config as AddressConfig;
@@ -19,6 +21,7 @@ use Magento\Theme\Block\Html\Title;
  * Multi-shipping checkout results information
  *
  * @api
+ * @since 100.2.1
  */
 class Results extends Success
 {
@@ -38,11 +41,6 @@ class Results extends Success
     private $session;
 
     /**
-     * @var Multishipping
-     */
-    private $multishipping;
-
-    /**
      * @param Context $context
      * @param Multishipping $multishipping
      * @param AddressConfig $addressConfig
@@ -60,7 +58,6 @@ class Results extends Success
     ) {
         parent::__construct($context, $multishipping, $data);
 
-        $this->multishipping = $multishipping;
         $this->addressConfig = $addressConfig;
         $this->orderRepository = $orderRepository;
         $this->session = $session;
@@ -70,16 +67,18 @@ class Results extends Success
      * Returns shipping addresses from quote.
      *
      * @return array
+     * @since 100.2.1
      */
     public function getQuoteShippingAddresses(): array
     {
-        return $this->multishipping->getQuote()->getAllShippingAddresses();
+        return $this->_multishipping->getQuote()->getAllShippingAddresses();
     }
 
     /**
      * Returns all failed addresses from quote.
      *
      * @return array
+     * @since 100.2.1
      */
     public function getFailedAddresses(): array
     {
@@ -95,6 +94,7 @@ class Results extends Success
      *
      * @param int $orderId
      * @return OrderAddress|null
+     * @since 100.2.1
      */
     public function getOrderShippingAddress(int $orderId)
     {
@@ -105,6 +105,7 @@ class Results extends Success
      * Retrieve quote billing address.
      *
      * @return QuoteAddress
+     * @since 100.2.1
      */
     public function getQuoteBillingAddress(): QuoteAddress
     {
@@ -116,6 +117,7 @@ class Results extends Success
      *
      * @param OrderAddress $address
      * @return string
+     * @since 100.2.1
      */
     public function formatOrderShippingAddress(OrderAddress $address): string
     {
@@ -127,6 +129,7 @@ class Results extends Success
      *
      * @param QuoteAddress $address
      * @return string
+     * @since 100.2.1
      */
     public function formatQuoteShippingAddress(QuoteAddress $address): string
     {
@@ -138,6 +141,7 @@ class Results extends Success
      *
      * @param QuoteAddress $address
      * @return bool
+     * @since 100.2.1
      */
     public function isShippingAddress(QuoteAddress $address): bool
     {
@@ -162,6 +166,7 @@ class Results extends Success
      *
      * @param QuoteAddress $address
      * @return string
+     * @since 100.2.1
      */
     public function getAddressError(QuoteAddress $address): string
     {
@@ -175,6 +180,7 @@ class Results extends Success
      *
      * @throws LocalizedException
      * @return Success
+     * @since 100.2.1
      */
     protected function _prepareLayout(): Success
     {

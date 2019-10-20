@@ -11,10 +11,11 @@ define([
     'underscore',
     './utils',
     'moment',
+    'tinycolor',
     'jquery/validate',
     'jquery/ui',
     'mage/translate'
-], function ($, _, utils, moment) {
+], function ($, _, utils, moment, tinycolor) {
     'use strict';
 
     /**
@@ -1018,6 +1019,22 @@ define([
                 return moment.utc(value, params.dateFormat).unix() <= maxValue;
             },
             $.mage.__('The date is not within the specified range.')
+        ],
+        'validate-color': [
+            function (value) {
+                if (value === '') {
+                    return true;
+                }
+
+                return tinycolor(value).isValid();
+            },
+            $.mage.__('Wrong color format. Please specify color in HEX, RGBa, HSVa, HSLa or use color name.')
+        ],
+        'blacklist-url': [
+            function (value, param) {
+                return new RegExp(param).test(value);
+            },
+            $.mage.__('This link is not allowed.')
         ]
     }, function (data) {
         return {

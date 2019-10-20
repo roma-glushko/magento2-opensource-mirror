@@ -27,7 +27,7 @@ class IndexBuilder
 
     /**
      * @var \Magento\Framework\EntityManager\MetadataPool
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @since 100.1.0
      */
     protected $metadataPool;
@@ -38,7 +38,7 @@ class IndexBuilder
      * This array contain list of CatalogRuleGroupWebsite table columns
      *
      * @var array
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      */
     protected $_catalogRuleGroupWebsiteColumnsList = ['rule_id', 'customer_group_id', 'website_id'];
 
@@ -133,6 +133,11 @@ class IndexBuilder
     private $pricesPersistor;
 
     /**
+     * @var \Magento\Catalog\Model\ResourceModel\Indexer\ActiveTableSwitcher
+     */
+    private $activeTableSwitcher;
+
+    /**
      * @var TableSwapper
      */
     private $tableSwapper;
@@ -163,7 +168,6 @@ class IndexBuilder
      * @param ProductLoader|null $productLoader
      * @param TableSwapper|null $tableSwapper
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function __construct(
         RuleCollectionFactory $ruleCollectionFactory,
@@ -215,6 +219,9 @@ class IndexBuilder
         );
         $this->pricesPersistor = $pricesPersistor ?? ObjectManager::getInstance()->get(
             RuleProductPricesPersistor::class
+        );
+        $this->activeTableSwitcher = $activeTableSwitcher ?? ObjectManager::getInstance()->get(
+            \Magento\Catalog\Model\ResourceModel\Indexer\ActiveTableSwitcher::class
         );
         $this->productLoader = $productLoader ?? ObjectManager::getInstance()->get(
             ProductLoader::class
@@ -426,7 +433,7 @@ class IndexBuilder
     /**
      * @param Rule $rule
      * @return $this
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @see ReindexRuleProduct::execute
      */
     protected function updateRuleProductData(Rule $rule)
@@ -452,7 +459,7 @@ class IndexBuilder
      * @param Product|null $product
      * @throws \Exception
      * @return $this
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @see ReindexRuleProductPrice::execute
      * @see ReindexRuleGroupWebsite::execute
      */
@@ -467,7 +474,7 @@ class IndexBuilder
      * Update CatalogRuleGroupWebsite data
      *
      * @return $this
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @see ReindexRuleGroupWebsite::execute
      */
     protected function updateCatalogRuleGroupWebsiteData()
@@ -491,7 +498,7 @@ class IndexBuilder
      * @param array $ruleData
      * @param null $productData
      * @return float
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @see ProductPriceCalculator::calculate
      */
     protected function calcRuleProductPrice($ruleData, $productData = null)
@@ -504,7 +511,7 @@ class IndexBuilder
      * @param Product|null $product
      * @return \Zend_Db_Statement_Interface
      * @throws \Magento\Framework\Exception\LocalizedException
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @see RuleProductsSelectBuilder::build
      */
     protected function getRuleProductsStmt($websiteId, Product $product = null)
@@ -516,7 +523,7 @@ class IndexBuilder
      * @param array $arrData
      * @return $this
      * @throws \Exception
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @see RuleProductPricesPersistor::execute
      */
     protected function saveRuleProductPrices($arrData)

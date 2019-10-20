@@ -15,7 +15,7 @@ use PHPUnit_Framework_MockObject_MockObject as MockObject;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class TransactionSubmitForSettlementTest
+ * Tests \Magento\Braintree\Gateway\Http\Client\TransactionSubmitForSettlement.
  */
 class TransactionSubmitForSettlementTest extends \PHPUnit\Framework\TestCase
 {
@@ -27,48 +27,50 @@ class TransactionSubmitForSettlementTest extends \PHPUnit\Framework\TestCase
     /**
      * @var Logger|MockObject
      */
-    private $logger;
+    private $loggerMock;
 
     /**
      * @var BraintreeAdapter|MockObject
      */
-    private $adapter;
+    private $adapterMock;
 
     protected function setUp()
     {
-        /** @var LoggerInterface|MockObject $criticalLogger */
-        $criticalLogger = $this->getMockForAbstractClass(LoggerInterface::class);
-        $this->logger = $this->getMockBuilder(Logger::class)
+        /** @var LoggerInterface|MockObject $criticalLoggerMock */
+        $criticalLoggerMock = $this->getMockForAbstractClass(LoggerInterface::class);
+        $this->loggerMock = $this->getMockBuilder(Logger::class)
             ->disableOriginalConstructor()
             ->setMethods(['debug'])
             ->getMock();
 
-        $this->adapter = $this->getMockBuilder(BraintreeAdapter::class)
+        $this->adapterMock = $this->getMockBuilder(BraintreeAdapter::class)
             ->disableOriginalConstructor()
             ->setMethods(['submitForSettlement'])
             ->getMock();
-        /** @var BraintreeAdapterFactory|MockObject $adapterFactory */
-        $adapterFactory = $this->getMockBuilder(BraintreeAdapterFactory::class)
+        /** @var BraintreeAdapterFactory|MockObject $adapterFactoryMock */
+        $adapterFactoryMock = $this->getMockBuilder(BraintreeAdapterFactory::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $adapterFactory->method('create')
-            ->willReturn($this->adapter);
+        $adapterFactoryMock->method('create')
+            ->willReturn($this->adapterMock);
 
         $this->client = new TransactionSubmitForSettlement(
-            $criticalLogger,
-            $this->logger,
-            $adapterFactory
+            $criticalLoggerMock,
+            $this->loggerMock,
+            $adapterFactoryMock
         );
     }
 
     /**
+     * @covers \Magento\Braintree\Gateway\Http\Client\TransactionSubmitForSettlement::placeRequest
      * @expectedException \Magento\Payment\Gateway\Http\ClientException
      * @expectedExceptionMessage Transaction has been declined
      */
     public function testPlaceRequestWithException()
     {
         $exception = new \Exception('Transaction has been declined');
-        $this->adapter->method('submitForSettlement')
+        $this->adapterMock->expects(static::once())
+            ->method('submitForSettlement')
             ->willThrowException($exception);
 
         /** @var TransferInterface|MockObject $transferObject */
@@ -76,10 +78,14 @@ class TransactionSubmitForSettlementTest extends \PHPUnit\Framework\TestCase
         $this->client->placeRequest($transferObject);
     }
 
+    /**
+     * @covers \Magento\Braintree\Gateway\Http\Client\TransactionSubmitForSettlement::process
+     */
     public function testPlaceRequest()
     {
         $data = new Successful(['success'], [true]);
-        $this->adapter->method('submitForSettlement')
+        $this->adapterMock->expects(static::once())
+            ->method('submitForSettlement')
             ->willReturn($data);
 
         /** @var TransferInterface|MockObject $transferObject */
@@ -97,10 +103,11 @@ class TransactionSubmitForSettlementTest extends \PHPUnit\Framework\TestCase
     private function getTransferObjectMock()
     {
         $mock = $this->createMock(TransferInterface::class);
-        $mock->method('getBody')
+        $mock->expects($this->once())
+            ->method('getBody')
             ->willReturn([
                 'transaction_id' => 'vb4c6b',
-                'amount' => 124.00
+                'amount' => 124.00,
             ]);
 
         return $mock;

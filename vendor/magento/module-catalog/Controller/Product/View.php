@@ -6,10 +6,16 @@
  */
 namespace Magento\Catalog\Controller\Product;
 
+use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
+use Magento\Framework\App\Action\HttpGetActionInterface as HttpGetActionInterface;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Catalog\Controller\Product as ProductAction;
 
-class View extends \Magento\Catalog\Controller\Product
+/**
+ * View a product on storefront. Needs to be accessible by POST because of the store switching.
+ */
+class View extends ProductAction implements HttpGetActionInterface, HttpPostActionInterface
 {
     /**
      * @var \Magento\Catalog\Helper\Product\View
@@ -76,10 +82,7 @@ class View extends \Magento\Catalog\Controller\Product
         $productId = (int) $this->getRequest()->getParam('id');
         $specifyOptions = $this->getRequest()->getParam('options');
 
-        if (!$this->_request->getParam('___from_store')
-            && $this->_request->isPost()
-            && $this->_request->getParam(self::PARAM_NAME_URL_ENCODED)
-        ) {
+        if ($this->getRequest()->isPost() && $this->getRequest()->getParam(self::PARAM_NAME_URL_ENCODED)) {
             $product = $this->_initProduct();
             
             if (!$product) {

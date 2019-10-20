@@ -69,7 +69,7 @@ class FactoryTest extends \PHPUnit\Framework\TestCase
     {
         $this->objectManager->expects($this->once())
             ->method('create')
-            ->will($this->returnValue(new \stdClass()));
+            ->will($this->returnValue(new \StdClass()));
 
         $object = new Factory($this->objectManager);
         $object->createRoute(

@@ -8,7 +8,12 @@ namespace Magento\Framework;
 /**
  * Registry model. Used to manage values in registry
  *
+ * Registry usage as a shared service introduces temporal, hard to detect coupling into system.
+ * It's usage should be avoid. Use service classes or data providers instead.
+ *
  * @api
+ * @deprecated
+ * @since 100.0.2
  */
 class Registry
 {
@@ -24,6 +29,8 @@ class Registry
      *
      * @param string $key
      * @return mixed
+     *
+     * @deprecated
      */
     public function registry($key)
     {
@@ -41,6 +48,8 @@ class Registry
      * @param bool $graceful
      * @return void
      * @throws \RuntimeException
+     *
+     * @deprecated
      */
     public function register($key, $value, $graceful = false)
     {
@@ -58,6 +67,8 @@ class Registry
      *
      * @param string $key
      * @return void
+     *
+     * @deprecated
      */
     public function unregister($key)
     {

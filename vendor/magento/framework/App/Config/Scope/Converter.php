@@ -5,7 +5,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\Framework\App\Config\Scope;
 
 class Converter implements \Magento\Framework\Config\ConverterInterface
@@ -20,7 +19,7 @@ class Converter implements \Magento\Framework\Config\ConverterInterface
     {
         $output = [];
         foreach ($source as $key => $value) {
-            $output = $this->_setArrayValue($output, $key, $value);
+            $this->_setArrayValue($output, $key, $value);
         }
         return $output;
     }
@@ -28,25 +27,21 @@ class Converter implements \Magento\Framework\Config\ConverterInterface
     /**
      * Set array value by path
      *
-     * @param array $container
+     * @param array &$container
      * @param string $path
      * @param string $value
-     * @return array
+     * @return void
      */
-    protected function _setArrayValue(array $container, $path, $value)
+    protected function _setArrayValue(array &$container, $path, $value)
     {
-        $parts = explode('/', $path);
-        if (count($parts) > 0) {
-            $parts = array_reverse($parts);
-            $result = $value;
-            foreach ($parts as $part) {
-                $part = trim($part);
-                if ($part !== '') {
-                    $result = [$part => $result];
-                }
+        $segments = explode('/', $path);
+        $currentPointer = & $container;
+        foreach ($segments as $segment) {
+            if (!isset($currentPointer[$segment])) {
+                $currentPointer[$segment] = [];
             }
-            $container = array_merge_recursive($container, $result);
+            $currentPointer = & $currentPointer[$segment];
         }
-        return $container;
+        $currentPointer = $value;
     }
 }

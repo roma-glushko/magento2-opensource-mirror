@@ -7,13 +7,18 @@ declare(strict_types=1);
 
 namespace Magento\Bundle\Pricing\Price;
 
+use Magento\Bundle\Pricing\Adjustment\BundleCalculatorInterface;
+use Magento\Framework\Pricing\SaleableInterface;
+use Magento\Framework\Pricing\Amount\AmountInterface;
+use Magento\Catalog\Model\Product;
+
 /**
  * Bundle option price calculation model.
  */
 class BundleOptions
 {
     /**
-     * @var \Magento\Bundle\Pricing\Adjustment\BundleCalculatorInterface
+     * @var BundleCalculatorInterface
      */
     private $calculator;
 
@@ -23,16 +28,16 @@ class BundleOptions
     private $selectionFactory;
 
     /**
-     * @var \Magento\Framework\Pricing\Amount\AmountInterface[]
+     * @var AmountInterface[]
      */
     private $optionSelectionAmountCache = [];
 
     /**
-     * @param \Magento\Bundle\Pricing\Adjustment\BundleCalculatorInterface $calculator
+     * @param BundleCalculatorInterface $calculator
      * @param BundleSelectionFactory $bundleSelectionFactory
      */
     public function __construct(
-        \Magento\Bundle\Pricing\Adjustment\BundleCalculatorInterface $calculator,
+        BundleCalculatorInterface $calculator,
         BundleSelectionFactory $bundleSelectionFactory
     ) {
         $this->calculator = $calculator;
@@ -40,12 +45,12 @@ class BundleOptions
     }
 
     /**
-     * Get Options with attached Selections collection
+     * Get Options with attached Selections collection.
      *
-     * @param \Magento\Framework\Pricing\SaleableInterface $bundleProduct
-     * @return \Magento\Bundle\Model\ResourceModel\Option\Collection
+     * @param SaleableInterface $bundleProduct
+     * @return \Magento\Bundle\Model\ResourceModel\Option\Collection|array
      */
-    public function getOptions(\Magento\Framework\Pricing\SaleableInterface $bundleProduct)
+    public function getOptions(SaleableInterface $bundleProduct)
     {
         /** @var \Magento\Bundle\Model\Product\Type $typeInstance */
         $typeInstance = $bundleProduct->getTypeInstance();
@@ -61,22 +66,24 @@ class BundleOptions
         );
 
         $priceOptions = $optionCollection->appendSelections($selectionCollection, true, false);
+
         return $priceOptions;
     }
 
     /**
-     * Calculate maximal or minimal options value
+     * Calculate maximal or minimal options value.
      *
-     * @param \Magento\Framework\Pricing\SaleableInterface $bundleProduct
+     * @param SaleableInterface $bundleProduct
      * @param bool $searchMin
+     *
      * @return float
      */
     public function calculateOptions(
-        \Magento\Framework\Pricing\SaleableInterface $bundleProduct,
+        SaleableInterface $bundleProduct,
         bool $searchMin = true
-    ) {
+    ) : float {
         $priceList = [];
-        /* @var $option \Magento\Bundle\Model\Option */
+        /* @var \Magento\Bundle\Model\Option $option */
         foreach ($this->getOptions($bundleProduct) as $option) {
             if ($searchMin && !$option->getRequired()) {
                 continue;
@@ -87,29 +94,31 @@ class BundleOptions
             $priceList = array_merge($priceList, $selectionPriceList);
         }
         $amount = $this->calculator->calculateBundleAmount(0., $bundleProduct, $priceList);
+
         return $amount->getValue();
     }
 
     /**
-     * Get selection amount
+     * Get selection amount.
      *
-     * @param \Magento\Catalog\Model\Product $bundleProduct
-     * @param \Magento\Bundle\Model\Selection $selection
+     * @param Product $bundleProduct
+     * @param \Magento\Bundle\Model\Selection|Product $selection
      * @param bool $useRegularPrice
-     * @return \Magento\Framework\Pricing\Amount\AmountInterface
+     *
+     * @return AmountInterface
      */
     public function getOptionSelectionAmount(
-        \Magento\Catalog\Model\Product $bundleProduct,
+        Product $bundleProduct,
         $selection,
         bool $useRegularPrice = false
-    ) {
+    ) : AmountInterface {
         $cacheKey = implode(
             '_',
             [
                 $bundleProduct->getId(),
                 $selection->getOptionId(),
                 $selection->getSelectionId(),
-                $useRegularPrice ? 1 : 0
+                $useRegularPrice ? 1 : 0,
             ]
         );
 

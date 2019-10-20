@@ -4,6 +4,8 @@
  * See COPYING.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Magento\Framework\Filesystem\Directory;
 
 use Magento\Framework\Exception\ValidatorException;
@@ -19,7 +21,7 @@ interface PathValidatorInterface
      * @param string $directoryPath
      * @param string $path
      * @param string|null $scheme
-     * @param bool $absolutePath
+     * @param bool $absolutePath Is given path an absolute path?.
      * @throws ValidatorException
      *
      * @return void
@@ -27,7 +29,7 @@ interface PathValidatorInterface
     public function validate(
         string $directoryPath,
         string $path,
-        $scheme = null,
-        $absolutePath = false
-    );
+        ?string $scheme = null,
+        bool $absolutePath = false
+    ): void;
 }

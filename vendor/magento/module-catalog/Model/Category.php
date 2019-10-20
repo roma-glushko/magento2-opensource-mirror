@@ -6,6 +6,7 @@
 namespace Magento\Catalog\Model;
 
 use Magento\Catalog\Api\CategoryRepositoryInterface;
+use Magento\Catalog\Api\Data\CategoryInterface;
 use Magento\CatalogUrlRewrite\Model\CategoryUrlRewriteGenerator;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Convert\ConvertArray;
@@ -71,23 +72,6 @@ class Category extends \Magento\Catalog\Model\AbstractModel implements
 
     const CACHE_TAG = 'cat_c';
 
-    /**#@+
-     * Constants
-     */
-    const KEY_PARENT_ID = 'parent_id';
-    const KEY_NAME = 'name';
-    const KEY_IS_ACTIVE = 'is_active';
-    const KEY_POSITION = 'position';
-    const KEY_LEVEL = 'level';
-    const KEY_UPDATED_AT = 'updated_at';
-    const KEY_CREATED_AT = 'created_at';
-    const KEY_PATH = 'path';
-    const KEY_AVAILABLE_SORT_BY = 'available_sort_by';
-    const KEY_INCLUDE_IN_MENU = 'include_in_menu';
-    const KEY_PRODUCT_COUNT = 'product_count';
-    const KEY_CHILDREN_DATA = 'children_data';
-    /**#@-*/
-
     /**#@-*/
     protected $_eventPrefix = 'catalog_category';
 
@@ -114,6 +98,7 @@ class Category extends \Magento\Catalog\Model\AbstractModel implements
 
     /**
      * @var ResourceModel\Category
+     * @since 102.0.6
      */
     protected $_resource;
 
@@ -121,7 +106,7 @@ class Category extends \Magento\Catalog\Model\AbstractModel implements
      * URL rewrite model
      *
      * @var \Magento\UrlRewrite\Model\UrlRewrite
-     * @deprecated 101.1.0
+     * @deprecated 102.0.0
      */
     protected $_urlRewrite;
 
@@ -149,21 +134,11 @@ class Category extends \Magento\Catalog\Model\AbstractModel implements
     /**
      * Attributes are that part of interface
      *
+     * @deprecated
+     * @see CategoryInterface::ATTRIBUTES
      * @var array
      */
-    protected $interfaceAttributes = [
-        'id',
-        self::KEY_PARENT_ID,
-        self::KEY_NAME,
-        self::KEY_IS_ACTIVE,
-        self::KEY_POSITION,
-        self::KEY_LEVEL,
-        self::KEY_UPDATED_AT,
-        self::KEY_CREATED_AT,
-        self::KEY_AVAILABLE_SORT_BY,
-        self::KEY_INCLUDE_IN_MENU,
-        self::KEY_CHILDREN_DATA,
-    ];
+    protected $interfaceAttributes = CategoryInterface::ATTRIBUTES;
 
     /**
      * Category tree model
@@ -332,7 +307,7 @@ class Category extends \Magento\Catalog\Model\AbstractModel implements
     {
         if ($this->customAttributesCodes === null) {
             $this->customAttributesCodes = $this->getEavAttributesCodes($this->metadataService);
-            $this->customAttributesCodes = array_diff($this->customAttributesCodes, $this->interfaceAttributes);
+            $this->customAttributesCodes = array_diff($this->customAttributesCodes, CategoryInterface::ATTRIBUTES);
         }
         return $this->customAttributesCodes;
     }
@@ -340,7 +315,8 @@ class Category extends \Magento\Catalog\Model\AbstractModel implements
     /**
      * @throws \Magento\Framework\Exception\LocalizedException
      * @return \Magento\Catalog\Model\ResourceModel\Category
-     * @deprecated because resource models should be used directly
+     * @deprecated 102.0.6 because resource models should be used directly
+     * @since 102.0.6
      */
     protected function _getResource()
     {
@@ -684,9 +660,22 @@ class Category extends \Magento\Catalog\Model\AbstractModel implements
         $image = $this->getData($attributeCode);
         if ($image) {
             if (is_string($image)) {
-                $url = $this->_storeManager->getStore()->getBaseUrl(
+                $store = $this->_storeManager->getStore();
+
+                $isRelativeUrl = substr($image, 0, 1) === '/';
+
+                $mediaBaseUrl = $store->getBaseUrl(
                     \Magento\Framework\UrlInterface::URL_TYPE_MEDIA
-                ) . 'catalog/category/' . $image;
+                );
+
+                if ($isRelativeUrl) {
+                    $url = $image;
+                } else {
+                    $url = $mediaBaseUrl
+                        . ltrim(\Magento\Catalog\Model\Category\FileInfo::ENTITY_MEDIA_PATH, '/')
+                        . '/'
+                        . $image;
+                }
             } else {
                 throw new \Magento\Framework\Exception\LocalizedException(
                     __('Something went wrong while getting the image url.')
@@ -1150,25 +1139,15 @@ class Category extends \Magento\Catalog\Model\AbstractModel implements
      */
     public function getIdentities()
     {
-        $identities = [];
-        if ($this->getId()) {
-            if ($this->getAffectedCategoryIds()) {
-                foreach (array_unique($this->getAffectedCategoryIds()) as $affectedCategoryId) {
-                    $identities[] = self::CACHE_TAG . '_' . $affectedCategoryId;
-                }
-            } else {
-                $identities[] = self::CACHE_TAG . '_' . $this->getId();
-            }
-
-            if ($this->hasDataChanges() || $this->isDeleted() || $this->dataHasChangedFor(self::KEY_INCLUDE_IN_MENU)) {
-                $identities[] = Product::CACHE_PRODUCT_CATEGORY_TAG . '_' . $this->getId();
-            }
-            
-            if ($this->isObjectNew()) {
-                $identities[] = self::CACHE_TAG;
-            }
+        $identities = [
+            self::CACHE_TAG . '_' . $this->getId(),
+        ];
+        if (!$this->getId() || $this->hasDataChanges()
+            || $this->isDeleted() || $this->dataHasChangedFor(self::KEY_INCLUDE_IN_MENU)
+        ) {
+            $identities[] = self::CACHE_TAG;
+            $identities[] = Product::CACHE_PRODUCT_CATEGORY_TAG . '_' . $this->getId();
         }
-
         return $identities;
     }
 

@@ -133,7 +133,7 @@ class NodeBuilder implements NodeParentInterface
     /**
      * Returns the parent node.
      *
-     * @return ParentNodeDefinitionInterface|NodeDefinition The parent node
+     * @return NodeDefinition&ParentNodeDefinitionInterface The parent node
      */
     public function end()
     {
@@ -179,7 +179,7 @@ class NodeBuilder implements NodeParentInterface
      */
     public function append(NodeDefinition $node)
     {
-        if ($node instanceof ParentNodeDefinitionInterface) {
+        if ($node instanceof BuilderAwareInterface) {
             $builder = clone $this;
             $builder->setParent(null);
             $node->setBuilder($builder);

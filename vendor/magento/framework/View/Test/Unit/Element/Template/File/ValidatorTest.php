@@ -10,40 +10,41 @@ use Magento\Framework\Component\ComponentRegistrar;
 use \Magento\Framework\Filesystem\DriverPool;
 
 /**
- * Tests for Magento\Framework\View\Element\Template\File\Validator class.
+ * Class ValidatorTest
+ * @package Magento\Framework\View\Test\Unit\Element\Template\File
  */
 class ValidatorTest extends \PHPUnit\Framework\TestCase
 {
     /**
-     * Resolver object.
+     * Resolver object
      *
      * @var \Magento\Framework\View\Element\Template\File\Validator
      */
     private $validator;
 
     /**
-     * Mock for view file system.
+     * Mock for view file system
      *
      * @var \Magento\Framework\FileSystem|\PHPUnit_Framework_MockObject_MockObject
      */
     private $fileSystemMock;
 
     /**
-     * Mock for scope config.
+     * Mock for scope config
      *
      * @var \Magento\Framework\App\Config\ScopeConfigInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $scopeConfigMock;
 
     /**
-     * Mock for root directory reader.
+     * Mock for root directory reader
      *
      * @var \Magento\Framework\Filesystem\Directory\ReadInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     private $rootDirectoryMock;
 
     /**
-     * Mock for compiled directory reader.
+     * Mock for compiled directory reader
      *
      * @var \Magento\Framework\Filesystem\Directory\ReadInterface|\PHPUnit_Framework_MockObject_MockObject
      */
@@ -55,7 +56,9 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
     private $componentRegistrar;
 
     /**
-     * @inheritdoc
+     * Test Setup
+     *
+     * @return void
      */
     protected function setUp()
     {
@@ -84,7 +87,7 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
                 $this->returnValueMap(
                     [
                         [ComponentRegistrar::MODULE, ['/magento/app/code/Some/Module']],
-                        [ComponentRegistrar::THEME, ['/magento/themes/default']],
+                        [ComponentRegistrar::THEME, ['/magento/themes/default']]
                     ]
                 )
             );
@@ -104,7 +107,7 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * Test is file valid.
+     * Test is file valid
      *
      * @param string $file
      * @param bool $expectedResult
@@ -112,18 +115,18 @@ class ValidatorTest extends \PHPUnit\Framework\TestCase
      *
      * @dataProvider isValidDataProvider
      */
-    public function testIsValid(string $file, bool $expectedResult)
+    public function testIsValid($file, $expectedResult)
     {
         $this->rootDirectoryMock->expects($this->any())->method('isFile')->will($this->returnValue(true));
         $this->assertEquals($expectedResult, $this->validator->isValid($file));
     }
 
     /**
-     * Data provider for testIsValid.
+     * Data provider for testIsValid
      *
      * @return array
      */
-    public function isValidDataProvider() : array
+    public function isValidDataProvider()
     {
         return [
             'empty' => ['', false],

@@ -7,10 +7,10 @@ namespace Magento\Framework\Filesystem\Directory;
 
 use Magento\Framework\Exception\FileSystemException;
 use Magento\Framework\Exception\ValidatorException;
-use Magento\Framework\Filesystem\File\ReadFactoryInterface;
 
 /**
  * @api
+ * @since 100.0.2
  */
 class Read implements ReadInterface
 {
@@ -36,7 +36,7 @@ class Read implements ReadInterface
     protected $driver;
 
     /**
-     * @var PathValidatorInterface
+     * @var PathValidatorInterface|null
      */
     private $pathValidator;
 
@@ -52,7 +52,7 @@ class Read implements ReadInterface
         \Magento\Framework\Filesystem\File\ReadFactory $fileFactory,
         \Magento\Framework\Filesystem\DriverInterface $driver,
         $path,
-        PathValidatorInterface $pathValidator = null
+        ?PathValidatorInterface $pathValidator = null
     ) {
         $this->fileFactory = $fileFactory;
         $this->driver = $driver;
@@ -61,18 +61,18 @@ class Read implements ReadInterface
     }
 
     /**
-     * @param string|null $path
-     * @param string|null $scheme
+     * @param null|string $path
+     * @param null|string $scheme
      * @param bool $absolutePath
+     * @throws ValidatorException
      *
      * @return void
-     * @throws ValidatorException
      */
     protected function validatePath(
-        $path = null,
-        $scheme = null,
-        $absolutePath = false
-    ) {
+        ?string $path,
+        ?string $scheme = null,
+        bool $absolutePath = false
+    ): void {
         if ($path && $this->pathValidator) {
             $this->pathValidator->validate(
                 $this->path,
@@ -102,8 +102,8 @@ class Read implements ReadInterface
      *
      * @param string $path
      * @param string $scheme
-     * @return string
      * @throws ValidatorException
+     * @return string
      */
     public function getAbsolutePath($path = null, $scheme = null)
     {
@@ -116,8 +116,8 @@ class Read implements ReadInterface
      * Retrieves relative path
      *
      * @param string $path
-     * @return string
      * @throws ValidatorException
+     * @return string
      */
     public function getRelativePath($path = null)
     {
@@ -134,8 +134,8 @@ class Read implements ReadInterface
      * Retrieve list of all entities in given path
      *
      * @param string|null $path
-     * @return string[]
      * @throws ValidatorException
+     * @return string[]
      */
     public function read($path = null)
     {
@@ -146,7 +146,6 @@ class Read implements ReadInterface
         foreach ($files as $file) {
             $result[] = $this->getRelativePath($file);
         }
-
         return $result;
     }
 
@@ -154,8 +153,8 @@ class Read implements ReadInterface
      * Read recursively
      *
      * @param null $path
-     * @return string[]
      * @throws ValidatorException
+     * @return string[]
      */
     public function readRecursively($path = null)
     {
@@ -168,7 +167,6 @@ class Read implements ReadInterface
             $result[] = $this->getRelativePath($file);
         }
         sort($result);
-
         return $result;
     }
 
@@ -177,8 +175,8 @@ class Read implements ReadInterface
      *
      * @param string $pattern
      * @param string $path [optional]
-     * @return string[]
      * @throws ValidatorException
+     * @return string[]
      */
     public function search($pattern, $path = null)
     {
@@ -195,7 +193,6 @@ class Read implements ReadInterface
         foreach ($files as $file) {
             $result[] = $this->getRelativePath($file);
         }
-
         return $result;
     }
 
@@ -248,9 +245,9 @@ class Read implements ReadInterface
      * Open file in read mode
      *
      * @param string $path
+     * @throws ValidatorException
      *
      * @return \Magento\Framework\Filesystem\File\ReadInterface
-     * @throws ValidatorException
      */
     public function openFile($path)
     {
@@ -277,7 +274,6 @@ class Read implements ReadInterface
         $this->validatePath($path);
 
         $absolutePath = $this->driver->getAbsolutePath($this->path, $path);
-
         return $this->driver->fileGetContents($absolutePath, $flag, $context);
     }
 
@@ -285,8 +281,8 @@ class Read implements ReadInterface
      * Check whether given path is file
      *
      * @param string $path
-     * @return bool
      * @throws ValidatorException
+     * @return bool
      */
     public function isFile($path)
     {
@@ -299,8 +295,8 @@ class Read implements ReadInterface
      * Check whether given path is directory
      *
      * @param string $path [optional]
-     * @return bool
      * @throws ValidatorException
+     * @return bool
      */
     public function isDirectory($path = null)
     {

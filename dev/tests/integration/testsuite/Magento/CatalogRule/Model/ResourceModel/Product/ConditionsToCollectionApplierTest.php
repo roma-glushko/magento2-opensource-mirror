@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\CatalogRule\Model\ResourceModel\Product;
 
 use Magento\TestFramework\Helper\Bootstrap;
@@ -73,8 +75,8 @@ class ConditionsToCollectionApplierTest extends \PHPUnit\Framework\TestCase
                 array_values($resultCollection->getItems())
             );
 
-            sort($expectedSkuList);
-            sort($resultSkuList);
+            asort($expectedSkuList);
+            asort($resultSkuList);
 
             $this->assertEquals($expectedSkuList, $resultSkuList, sprintf('%s failed', $variationName));
         }

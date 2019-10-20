@@ -28,15 +28,12 @@ class GeneralTest extends AbstractModifierTest
      */
     private $generalModifier;
 
-    /**
-     * @inheritdoc
-     */
     protected function setUp()
     {
         parent::setUp();
 
         $this->attributeRepositoryMock = $this->getMockBuilder(AttributeRepositoryInterface::class)
-            ->getMockForAbstractClass();
+        ->getMockForAbstractClass();
 
         $arrayManager = $this->objectManager->getObject(ArrayManager::class);
 
@@ -61,9 +58,6 @@ class GeneralTest extends AbstractModifierTest
         ]);
     }
 
-    /**
-     * @return void
-     */
     public function testModifyMeta()
     {
         $this->arrayManagerMock->expects($this->any())
@@ -86,8 +80,8 @@ class GeneralTest extends AbstractModifierTest
      * @param array $data
      * @param int $defaultStatusValue
      * @param array $expectedResult
+     * @throws \Magento\Framework\Exception\NoSuchEntityException
      * @dataProvider modifyDataDataProvider
-     * @return void
      */
     public function testModifyDataNewProduct(array $data, int $defaultStatusValue, array $expectedResult)
     {

@@ -147,7 +147,7 @@ class ArgvInput extends Input
 
         if (false !== $pos = strpos($name, '=')) {
             if (0 === \strlen($value = substr($name, $pos + 1))) {
-                array_unshift($this->parsed, null);
+                array_unshift($this->parsed, $value);
             }
             $this->addLongOption(substr($name, 0, $pos), $value);
         } else {
@@ -220,23 +220,16 @@ class ArgvInput extends Input
 
         $option = $this->definition->getOption($name);
 
-        // Convert empty values to null
-        if (!isset($value[0])) {
-            $value = null;
-        }
-
         if (null !== $value && !$option->acceptValue()) {
             throw new RuntimeException(sprintf('The "--%s" option does not accept a value.', $name));
         }
 
-        if (null === $value && $option->acceptValue() && \count($this->parsed)) {
+        if (\in_array($value, array('', null), true) && $option->acceptValue() && \count($this->parsed)) {
             // if option accepts an optional or mandatory argument
             // let's see if there is one provided
             $next = array_shift($this->parsed);
-            if (isset($next[0]) && '-' !== $next[0]) {
+            if ((isset($next[0]) && '-' !== $next[0]) || \in_array($next, array('', null), true)) {
                 $value = $next;
-            } elseif (empty($next)) {
-                $value = null;
             } else {
                 array_unshift($this->parsed, $next);
             }
@@ -247,8 +240,8 @@ class ArgvInput extends Input
                 throw new RuntimeException(sprintf('The "--%s" option requires a value.', $name));
             }
 
-            if (!$option->isArray()) {
-                $value = $option->isValueOptional() ? $option->getDefault() : true;
+            if (!$option->isArray() && !$option->isValueOptional()) {
+                $value = true;
             }
         }
 
@@ -276,11 +269,14 @@ class ArgvInput extends Input
     /**
      * {@inheritdoc}
      */
-    public function hasParameterOption($values)
+    public function hasParameterOption($values, $onlyParams = false)
     {
         $values = (array) $values;
 
         foreach ($this->tokens as $token) {
+            if ($onlyParams && '--' === $token) {
+                return false;
+            }
             foreach ($values as $value) {
                 // Options with values:
                 //   For long options, test for '--option=' at beginning
@@ -298,13 +294,16 @@ class ArgvInput extends Input
     /**
      * {@inheritdoc}
      */
-    public function getParameterOption($values, $default = false)
+    public function getParameterOption($values, $default = false, $onlyParams = false)
     {
         $values = (array) $values;
         $tokens = $this->tokens;
 
         while (0 < \count($tokens)) {
             $token = array_shift($tokens);
+            if ($onlyParams && '--' === $token) {
+                return $default;
+            }
 
             foreach ($values as $value) {
                 if ($token === $value) {
@@ -330,14 +329,13 @@ class ArgvInput extends Input
      */
     public function __toString()
     {
-        $self = $this;
-        $tokens = array_map(function ($token) use ($self) {
+        $tokens = array_map(function ($token) {
             if (preg_match('{^(-[^=]+=)(.+)}', $token, $match)) {
-                return $match[1].$self->escapeToken($match[2]);
+                return $match[1].$this->escapeToken($match[2]);
             }
 
             if ($token && '-' !== $token[0]) {
-                return $self->escapeToken($token);
+                return $this->escapeToken($token);
             }
 
             return $token;

@@ -1007,7 +1007,6 @@ class AdvancedPricingTest extends \Magento\ImportExport\Test\Unit\Model\Import\A
      * @param object $object
      * @param string $method
      * @param array $args
-     *
      * @return mixed
      * @throws \ReflectionException
      */

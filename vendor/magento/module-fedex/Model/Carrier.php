@@ -4,8 +4,6 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\Fedex\Model;
 
 use Magento\Framework\App\ObjectManager;
@@ -649,7 +647,7 @@ class Carrier extends AbstractCarrierOnline implements \Magento\Shipping\Model\C
                 }
             }
 
-            if (is_null($amount)) {
+            if ($amount === null) {
                 $amount = (string)$rate->RatedShipmentDetails[0]->ShipmentRateDetail->TotalNetCharge->Amount;
             }
         }
@@ -726,7 +724,7 @@ class Carrier extends AbstractCarrierOnline implements \Magento\Shipping\Model\C
 
         $responseBody = $this->_getCachedQuotes($request);
         if ($responseBody === null) {
-            $debugData = ['request' => parent::filterDebugData($request)];
+            $debugData = ['request' => $this->filterDebugData($request)];
             try {
                 $url = $this->getConfigData('gateway_url');
                 if (!$url) {
@@ -741,7 +739,7 @@ class Carrier extends AbstractCarrierOnline implements \Magento\Shipping\Model\C
                 $responseBody = curl_exec($ch);
                 curl_close($ch);
 
-                $debugData['result'] = parent::filterDebugData($responseBody);
+                $debugData['result'] = $this->filterDebugData($responseBody);
                 $this->_setCachedQuotes($request, $responseBody);
             } catch (\Exception $e) {
                 $debugData['result'] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
@@ -1143,7 +1141,8 @@ class Carrier extends AbstractCarrierOnline implements \Magento\Shipping\Model\C
         // no available tracking details
         if (!$counter) {
             $this->appendTrackingError(
-                $trackingValue, __('For some reason we can\'t retrieve tracking info right now.')
+                $trackingValue,
+                __('For some reason we can\'t retrieve tracking info right now.')
             );
         }
     }

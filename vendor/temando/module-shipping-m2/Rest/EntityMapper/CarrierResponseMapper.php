@@ -6,17 +6,17 @@ namespace Temando\Shipping\Rest\EntityMapper;
 
 use Temando\Shipping\Model\CarrierInterface;
 use Temando\Shipping\Model\CarrierInterfaceFactory;
-use Temando\Shipping\Rest\Response\Type\CarrierIntegrationResponseType;
-use Temando\Shipping\Rest\Response\Type\CarrierConfigurationResponseType;
+use Temando\Shipping\Rest\Response\DataObject\CarrierConfiguration;
+use Temando\Shipping\Rest\Response\DataObject\CarrierIntegration;
 
 /**
  * Map API data to application data object
  *
- * @package  Temando\Shipping\Rest
- * @author   Sebastian Ertner <sebastian.ertner@netresearch.de>
- * @author   Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\Rest
+ * @author  Sebastian Ertner <sebastian.ertner@netresearch.de>
+ * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class CarrierResponseMapper
 {
@@ -35,10 +35,10 @@ class CarrierResponseMapper
     }
 
     /**
-     * @param CarrierIntegrationResponseType $apiIntegration
+     * @param CarrierIntegration $apiIntegration
      * @return string[]
      */
-    private function getAvailableServices(CarrierIntegrationResponseType $apiIntegration)
+    private function getAvailableServices(CarrierIntegration $apiIntegration)
     {
         $apiIntegrationServices = $apiIntegration->getAttributes()->getServices();
         $serviceNames = [];
@@ -51,13 +51,13 @@ class CarrierResponseMapper
     }
 
     /**
-     * @param CarrierConfigurationResponseType $apiConfiguration
-     * @param CarrierIntegrationResponseType $apiIntegration
+     * @param CarrierConfiguration $apiConfiguration
+     * @param CarrierIntegration $apiIntegration
      * @return CarrierInterface
      */
     public function map(
-        CarrierConfigurationResponseType $apiConfiguration,
-        CarrierIntegrationResponseType $apiIntegration = null
+        CarrierConfiguration $apiConfiguration,
+        CarrierIntegration $apiIntegration = null
     ) {
         /** @var \Temando\Shipping\Model\Carrier $carrier */
         $carrier = $this->carrierFactory->create(['data' => [

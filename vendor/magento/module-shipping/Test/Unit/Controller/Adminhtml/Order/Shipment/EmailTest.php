@@ -207,7 +207,7 @@ class EmailTest extends \PHPUnit\Framework\TestCase
             ->will($this->returnValue(true));
         $this->messageManager->expects($this->once())
             ->method('addSuccess')
-            ->with('An email confirming the order is underway has been sent to the customer.');
+            ->with('You sent the shipment.');
         $path = '*/*/view';
         $arguments = ['shipment_id' => $shipmentId];
         $this->prepareRedirect($path, $arguments, 0);

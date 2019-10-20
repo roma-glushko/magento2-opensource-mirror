@@ -14,18 +14,18 @@ use PHPUnit\Framework\Error\Deprecated;
 use PHPUnit\Framework\Error\Notice;
 use PHPUnit\Framework\Error\Warning;
 use PHPUnit\Framework\Exception;
-use PHPUnit\Framework\TestSuite;
-use PHPUnit\Framework\TestResult;
-use PHPUnit\Framework\TestListener;
 use PHPUnit\Framework\Test;
+use PHPUnit\Framework\TestListener;
+use PHPUnit\Framework\TestResult;
+use PHPUnit\Framework\TestSuite;
 use PHPUnit\Runner\BaseTestRunner;
-use PHPUnit\Runner\Filter\Factory;
-use PHPUnit\Runner\Version;
-use PHPUnit\Runner\TestSuiteLoader;
-use PHPUnit\Runner\StandardTestSuiteLoader;
-use PHPUnit\Runner\Filter\NameFilterIterator;
 use PHPUnit\Runner\Filter\ExcludeGroupFilterIterator;
+use PHPUnit\Runner\Filter\Factory;
 use PHPUnit\Runner\Filter\IncludeGroupFilterIterator;
+use PHPUnit\Runner\Filter\NameFilterIterator;
+use PHPUnit\Runner\StandardTestSuiteLoader;
+use PHPUnit\Runner\TestSuiteLoader;
+use PHPUnit\Runner\Version;
 use PHPUnit\Util\Configuration;
 use PHPUnit\Util\Log\JUnit;
 use PHPUnit\Util\Log\TeamCity;
@@ -34,7 +34,6 @@ use PHPUnit\Util\TestDox\HtmlResultPrinter;
 use PHPUnit\Util\TestDox\TextResultPrinter;
 use PHPUnit\Util\TestDox\XmlResultPrinter;
 use ReflectionClass;
-use SebastianBergmann;
 use SebastianBergmann\CodeCoverage\CodeCoverage;
 use SebastianBergmann\CodeCoverage\Exception as CodeCoverageException;
 use SebastianBergmann\CodeCoverage\Filter as CodeCoverageFilter;
@@ -44,6 +43,7 @@ use SebastianBergmann\CodeCoverage\Report\Html\Facade as HtmlReport;
 use SebastianBergmann\CodeCoverage\Report\PHP as PhpReport;
 use SebastianBergmann\CodeCoverage\Report\Text as TextReport;
 use SebastianBergmann\CodeCoverage\Report\Xml\Facade as XmlReport;
+use SebastianBergmann\Comparator\Comparator;
 use SebastianBergmann\Environment\Runtime;
 
 /**
@@ -104,12 +104,13 @@ class TestRunner extends BaseTestRunner
     /**
      * @param Test|ReflectionClass $test
      * @param array                $arguments
+     * @param bool                 $exit
      *
      * @return TestResult
      *
      * @throws Exception
      */
-    public static function run($test, array $arguments = [])
+    public static function run($test, array $arguments = [], $exit = true)
     {
         if ($test instanceof ReflectionClass) {
             $test = new TestSuite($test);
@@ -120,7 +121,8 @@ class TestRunner extends BaseTestRunner
 
             return $aTestRunner->doRun(
                 $test,
-                $arguments
+                $arguments,
+                $exit
             );
         }
 
@@ -188,8 +190,6 @@ class TestRunner extends BaseTestRunner
 
         $this->handleConfiguration($arguments);
 
-        $this->processSuiteFilters($suite, $arguments);
-
         if (isset($arguments['bootstrap'])) {
             $GLOBALS['__PHPUNIT_BOOTSTRAP'] = $arguments['bootstrap'];
         }
@@ -203,7 +203,7 @@ class TestRunner extends BaseTestRunner
         }
 
         if ($arguments['beStrictAboutChangesToGlobalState'] === true) {
-            $suite->setbeStrictAboutChangesToGlobalState(true);
+            $suite->setBeStrictAboutChangesToGlobalState(true);
         }
 
         if (\is_int($arguments['repeat']) && $arguments['repeat'] > 0) {
@@ -427,7 +427,7 @@ class TestRunner extends BaseTestRunner
             );
 
             $codeCoverage->setUnintentionallyCoveredSubclassesWhitelist(
-                [SebastianBergmann\Comparator\Comparator::class]
+                [Comparator::class]
             );
 
             $codeCoverage->setCheckForUnintentionallyCoveredCode(
@@ -454,20 +454,23 @@ class TestRunner extends BaseTestRunner
                 $codeCoverage->setDisableIgnoredLines(true);
             }
 
+            $whitelistFromConfigurationFile = false;
+            $whitelistFromOption            = false;
+
             if (isset($arguments['whitelist'])) {
                 $this->codeCoverageFilter->addDirectoryToWhitelist($arguments['whitelist']);
+
+                $whitelistFromOption = true;
             }
 
             if (isset($arguments['configuration'])) {
                 $filterConfiguration = $arguments['configuration']->getFilterConfiguration();
 
-                if (empty($filterConfiguration['whitelist'])) {
-                    $this->writeMessage('Error', 'No whitelist is configured, no code coverage will be generated.');
+                if (!empty($filterConfiguration['whitelist'])) {
+                    $whitelistFromConfigurationFile = true;
+                }
 
-                    $codeCoverageReports = 0;
-
-                    unset($codeCoverage);
-                } else {
+                if (!empty($filterConfiguration['whitelist'])) {
                     $codeCoverage->setAddUncoveredFilesFromWhitelist(
                         $filterConfiguration['whitelist']['addUncoveredFilesFromWhitelist']
                     );
@@ -503,7 +506,11 @@ class TestRunner extends BaseTestRunner
             }
 
             if (isset($codeCoverage) && !$this->codeCoverageFilter->hasWhitelist()) {
-                $this->writeMessage('Error', 'Incorrect whitelist config, no code coverage will be generated.');
+                if (!$whitelistFromConfigurationFile && !$whitelistFromOption) {
+                    $this->writeMessage('Error', 'No whitelist is configured, no code coverage will be generated.');
+                } else {
+                    $this->writeMessage('Error', 'Incorrect whitelist config, no code coverage will be generated.');
+                }
 
                 $codeCoverageReports = 0;
 
@@ -531,6 +538,7 @@ class TestRunner extends BaseTestRunner
         $result->setTimeoutForLargeTests($arguments['timeoutForLargeTests']);
 
         if ($suite instanceof TestSuite) {
+            $this->processSuiteFilters($suite, $arguments);
             $suite->setRunTestInSeparateProcess($arguments['processIsolation']);
         }
 

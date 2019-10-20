@@ -4,8 +4,6 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\UrlRewrite\Test\Unit\Model\Storage;
 
 use Magento\Framework\DB\Select;
@@ -64,7 +62,8 @@ class DbStorageTest extends \PHPUnit\Framework\TestCase
             ->method('select')
             ->will($this->returnValue($this->select));
 
-        $this->storage = (new ObjectManager($this))->getObject(\Magento\UrlRewrite\Model\Storage\DbStorage::class,
+        $this->storage = (new ObjectManager($this))->getObject(
+            \Magento\UrlRewrite\Model\Storage\DbStorage::class,
             [
                 'urlRewriteFactory' => $this->urlRewriteFactory,
                 'dataObjectHelper' => $this->dataObjectHelper,
@@ -446,6 +445,7 @@ class DbStorageTest extends \PHPUnit\Framework\TestCase
         $urlSecond = $this->createMock(\Magento\UrlRewrite\Service\V1\Data\UrlRewrite::class);
 
         // delete
+
         $urlFirst->expects($this->any())
             ->method('getEntityType')
             ->willReturn('product');
@@ -455,6 +455,7 @@ class DbStorageTest extends \PHPUnit\Framework\TestCase
         $urlFirst->expects($this->any())
             ->method('getStoreId')
             ->willReturn('store_id_1');
+
         $urlSecond->expects($this->any())
             ->method('getEntityType')
             ->willReturn('category');

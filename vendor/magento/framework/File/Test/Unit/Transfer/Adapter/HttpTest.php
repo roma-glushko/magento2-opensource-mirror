@@ -24,6 +24,9 @@ class HttpTest extends \PHPUnit\Framework\TestCase
      */
     private $mime;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         $this->response = $this->createPartialMock(
@@ -34,7 +37,10 @@ class HttpTest extends \PHPUnit\Framework\TestCase
         $this->object = new Http($this->response, $this->mime);
     }
 
-    public function testSend()
+    /**
+     * @return void
+     */
+    public function testSend(): void
     {
         $file = __DIR__ . '/../../_files/javascript.js';
         $contentType = 'content/type';
@@ -56,7 +62,10 @@ class HttpTest extends \PHPUnit\Framework\TestCase
         $this->object->send($file);
     }
 
-    public function testSendWithOptions()
+    /**
+     * @return void
+     */
+    public function testSendWithOptions(): void
     {
         $file = __DIR__ . '/../../_files/javascript.js';
         $contentType = 'content/type';
@@ -81,8 +90,9 @@ class HttpTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage Filename is not set
+     * @return void
      */
-    public function testSendNoFileSpecifiedException()
+    public function testSendNoFileSpecifiedException(): void
     {
         $this->object->send([]);
     }
@@ -90,8 +100,9 @@ class HttpTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage File 'nonexistent.file' does not exists
+     * @return void
      */
-    public function testSendNoFileExistException()
+    public function testSendNoFileExistException(): void
     {
         $this->object->send('nonexistent.file');
     }

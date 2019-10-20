@@ -12,14 +12,14 @@
 namespace Symfony\Component\DependencyInjection\Tests\Compiler;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
-use Symfony\Component\DependencyInjection\Compiler\RepeatedPass;
-use Symfony\Component\DependencyInjection\Compiler\InlineServiceDefinitionsPass;
-use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
 use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
+use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
+use Symfony\Component\DependencyInjection\Compiler\AnalyzeServiceReferencesPass;
+use Symfony\Component\DependencyInjection\Compiler\InlineServiceDefinitionsPass;
+use Symfony\Component\DependencyInjection\Compiler\RepeatedPass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 
 class InlineServiceDefinitionsPassTest extends TestCase
 {
@@ -92,7 +92,7 @@ class InlineServiceDefinitionsPassTest extends TestCase
         $this->assertNotSame($container->getDefinition('bar'), $arguments[2]);
     }
 
-    public function testProcessInlinesMixedServicesLoop()
+    public function testProcessDoesNotInlineMixedServicesLoop()
     {
         $container = new ContainerBuilder();
         $container
@@ -108,7 +108,7 @@ class InlineServiceDefinitionsPassTest extends TestCase
 
         $this->process($container);
 
-        $this->assertEquals($container->getDefinition('foo')->getArgument(0), $container->getDefinition('bar'));
+        $this->assertEquals(new Reference('bar'), $container->getDefinition('foo')->getArgument(0));
     }
 
     /**
@@ -323,30 +323,6 @@ class InlineServiceDefinitionsPassTest extends TestCase
         $values = $container->getDefinition('iterator')->getArgument(0)->getValues();
         $this->assertInstanceOf(Reference::class, $values[0]);
         $this->assertSame('inline', (string) $values[0]);
-    }
-
-    public function testGetInlinedServiceIdData()
-    {
-        $container = new ContainerBuilder();
-        $container
-            ->register('inlinable.service')
-            ->setPublic(false)
-        ;
-        $container
-            ->register('non_inlinable.service')
-            ->setPublic(true)
-        ;
-
-        $container
-            ->register('other_service')
-            ->setArguments(array(new Reference('inlinable.service')))
-        ;
-
-        $inlinePass = new InlineServiceDefinitionsPass();
-        $repeatedPass = new RepeatedPass(array(new AnalyzeServiceReferencesPass(), $inlinePass));
-        $repeatedPass->process($container);
-
-        $this->assertEquals(array('inlinable.service' => array('other_service')), $inlinePass->getInlinedServiceIds());
     }
 
     protected function process(ContainerBuilder $container)

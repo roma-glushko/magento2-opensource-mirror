@@ -7,22 +7,23 @@ namespace Temando\Shipping\CustomerData;
 use Magento\Customer\CustomerData\SectionSourceInterface;
 use Magento\Framework\EntityManager\HydratorInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Session\SessionManagerInterface;
-use Temando\Shipping\Api\Data\CollectionPoint\QuoteCollectionPointInterface;
-use Temando\Shipping\Api\Data\CollectionPoint\SearchRequestInterface;
-use Temando\Shipping\Model\CollectionPoint\CartCollectionPointManagement;
-use Temando\Shipping\Model\CollectionPoint\OpeningHoursFormatter;
-use Temando\Shipping\Model\CollectionPoint\QuoteCollectionPoint;
+use Magento\Store\Model\StoreManagerInterface;
+use Temando\Shipping\Api\Data\Delivery\QuoteCollectionPointInterface;
+use Temando\Shipping\Api\Delivery\CartCollectionPointManagementInterface;
 use Temando\Shipping\Model\Config\ModuleConfigInterface;
+use Temando\Shipping\Model\Delivery\OpeningHoursFormatter;
+use Temando\Shipping\Model\Delivery\QuoteCollectionPoint;
 use Temando\Shipping\Model\ResourceModel\Repository\CollectionPointSearchRepositoryInterface;
 
 /**
  * CollectionPoints
  *
- * @package  Temando\Shipping\CustomerData
- * @author   Sebastian Ertner <sebastian.ertner@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\CustomerData
+ * @author  Sebastian Ertner <sebastian.ertner@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class CollectionPoints implements SectionSourceInterface
 {
@@ -37,7 +38,7 @@ class CollectionPoints implements SectionSourceInterface
     private $checkoutSession;
 
     /**
-     * @var CartCollectionPointManagement
+     * @var CartCollectionPointManagementInterface
      */
     private $cartCollectionPointManagement;
 
@@ -52,6 +53,11 @@ class CollectionPoints implements SectionSourceInterface
     private $searchRequestRepository;
 
     /**
+     * @var StoreManagerInterface
+     */
+    private $storeManager;
+
+    /**
      * @var HydratorInterface
      */
     private $hydrator;
@@ -60,24 +66,27 @@ class CollectionPoints implements SectionSourceInterface
      * CollectionPoints constructor.
      * @param ModuleConfigInterface $moduleConfig
      * @param SessionManagerInterface $checkoutSession
-     * @param CartCollectionPointManagement $cartCollectionPointManagement
+     * @param CartCollectionPointManagementInterface $cartCollectionPointManagement
      * @param OpeningHoursFormatter $openingHoursFormatter
      * @param CollectionPointSearchRepositoryInterface $searchRequestRepository
+     * @param StoreManagerInterface $storeManager
      * @param HydratorInterface $hydrator
      */
     public function __construct(
         ModuleConfigInterface $moduleConfig,
         SessionManagerInterface $checkoutSession,
-        CartCollectionPointManagement $cartCollectionPointManagement,
+        CartCollectionPointManagementInterface $cartCollectionPointManagement,
         OpeningHoursFormatter $openingHoursFormatter,
         CollectionPointSearchRepositoryInterface $searchRequestRepository,
+        StoreManagerInterface $storeManager,
         HydratorInterface $hydrator
     ) {
         $this->moduleConfig = $moduleConfig;
-        $this->cartCollectionPointManagement = $cartCollectionPointManagement;
-        $this->searchRequestRepository = $searchRequestRepository;
-        $this->openingHoursFormatter = $openingHoursFormatter;
         $this->checkoutSession = $checkoutSession;
+        $this->cartCollectionPointManagement = $cartCollectionPointManagement;
+        $this->openingHoursFormatter = $openingHoursFormatter;
+        $this->searchRequestRepository = $searchRequestRepository;
+        $this->storeManager = $storeManager;
         $this->hydrator = $hydrator;
     }
 
@@ -88,11 +97,16 @@ class CollectionPoints implements SectionSourceInterface
      */
     public function getSectionData()
     {
-        if (!$this->moduleConfig->isEnabled() || !$this->moduleConfig->isCollectionPointsEnabled()) {
+        try {
+            $storeId = $this->storeManager->getStore()->getId();
+        } catch (NoSuchEntityException $exception) {
+            $storeId = null;
+        }
+
+        if (!$this->moduleConfig->isEnabled($storeId) || !$this->moduleConfig->isCollectionPointsEnabled($storeId)) {
             return [
                 'collection-points' => [],
                 'search-request' => [],
-                'message' => ''
             ];
         }
 
@@ -113,7 +127,6 @@ class CollectionPoints implements SectionSourceInterface
             return [
                 'collection-points' => [],
                 'search-request' => $searchRequestData,
-                'message' => __('Enter country and postal code to search for a collection point.')
             ];
         }
 
@@ -130,14 +143,9 @@ class CollectionPoints implements SectionSourceInterface
             return $collectionPointData;
         }, $collectionPoints);
 
-        $message = !empty($collectionPoints)
-            ? __('There were %1 results for your search.', count($collectionPoints))
-            : $message = __('No Collection Points found.');
-
         return [
             'collection-points' => array_values($collectionPoints),
             'search-request' => $searchRequestData,
-            'message' => $message
         ];
     }
 }

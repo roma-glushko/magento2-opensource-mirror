@@ -4,10 +4,12 @@
  */
 namespace Temando\Shipping\Rest\EntityMapper;
 
-use Temando\Shipping\Api\Data\CollectionPoint\QuoteCollectionPointInterface;
-use Temando\Shipping\Api\Data\CollectionPoint\QuoteCollectionPointInterfaceFactory;
-use Temando\Shipping\Rest\Response\Type\CollectionPoints\Included\Attributes\CollectionPoint\Location\OpeningHours;
-use Temando\Shipping\Rest\Response\Type\CollectionPointsIncludedResponseType;
+use Magento\Framework\Exception\LocalizedException;
+use Temando\Shipping\Api\Data\Delivery\QuoteCollectionPointInterface;
+use Temando\Shipping\Api\Data\Delivery\QuoteCollectionPointInterfaceFactory;
+use Temando\Shipping\Rest\Response\DataObject\CollectionPointQualification;
+use Temando\Shipping\Rest\Response\Fields\Location\OpeningHours;
+use Temando\Shipping\Rest\Response\Fields\LocationAttributes;
 
 /**
  * Map API data to application data object
@@ -30,60 +32,64 @@ class CollectionPointsResponseMapper
     private $collectionPointFactory;
 
     /**
+     * @var OpeningHoursMapper
+     */
+    private $openingHoursMapper;
+
+    /**
      * CollectionPointsResponseMapper constructor.
      * @param ShippingExperiencesMapper $shippingExperiencesMapper
      * @param QuoteCollectionPointInterfaceFactory $collectionPointFactory
+     * @param OpeningHoursMapper $openingHoursMapper
      */
     public function __construct(
         ShippingExperiencesMapper $shippingExperiencesMapper,
-        QuoteCollectionPointInterfaceFactory $collectionPointFactory
+        QuoteCollectionPointInterfaceFactory $collectionPointFactory,
+        OpeningHoursMapper $openingHoursMapper
     ) {
         $this->shippingExperiencesMapper = $shippingExperiencesMapper;
         $this->collectionPointFactory = $collectionPointFactory;
+        $this->openingHoursMapper = $openingHoursMapper;
     }
 
     /**
-     * @param OpeningHours $apiHours
-     * @return string[]
-     *
-     * Date Format: ["l" => ["from" => "H:i:sP", "to" => "H:i:sP"]]
+     * @param LocationAttributes $apiLocation
+     * @return string[][]
      */
-    private function mapOpeningHours(OpeningHours $apiHours)
+    private function mapOpeningHours(LocationAttributes $apiLocation)
     {
-        $openingHours = [];
-
-        foreach ($apiHours->getDefault() as $item) {
-            $dow = $item->getDayOfWeek();
-            $openingHours[$dow] = [
-                'from' => $item->getOpens(),
-                'to' => $item->getCloses(),
+        if ($apiLocation->getOpeningHours() instanceof OpeningHours) {
+            return $this->openingHoursMapper->map($apiLocation->getOpeningHours());
+        } else {
+            return [
+                'general' => [],
+                'specific' => [],
             ];
         }
-
-        return $openingHours;
     }
 
     /**
-     * @param CollectionPointsIncludedResponseType[] $apiIncluded
+     * @param CollectionPointQualification[] $apiIncluded
      * @return QuoteCollectionPointInterface[]
+     * @throws LocalizedException
      */
     public function map(array $apiIncluded)
     {
-        /** @var CollectionPointsIncludedResponseType[] $apiIncluded */
-        $apiIncluded = array_filter($apiIncluded, function (CollectionPointsIncludedResponseType $element) {
+        /** @var CollectionPointQualification[] $apiIncluded */
+        $apiIncluded = array_filter($apiIncluded, function (CollectionPointQualification $element) {
             return ($element->getType() == 'collection-point-quote-set');
         });
 
-        /** @var \Temando\Shipping\Rest\Response\Type\CollectionPoints\Included\Attributes[] $sets */
-        $sets = array_reduce($apiIncluded, function ($sets, CollectionPointsIncludedResponseType $apiIncluded) {
+        /** @var \Temando\Shipping\Rest\Response\Fields\CollectionPointQualificationAttributes[] $sets */
+        $sets = array_reduce($apiIncluded, function ($sets, CollectionPointQualification $apiIncluded) {
             return array_merge($sets, $apiIncluded->getAttributes());
         }, []);
 
         $collectionPoints = [];
         foreach ($sets as $set) {
             $location = $set->getCollectionPoint()->getLocation();
-            $openingHours = $this->mapOpeningHours($location->getOpeningHours());
             $shippingExperiences = $this->shippingExperiencesMapper->map($set->getExperiences());
+            $openingHours = $this->mapOpeningHours($location);
 
             $collectionPoint = $this->collectionPointFactory->create(['data' => [
                 QuoteCollectionPointInterface::COLLECTION_POINT_ID => $set->getCollectionPoint()->getId(),
@@ -93,7 +99,7 @@ class CollectionPointsResponseMapper
                 QuoteCollectionPointInterface::POSTCODE => $location->getAddress()->getPostalCode(),
                 QuoteCollectionPointInterface::CITY => $location->getAddress()->getLocality(),
                 QuoteCollectionPointInterface::STREET => $location->getAddress()->getLines(),
-                QuoteCollectionPointInterface::OPENING_HOURS => $openingHours,
+                QuoteCollectionPointInterface::OPENING_HOURS => $openingHours['general'],
                 QuoteCollectionPointInterface::SHIPPING_EXPERIENCES => $shippingExperiences,
             ]]);
 

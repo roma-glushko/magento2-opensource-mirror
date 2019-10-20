@@ -6,15 +6,20 @@
  */
 namespace Magento\Catalog\Controller\Category;
 
+use Magento\Framework\App\Action\HttpPostActionInterface;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Catalog\Api\CategoryRepositoryInterface;
 use Magento\Catalog\Model\Layer\Resolver;
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\View\Result\PageFactory;
+use Magento\Framework\App\Action\Action;
 
 /**
+ * View a category on storefront. Needs to be accessible by POST because of the store switching.
+ *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class View extends \Magento\Framework\App\Action\Action
+class View extends Action implements HttpGetActionInterface, HttpPostActionInterface
 {
     /**
      * Core registry
@@ -152,9 +157,7 @@ class View extends \Magento\Framework\App\Action\Action
      */
     public function execute()
     {
-        if (!$this->_request->getParam('___from_store')
-            && $this->_request->getParam(self::PARAM_NAME_URL_ENCODED)
-        ) {
+        if ($this->_request->getParam(\Magento\Framework\App\ActionInterface::PARAM_NAME_URL_ENCODED)) {
             return $this->resultRedirectFactory->create()->setUrl($this->_redirect->getRedirectUrl());
         }
         $category = $this->_initCategory();

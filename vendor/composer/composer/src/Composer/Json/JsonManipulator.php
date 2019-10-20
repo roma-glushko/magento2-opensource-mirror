@@ -69,11 +69,15 @@ class JsonManipulator
 
         $links = $matches['value'];
 
-        if (isset($decoded[$type][$package])) {
+        // try to find existing link
+        $packageRegex = str_replace('/', '\\\\?/', preg_quote($package));
+        $regex = '{'.self::$DEFINES.'"(?P<package>'.$packageRegex.')"(\s*:\s*)(?&string)}ix';
+        if ($this->pregMatch($regex, $links, $packageMatches)) {
             // update existing link
-            $packageRegex = str_replace('/', '\\\\?/', preg_quote($package));
-            $links = preg_replace_callback('{'.self::$DEFINES.'"'.$packageRegex.'"(?P<separator>\s*:\s*)(?&string)}ix', function ($m) use ($package, $constraint) {
-                return JsonFile::encode($package) . $m['separator'] . '"' . $constraint . '"';
+            $existingPackage = $packageMatches['package'];
+            $packageRegex = str_replace('/', '\\\\?/', preg_quote($existingPackage));
+            $links = preg_replace_callback('{'.self::$DEFINES.'"'.$packageRegex.'"(?P<separator>\s*:\s*)(?&string)}ix', function ($m) use ($existingPackage, $constraint) {
+                return JsonFile::encode(str_replace('\\/', '/', $existingPackage)) . $m['separator'] . '"' . $constraint . '"';
             }, $links);
         } else {
             if ($this->pregMatch('#^\s*\{\s*\S+.*?(\s*\}\s*)$#s', $links, $match)) {
@@ -167,6 +171,10 @@ class JsonManipulator
             return $this->addSubNode('extra', substr($name, 6), $value);
         }
 
+        if (substr($name, 0, 8) === 'scripts.') {
+            return $this->addSubNode('scripts', substr($name, 8), $value);
+        }
+
         return $this->addMainKey($name, $value);
     }
 
@@ -174,6 +182,10 @@ class JsonManipulator
     {
         if (substr($name, 0, 6) === 'extra.') {
             return $this->removeSubNode('extra', substr($name, 6));
+        }
+
+        if (substr($name, 0, 8) === 'scripts.') {
+            return $this->removeSubNode('scripts', substr($name, 8));
         }
 
         return $this->removeMainKey($name);
@@ -184,7 +196,7 @@ class JsonManipulator
         $decoded = JsonFile::parseJson($this->contents);
 
         $subName = null;
-        if (in_array($mainNode, array('config', 'repositories', 'extra')) && false !== strpos($name, '.')) {
+        if (in_array($mainNode, array('config', 'extra', 'scripts')) && false !== strpos($name, '.')) {
             list($name, $subName) = explode('.', $name, 2);
         }
 
@@ -225,7 +237,7 @@ class JsonManipulator
         // child exists
         $childRegex = '{'.self::$DEFINES.'(?P<start>"'.preg_quote($name).'"\s*:\s*)(?P<content>(?&json))(?P<end>,?)}x';
         if ($this->pregMatch($childRegex, $children, $matches)) {
-            $children = preg_replace_callback($childRegex, function ($matches) use ($name, $subName, $value, $that) {
+            $children = preg_replace_callback($childRegex, function ($matches) use ($subName, $value, $that) {
                 if ($subName !== null) {
                     $curVal = json_decode($matches['content'], true);
                     if (!is_array($curVal)) {
@@ -304,7 +316,7 @@ class JsonManipulator
         }
 
         $subName = null;
-        if (in_array($mainNode, array('config', 'repositories', 'extra')) && false !== strpos($name, '.')) {
+        if (in_array($mainNode, array('config', 'extra', 'scripts')) && false !== strpos($name, '.')) {
             list($name, $subName) = explode('.', $name, 2);
         }
 
@@ -413,7 +425,7 @@ class JsonManipulator
     {
         $decoded = JsonFile::parseJson($this->contents);
 
-        if (!isset($decoded[$key])) {
+        if (!array_key_exists($key, $decoded)) {
             return true;
         }
 
@@ -424,6 +436,11 @@ class JsonManipulator
             // invalid match due to un-regexable content, abort
             if (!@json_decode('{'.$matches['removal'].'}')) {
                 return false;
+            }
+
+            // check that we are not leaving a dangling comma on the previous line if the last line was removed
+            if (preg_match('#,\s*$#', $matches['start']) && preg_match('#^\}$#', $matches['end'])) {
+                $matches['start'] = rtrim(preg_replace('#,(\s*)$#', '$1', $matches['start']), $this->indent);
             }
 
             $this->contents = $matches['start'] . $matches['end'];
@@ -493,8 +510,7 @@ class JsonManipulator
                     if (PHP_VERSION_ID > 70000) {
                         throw new \RuntimeException('Failed to execute regex: PREG_JIT_STACKLIMIT_ERROR', 6);
                     }
-                    // fallthrough
-
+                    // no break
                 default:
                     throw new \RuntimeException('Failed to execute regex: Unknown error');
             }

@@ -27,6 +27,7 @@ use Magento\Framework\View\ConfigInterface as ViewConfig;
  * @SuppressWarnings(PHPMD.TooManyFields)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @api
+ * @since 100.0.2
  */
 class Context
 {
@@ -332,15 +333,11 @@ class Context
     }
 
     /**
-     * Retrieve the module name
-     *
-     * @return string
-     *
-     * @todo alias of getModuleName
+     * @see getModuleName
      */
     public function getFrontName()
     {
-        return $this->getRequest()->getModuleName();
+        return $this->getModuleName();
     }
 
     /**

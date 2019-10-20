@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Framework\Search\Dynamic\Algorithm;
 
 use Magento\Framework\Exception\LocalizedException;
@@ -10,6 +11,7 @@ use Magento\Framework\ObjectManagerInterface;
 
 /**
  * @api
+ * @since 100.0.2
  */
 class Repository
 {
@@ -53,7 +55,7 @@ class Repository
         if (!isset($this->instances[$algorithmType])) {
             if (!isset($this->algorithms[$algorithmType])) {
                 throw new LocalizedException(
-                    new \Magento\Framework\Phrase('%1 was not found in algorithms', [$algorithmType])
+                    new \Magento\Framework\Phrase("The %1 value wasn't found in the algorithms.", [$algorithmType])
                 );
             }
 

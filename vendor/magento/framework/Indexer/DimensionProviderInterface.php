@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\Framework\Indexer;
 
 /**
+ * @api
  * Provide a list of dimensions
  */
 interface DimensionProviderInterface extends \IteratorAggregate

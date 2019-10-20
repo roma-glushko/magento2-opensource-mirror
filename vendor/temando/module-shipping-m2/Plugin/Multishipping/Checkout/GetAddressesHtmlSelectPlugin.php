@@ -7,16 +7,15 @@ namespace Temando\Shipping\Plugin\Multishipping\Checkout;
 use Magento\Checkout\Model\Session;
 use Magento\Multishipping\Block\Checkout\Addresses;
 use Magento\Quote\Model\Quote\Address\Item;
-use Magento\Store\Model\StoreManagerInterface;
 use Temando\Shipping\Model\Checkout\Schema\CheckoutField;
 use Temando\Shipping\Model\Checkout\Schema\CheckoutFieldsSchema;
 use Temando\Shipping\Model\Config\ModuleConfigInterface;
 
 /**
- * @package  Temando\Shipping\Plugin
- * @author   Sebastian Ertner <sebastian.ertner@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\Plugin
+ * @author  Sebastian Ertner <sebastian.ertner@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class GetAddressesHtmlSelectPlugin
 {
@@ -36,28 +35,20 @@ class GetAddressesHtmlSelectPlugin
     private $checkoutSession;
 
     /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
      * GetAddressesHtmlSelectPlugin constructor.
      *
      * @param ModuleConfigInterface $moduleConfig
      * @param CheckoutFieldsSchema  $schema
-     * @param Session               $checkoutSession
-     * @param StoreManagerInterface $storeManager
+     * @param Session $checkoutSession
      */
     public function __construct(
         ModuleConfigInterface $moduleConfig,
         CheckoutFieldsSchema $schema,
-        Session $checkoutSession,
-        StoreManagerInterface $storeManager
+        Session $checkoutSession
     ) {
-        $this->moduleConfig    = $moduleConfig;
-        $this->schema          = $schema;
+        $this->moduleConfig = $moduleConfig;
+        $this->schema = $schema;
         $this->checkoutSession = $checkoutSession;
-        $this->storeManager    = $storeManager;
     }
 
     /**
@@ -191,7 +182,8 @@ class GetAddressesHtmlSelectPlugin
      */
     public function afterGetAddressesHtmlSelect(Addresses $subject, $result, Item $item, $index)
     {
-        if (!$this->moduleConfig->isEnabled($this->storeManager->getStore()->getId())) {
+        $storeId = $subject->getCheckout()->getQuote()->getStoreId();
+        if (!$this->moduleConfig->isEnabled($storeId)) {
             return $result;
         }
 

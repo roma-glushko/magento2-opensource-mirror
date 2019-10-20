@@ -27,9 +27,10 @@ class ChildDefinition extends Definition
     /**
      * @param string $parent The id of Definition instance to decorate
      */
-    public function __construct($parent)
+    public function __construct(string $parent)
     {
         $this->parent = $parent;
+        $this->setPrivate(false);
     }
 
     /**
@@ -94,7 +95,7 @@ class ChildDefinition extends Definition
      */
     public function replaceArgument($index, $value)
     {
-        if (is_int($index)) {
+        if (\is_int($index)) {
             $this->arguments['index_'.$index] = $value;
         } elseif (0 === strpos($index, '$')) {
             $this->arguments[$index] = $value;
@@ -121,5 +122,3 @@ class ChildDefinition extends Definition
         throw new BadMethodCallException('A ChildDefinition cannot have instanceof conditionals set on it.');
     }
 }
-
-class_alias(ChildDefinition::class, DefinitionDecorator::class);

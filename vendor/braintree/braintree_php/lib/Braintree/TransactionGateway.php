@@ -173,6 +173,7 @@ class TransactionGateway
                     'addBillingAddressToPaymentMethod',
                     'venmoSdkSession',
                     'storeShippingAddressInVault',
+                    'payeeId',
                     'payeeEmail',
                     'skipAdvancedFraudChecking',
                     'skipAvs',
@@ -180,12 +181,13 @@ class TransactionGateway
                     ['threeDSecure' =>
                         ['required']
                     ],
-                    # Included for backwards compatiblity. Remove in the next major version
+                    # TODO: Snake case version included for backwards compatiblity. Remove in the next major version
                     ['three_d_secure' =>
                         ['required']
                     ],
                     ['paypal' =>
                         [
+                            'payeeId',
                             'payeeEmail',
                             'customField',
                             'description',
@@ -199,13 +201,22 @@ class TransactionGateway
                             'currencyAmount',
                             'currencyIsoCode'
                         ]
+                    ],
+                    ['venmo' =>
+                        [
+                            # TODO: Snake case version included for backwards compatiblity. Remove in the next major version
+                            'profile_id',
+                            'profileId'
+                        ]
                     ]
                 ],
             ],
             ['customFields' => ['_anyKey_']],
             ['descriptor' => ['name', 'phone', 'url']],
-            ['paypalAccount' => ['payeeEmail']],
-            ['apple_pay_card' => ['number', 'cardholder_name', 'cryptogram', 'expiration_month', 'expiration_year', 'eci_indicator']], #backwards compatibility
+            ['paypalAccount' => ['payeeId', 'payeeEmail']],
+            # TODO: Snake case version included for backwards compatiblity. Remove in the next major version
+            ['apple_pay_card' => ['number', 'cardholder_name', 'cryptogram', 'expiration_month', 'expiration_year', 'eci_indicator']], 
+
             ['applePayCard' => ['number', 'cardholderName', 'cryptogram', 'expirationMonth', 'expirationYear', 'eciIndicator']],
             ['industry' =>
                 ['industryType',

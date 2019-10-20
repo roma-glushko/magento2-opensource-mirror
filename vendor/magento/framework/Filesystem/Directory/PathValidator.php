@@ -4,6 +4,8 @@
  * See COPYING.txt for license details.
  */
 
+declare(strict_types=1);
+
 namespace Magento\Framework\Filesystem\Directory;
 
 use Magento\Framework\Exception\ValidatorException;
@@ -11,7 +13,7 @@ use Magento\Framework\Filesystem\DriverInterface;
 use Magento\Framework\Phrase;
 
 /**
- * {@inheritdoc}
+ * @inheritDoc
  *
  * Validates paths using driver.
  */
@@ -31,16 +33,16 @@ class PathValidator implements PathValidatorInterface
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
     public function validate(
         string $directoryPath,
         string $path,
-        $scheme = null,
-        $absolutePath = false
-    ) {
+        ?string $scheme = null,
+        bool $absolutePath = false
+    ): void {
         $realDirectoryPath = $this->driver->getRealPathSafety($directoryPath);
-        if (mb_substr($realDirectoryPath, -1) !== DIRECTORY_SEPARATOR) {
+        if ($realDirectoryPath[-1] !== DIRECTORY_SEPARATOR) {
             $realDirectoryPath .= DIRECTORY_SEPARATOR;
         }
         if (!$absolutePath) {
@@ -56,7 +58,7 @@ class PathValidator implements PathValidatorInterface
         }
 
         if (mb_strpos($actualPath, $realDirectoryPath) !== 0
-            && $path . DIRECTORY_SEPARATOR !== $realDirectoryPath
+            && $path .DIRECTORY_SEPARATOR !== $realDirectoryPath
         ) {
             throw new ValidatorException(
                 new Phrase(

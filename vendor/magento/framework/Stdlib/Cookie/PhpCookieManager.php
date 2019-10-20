@@ -152,11 +152,11 @@ class PhpCookieManager implements CookieManagerInterface
             $params['name'] = $name;
             if ($value == '') {
                 throw new FailureToSendException(
-                    new Phrase('Unable to delete the cookie with cookieName = %name', $params)
+                    new Phrase('The cookie with "%name" cookieName couldn\'t be deleted.', $params)
                 );
             } else {
                 throw new FailureToSendException(
-                    new Phrase('Unable to send the cookie with cookieName = %name', $params)
+                    new Phrase('The cookie with "%name" cookieName couldn\'t be sent. Please try again later.', $params)
                 );
             }
         }
@@ -237,9 +237,7 @@ class PhpCookieManager implements CookieManagerInterface
         ) {
             $expireTime = $metadataArray[PhpCookieManager::KEY_EXPIRE_TIME];
         } else {
-            if (isset($metadataArray[CookieMetadata::KEY_DURATION])
-                && $metadataArray[CookieMetadata::KEY_DURATION] !== PhpCookieManager::EXPIRE_AT_END_OF_SESSION_TIME
-            ) {
+            if (isset($metadataArray[CookieMetadata::KEY_DURATION])) {
                 $expireTime = $metadataArray[CookieMetadata::KEY_DURATION] + time();
             } else {
                 $expireTime = PhpCookieManager::EXPIRE_AT_END_OF_SESSION_TIME;

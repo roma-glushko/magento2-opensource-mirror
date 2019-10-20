@@ -74,9 +74,4 @@
             <argument name="session" xsi:type="object">Magento\Backend\Model\Session\Quote</argument>
         </arguments>
     </type>
-    <type name="Magento\Braintree\Model\Ui\ConfigProvider">
-        <arguments>
-            <argument name="session" xsi:type="object">Magento\Backend\Model\Session\Quote</argument>
-        </arguments>
-    </type>
 </config>

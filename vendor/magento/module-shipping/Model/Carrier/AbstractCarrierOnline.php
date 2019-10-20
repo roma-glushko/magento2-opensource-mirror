@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Shipping\Model\Carrier;
 
 use Magento\Framework\Exception\LocalizedException;
@@ -301,7 +302,7 @@ abstract class AbstractCarrierOnline extends AbstractCarrier
      *
      * @param \Magento\Framework\DataObject $request
      * @return $this|bool|\Magento\Framework\DataObject
-     * @deprecated
+     * @deprecated 100.2.6
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
@@ -317,6 +318,7 @@ abstract class AbstractCarrierOnline extends AbstractCarrier
      * @return $this|bool|\Magento\Framework\DataObject
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
+     * @since 100.2.6
      */
     public function processAdditionalValidation(\Magento\Framework\DataObject $request)
     {
@@ -669,7 +671,7 @@ abstract class AbstractCarrierOnline extends AbstractCarrier
     public function parseXml($xmlContent, $customSimplexml = 'SimpleXMLElement')
     {
         if (!$this->xmlSecurity->scan($xmlContent)) {
-            throw new LocalizedException(__('Security validation of XML document has been failed.'));
+            throw new LocalizedException(__('The security validation of the XML document has failed.'));
         }
 
         $xmlElement = simplexml_load_string($xmlContent, $customSimplexml);

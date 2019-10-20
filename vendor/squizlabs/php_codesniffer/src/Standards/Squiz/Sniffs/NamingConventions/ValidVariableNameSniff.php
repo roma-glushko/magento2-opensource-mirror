@@ -16,16 +16,6 @@ use PHP_CodeSniffer\Files\File;
 class ValidVariableNameSniff extends AbstractVariableSniff
 {
 
-    /**
-     * Tokens to ignore so that we can find a DOUBLE_COLON.
-     *
-     * @var array
-     */
-    private $ignore = [
-        T_WHITESPACE,
-        T_COMMENT,
-    ];
-
 
     /**
      * Processes this test, when one of its tokens is encountered.
@@ -41,23 +31,8 @@ class ValidVariableNameSniff extends AbstractVariableSniff
         $tokens  = $phpcsFile->getTokens();
         $varName = ltrim($tokens[$stackPtr]['content'], '$');
 
-        $phpReservedVars = [
-            '_SERVER',
-            '_GET',
-            '_POST',
-            '_REQUEST',
-            '_SESSION',
-            '_ENV',
-            '_COOKIE',
-            '_FILES',
-            'GLOBALS',
-            'http_response_header',
-            'HTTP_RAW_POST_DATA',
-            'php_errormsg',
-        ];
-
         // If it's a php reserved var, then its ok.
-        if (in_array($varName, $phpReservedVars) === true) {
+        if (isset($this->phpReservedVars[$varName]) === true) {
             return;
         }
 
@@ -149,17 +124,18 @@ class ValidVariableNameSniff extends AbstractVariableSniff
                     $errorData[0],
                 ];
                 $phpcsFile->addError($error, $stackPtr, 'PublicHasUnderscore', $data);
-                return;
             }
         } else {
             if (substr($varName, 0, 1) !== '_') {
                 $error = 'Private member variable "%s" must contain a leading underscore';
                 $phpcsFile->addError($error, $stackPtr, 'PrivateNoUnderscore', $errorData);
-                return;
             }
         }
 
-        if (Common::isCamelCaps($varName, false, $public, false) === false) {
+        // Remove a potential underscore prefix for testing CamelCaps.
+        $varName = ltrim($varName, '_');
+
+        if (Common::isCamelCaps($varName, false, true, false) === false) {
             $error = 'Member variable "%s" is not in valid camel caps format';
             $phpcsFile->addError($error, $stackPtr, 'MemberNotCamelCaps', $errorData);
         }
@@ -180,25 +156,10 @@ class ValidVariableNameSniff extends AbstractVariableSniff
     {
         $tokens = $phpcsFile->getTokens();
 
-        $phpReservedVars = [
-            '_SERVER',
-            '_GET',
-            '_POST',
-            '_REQUEST',
-            '_SESSION',
-            '_ENV',
-            '_COOKIE',
-            '_FILES',
-            'GLOBALS',
-            'http_response_header',
-            'HTTP_RAW_POST_DATA',
-            'php_errormsg',
-        ];
-
         if (preg_match_all('|[^\\\]\${?([a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)|', $tokens[$stackPtr]['content'], $matches) !== 0) {
             foreach ($matches[1] as $varName) {
                 // If it's a php reserved var, then its ok.
-                if (in_array($varName, $phpReservedVars) === true) {
+                if (isset($this->phpReservedVars[$varName]) === true) {
                     continue;
                 }
 

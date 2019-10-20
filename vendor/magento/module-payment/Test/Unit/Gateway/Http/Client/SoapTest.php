@@ -64,7 +64,7 @@ class SoapTest extends \PHPUnit\Framework\TestCase
         $expectedResult = [
             'result' => []
         ];
-        $soapResult = new \stdClass();
+        $soapResult = new \StdClass();
 
         $this->logger->expects(static::at(0))
             ->method('debug')

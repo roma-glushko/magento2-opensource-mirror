@@ -32,6 +32,7 @@ abstract class AbstractType
      * Maintain a list of invisible attributes
      *
      * @var array
+     * @since 100.2.5
      */
     public static $invAttributesCache = [];
 
@@ -558,6 +559,12 @@ abstract class AbstractType
         foreach ($this->_getProductAttributes($rowData) as $attrCode => $attrParams) {
             if (!$attrParams['is_static'] && !isset($rowData[$attrCode])) {
                 unset($rowData[$attrCode]);
+            }
+
+            if (isset($rowData[$attrCode])
+                && $rowData[$attrCode] === $this->_entityModel->getEmptyAttributeValueConstant()
+            ) {
+                $rowData[$attrCode] = null;
             }
         }
         return $rowData;

@@ -7,8 +7,9 @@ namespace Temando\Shipping\Webservice\Processor\OrderOperation;
 use Magento\Framework\EntityManager\HydratorInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Api\Data\OrderInterface as SalesOrderInterface;
-use Temando\Shipping\Api\Data\CollectionPoint\OrderCollectionPointInterface;
-use Temando\Shipping\Api\Data\CollectionPoint\OrderCollectionPointInterfaceFactory;
+use Temando\Shipping\Api\Data\Delivery\OrderCollectionPointInterface;
+use Temando\Shipping\Api\Data\Delivery\OrderCollectionPointInterfaceFactory;
+use Temando\Shipping\Api\Data\Delivery\QuoteCollectionPointInterface;
 use Temando\Shipping\Model\OrderInterface;
 use Temando\Shipping\Model\ResourceModel\Repository\OrderCollectionPointRepositoryInterface;
 use Temando\Shipping\Webservice\Response\Type\OrderResponseTypeInterface;
@@ -20,8 +21,8 @@ use Temando\Shipping\Webservice\Response\Type\OrderResponseTypeInterface;
  *
  * @package Temando\Shipping\Webservice
  * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link    http://www.temando.com/
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class CollectionPointManifestProcessor implements SaveProcessorInterface
 {
@@ -70,9 +71,8 @@ class CollectionPointManifestProcessor implements SaveProcessorInterface
         OrderInterface $requestType,
         OrderResponseTypeInterface $responseType
     ) {
-        /** @var \Temando\Shipping\Model\CollectionPoint\QuoteCollectionPoint $collectionPoint */
         $quoteCollectionPoint = $requestType->getCollectionPoint();
-        if ($quoteCollectionPoint->getEntityId()) {
+        if ($quoteCollectionPoint instanceof QuoteCollectionPointInterface) {
             $shippingAddressId = $salesOrder->getShippingAddress()->getId();
 
             $collectionPointData = $this->hydrator->extract($quoteCollectionPoint);

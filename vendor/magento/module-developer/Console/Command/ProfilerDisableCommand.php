@@ -11,9 +11,6 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-/**
- * CLI Command to disable Magento profiler.
- */
 class ProfilerDisableCommand extends Command
 {
     /**
@@ -40,12 +37,11 @@ class ProfilerDisableCommand extends Command
      * Initialize dependencies.
      *
      * @param File $filesystem
-     * @param string|null $name The name of the command; passing null means it must be set in configure()
      * @internal param ConfigInterface $resourceConfig
      */
-    public function __construct(File $filesystem, $name = null)
+    public function __construct(File $filesystem)
     {
-        parent::__construct($name ?: self::COMMAND_NAME);
+        parent::__construct();
         $this->filesystem = $filesystem;
     }
 
@@ -54,7 +50,9 @@ class ProfilerDisableCommand extends Command
      */
     protected function configure()
     {
-        $this->setDescription('Disable the profiler.');
+        $this->setName(self::COMMAND_NAME)
+            ->setDescription('Disable the profiler.');
+
         parent::configure();
     }
 

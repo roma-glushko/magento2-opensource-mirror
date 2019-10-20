@@ -233,6 +233,8 @@ class Config implements \Magento\Framework\Mail\Template\ConfigInterface
     }
 
     /**
+     * Retrieve template file path.
+     *
      * @param string $file
      * @param array $designParams
      * @param string $module
@@ -241,7 +243,7 @@ class Config implements \Magento\Framework\Mail\Template\ConfigInterface
      *
      * @throws \UnexpectedValueException
      */
-    private function getFilename($file, array $designParams, $module)
+    private function getFilename(string $file, array $designParams, string $module): string
     {
         $filename = $this->viewFileSystem->getEmailTemplateFileName($file, $designParams, $module);
 

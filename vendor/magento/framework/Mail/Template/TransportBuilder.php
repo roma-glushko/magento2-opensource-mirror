@@ -9,14 +9,17 @@
 namespace Magento\Framework\Mail\Template;
 
 use Magento\Framework\App\TemplateTypesInterface;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Mail\MessageInterface;
 use Magento\Framework\Mail\MessageInterfaceFactory;
-use Magento\Framework\Mail\TransportInterface;
 use Magento\Framework\Mail\TransportInterfaceFactory;
 use Magento\Framework\ObjectManagerInterface;
+use Magento\Framework\Phrase;
 
 /**
  * @api
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @since 100.0.2
  */
 class TransportBuilder
 {
@@ -51,7 +54,7 @@ class TransportBuilder
     /**
      * Mail Transport
      *
-     * @var TransportInterface
+     * @var \Magento\Framework\Mail\TransportInterface
      */
     protected $transport;
 
@@ -65,31 +68,31 @@ class TransportBuilder
     /**
      * Object Manager
      *
-     * @var ObjectManagerInterface
+     * @var \Magento\Framework\ObjectManagerInterface
      */
     protected $objectManager;
 
     /**
      * Message
      *
-     * @var MessageInterface
+     * @var \Magento\Framework\Mail\Message
      */
     protected $message;
 
     /**
      * Sender resolver
      *
-     * @var SenderResolverInterface
+     * @var \Magento\Framework\Mail\Template\SenderResolverInterface
      */
     protected $_senderResolver;
 
     /**
-     * @var TransportInterfaceFactory
+     * @var \Magento\Framework\Mail\TransportInterfaceFactory
      */
     protected $mailTransportFactory;
 
     /**
-     * @var MessageInterfaceFactory
+     * @var \Magento\Framework\Mail\MessageInterfaceFactory
      */
     private $messageFactory;
 
@@ -99,7 +102,7 @@ class TransportBuilder
      * @param SenderResolverInterface $senderResolver
      * @param ObjectManagerInterface $objectManager
      * @param TransportInterfaceFactory $mailTransportFactory
-     * @param MessageInterfaceFactory|null $messageFactory
+     * @param MessageInterfaceFactory $messageFactory
      *
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
@@ -234,7 +237,7 @@ class TransportBuilder
     /**
      * Get mail transport
      *
-     * @return TransportInterface
+     * @return \Magento\Framework\Mail\TransportInterface
      */
     public function getTransport()
     {
@@ -272,23 +275,30 @@ class TransportBuilder
     }
 
     /**
-     * Prepare message
+     * Prepare message.
      *
      * @return $this
+     * @throws LocalizedException if template type is unknown
      */
     protected function prepareMessage()
     {
         $template = $this->getTemplate();
-        $types = [
-            TemplateTypesInterface::TYPE_TEXT => MessageInterface::TYPE_TEXT,
-            TemplateTypesInterface::TYPE_HTML => MessageInterface::TYPE_HTML,
-        ];
-
         $body = $template->processTemplate();
-        $this->message->setMessageType($types[$template->getType()])
-            ->setBody($body)
-            ->setSubject(html_entity_decode($template->getSubject(), ENT_QUOTES));
+        switch ($template->getType()) {
+            case TemplateTypesInterface::TYPE_TEXT:
+                $this->message->setBodyText($body);
+                break;
 
+            case TemplateTypesInterface::TYPE_HTML:
+                $this->message->setBodyHtml($body);
+                break;
+
+            default:
+                throw new LocalizedException(
+                    new Phrase('Unknown template type')
+                );
+        }
+        $this->message->setSubject(html_entity_decode($template->getSubject(), ENT_QUOTES));
         return $this;
     }
 }

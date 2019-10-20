@@ -4,8 +4,6 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\Customer\Model;
 
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -13,7 +11,6 @@ use Magento\TestFramework\Helper\Bootstrap;
 
 /**
  * Test for \Magento\Customer\Model\CustomerRegistry
- * @magentoAppIsolation enabled
  */
 class CustomerRegistryTest extends \PHPUnit\Framework\TestCase
 {

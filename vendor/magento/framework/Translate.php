@@ -119,14 +119,14 @@ class Translate implements \Magento\Framework\TranslateInterface
     protected $packDictionary;
 
     /**
-     * @var DriverInterface
-     */
-    private $fileDriver;
-
-    /**
      * @var \Magento\Framework\Serialize\SerializerInterface
      */
     private $serializer;
+
+    /**
+     * @var DriverInterface
+     */
+    private $fileDriver;
 
     /**
      * @param \Magento\Framework\View\DesignInterface $viewDesign
@@ -175,14 +175,15 @@ class Translate implements \Magento\Framework\TranslateInterface
         $this->directory = $filesystem->getDirectoryRead(DirectoryList::ROOT);
         $this->_csvParser = $csvParser;
         $this->packDictionary = $packDictionary;
-        $this->fileDriver = $fileDriver ?: ObjectManager::getInstance()->get(File::class);
+        $this->fileDriver = $fileDriver
+            ?? ObjectManager::getInstance()->get(File::class);
 
         $this->_config = [
             self::CONFIG_AREA_KEY => null,
             self::CONFIG_LOCALE_KEY => null,
             self::CONFIG_SCOPE_KEY => null,
             self::CONFIG_THEME_KEY => null,
-            self::CONFIG_MODULE_KEY => null
+            self::CONFIG_MODULE_KEY => null,
         ];
     }
 
@@ -192,7 +193,6 @@ class Translate implements \Magento\Framework\TranslateInterface
      * @param string|null $area
      * @param bool $forceReload
      * @return $this
-     * @throws Exception\LocalizedException
      */
     public function loadData($area = null, $forceReload = false)
     {
@@ -207,7 +207,8 @@ class Translate implements \Magento\Framework\TranslateInterface
         );
 
         if (!$forceReload) {
-            if (false !== $data = $this->_loadCache()) {
+            $data = $this->_loadCache();
+            if (false !== $data) {
                 $this->_data = $data;
                 return $this;
             }
@@ -474,11 +475,9 @@ class Translate implements \Magento\Framework\TranslateInterface
     /**
      * Retrieve cache identifier
      *
-     * @param bool $forceReload
      * @return string
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
-    protected function getCacheId($forceReload = false)
+    protected function getCacheId()
     {
         $_cacheId = \Magento\Framework\App\Cache\Type\Translate::TYPE_IDENTIFIER;
         $_cacheId .= '_' . $this->_config[self::CONFIG_LOCALE_KEY];
@@ -520,7 +519,7 @@ class Translate implements \Magento\Framework\TranslateInterface
      * Get serializer
      *
      * @return \Magento\Framework\Serialize\SerializerInterface
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      */
     private function getSerializer()
     {

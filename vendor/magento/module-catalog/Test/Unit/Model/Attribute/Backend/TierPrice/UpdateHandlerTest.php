@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magento\Catalog\Test\Unit\Model\Attribute\Backend\TierPrice;
 
@@ -16,6 +17,7 @@ use Magento\Catalog\Model\ResourceModel\Product\Attribute\Backend\Tierprice;
 
 /**
  * Unit tests for \Magento\Catalog\Model\Product\Attribute\Backend\TierPrice\UpdateHandler
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class UpdateHandlerTest extends \PHPUnit\Framework\TestCase
 {
@@ -93,7 +95,7 @@ class UpdateHandlerTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testExecute()
+    public function testExecute(): void
     {
         $newTierPrices = [
             ['website_id' => 0, 'price_qty' => 2, 'cust_group' => 0, 'price' => 15],
@@ -163,7 +165,7 @@ class UpdateHandlerTest extends \PHPUnit\Framework\TestCase
      * @expectedException \Magento\Framework\Exception\InputException
      * @expectedExceptionMessage Tier prices data should be array, but actually other type is received
      */
-    public function testExecuteWithException()
+    public function testExecuteWithException(): void
     {
         /** @var \PHPUnit_Framework_MockObject_MockObject $attribute */
         $attribute = $this->getMockBuilder(\Magento\Catalog\Api\Data\ProductAttributeInterface::class)

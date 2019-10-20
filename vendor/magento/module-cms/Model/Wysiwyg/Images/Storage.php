@@ -3,8 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-declare(strict_types=1);
-
 namespace Magento\Cms\Model\Wysiwyg\Images;
 
 use Magento\Cms\Helper\Wysiwyg\Images;
@@ -243,10 +241,12 @@ class Storage extends \Magento\Framework\DataObject
     protected function removeItemFromCollection($collection, $conditions)
     {
         $regExp = $conditions['reg_exp'] ? '~' . implode('|', array_keys($conditions['reg_exp'])) . '~i' : null;
-        $storageRootLength = strlen($this->_cmsWysiwygImages->getStorageRoot());
+        $storageRoot = $this->_cmsWysiwygImages->getStorageRoot();
+        $storageRootLength = strlen($storageRoot);
 
         foreach ($collection as $key => $value) {
-            $rootChildParts = explode('/', substr($value->getFilename(), $storageRootLength));
+            $mediaSubPathname = substr($value->getFilename(), $storageRootLength);
+            $rootChildParts = explode('/', '/' . ltrim($mediaSubPathname, '/'));
 
             if (array_key_exists($rootChildParts[1], $conditions['plain'])
                 || ($regExp && preg_match($regExp, $value->getFilename()))) {
@@ -320,6 +320,8 @@ class Storage extends \Magento\Framework\DataObject
             $item->setName($item->getBasename());
             $item->setShortName($this->_cmsWysiwygImages->getShortFilename($item->getBasename()));
             $item->setUrl($this->_cmsWysiwygImages->getCurrentUrl() . $item->getBasename());
+            $item->setSize(filesize($item->getFilename()));
+            $item->setMimeType(\mime_content_type($item->getFilename()));
 
             if ($this->isImage($item->getBasename())) {
                 $thumbUrl = $this->getThumbnailUrl($item->getFilename(), true);
@@ -476,7 +478,6 @@ class Storage extends \Magento\Framework\DataObject
      * @param string $type Type of storage, e.g. image, media etc.
      * @return array File info Array
      * @throws \Magento\Framework\Exception\LocalizedException
-     * @throws \Exception
      */
     public function uploadFile($targetPath, $type = null)
     {
@@ -747,7 +748,7 @@ class Storage extends \Magento\Framework\DataObject
     }
 
     /**
-     * Prepare mime types config settings
+     * Prepare mime types config settings.
      *
      * @param string|null $type Type of storage, e.g. image, media etc.
      * @return array Array of allowed file extensions
@@ -760,7 +761,7 @@ class Storage extends \Magento\Framework\DataObject
     }
 
     /**
-     * Get list of allowed file extensions with mime type in values
+     * Get list of allowed file extensions with mime type in values.
      *
      * @param string|null $type
      * @return array
@@ -772,6 +773,7 @@ class Storage extends \Magento\Framework\DataObject
         } else {
             $allowed = $this->_extensions['allowed'];
         }
+
         return $allowed;
     }
 }

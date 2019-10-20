@@ -29,9 +29,6 @@ class DefaultItemTest extends \PHPUnit\Framework\TestCase
      */
     private $itemResolver;
 
-    /**
-     * @inheritdoc
-     */
     protected function setUp()
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
@@ -84,10 +81,11 @@ class DefaultItemTest extends \PHPUnit\Framework\TestCase
         $this->imageHelper->expects($this->any())->method('getWidth')->willReturn(100);
         $this->imageHelper->expects($this->any())->method('getHeight')->willReturn(100);
         $this->configurationPool->expects($this->any())->method('getByProductType')->willReturn($product);
+
         $this->itemResolver->expects($this->any())
             ->method('getFinalProduct')
             ->with($item)
-            ->willReturn($product);
+            ->will($this->returnValue($product));
 
         $itemData = $this->model->getItemData($item);
         $this->assertArrayHasKey('options', $itemData);

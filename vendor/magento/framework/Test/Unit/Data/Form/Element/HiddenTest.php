@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
@@ -40,9 +40,9 @@ class HiddenTest extends \PHPUnit\Framework\TestCase
             foreach ($value as $item) {
                 $this->assertContains($item, $html);
             }
-        } else {
-            $this->assertContains($value, $html);
+            return;
         }
+        $this->assertContains($value, $html);
     }
 
     /**

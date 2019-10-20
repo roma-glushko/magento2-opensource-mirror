@@ -4,8 +4,7 @@
  */
 namespace Temando\Shipping\Model\CollectionPoint;
 
-use Magento\Framework\Model\AbstractModel;
-use Temando\Shipping\Model\ResourceModel\CollectionPoint\QuoteCollectionPoint as CollectionPointResource;
+use Magento\Framework\DataObject;
 use Temando\Shipping\Api\Data\CollectionPoint\QuoteCollectionPointInterface;
 
 /**
@@ -14,23 +13,16 @@ use Temando\Shipping\Api\Data\CollectionPoint\QuoteCollectionPointInterface;
  * This model contains a subset of data that is used in the shipping module.
  * It does not contain all data as available in its platform representation.
  *
+ * @deprecated since 1.4.0
+ * @see \Temando\Shipping\Model\Delivery\QuoteCollectionPoint
+ *
  * @package Temando\Shipping\Model
  * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link    http://www.temando.com/
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
-class QuoteCollectionPoint extends AbstractModel implements QuoteCollectionPointInterface
+class QuoteCollectionPoint extends DataObject implements QuoteCollectionPointInterface
 {
-    /**
-     * Init resource model.
-     * @return void
-     */
-    protected function _construct()
-    {
-        parent::_construct();
-        $this->_init(CollectionPointResource::class);
-    }
-
     /**
      * @return int
      */

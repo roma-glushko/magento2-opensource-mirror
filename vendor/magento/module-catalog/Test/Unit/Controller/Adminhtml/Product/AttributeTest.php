@@ -10,6 +10,7 @@ use Magento\Catalog\Controller\Adminhtml\Product\Attribute;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Cache\FrontendInterface;
 use Magento\Framework\Message\ManagerInterface;
+use Magento\Framework\ObjectManager\ObjectManager;
 use Magento\Framework\Registry;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager as ObjectManagerHelper;
 use Magento\Framework\View\Result\PageFactory;
@@ -58,7 +59,7 @@ class AttributeTest extends \PHPUnit\Framework\TestCase
     /**
      * @var ManagerInterface|\PHPUnit_Framework_MockObject_MockObject
      */
-    private $messageManager;
+    protected $messageManager;
 
     protected function setUp()
     {
@@ -90,7 +91,7 @@ class AttributeTest extends \PHPUnit\Framework\TestCase
         $this->contextMock->expects($this->any())
             ->method('getResultFactory')
             ->willReturn($this->resultFactoryMock);
-        $this->contextMock->expects($this->once())
+        $this->contextMock
             ->method('getMessageManager')
             ->willReturn($this->messageManager);
     }

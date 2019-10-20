@@ -15,7 +15,7 @@ use Magento\Framework\App\Filesystem\DirectoryList;
 /**
  * BundleService model
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
- * @deprecated 100.2.0
+ * @deprecated 101.0.0
  * @see \Magento\Deploy\Service\Bundle
  */
 class Manager
@@ -175,7 +175,7 @@ class Manager
      */
     protected function splitPath($path)
     {
-        if (strpos($path, '::') > 0) {
+        if (strpos($path, '::') !== false) {
             list($excludedModule, $excludedPath) = explode('::', $path);
             return [
                 'excludedModule' => $excludedModule,

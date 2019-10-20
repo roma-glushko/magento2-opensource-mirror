@@ -53,7 +53,7 @@ class GroupTest extends \PHPUnit\Framework\TestCase
      */
     public function testGetScopeWithInvalidScope()
     {
-        $scopeMock = new \stdClass();
+        $scopeMock = new \StdClass();
         $this->storeManagerMock
             ->expects($this->once())
             ->method('getGroup')

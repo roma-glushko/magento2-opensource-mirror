@@ -5,7 +5,10 @@
  */
 namespace Magento\UrlRewrite\Controller;
 
-class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
+use Magento\TestFramework\TestCase\AbstractController;
+use Magento\Framework\App\Response\Http as HttpResponse;
+
+class UrlRewriteTest extends AbstractController
 {
     /**
      * @magentoDataFixture Magento/UrlRewrite/_files/url_rewrite.php
@@ -21,18 +24,27 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
      * @dataProvider requestDataProvider
      */
     public function testMatchUrlRewrite(
-        $request,
-        $redirect,
-        $expectedCode = 301
+        string $request,
+        string $redirect,
+        int $expectedCode = 301
     ) {
         $this->dispatch($request);
-        $code = $this->getResponse()->getHttpResponseCode();
-        $location = $this->getResponse()->getHeader('Location')->getFieldValue();
+        /** @var HttpResponse $response */
+        $response = $this->getResponse();
+        $code = $response->getHttpResponseCode();
+        $location = $response->getHeader('Location')->getFieldValue();
 
         $this->assertEquals($expectedCode, $code, 'Invalid response code');
-        $this->assertStringEndsWith($redirect, $location, 'Invalid location header');
+        $this->assertStringEndsWith(
+            $redirect,
+            $location,
+            'Invalid location header'
+        );
     }
 
+    /**
+     * @return array
+     */
     public function requestDataProvider()
     {
         return [
@@ -59,7 +71,7 @@ class UrlRewriteTest extends \Magento\TestFramework\TestCase\AbstractController
             'Use Case #6: Rewrite: page-similar/ --(301)--> page-b; Request: page-similar/ --(301)--> page-b' => [
                 'request' => '/page-similar/',
                 'redirect' => '/page-b',
-            ]
+            ],
         ];
     }
 }

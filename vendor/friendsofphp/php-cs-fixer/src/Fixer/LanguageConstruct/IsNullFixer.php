@@ -34,13 +34,21 @@ final class IsNullFixer extends AbstractFixer implements ConfigurationDefinition
     {
         return new FixerDefinition(
             'Replaces `is_null($var)` expression with `null === $var`.',
-            array(
-                new CodeSample("<?php\n\$a = is_null(\$b);"),
-                new CodeSample("<?php\n\$a = is_null(\$b);", array('use_yoda_style' => false)),
-            ),
+            [
+                new CodeSample("<?php\n\$a = is_null(\$b);\n"),
+            ],
             null,
             'Risky when the function `is_null` is overridden.'
         );
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPriority()
+    {
+        // must be run before YodaStyleFixer
+        return 1;
     }
 
     /**
@@ -64,7 +72,7 @@ final class IsNullFixer extends AbstractFixer implements ConfigurationDefinition
      */
     protected function applyFix(\SplFileInfo $file, Tokens $tokens)
     {
-        static $sequenceNeeded = array(array(T_STRING, 'is_null'), '(');
+        static $sequenceNeeded = [[T_STRING, 'is_null'], '('];
 
         $currIndex = 0;
         while (null !== $currIndex) {
@@ -89,7 +97,7 @@ final class IsNullFixer extends AbstractFixer implements ConfigurationDefinition
             // skip all expressions which are not a function reference
             $inversionCandidateIndex = $prevTokenIndex = $tokens->getPrevMeaningfulToken($matches[0]);
             $prevToken = $tokens[$prevTokenIndex];
-            if ($prevToken->isGivenKind(array(T_DOUBLE_COLON, T_NEW, T_OBJECT_OPERATOR, T_FUNCTION))) {
+            if ($prevToken->isGivenKind([T_DOUBLE_COLON, T_NEW, T_OBJECT_OPERATOR, T_FUNCTION])) {
                 continue;
             }
 
@@ -98,7 +106,7 @@ final class IsNullFixer extends AbstractFixer implements ConfigurationDefinition
                 $inversionCandidateIndex = $twicePrevTokenIndex = $tokens->getPrevMeaningfulToken($prevTokenIndex);
                 /** @var Token $twicePrevToken */
                 $twicePrevToken = $tokens[$twicePrevTokenIndex];
-                if ($twicePrevToken->isGivenKind(array(T_DOUBLE_COLON, T_NEW, T_OBJECT_OPERATOR, T_FUNCTION, T_STRING, CT::T_NAMESPACE_OPERATOR))) {
+                if ($twicePrevToken->isGivenKind([T_DOUBLE_COLON, T_NEW, T_OBJECT_OPERATOR, T_FUNCTION, T_STRING, CT::T_NAMESPACE_OPERATOR])) {
                     continue;
                 }
 
@@ -121,7 +129,7 @@ final class IsNullFixer extends AbstractFixer implements ConfigurationDefinition
             $referenceEnd = $tokens->findBlockEnd(Tokens::BLOCK_TYPE_PARENTHESIS_BRACE, $matches[1]);
             $isContainingDangerousConstructs = false;
             for ($paramTokenIndex = $matches[1]; $paramTokenIndex <= $referenceEnd; ++$paramTokenIndex) {
-                if (in_array($tokens[$paramTokenIndex]->getContent(), array('?', '?:', '='), true)) {
+                if (\in_array($tokens[$paramTokenIndex]->getContent(), ['?', '?:', '='], true)) {
                     $isContainingDangerousConstructs = true;
 
                     break;
@@ -131,7 +139,7 @@ final class IsNullFixer extends AbstractFixer implements ConfigurationDefinition
             // edge cases: is_null() followed/preceded by ==, ===, !=, !==, <>
             $parentLeftToken = $tokens[$tokens->getPrevMeaningfulToken($isNullIndex)];
             $parentRightToken = $tokens[$tokens->getNextMeaningfulToken($referenceEnd)];
-            $parentOperations = array(T_IS_EQUAL, T_IS_NOT_EQUAL, T_IS_IDENTICAL, T_IS_NOT_IDENTICAL);
+            $parentOperations = [T_IS_EQUAL, T_IS_NOT_EQUAL, T_IS_IDENTICAL, T_IS_NOT_IDENTICAL];
             $wrapIntoParentheses = $parentLeftToken->isGivenKind($parentOperations) || $parentRightToken->isGivenKind($parentOperations);
 
             if (!$isContainingDangerousConstructs) {
@@ -148,12 +156,12 @@ final class IsNullFixer extends AbstractFixer implements ConfigurationDefinition
             }
 
             // sequence which we'll use as a replacement
-            $replacement = array(
-                new Token(array(T_STRING, 'null')),
-                new Token(array(T_WHITESPACE, ' ')),
-                new Token($isInvertedNullCheck ? array(T_IS_NOT_IDENTICAL, '!==') : array(T_IS_IDENTICAL, '===')),
-                new Token(array(T_WHITESPACE, ' ')),
-            );
+            $replacement = [
+                new Token([T_STRING, 'null']),
+                new Token([T_WHITESPACE, ' ']),
+                new Token($isInvertedNullCheck ? [T_IS_NOT_IDENTICAL, '!=='] : [T_IS_IDENTICAL, '===']),
+                new Token([T_WHITESPACE, ' ']),
+            ];
 
             if (true === $this->configuration['use_yoda_style']) {
                 if ($wrapIntoParentheses) {
@@ -187,13 +195,13 @@ final class IsNullFixer extends AbstractFixer implements ConfigurationDefinition
      */
     protected function createConfigurationDefinition()
     {
-        $yoda = new FixerOptionBuilder('use_yoda_style', 'Whether Yoda style conditions should be used.');
-        $yoda = $yoda
-            ->setAllowedTypes(array('bool'))
-            ->setDefault(true)
-            ->getOption()
-        ;
-
-        return new FixerConfigurationResolver(array($yoda));
+        // @todo 3.0 drop `ConfigurationDefinitionFixerInterface`
+        return new FixerConfigurationResolver([
+            (new FixerOptionBuilder('use_yoda_style', 'Whether Yoda style conditions should be used.'))
+                ->setAllowedTypes(['bool'])
+                ->setDefault(true)
+                ->setDeprecationMessage('Use `yoda_style` fixer instead.')
+                ->getOption(),
+        ]);
     }
 }

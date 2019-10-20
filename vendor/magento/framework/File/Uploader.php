@@ -5,8 +5,6 @@
  */
 namespace Magento\Framework\File;
 
-use Magento\Framework\Image\Adapter\UploadConfigInterface;
-
 /**
  * File upload class
  *
@@ -14,6 +12,7 @@ use Magento\Framework\Image\Adapter\UploadConfigInterface;
  * validation by protected file extension list to extended class
  *
  * @api
+ * @since 100.0.2
  */
 class Uploader
 {
@@ -140,16 +139,16 @@ class Uploader
     /**
      * Maximum Image Width resolution in pixels. For image resizing on client side
      * @deprecated
-     * @see UploadConfigInterface::getMaxWidth()
+     * @see \Magento\Framework\Image\Adapter\UploadConfigInterface::getMaxWidth()
      */
-    const MAX_IMAGE_WIDTH = 1920;
+    const MAX_IMAGE_WIDTH = 4096;
 
     /**
      * Maximum Image Height resolution in pixels. For image resizing on client side
      * @deprecated
-     * @see UploadConfigInterface::getMaxHeight()
+     * @see \Magento\Framework\Image\Adapter\UploadConfigInterface::getMaxHeight()
      */
-    const MAX_IMAGE_HEIGHT = 1200;
+    const MAX_IMAGE_HEIGHT = 2160;
 
     /**
      * Resulting of uploaded file
@@ -163,7 +162,7 @@ class Uploader
      * Init upload
      *
      * @param string|array $fileId
-     * @param null|\Magento\Framework\File\Mime $fileMime
+     * @param \Magento\Framework\File\Mime|null $fileMime
      * @throws \Exception
      */
     public function __construct(
@@ -193,8 +192,7 @@ class Uploader
     }
 
     /**
-     * Used to save uploaded file into destination folder with
-     * original or new file name (if specified)
+     * Used to save uploaded file into destination folder with original or new file name (if specified).
      *
      * @param string $destinationFolder
      * @param string $newFileName
@@ -273,6 +271,8 @@ class Uploader
     }
 
     /**
+     * Set access permissions to file.
+     *
      * @param string $file
      * @return void
      *
@@ -549,7 +549,7 @@ class Uploader
 
             preg_match("/^(.*?)\[(.*?)\]$/", $fileId, $file);
 
-            if (count($file) > 0 && count($file[0]) > 0 && count($file[1]) > 0) {
+            if (is_array($file) && count($file) > 0 && count($file[0]) > 0 && count($file[1]) > 0) {
                 array_shift($file);
                 $this->_uploadType = self::MULTIPLE_STYLE;
 
@@ -562,7 +562,7 @@ class Uploader
 
                 $fileAttributes = $tmpVar;
                 $this->_file = $fileAttributes;
-            } elseif (count($fileId) > 0 && isset($_FILES[$fileId])) {
+            } elseif (!empty($fileId) && isset($_FILES[$fileId])) {
                 $this->_uploadType = self::SINGLE_STYLE;
                 $this->_file = $_FILES[$fileId];
             } elseif ($fileId == '') {
@@ -625,7 +625,7 @@ class Uploader
      *
      * @param string $fileName
      * @return string
-     * @deprecated
+     * @deprecated 101.0.4
      */
     public static function getDispretionPath($fileName)
     {
@@ -637,6 +637,7 @@ class Uploader
      *
      * @param string $fileName
      * @return string
+     * @since 101.0.4
      */
     public static function getDispersionPath($fileName)
     {

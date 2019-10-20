@@ -77,8 +77,6 @@ class PlaceOrder extends Action
     private $orderRepository;
 
     /**
-     * PlaceOrder constructor.
-     *
      * @param Context $context
      * @param StoreManagerInterface $storeManager
      * @param Session $customerSession

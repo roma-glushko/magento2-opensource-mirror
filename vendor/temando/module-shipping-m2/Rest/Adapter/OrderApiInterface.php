@@ -7,10 +7,9 @@ namespace Temando\Shipping\Rest\Adapter;
 
 use Temando\Shipping\Rest\Exception\AdapterException;
 use Temando\Shipping\Rest\Request\OrderRequestInterface;
-use Temando\Shipping\Rest\Response\AllocateOrderInterface;
-use Temando\Shipping\Rest\Response\CreateOrderInterface;
-use Temando\Shipping\Rest\Response\GetCollectionPointsInterface;
-use Temando\Shipping\Rest\Response\UpdateOrderInterface;
+use Temando\Shipping\Rest\Response\Document\AllocateOrderInterface;
+use Temando\Shipping\Rest\Response\Document\GetCollectionPointsInterface;
+use Temando\Shipping\Rest\Response\Document\QualifyOrderInterface;
 
 /**
  * The Temando Order API interface defines the supported subset of operations
@@ -24,9 +23,33 @@ use Temando\Shipping\Rest\Response\UpdateOrderInterface;
  */
 interface OrderApiInterface
 {
+    /**
+     * QUOTE or MANIFEST (depends on persist parameter)
+     * → Applicable to regular "ship to address" orders
+     */
     const ACTION_CREATE = 'create';
+
+    /**
+     * QUOTE or MANIFEST (depends on persist parameter)
+     * → Applicable to "click & collect" orders
+     */
+    const ACTION_CREATE_PICKUP_ORDER = 'create_pickup_order';
+
+    /**
+     * QUOTE
+     * → Applicable to collection point orders
+     */
     const ACTION_GET_COLLECTION_POINTS = 'get_collection_points';
+
+    /**
+     * MANIFEST with shipment allocation
+     * → Applicable to regular and collection point orders
+     */
     const ACTION_ALLOCATE = 'allocate';
+
+    /**
+     * UPDATE manifested order
+     */
     const ACTION_UPDATE = 'update';
 
     /**
@@ -35,10 +58,22 @@ interface OrderApiInterface
      * For quoting only (if the order is not yet complete/placed) set additional request parameter `persist=false`.
      *
      * @param OrderRequestInterface $request
-     * @return CreateOrderInterface
+     * @return QualifyOrderInterface
      * @throws AdapterException
      */
     public function createOrder(OrderRequestInterface $request);
+
+    /**
+     * Manifest order and create open ("pickup requested") pickup fulfillment.
+     *
+     * For quoting only (if the order is not yet complete/placed), to retrieve
+     * pickup locations, set additional request parameter `persist=false`.
+     *
+     * @param OrderRequestInterface $request
+     * @return QualifyOrderInterface
+     * @throws AdapterException
+     */
+    public function createPickupOrder(OrderRequestInterface $request);
 
     /**
      * Create order at the platform and retrieve applicable collection points.
@@ -62,7 +97,7 @@ interface OrderApiInterface
      * Update order.
      *
      * @param OrderRequestInterface $request
-     * @return UpdateOrderInterface
+     * @return QualifyOrderInterface
      * @throws AdapterException
      */
     public function updateOrder(OrderRequestInterface $request);

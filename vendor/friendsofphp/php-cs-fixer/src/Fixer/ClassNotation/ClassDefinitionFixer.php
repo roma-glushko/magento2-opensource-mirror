@@ -40,29 +40,22 @@ final class ClassDefinitionFixer extends AbstractFixer implements ConfigurationD
     {
         return new FixerDefinition(
             'Whitespace around the keywords of a class, trait or interfaces definition should be one space.',
-            array(
+            [
                 new CodeSample(
 '<?php
 
 class  Foo  extends  Bar  implements  Baz,  BarBaz
 {
-}'
-                ),
-                new VersionSpecificCodeSample(
-'<?php
-
-trait  Foo
-{
-}',
-                    new VersionSpecification(50400)
-                ),
-                new VersionSpecificCodeSample(
-'<?php
+}
 
 final  class  Foo  extends  Bar  implements  Baz,  BarBaz
 {
-}',
-                    new VersionSpecification(50500)
+}
+
+trait  Foo
+{
+}
+'
                 ),
                 new VersionSpecificCodeSample(
 '<?php
@@ -79,7 +72,7 @@ extends Bar
 implements Baz, BarBaz
 {}
 ',
-                    array('single_line' => true)
+                    ['single_line' => true]
                 ),
                 new CodeSample(
 '<?php
@@ -89,7 +82,7 @@ extends Bar
 implements Baz
 {}
 ',
-                    array('single_item_single_line' => true)
+                    ['single_item_single_line' => true]
                 ),
                 new CodeSample(
 '<?php
@@ -98,9 +91,9 @@ interface Bar extends
     Bar, BarBaz, FooBarBaz
 {}
 ',
-                    array('multi_line_extends_each_single_line' => true)
+                    ['multi_line_extends_each_single_line' => true]
                 ),
-            )
+            ]
         );
     }
 
@@ -130,38 +123,29 @@ interface Bar extends
      */
     protected function createConfigurationDefinition()
     {
-        $multiLineExtendsEachSingleLine = new AliasedFixerOptionBuilder(
-            new FixerOptionBuilder('multi_line_extends_each_single_line', 'Whether definitions should be multiline.'),
-            'multiLineExtendsEachSingleLine'
-        );
-        $multiLineExtendsEachSingleLine
-            ->setAllowedTypes(array('bool'))
-            ->setDefault(false)
-        ;
-
-        $singleItemSingleLine = new AliasedFixerOptionBuilder(
-            new FixerOptionBuilder('single_item_single_line', 'Whether definitions should be single line when including a single item.'),
-            'singleItemSingleLine'
-        );
-        $singleItemSingleLine
-            ->setAllowedTypes(array('bool'))
-            ->setDefault(false)
-        ;
-
-        $singleLine = new AliasedFixerOptionBuilder(
-            new FixerOptionBuilder('single_line', 'Whether definitions should be single line.'),
-            'singleLine'
-        );
-        $singleLine
-            ->setAllowedTypes(array('bool'))
-            ->setDefault(false)
-        ;
-
-        return new FixerConfigurationResolver(array(
-            $multiLineExtendsEachSingleLine->getOption(),
-            $singleItemSingleLine->getOption(),
-            $singleLine->getOption(),
-        ));
+        return new FixerConfigurationResolver([
+            (new AliasedFixerOptionBuilder(
+                new FixerOptionBuilder('multi_line_extends_each_single_line', 'Whether definitions should be multiline.'),
+                'multiLineExtendsEachSingleLine'
+            ))
+                ->setAllowedTypes(['bool'])
+                ->setDefault(false)
+                ->getOption(),
+            (new AliasedFixerOptionBuilder(
+                new FixerOptionBuilder('single_item_single_line', 'Whether definitions should be single line when including a single item.'),
+                'singleItemSingleLine'
+            ))
+                ->setAllowedTypes(['bool'])
+                ->setDefault(false)
+                ->getOption(),
+            (new AliasedFixerOptionBuilder(
+                new FixerOptionBuilder('single_line', 'Whether definitions should be single line.'),
+                'singleLine'
+            ))
+                ->setAllowedTypes(['bool'])
+                ->setDefault(false)
+                ->getOption(),
+        ]);
     }
 
     /**
@@ -271,9 +255,9 @@ interface Bar extends
     {
         if ($classDefInfo['anonymousClass']) {
             if (false !== $classDefInfo['implements']) {
-                $spacing = $classDefInfo['implements']['multiLine'] ? $spacing = $this->whitespacesConfig->getLineEnding() : ' ';
+                $spacing = $classDefInfo['implements']['multiLine'] ? $this->whitespacesConfig->getLineEnding() : ' ';
             } elseif (false !== $classDefInfo['extends']) {
-                $spacing = $classDefInfo['extends']['multiLine'] ? $spacing = $this->whitespacesConfig->getLineEnding() : ' ';
+                $spacing = $classDefInfo['extends']['multiLine'] ? $this->whitespacesConfig->getLineEnding() : ' ';
             } else {
                 $spacing = ' ';
             }
@@ -281,20 +265,20 @@ interface Bar extends
             $spacing = $this->whitespacesConfig->getLineEnding();
         }
 
-        $openIndex = $tokens->getNextTokenOfKind($classDefInfo['classy'], array('{'));
+        $openIndex = $tokens->getNextTokenOfKind($classDefInfo['classy'], ['{']);
         if (' ' !== $spacing && false !== strpos($tokens[$openIndex - 1]->getContent(), "\n")) {
             return $openIndex;
         }
 
         if ($tokens[$openIndex - 1]->isWhitespace()) {
             if (' ' !== $spacing || !$tokens[$tokens->getPrevNonWhitespace($openIndex - 1)]->isComment()) {
-                $tokens[$openIndex - 1] = new Token(array(T_WHITESPACE, $spacing));
+                $tokens[$openIndex - 1] = new Token([T_WHITESPACE, $spacing]);
             }
 
             return $openIndex;
         }
 
-        $tokens->insertAt($openIndex, new Token(array(T_WHITESPACE, $spacing)));
+        $tokens->insertAt($openIndex, new Token([T_WHITESPACE, $spacing]));
 
         return $openIndex + 1;
     }
@@ -307,34 +291,34 @@ interface Bar extends
      */
     private function getClassyDefinitionInfo(Tokens $tokens, $classyIndex)
     {
-        $openIndex = $tokens->getNextTokenOfKind($classyIndex, array('{'));
+        $openIndex = $tokens->getNextTokenOfKind($classyIndex, ['{']);
         $prev = $tokens->getPrevMeaningfulToken($classyIndex);
-        $startIndex = $tokens[$prev]->isGivenKind(array(T_FINAL, T_ABSTRACT)) ? $prev : $classyIndex;
+        $startIndex = $tokens[$prev]->isGivenKind([T_FINAL, T_ABSTRACT]) ? $prev : $classyIndex;
 
         $extends = false;
         $implements = false;
         $anonymousClass = false;
 
-        if (!(defined('T_TRAIT') && $tokens[$classyIndex]->isGivenKind(T_TRAIT))) {
+        if (!$tokens[$classyIndex]->isGivenKind(T_TRAIT)) {
             $extends = $tokens->findGivenKind(T_EXTENDS, $classyIndex, $openIndex);
-            $extends = count($extends) ? $this->getClassyInheritanceInfo($tokens, key($extends), 'numberOfExtends') : false;
+            $extends = \count($extends) ? $this->getClassyInheritanceInfo($tokens, key($extends), 'numberOfExtends') : false;
 
             if (!$tokens[$classyIndex]->isGivenKind(T_INTERFACE)) {
                 $implements = $tokens->findGivenKind(T_IMPLEMENTS, $classyIndex, $openIndex);
-                $implements = count($implements) ? $this->getClassyInheritanceInfo($tokens, key($implements), 'numberOfImplements') : false;
+                $implements = \count($implements) ? $this->getClassyInheritanceInfo($tokens, key($implements), 'numberOfImplements') : false;
                 $tokensAnalyzer = new TokensAnalyzer($tokens);
                 $anonymousClass = $tokensAnalyzer->isAnonymousClass($classyIndex);
             }
         }
 
-        return array(
+        return [
             'start' => $startIndex,
             'classy' => $classyIndex,
             'open' => $openIndex,
             'extends' => $extends,
             'implements' => $implements,
             'anonymousClass' => $anonymousClass,
-        );
+        ];
     }
 
     /**
@@ -346,9 +330,9 @@ interface Bar extends
      */
     private function getClassyInheritanceInfo(Tokens $tokens, $startIndex, $label)
     {
-        $implementsInfo = array('start' => $startIndex, $label => 1, 'multiLine' => false);
+        $implementsInfo = ['start' => $startIndex, $label => 1, 'multiLine' => false];
         ++$startIndex;
-        $endIndex = $tokens->getNextTokenOfKind($startIndex, array('{', array(T_IMPLEMENTS), array(T_EXTENDS)));
+        $endIndex = $tokens->getNextTokenOfKind($startIndex, ['{', [T_IMPLEMENTS], [T_EXTENDS]]);
         $endIndex = $tokens[$endIndex]->equals('{') ? $tokens->getPrevNonWhitespace($endIndex) : $endIndex;
         for ($i = $startIndex; $i < $endIndex; ++$i) {
             if ($tokens[$i]->equals(',')) {
@@ -382,26 +366,26 @@ interface Bar extends
                     if (!('#' === $content || '//' === substr($content, 0, 2))) {
                         $content = $tokens[$nextNonWhite]->getContent();
                         if (!('#' === $content || '//' === substr($content, 0, 2))) {
-                            $tokens[$i] = new Token(array(T_WHITESPACE, ' '));
+                            $tokens[$i] = new Token([T_WHITESPACE, ' ']);
                         }
                     }
 
                     continue;
                 }
 
-                if ($tokens[$i + 1]->equalsAny(array(',', '(', ')')) || $tokens[$i - 1]->equals('(')) {
+                if ($tokens[$i + 1]->equalsAny([',', '(', ')']) || $tokens[$i - 1]->equals('(')) {
                     $tokens->clearAt($i);
 
                     continue;
                 }
 
-                $tokens[$i] = new Token(array(T_WHITESPACE, ' '));
+                $tokens[$i] = new Token([T_WHITESPACE, ' ']);
 
                 continue;
             }
 
             if ($tokens[$i]->equals(',') && !$tokens[$i + 1]->isWhitespace()) {
-                $tokens->insertAt($i + 1, new Token(array(T_WHITESPACE, ' ')));
+                $tokens->insertAt($i + 1, new Token([T_WHITESPACE, ' ']));
 
                 continue;
             }
@@ -411,11 +395,11 @@ interface Bar extends
             }
 
             if (!$tokens[$i + 1]->isWhitespace() && !$tokens[$i + 1]->isComment() && false === strpos($tokens[$i]->getContent(), "\n")) {
-                $tokens->insertAt($i + 1, new Token(array(T_WHITESPACE, ' ')));
+                $tokens->insertAt($i + 1, new Token([T_WHITESPACE, ' ']));
             }
 
             if (!$tokens[$i - 1]->isWhitespace() && !$tokens[$i - 1]->isComment()) {
-                $tokens->insertAt($i, new Token(array(T_WHITESPACE, ' ')));
+                $tokens->insertAt($i, new Token([T_WHITESPACE, ' ']));
             }
         }
     }
@@ -428,7 +412,7 @@ interface Bar extends
     private function makeClassyInheritancePartMultiLine(Tokens $tokens, $startIndex, $endIndex)
     {
         for ($i = $endIndex; $i > $startIndex; --$i) {
-            $previousInterfaceImplementingIndex = $tokens->getPrevTokenOfKind($i, array(',', array(T_IMPLEMENTS), array(T_EXTENDS)));
+            $previousInterfaceImplementingIndex = $tokens->getPrevTokenOfKind($i, [',', [T_IMPLEMENTS], [T_EXTENDS]]);
             $breakAtIndex = $tokens->getNextMeaningfulToken($previousInterfaceImplementingIndex);
             // make the part of a ',' or 'implements' single line
             $this->makeClassyDefinitionSingleLine(
@@ -449,12 +433,12 @@ interface Bar extends
 
             if (!$isOnOwnLine) {
                 if ($tokens[$breakAtIndex - 1]->isWhitespace()) {
-                    $tokens[$breakAtIndex - 1] = new Token(array(
+                    $tokens[$breakAtIndex - 1] = new Token([
                         T_WHITESPACE,
                         $this->whitespacesConfig->getLineEnding().$this->whitespacesConfig->getIndent(),
-                    ));
+                    ]);
                 } else {
-                    $tokens->insertAt($breakAtIndex, new Token(array(T_WHITESPACE, $this->whitespacesConfig->getLineEnding().$this->whitespacesConfig->getIndent())));
+                    $tokens->insertAt($breakAtIndex, new Token([T_WHITESPACE, $this->whitespacesConfig->getLineEnding().$this->whitespacesConfig->getIndent()]));
                 }
             }
 

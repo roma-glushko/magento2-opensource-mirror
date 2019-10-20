@@ -18,6 +18,7 @@ define([
 
     return Component.extend({
         isGuestCheckoutAllowed: checkoutConfig.isGuestCheckoutAllowed,
+        isCustomerLoginRequired: checkoutConfig.isCustomerLoginRequired,
         registerUrl: checkoutConfig.registerUrl,
         forgotPasswordUrl: checkoutConfig.forgotPasswordUrl,
         autocomplete: checkoutConfig.autocomplete,

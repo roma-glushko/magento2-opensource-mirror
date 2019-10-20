@@ -6,7 +6,7 @@ namespace Temando\Shipping\Rest\EntityMapper;
 
 use Temando\Shipping\Model\Shipment\TrackEventInterface;
 use Temando\Shipping\Model\Shipment\TrackEventInterfaceFactory;
-use Temando\Shipping\Rest\Response\Type\TrackingEventResponseType;
+use Temando\Shipping\Rest\Response\DataObject\TrackingEvent;
 
 /**
  * Map API data to application data object
@@ -34,10 +34,10 @@ class TrackingResponseMapper
     }
 
     /**
-     * @param TrackingEventResponseType $apiTrackingEvent
+     * @param TrackingEvent $apiTrackingEvent
      * @return TrackEventInterface
      */
-    public function map(TrackingEventResponseType $apiTrackingEvent)
+    public function map(TrackingEvent $apiTrackingEvent)
     {
         $trackEvent = $this->trackEventFactory->create(['data' => [
             TrackEventInterface::TRACKING_EVENT_ID => $apiTrackingEvent->getId(),

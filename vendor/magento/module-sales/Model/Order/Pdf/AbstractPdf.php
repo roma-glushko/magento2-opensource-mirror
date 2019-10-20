@@ -4,8 +4,6 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\Sales\Model\Order\Pdf;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
@@ -297,14 +295,15 @@ abstract class AbstractPdf extends \Magento\Framework\DataObject
         $page->setLineWidth(0);
         $this->y = $this->y ? $this->y : 815;
         $top = 815;
-        foreach (explode(
-                     "\n",
-                     $this->_scopeConfig->getValue(
-                         'sales/identity/address',
-                         \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
-                         $store
-                     )
-                 ) as $value) {
+        $values = explode(
+            "\n",
+            $this->_scopeConfig->getValue(
+                'sales/identity/address',
+                \Magento\Store\Model\ScopeInterface::SCOPE_STORE,
+                $store
+            )
+        );
+        foreach ($values as $value) {
             if ($value !== '') {
                 $value = preg_replace('/<br[^>]*>/i', "\n", $value);
                 foreach ($this->string->split($value, 45, true, true) as $_value) {
@@ -444,7 +443,9 @@ abstract class AbstractPdf extends \Magento\Framework\DataObject
         /* Shipping Address and Method */
         if (!$order->getIsVirtual()) {
             /* Shipping Address */
-            $shippingAddress = $this->_formatAddress($this->addressRenderer->format($order->getShippingAddress(), 'pdf'));
+            $shippingAddress = $this->_formatAddress(
+                $this->addressRenderer->format($order->getShippingAddress(), 'pdf')
+            );
             $shippingMethod = $order->getShippingDescription();
         }
 
@@ -557,11 +558,11 @@ abstract class AbstractPdf extends \Magento\Framework\DataObject
             }
 
             $yShipments = $this->y;
-            $totalShippingChargesText = "(" . __(
-                    'Total Shipping Charges'
-                ) . " " . $order->formatPriceTxt(
-                    $order->getShippingAmount()
-                ) . ")";
+            $totalShippingChargesText = "("
+                . __('Total Shipping Charges')
+                . " "
+                . $order->formatPriceTxt($order->getShippingAmount())
+                . ")";
 
             $page->drawText($totalShippingChargesText, 285, $yShipments - $topMargin, 'UTF-8');
             $yShipments -= $topMargin + 10;
@@ -832,8 +833,11 @@ abstract class AbstractPdf extends \Magento\Framework\DataObject
      * @param  \Magento\Sales\Model\Order $order
      * @return \Zend_Pdf_Page
      */
-    protected function _drawItem(\Magento\Framework\DataObject $item, \Zend_Pdf_Page $page, \Magento\Sales\Model\Order $order)
-    {
+    protected function _drawItem(
+        \Magento\Framework\DataObject $item,
+        \Zend_Pdf_Page $page,
+        \Magento\Sales\Model\Order $order
+    ) {
         $type = $item->getOrderItem()->getProductType();
         $renderer = $this->_getRenderer($type);
         $renderer->setOrder($order);
@@ -953,8 +957,8 @@ abstract class AbstractPdf extends \Magento\Framework\DataObject
      * feed         int; x position (required)
      * font         string; font style, optional: bold, italic, regular
      * font_file    string; path to font file (optional for use your custom font)
-     * font_size    int; font size (default 10)
-     * align        string; text align (also see feed parametr), optional left, right
+     * font_size    int; font size (default 7)
+     * align        string; text align (also see feed parameter), optional left, right
      * height       int;line spacing (default 10)
      *
      * @param  \Zend_Pdf_Page $page
@@ -1005,8 +1009,24 @@ abstract class AbstractPdf extends \Magento\Framework\DataObject
             foreach ($lines as $line) {
                 $maxHeight = 0;
                 foreach ($line as $column) {
-                    $font = $this->setFont($page, $column);
-                    $fontSize = $column['font_size'];
+                    $fontSize = empty($column['font_size']) ? 10 : $column['font_size'];
+                    if (!empty($column['font_file'])) {
+                        $font = \Zend_Pdf_Font::fontWithPath($column['font_file']);
+                        $page->setFont($font, $fontSize);
+                    } else {
+                        $fontStyle = empty($column['font']) ? 'regular' : $column['font'];
+                        switch ($fontStyle) {
+                            case 'bold':
+                                $font = $this->_setFontBold($page, $fontSize);
+                                break;
+                            case 'italic':
+                                $font = $this->_setFontItalic($page, $fontSize);
+                                break;
+                            default:
+                                $font = $this->_setFontRegular($page, $fontSize);
+                                break;
+                        }
+                    }
 
                     if (!is_array($column['text'])) {
                         $column['text'] = [$column['text']];
@@ -1017,8 +1037,6 @@ abstract class AbstractPdf extends \Magento\Framework\DataObject
                     foreach ($column['text'] as $part) {
                         if ($this->y - $lineSpacing < 15) {
                             $page = $this->newPage($pageSettings);
-                            $font = $this->setFont($page, $column);
-                            $fontSize = $column['font_size'];
                         }
 
                         $feed = $column['feed'];
@@ -1051,43 +1069,5 @@ abstract class AbstractPdf extends \Magento\Framework\DataObject
         }
 
         return $page;
-    }
-
-    /**
-     * Set page font.
-     * 
-     * column array format
-     * font         string; font style, optional: bold, italic, regular
-     * font_file    string; path to font file (optional for use your custom font)
-     * font_size    int; font size (default 10)
-     * 
-     * @param \Zend_Pdf_Page $page
-     * @param array $column
-     * @return \Zend_Pdf_Resource_Font
-     * @throws \Zend_Pdf_Exception
-     */
-    private function setFont($page, &$column)
-    {
-        $fontSize = empty($column['font_size']) ? 10 : $column['font_size'];
-        $column['font_size'] = $fontSize;
-        if (!empty($column['font_file'])) {
-            $font = \Zend_Pdf_Font::fontWithPath($column['font_file']);
-            $page->setFont($font, $fontSize);
-        } else {
-            $fontStyle = empty($column['font']) ? 'regular' : $column['font'];
-            switch ($fontStyle) {
-                case 'bold':
-                    $font = $this->_setFontBold($page, $fontSize);
-                    break;
-                case 'italic':
-                    $font = $this->_setFontItalic($page, $fontSize);
-                    break;
-                default:
-                    $font = $this->_setFontRegular($page, $fontSize);
-                    break;
-            }
-        }
-
-        return $font;
     }
 }

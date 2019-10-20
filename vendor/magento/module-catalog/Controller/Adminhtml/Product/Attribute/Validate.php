@@ -4,18 +4,22 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Catalog\Controller\Adminhtml\Product\Attribute;
 
 use Magento\Framework\Serialize\Serializer\FormData;
+use Magento\Framework\App\Action\HttpGetActionInterface;
+use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\DataObject;
+use Magento\Catalog\Controller\Adminhtml\Product\Attribute as AttributeAction;
 
 /**
  * Product attribute validate controller.
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class Validate extends \Magento\Catalog\Controller\Adminhtml\Product\Attribute
+class Validate extends AttributeAction implements HttpGetActionInterface, HttpPostActionInterface
 {
     const DEFAULT_MESSAGE_KEY = 'message';
 
@@ -35,7 +39,7 @@ class Validate extends \Magento\Catalog\Controller\Adminhtml\Product\Attribute
     private $multipleAttributeList;
 
     /**
-     * @var FormData
+     * @var FormData|null
      */
     private $formDataSerializer;
 
@@ -65,12 +69,14 @@ class Validate extends \Magento\Catalog\Controller\Adminhtml\Product\Attribute
         $this->resultJsonFactory = $resultJsonFactory;
         $this->layoutFactory = $layoutFactory;
         $this->multipleAttributeList = $multipleAttributeList;
-        $this->formDataSerializer = $formDataSerializer ?? ObjectManager::getInstance()->get(FormData::class);
+        $this->formDataSerializer = $formDataSerializer ?: ObjectManager::getInstance()
+            ->get(FormData::class);
     }
 
     /**
      * @inheritdoc
      *
+     * @return \Magento\Framework\Controller\ResultInterface
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      */
@@ -79,9 +85,8 @@ class Validate extends \Magento\Catalog\Controller\Adminhtml\Product\Attribute
         $response = new DataObject();
         $response->setError(false);
         try {
-            $optionsData = $this->formDataSerializer->unserialize(
-                $this->getRequest()->getParam('serialized_options', '[]')
-            );
+            $optionsData = $this->formDataSerializer
+                ->unserialize($this->getRequest()->getParam('serialized_options', '[]'));
         } catch (\InvalidArgumentException $e) {
             $message = __("The attribute couldn't be validated due to an error. Verify your information and try again. "
                 . "If the error persists, please try again later.");
@@ -129,7 +134,7 @@ class Validate extends \Magento\Catalog\Controller\Adminhtml\Product\Attribute
         $multipleOption = $this->getRequest()->getParam("frontend_input");
         $multipleOption = (null === $multipleOption) ? 'select' : $multipleOption;
 
-        if (isset($this->multipleAttributeList[$multipleOption]) && !(null == ($multipleOption))) {
+        if (isset($this->multipleAttributeList[$multipleOption])) {
             $options = $optionsData[$this->multipleAttributeList[$multipleOption]] ?? null;
             $this->checkUniqueOption(
                 $response,
@@ -163,7 +168,7 @@ class Validate extends \Magento\Catalog\Controller\Adminhtml\Product\Attribute
             }
         }
         $uniqueValues = array_unique($adminValues);
-        return ($uniqueValues === $adminValues);
+        return array_diff_assoc($adminValues, $uniqueValues);
     }
 
     /**
@@ -194,10 +199,17 @@ class Validate extends \Magento\Catalog\Controller\Adminhtml\Product\Attribute
         if (is_array($options)
             && isset($options['value'])
             && isset($options['delete'])
-            && !$this->isUniqueAdminValues($options['value'], $options['delete'])
+            && !empty($options['value'])
+            && !empty($options['delete'])
         ) {
-            $this->setMessageToResponse($response, [__("The value of Admin must be unique.")]);
-            $response->setError(true);
+            $duplicates = $this->isUniqueAdminValues($options['value'], $options['delete']);
+            if (!empty($duplicates)) {
+                $this->setMessageToResponse(
+                    $response,
+                    [__('The value of Admin must be unique. (%1)', implode(', ', $duplicates))]
+                );
+                $response->setError(true);
+            }
         }
         return $this;
     }

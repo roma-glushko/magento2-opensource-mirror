@@ -30,7 +30,7 @@ final class DirConstantFixer extends AbstractFunctionReferenceFixer
     {
         return new FixerDefinition(
             'Replaces `dirname(__FILE__)` expression with equivalent `__DIR__` constant.',
-            array(new CodeSample("<?php\n\$a = dirname(__FILE__);")),
+            [new CodeSample("<?php\n\$a = dirname(__FILE__);\n")],
             null,
             'Risky when the function `dirname` is overridden.'
         );
@@ -42,6 +42,15 @@ final class DirConstantFixer extends AbstractFunctionReferenceFixer
     public function isCandidate(Tokens $tokens)
     {
         return $tokens->isTokenKindFound(T_FILE);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getPriority()
+    {
+        // should run before CombineNestedDirnameFixer
+        return 4;
     }
 
     /**
@@ -66,7 +75,7 @@ final class DirConstantFixer extends AbstractFunctionReferenceFixer
             $fileCandidateRight = $tokens[$fileCandidateRightIndex];
             $fileCandidateLeftIndex = $tokens->getNextMeaningfulToken($openParenthesis);
             $fileCandidateLeft = $tokens[$fileCandidateLeftIndex];
-            if (!$fileCandidateRight->isGivenKind(array(T_FILE)) || !$fileCandidateLeft->isGivenKind(array(T_FILE))) {
+            if (!$fileCandidateRight->isGivenKind(T_FILE) || !$fileCandidateLeft->isGivenKind(T_FILE)) {
                 continue;
             }
 
@@ -94,7 +103,7 @@ final class DirConstantFixer extends AbstractFunctionReferenceFixer
             $tokens->clearAt($openParenthesis);
 
             // replace constant and remove function name
-            $tokens[$fileCandidateLeftIndex] = new Token(array(T_DIR, '__DIR__'));
+            $tokens[$fileCandidateLeftIndex] = new Token([T_DIR, '__DIR__']);
             $tokens->clearAt($functionNameIndex);
         }
     }

@@ -55,18 +55,18 @@ class Token
      */
     public function __construct($token)
     {
-        if (is_array($token)) {
-            if (!is_int($token[0])) {
+        if (\is_array($token)) {
+            if (!\is_int($token[0])) {
                 throw new \InvalidArgumentException(sprintf(
                     'Id must be an int, got "%s".',
-                    is_object($token[0]) ? get_class($token[0]) : gettype($token[0])
+                    \is_object($token[0]) ? \get_class($token[0]) : \gettype($token[0])
                 ));
             }
 
-            if (!is_string($token[1])) {
+            if (!\is_string($token[1])) {
                 throw new \InvalidArgumentException(sprintf(
                     'Content must be a string, got "%s".',
-                    is_object($token[1]) ? get_class($token[1]) : gettype($token[1])
+                    \is_object($token[1]) ? \get_class($token[1]) : \gettype($token[1])
                 ));
             }
 
@@ -77,13 +77,17 @@ class Token
             $this->isArray = true;
             $this->id = $token[0];
             $this->content = $token[1];
-        } elseif (is_string($token)) {
+
+            if ($token[0] && '' === $token[1]) {
+                throw new \InvalidArgumentException('Cannot set empty content for id-based Token.');
+            }
+        } elseif (\is_string($token)) {
             $this->isArray = false;
             $this->content = $token;
         } else {
             throw new \InvalidArgumentException(sprintf(
                 'Cannot recognize input value as valid Token prototype, got "%s".',
-                is_object($token) ? get_class($token) : gettype($token)
+                \is_object($token) ? \get_class($token) : \gettype($token)
             ));
         }
     }
@@ -93,27 +97,19 @@ class Token
      */
     public static function getCastTokenKinds()
     {
-        static $castTokens = array(T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST);
+        static $castTokens = [T_ARRAY_CAST, T_BOOL_CAST, T_DOUBLE_CAST, T_INT_CAST, T_OBJECT_CAST, T_STRING_CAST, T_UNSET_CAST];
 
         return $castTokens;
     }
 
     /**
-     * Get classy tokens kinds: T_CLASS, T_INTERFACE and T_TRAIT (if defined).
+     * Get classy tokens kinds: T_CLASS, T_INTERFACE and T_TRAIT.
      *
      * @return int[]
      */
     public static function getClassyTokenKinds()
     {
-        static $classTokens = null;
-
-        if (null === $classTokens) {
-            $classTokens = array(T_CLASS, T_INTERFACE);
-
-            if (defined('T_TRAIT')) {
-                $classTokens[] = T_TRAIT;
-            }
-        }
+        static $classTokens = [T_CLASS, T_TRAIT, T_INTERFACE];
 
         return $classTokens;
     }
@@ -122,9 +118,14 @@ class Token
      * Clear token at given index.
      *
      * Clearing means override token by empty string.
+     *
+     * @deprecated since 2.4
      */
     public function clear()
     {
+        @trigger_error(__METHOD__.' is deprecated and will be removed in 3.0.', E_USER_DEPRECATED);
+        Tokens::setLegacyMode(true);
+
         $this->content = '';
         $this->id = null;
         $this->isArray = false;
@@ -132,9 +133,14 @@ class Token
 
     /**
      * Clear internal flag if token was changed.
+     *
+     * @deprecated since 2.4
      */
     public function clearChanged()
     {
+        @trigger_error(__METHOD__.' is deprecated and will be removed in 3.0.', E_USER_DEPRECATED);
+        Tokens::setLegacyMode(true);
+
         $this->changed = false;
     }
 
@@ -152,7 +158,7 @@ class Token
     {
         $otherPrototype = $other instanceof self ? $other->getPrototype() : $other;
 
-        if ($this->isArray !== is_array($otherPrototype)) {
+        if ($this->isArray !== \is_array($otherPrototype)) {
             return false;
         }
 
@@ -211,7 +217,7 @@ class Token
      */
     public static function isKeyCaseSensitive($caseSensitive, $key)
     {
-        if (is_array($caseSensitive)) {
+        if (\is_array($caseSensitive)) {
             return isset($caseSensitive[$key]) ? $caseSensitive[$key] : true;
         }
 
@@ -227,10 +233,10 @@ class Token
             return $this->content;
         }
 
-        return array(
+        return [
             $this->id,
             $this->content,
-        );
+        ];
     }
 
     /**
@@ -258,7 +264,7 @@ class Token
     }
 
     /**
-     * Get token name.
+     * Get token's name.
      *
      * It shall be used only for getting the name of token, not for checking it against excepted value.
      *
@@ -270,11 +276,27 @@ class Token
             return null;
         }
 
-        if (CT::has($this->id)) {
-            return CT::getName($this->id);
+        return self::getNameForId($this->id);
+    }
+
+    /**
+     * Get token's name.
+     *
+     * It shall be used only for getting the name of token, not for checking it against excepted value.
+     *
+     * @param int $id
+     *
+     * @return null|string token name
+     */
+    public static function getNameForId($id)
+    {
+        if (CT::has($id)) {
+            return CT::getName($id);
         }
 
-        return token_name($this->id);
+        $name = token_name($id);
+
+        return 'UNKNOWN' === $name ? null : $name;
     }
 
     /**
@@ -287,7 +309,7 @@ class Token
         static $keywords = null;
 
         if (null === $keywords) {
-            $keywords = self::getTokenKindsForNames(array('T_ABSTRACT', 'T_ARRAY', 'T_AS', 'T_BREAK', 'T_CALLABLE', 'T_CASE',
+            $keywords = self::getTokenKindsForNames(['T_ABSTRACT', 'T_ARRAY', 'T_AS', 'T_BREAK', 'T_CALLABLE', 'T_CASE',
                 'T_CATCH', 'T_CLASS', 'T_CLONE', 'T_CONST', 'T_CONTINUE', 'T_DECLARE', 'T_DEFAULT', 'T_DO',
                 'T_ECHO', 'T_ELSE', 'T_ELSEIF', 'T_EMPTY', 'T_ENDDECLARE', 'T_ENDFOR', 'T_ENDFOREACH',
                 'T_ENDIF', 'T_ENDSWITCH', 'T_ENDWHILE', 'T_EVAL', 'T_EXIT', 'T_EXTENDS', 'T_FINAL',
@@ -296,8 +318,8 @@ class Token
                 'T_INTERFACE', 'T_ISSET', 'T_LIST', 'T_LOGICAL_AND', 'T_LOGICAL_OR', 'T_LOGICAL_XOR',
                 'T_NAMESPACE', 'T_NEW', 'T_PRINT', 'T_PRIVATE', 'T_PROTECTED', 'T_PUBLIC', 'T_REQUIRE',
                 'T_REQUIRE_ONCE', 'T_RETURN', 'T_STATIC', 'T_SWITCH', 'T_THROW', 'T_TRAIT', 'T_TRY',
-                'T_UNSET', 'T_USE', 'T_VAR', 'T_WHILE', 'T_YIELD',
-            )) + array(
+                'T_UNSET', 'T_USE', 'T_VAR', 'T_WHILE', 'T_YIELD', 'T_YIELD_FROM',
+            ]) + [
                 CT::T_ARRAY_TYPEHINT => CT::T_ARRAY_TYPEHINT,
                 CT::T_CLASS_CONSTANT => CT::T_CLASS_CONSTANT,
                 CT::T_CONST_IMPORT => CT::T_CONST_IMPORT,
@@ -305,7 +327,7 @@ class Token
                 CT::T_NAMESPACE_OPERATOR => CT::T_NAMESPACE_OPERATOR,
                 CT::T_USE_TRAIT => CT::T_USE_TRAIT,
                 CT::T_USE_LAMBDA => CT::T_USE_LAMBDA,
-            );
+            ];
         }
 
         return $keywords;
@@ -323,7 +345,7 @@ class Token
         static $magicConstants = null;
 
         if (null === $magicConstants) {
-            $magicConstants = self::getTokenKindsForNames(array('T_CLASS_C', 'T_DIR', 'T_FILE', 'T_FUNC_C', 'T_LINE', 'T_METHOD_C', 'T_NS_C', 'T_TRAIT_C'));
+            $magicConstants = self::getTokenKindsForNames(['T_CLASS_C', 'T_DIR', 'T_FILE', 'T_FUNC_C', 'T_LINE', 'T_METHOD_C', 'T_NS_C', 'T_TRAIT_C']);
         }
 
         return $magicConstants;
@@ -353,9 +375,13 @@ class Token
      * Check if token was changed.
      *
      * @return bool
+     *
+     * @deprecated since 2.4
      */
     public function isChanged()
     {
+        @trigger_error(__METHOD__.' is deprecated and will be removed in 3.0.', E_USER_DEPRECATED);
+
         return $this->changed;
     }
 
@@ -376,7 +402,7 @@ class Token
      */
     public function isComment()
     {
-        static $commentTokens = array(T_COMMENT, T_DOC_COMMENT);
+        static $commentTokens = [T_COMMENT, T_DOC_COMMENT];
 
         return $this->isGivenKind($commentTokens);
     }
@@ -385,9 +411,13 @@ class Token
      * Check if token is empty, e.g. because of clearing.
      *
      * @return bool
+     *
+     * @deprecated since 2.4
      */
     public function isEmpty()
     {
+        @trigger_error(__METHOD__.' is deprecated and will be removed in 3.0.', E_USER_DEPRECATED);
+
         return null === $this->id && ('' === $this->content || null === $this->content);
     }
 
@@ -400,7 +430,7 @@ class Token
      */
     public function isGivenKind($possibleKind)
     {
-        return $this->isArray && (is_array($possibleKind) ? in_array($this->id, $possibleKind, true) : $this->id === $possibleKind);
+        return $this->isArray && (\is_array($possibleKind) ? \in_array($this->id, $possibleKind, true) : $this->id === $possibleKind);
     }
 
     /**
@@ -422,9 +452,9 @@ class Token
      */
     public function isNativeConstant()
     {
-        static $nativeConstantStrings = array('true', 'false', 'null');
+        static $nativeConstantStrings = ['true', 'false', 'null'];
 
-        return $this->isArray && in_array(strtolower($this->content), $nativeConstantStrings, true);
+        return $this->isArray && \in_array(strtolower($this->content), $nativeConstantStrings, true);
     }
 
     /**
@@ -467,9 +497,14 @@ class Token
      * If called on Token inside Tokens collection please use `Tokens::overrideAt` instead.
      *
      * @param array|string|Token $other token prototype
+     *
+     * @deprecated since 2.4
      */
     public function override($other)
     {
+        @trigger_error(__METHOD__.' is deprecated and will be removed in 3.0.', E_USER_DEPRECATED);
+        Tokens::setLegacyMode(true);
+
         $prototype = $other instanceof self ? $other->getPrototype() : $other;
 
         if ($this->equals($prototype)) {
@@ -478,7 +513,7 @@ class Token
 
         $this->changed = true;
 
-        if (is_array($prototype)) {
+        if (\is_array($prototype)) {
             $this->isArray = true;
             $this->id = $prototype[0];
             $this->content = $prototype[1];
@@ -493,9 +528,14 @@ class Token
 
     /**
      * @param string $content
+     *
+     * @deprecated since 2.4
      */
     public function setContent($content)
     {
+        @trigger_error(__METHOD__.' is deprecated and will be removed in 3.0.', E_USER_DEPRECATED);
+        Tokens::setLegacyMode(true);
+
         if ($this->content === $content) {
             return;
         }
@@ -505,6 +545,7 @@ class Token
 
         // setting empty content is clearing the token
         if ('' === $content) {
+            @trigger_error(__METHOD__.' shall not be used to clear token, use Tokens::clearAt instead.', E_USER_DEPRECATED);
             $this->id = null;
             $this->isArray = false;
         }
@@ -512,13 +553,13 @@ class Token
 
     public function toArray()
     {
-        return array(
+        return [
             'id' => $this->id,
             'name' => $this->getName(),
             'content' => $this->content,
             'isArray' => $this->isArray,
             'changed' => $this->changed,
-        );
+        ];
     }
 
     /**
@@ -532,7 +573,7 @@ class Token
 
         if (null === $options) {
             if (null === $defaultOptions) {
-                $defaultOptions = Utils::calculateBitmask(array('JSON_PRETTY_PRINT', 'JSON_NUMERIC_CHECK'));
+                $defaultOptions = Utils::calculateBitmask(['JSON_PRETTY_PRINT', 'JSON_NUMERIC_CHECK']);
             }
 
             $options = $defaultOptions;
@@ -550,10 +591,10 @@ class Token
      */
     private static function getTokenKindsForNames(array $tokenNames)
     {
-        $keywords = array();
+        $keywords = [];
         foreach ($tokenNames as $keywordName) {
-            if (defined($keywordName)) {
-                $keyword = constant($keywordName);
+            if (\defined($keywordName)) {
+                $keyword = \constant($keywordName);
                 $keywords[$keyword] = $keyword;
             }
         }

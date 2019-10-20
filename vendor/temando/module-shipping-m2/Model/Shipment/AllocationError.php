@@ -12,7 +12,7 @@ use Magento\Framework\DataObject;
  * This model contains the data used in the shipping module, not necessarily all
  * data available in its webservice representation.
  *
- * @deprecated
+ * @deprecated since 1.3.0
  * @see ShipmentError
  *
  * @package Temando\Shipping\Model

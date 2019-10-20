@@ -91,9 +91,6 @@ abstract class AbstractSessionHandler implements \SessionHandlerInterface, \Sess
 
         $data = $this->doRead($sessionId);
         $this->newSessionId = '' === $data ? $sessionId : null;
-        if (\PHP_VERSION_ID < 70000) {
-            $this->prefetchData = $data;
-        }
 
         return $data;
     }
@@ -103,14 +100,6 @@ abstract class AbstractSessionHandler implements \SessionHandlerInterface, \Sess
      */
     public function write($sessionId, $data)
     {
-        if (\PHP_VERSION_ID < 70000 && $this->prefetchData) {
-            $readData = $this->prefetchData;
-            $this->prefetchData = null;
-
-            if ($readData === $data) {
-                return $this->updateTimestamp($sessionId, $data);
-            }
-        }
         if (null === $this->igbinaryEmptyData) {
             // see https://github.com/igbinary/igbinary/issues/146
             $this->igbinaryEmptyData = \function_exists('igbinary_serialize') ? igbinary_serialize(array()) : '';
@@ -128,10 +117,7 @@ abstract class AbstractSessionHandler implements \SessionHandlerInterface, \Sess
      */
     public function destroy($sessionId)
     {
-        if (\PHP_VERSION_ID < 70000) {
-            $this->prefetchData = null;
-        }
-        if (!headers_sent() && ini_get('session.use_cookies')) {
+        if (!headers_sent() && filter_var(ini_get('session.use_cookies'), FILTER_VALIDATE_BOOLEAN)) {
             if (!$this->sessionName) {
                 throw new \LogicException(sprintf('Session name cannot be empty, did you forget to call "parent::open()" in "%s"?.', \get_class($this)));
             }
@@ -159,7 +145,7 @@ abstract class AbstractSessionHandler implements \SessionHandlerInterface, \Sess
                     header($h, false);
                 }
             } else {
-                setcookie($this->sessionName, '', 0, ini_get('session.cookie_path'), ini_get('session.cookie_domain'), ini_get('session.cookie_secure'), ini_get('session.cookie_httponly'));
+                setcookie($this->sessionName, '', 0, ini_get('session.cookie_path'), ini_get('session.cookie_domain'), filter_var(ini_get('session.cookie_secure'), FILTER_VALIDATE_BOOLEAN), filter_var(ini_get('session.cookie_httponly'), FILTER_VALIDATE_BOOLEAN));
             }
         }
 

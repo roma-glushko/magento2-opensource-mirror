@@ -24,14 +24,15 @@ class SuggestsCommand extends BaseCommand
     {
         $this
             ->setName('suggests')
-            ->setDescription('Show package suggestions.')
+            ->setDescription('Shows package suggestions.')
             ->setDefinition(array(
                 new InputOption('by-package', null, InputOption::VALUE_NONE, 'Groups output by suggesting package'),
                 new InputOption('by-suggestion', null, InputOption::VALUE_NONE, 'Groups output by suggested package'),
                 new InputOption('no-dev', null, InputOption::VALUE_NONE, 'Exclude suggestions from require-dev packages'),
                 new InputArgument('packages', InputArgument::IS_ARRAY | InputArgument::OPTIONAL, 'Packages that you want to list suggestions from.'),
             ))
-            ->setHelp(<<<EOT
+            ->setHelp(
+                <<<EOT
 
 The <info>%command.name%</info> command shows a sorted list of suggested packages.
 
@@ -88,7 +89,7 @@ EOT
                 continue;
             }
             foreach ($package['suggest'] as $suggestion => $reason) {
-                if (false === strpos('/', $suggestion) && !is_null($platform->findPackage($suggestion, '*'))) {
+                if (false === strpos('/', $suggestion) && null !== $platform->findPackage($suggestion, '*')) {
                     continue;
                 }
                 if (!isset($installed[$suggestion])) {

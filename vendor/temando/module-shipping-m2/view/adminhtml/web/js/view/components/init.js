@@ -1,13 +1,10 @@
 /**
  * Refer to LICENSE.txt distributed with the Temando Shipping module for notice of license
  */
-
-/*jshint browser:true jquery:true*/
-/*global alert*/
 define([
     'jquery',
     'uiComponent',
-    'temandoShippingComponentry',
+    'temandoShippingComponentry'
 ], function ($, Component, temando) {
     'use strict';
 
@@ -28,6 +25,6 @@ define([
                 elements: elements,
                 data: componentData.data
             });
-        },
+        }
     });
 });

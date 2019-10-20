@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Quote\Model;
 
 use Magento\Customer\Api\Data\AddressInterfaceFactory;
@@ -107,7 +108,7 @@ class ShippingMethodManagement implements
         /** @var \Magento\Quote\Model\Quote\Address $shippingAddress */
         $shippingAddress = $quote->getShippingAddress();
         if (!$shippingAddress->getCountryId()) {
-            throw new StateException(__('Shipping address not set.'));
+            throw new StateException(__('The shipping address is missing. Set the address and try again.'));
         }
 
         $shippingMethod = $shippingAddress->getShippingMethod();
@@ -141,7 +142,7 @@ class ShippingMethodManagement implements
 
         $shippingAddress = $quote->getShippingAddress();
         if (!$shippingAddress->getCountryId()) {
-            throw new StateException(__('Shipping address not set.'));
+            throw new StateException(__('The shipping address is missing. Set the address and try again.'));
         }
         $shippingAddress->collectShippingRates();
         $shippingRates = $shippingAddress->getGroupedAllShippingRates();
@@ -169,7 +170,7 @@ class ShippingMethodManagement implements
         try {
             $this->quoteRepository->save($quote->collectTotals());
         } catch (\Exception $e) {
-            throw new CouldNotSaveException(__('Cannot set shipping method. %1', $e->getMessage()));
+            throw new CouldNotSaveException(__('The shipping method can\'t be set. %1', $e->getMessage()));
         }
         return true;
     }
@@ -180,7 +181,7 @@ class ShippingMethodManagement implements
      * @param string $methodCode The shipping method code.
      * @return void
      * @throws InputException The shipping method is not valid for an empty cart.
-     * @throws NoSuchEntityException Cart contains only virtual products. Shipping method is not applicable.
+     * @throws NoSuchEntityException CThe Cart includes virtual product(s) only, so a shipping address is not used.
      * @throws StateException The billing or shipping address is not set.
      * @throws \Exception
      */
@@ -189,18 +190,20 @@ class ShippingMethodManagement implements
         /** @var \Magento\Quote\Model\Quote $quote */
         $quote = $this->quoteRepository->getActive($cartId);
         if (0 == $quote->getItemsCount()) {
-            throw new InputException(__('Shipping method is not applicable for empty cart'));
+            throw new InputException(
+                __('The shipping method can\'t be set for an empty cart. Add an item to cart and try again.')
+            );
         }
         if ($quote->isVirtual()) {
             throw new NoSuchEntityException(
-                __('Cart contains virtual product(s) only. Shipping method is not applicable.')
+                __('The Cart includes virtual product(s) only, so a shipping address is not used.')
             );
         }
         $shippingAddress = $quote->getShippingAddress();
         if (!$shippingAddress->getCountryId()) {
             // Remove empty quote address
             $this->quoteAddressResource->delete($shippingAddress);
-            throw new StateException(__('Shipping address is not set'));
+            throw new StateException(__('The shipping address is missing. Set the address and try again.'));
         }
         $shippingAddress->setShippingMethod($carrierCode . '_' . $methodCode);
     }
@@ -263,7 +266,7 @@ class ShippingMethodManagement implements
      * @param string $region
      * @param \Magento\Framework\Api\ExtensibleDataInterface|null $address
      * @return \Magento\Quote\Api\Data\ShippingMethodInterface[] An array of shipping methods.
-     * @deprecated 100.2.0
+     * @deprecated 100.1.6
      */
     protected function getEstimatedRates(
         \Magento\Quote\Model\Quote $quote,
@@ -331,7 +334,7 @@ class ShippingMethodManagement implements
      * Gets the data object processor
      *
      * @return \Magento\Framework\Reflection\DataObjectProcessor
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      */
     private function getDataObjectProcessor()
     {

@@ -17,10 +17,11 @@ use Magento\Shipping\Model\Rate\ResultFactory;
 use Magento\Shipping\Model\Tracking\Result\StatusFactory;
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use Temando\Shipping\Model\Checkout\RateRequest\QuotingDataInitializer;
 use Temando\Shipping\Model\ResourceModel\Repository\OrderRepositoryInterface;
+use Temando\Shipping\Model\ResourceModel\Repository\ShipmentReferenceRepositoryInterface;
 use Temando\Shipping\Model\ResourceModel\Repository\ShipmentRepositoryInterface;
 use Temando\Shipping\Model\Shipment\TrackEventInterface;
-use Temando\Shipping\Model\Shipping\RateRequest\RequestDataInitializer;
 use Temando\Shipping\Webservice\Processor\OrderOperationProcessorPool;
 
 /**
@@ -60,14 +61,19 @@ class Carrier extends AbstractCarrier implements CarrierInterface
     private $shipmentRepository;
 
     /**
+     * @var ShipmentReferenceRepositoryInterface
+     */
+    private $shipmentReferenceRepository;
+
+    /**
      * @var OrderRepositoryInterface
      */
     private $orderRepository;
 
     /**
-     * @var RequestDataInitializer
+     * @var QuotingDataInitializer
      */
-    private $requestDataInitializer;
+    private $quotingDataInitializer;
 
     /**
      * @var OrderOperationProcessorPool
@@ -84,8 +90,9 @@ class Carrier extends AbstractCarrier implements CarrierInterface
      * @param ResultFactory $rateResultFactory
      * @param ManagerInterface $messageManager
      * @param ShipmentRepositoryInterface $shipmentRepository
+     * @param ShipmentReferenceRepositoryInterface $shipmentReferenceRepository
      * @param OrderRepositoryInterface $orderRepository
-     * @param RequestDataInitializer $ratesRequestDataInitializer
+     * @param QuotingDataInitializer $quotingDataInitializer
      * @param OrderOperationProcessorPool $processorPool
      * @param mixed[] $data
      */
@@ -98,8 +105,9 @@ class Carrier extends AbstractCarrier implements CarrierInterface
         ResultFactory $rateResultFactory,
         ManagerInterface $messageManager,
         ShipmentRepositoryInterface $shipmentRepository,
+        ShipmentReferenceRepositoryInterface $shipmentReferenceRepository,
         OrderRepositoryInterface $orderRepository,
-        RequestDataInitializer $ratesRequestDataInitializer,
+        QuotingDataInitializer $quotingDataInitializer,
         OrderOperationProcessorPool $processorPool,
         array $data = []
     ) {
@@ -108,8 +116,9 @@ class Carrier extends AbstractCarrier implements CarrierInterface
         $this->rateResultFactory = $rateResultFactory;
         $this->messageManager = $messageManager;
         $this->shipmentRepository = $shipmentRepository;
+        $this->shipmentReferenceRepository = $shipmentReferenceRepository;
         $this->orderRepository = $orderRepository;
-        $this->requestDataInitializer = $ratesRequestDataInitializer;
+        $this->quotingDataInitializer = $quotingDataInitializer;
         $this->processorPool = $processorPool;
 
         parent::__construct($scopeConfig, $rateErrorFactory, $logger, $data);
@@ -144,7 +153,7 @@ class Carrier extends AbstractCarrier implements CarrierInterface
 
         try {
             // create request data from rate request
-            $order = $this->requestDataInitializer->getQuotingData($rateRequest);
+            $order = $this->quotingDataInitializer->getOrder($rateRequest);
             // send order to Temando platform, will respond with shipping options
             $saveResult = $this->orderRepository->save($order);
             // read applicable shipping options from response
@@ -216,7 +225,7 @@ class Carrier extends AbstractCarrier implements CarrierInterface
         $tracking = $this->trackStatusFactory->create();
 
         try {
-            $shipmentTrack = $this->shipmentRepository->getShipmentTrack($this->_code, $trackingNumber);
+            $shipmentTrack = $this->shipmentReferenceRepository->getShipmentTrack($this->_code, $trackingNumber);
             $carrierTitle = $shipmentTrack->getTitle() ? $shipmentTrack->getTitle() : $this->getConfigData('title');
         } catch (LocalizedException $exception) {
             $carrierTitle = $this->getConfigData('title');
@@ -239,7 +248,7 @@ class Carrier extends AbstractCarrier implements CarrierInterface
         }
 
         try {
-            $shipmentReference = $this->shipmentRepository->getReferenceByTrackingNumber($trackingNumber);
+            $shipmentReference = $this->shipmentReferenceRepository->getByTrackingNumber($trackingNumber);
             $tracking->setUrl($shipmentReference->getExtTrackingUrl());
         } catch (NoSuchEntityException $e) {
             $this->messageManager->addErrorMessage($e->getMessage());

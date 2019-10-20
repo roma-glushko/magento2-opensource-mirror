@@ -11,26 +11,21 @@ use Temando\Shipping\Rest\Exception\AdapterException;
 use Temando\Shipping\Rest\Exception\RestClientErrorException;
 use Temando\Shipping\Rest\Request\OrderRequestInterface;
 use Temando\Shipping\Rest\Request\RequestHeadersInterface;
-use Temando\Shipping\Rest\Response\AllocateOrder;
-use Temando\Shipping\Rest\Response\AllocateOrderInterface;
-use Temando\Shipping\Rest\Response\CreateOrder;
-use Temando\Shipping\Rest\Response\CreateOrderInterface;
-use Temando\Shipping\Rest\Response\Errors;
-use Temando\Shipping\Rest\Response\GetCollectionPoints;
-use Temando\Shipping\Rest\Response\GetCollectionPointsInterface;
-use Temando\Shipping\Rest\Response\UpdateOrder;
-use Temando\Shipping\Rest\Response\UpdateOrderInterface;
+use Temando\Shipping\Rest\Response\Document\AllocateOrder;
+use Temando\Shipping\Rest\Response\Document\QualifyOrder;
+use Temando\Shipping\Rest\Response\Document\Errors;
+use Temando\Shipping\Rest\Response\Document\GetCollectionPoints;
 use Temando\Shipping\Rest\SchemaMapper\ParserInterface;
 use Temando\Shipping\Webservice\Config\WsConfigInterface;
 
 /**
  * Temando REST API Order Operations Adapter
  *
- * @package  Temando\Shipping\Rest
- * @author   Christoph Aßmann <christoph.assmann@netresearch.de>
- * @author   Sebastian Ertner <sebastian.ertner@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\Rest
+ * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
+ * @author  Sebastian Ertner <sebastian.ertner@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class OrderAdapter implements OrderApiInterface
 {
@@ -108,7 +103,7 @@ class OrderAdapter implements OrderApiInterface
      * For quoting only (if the order is not yet complete/placed) set additional request parameter `persist=false`.
      *
      * @param OrderRequestInterface $request
-     * @return CreateOrderInterface
+     * @return QualifyOrder
      * @throws AdapterException
      */
     public function createOrder(OrderRequestInterface $request)
@@ -126,8 +121,8 @@ class OrderAdapter implements OrderApiInterface
             $rawResponse = $this->restClient->post($uri, $requestBody, $headers);
             $this->logger->log(LogLevel::DEBUG, $rawResponse);
 
-            /** @var CreateOrder $response */
-            $response = $this->responseParser->parse($rawResponse, CreateOrder::class);
+            /** @var QualifyOrder $response */
+            $response = $this->responseParser->parse($rawResponse, QualifyOrder::class);
         } catch (RestClientErrorException $e) {
             $this->logger->log(LogLevel::ERROR, $e->getMessage());
 
@@ -145,7 +140,7 @@ class OrderAdapter implements OrderApiInterface
      * Create order at the platform and retrieve applicable collection points.
      *
      * @param OrderRequestInterface $request
-     * @return GetCollectionPointsInterface
+     * @return GetCollectionPoints
      * @throws AdapterException
      */
     public function getCollectionPoints(OrderRequestInterface $request)
@@ -179,10 +174,47 @@ class OrderAdapter implements OrderApiInterface
     }
 
     /**
-     * Manifest order and retrieve allocated shipments.
+     * Create order at the platform and retrieve applicable pickup locations.
      *
      * @param OrderRequestInterface $request
-     * @return AllocateOrderInterface
+     * @return QualifyOrder
+     * @throws AdapterException
+     */
+    public function createPickupOrder(OrderRequestInterface $request)
+    {
+        $requestParams = $request->getRequestParams(self::ACTION_CREATE_PICKUP_ORDER);
+        $uri = sprintf('%s/orders?%s', $this->endpoint, http_build_query($requestParams));
+        $requestBody = $request->getRequestBody();
+
+        $this->logger->log(LogLevel::DEBUG, sprintf("%s\n%s", $uri, $requestBody));
+
+        try {
+            $this->auth->connect($this->accountId, $this->bearerToken);
+            $headers = $this->requestHeaders->getHeaders();
+
+            $rawResponse = $this->restClient->post($uri, $requestBody, $headers);
+            $this->logger->log(LogLevel::DEBUG, $rawResponse);
+
+            /** @var QualifyOrder $response */
+            $response = $this->responseParser->parse($rawResponse, QualifyOrder::class);
+        } catch (RestClientErrorException $e) {
+            $this->logger->log(LogLevel::ERROR, $e->getMessage());
+
+            /** @var Errors $response */
+            $response = $this->responseParser->parse($e->getMessage(), Errors::class);
+            throw AdapterException::errorResponse($response, $e);
+        } catch (\Exception $e) {
+            throw AdapterException::create($e);
+        }
+
+        return $response;
+    }
+
+    /**
+     * Manifest pickup order
+     *
+     * @param OrderRequestInterface $request
+     * @return AllocateOrder
      * @throws AdapterException
      */
     public function allocateOrder(OrderRequestInterface $request)
@@ -219,7 +251,7 @@ class OrderAdapter implements OrderApiInterface
      * Update order.
      *
      * @param OrderRequestInterface $request
-     * @return UpdateOrderInterface
+     * @return QualifyOrder
      * @throws AdapterException
      */
     public function updateOrder(OrderRequestInterface $request)
@@ -239,8 +271,8 @@ class OrderAdapter implements OrderApiInterface
             $rawResponse =  $this->restClient->put($uri, $requestBody, $headers);
             $this->logger->log(LogLevel::DEBUG, $rawResponse);
 
-            /** @var UpdateOrder $response */
-            $response = $this->responseParser->parse($rawResponse, UpdateOrder::class);
+            /** @var QualifyOrder $response */
+            $response = $this->responseParser->parse($rawResponse, QualifyOrder::class);
         } catch (RestClientErrorException $e) {
             $this->logger->log(LogLevel::ERROR, $e->getMessage());
 

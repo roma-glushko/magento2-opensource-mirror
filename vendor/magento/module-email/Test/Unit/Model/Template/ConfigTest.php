@@ -278,8 +278,9 @@ class ConfigTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \UnexpectedValueException
      * @expectedExceptionMessage Template file 'one.html' is not found
+     * @return void
      */
-    public function testGetTemplateFilenameWrongFileName()
+    public function testGetTemplateFilenameWrongFileName(): void
     {
         $this->viewFileSystem->expects($this->once())->method('getEmailTemplateFileName')
             ->with('one.html', $this->designParams, 'Fixture_ModuleOne')

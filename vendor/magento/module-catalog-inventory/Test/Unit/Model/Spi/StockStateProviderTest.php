@@ -301,7 +301,6 @@ class StockStateProviderTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @param $methodName
-     *
      * @return array
      */
     protected function prepareDataForMethod($methodName)

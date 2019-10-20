@@ -35,7 +35,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Application extends BaseApplication
 {
-    const VERSION = '2.2.20';
+    const VERSION = '2.13.1';
+    const VERSION_CODENAME = 'Yogi\'s BBQ';
 
     /**
      * @var ToolInfo
@@ -44,7 +45,9 @@ final class Application extends BaseApplication
 
     public function __construct()
     {
-        error_reporting(-1);
+        if (!getenv('PHP_CS_FIXER_FUTURE_MODE')) {
+            error_reporting(-1);
+        }
 
         parent::__construct('PHP CS Fixer', self::VERSION);
 
@@ -86,7 +89,12 @@ final class Application extends BaseApplication
      */
     public function getLongVersion()
     {
-        $version = parent::getLongVersion().' by <comment>Fabien Potencier</comment> and <comment>Dariusz Ruminski</comment>';
+        $version = parent::getLongVersion();
+        if (self::VERSION_CODENAME) {
+            $version .= ' <info>'.self::VERSION_CODENAME.'</info>';
+        }
+        $version .= ' by <comment>Fabien Potencier</comment> and <comment>Dariusz Ruminski</comment>';
+
         $commit = '@git-commit@';
 
         if ('@'.'git-commit@' !== $commit) {
@@ -101,6 +109,6 @@ final class Application extends BaseApplication
      */
     protected function getDefaultCommands()
     {
-        return array(new HelpCommand(), new ListCommand());
+        return [new HelpCommand(), new ListCommand()];
     }
 }

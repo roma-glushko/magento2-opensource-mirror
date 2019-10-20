@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\CatalogInventory\Test\Unit\Model\Stock;
 
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
@@ -251,7 +252,7 @@ class StockItemRepositoryTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @expectedException \Magento\Framework\Exception\CouldNotDeleteException
-     * @expectedExceptionMessage Unable to remove Stock Item with id "1"
+     * @expectedExceptionMessage The stock item with the "1" ID wasn't found. Verify the ID and try again.
      */
     public function testDeleteByIdException()
     {
@@ -276,7 +277,7 @@ class StockItemRepositoryTest extends \PHPUnit\Framework\TestCase
             ->method('verifyStock')
             ->with($this->stockItemMock)
             ->willReturn(false);
-        $this->stockItemMock->expects($this->exactly(2))->method('getManageStock')->willReturn(true);
+        $this->stockItemMock->expects($this->once())->method('getManageStock')->willReturn(true);
         $this->stockItemMock->expects($this->once())->method('setIsInStock')->with(false)->willReturnSelf();
         $this->stockItemMock->expects($this->once())
             ->method('setStockStatusChangedAutomaticallyFlag')

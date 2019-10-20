@@ -6,7 +6,7 @@ namespace Temando\Shipping\Rest\EntityMapper;
 
 use Temando\Shipping\Model\LocationInterface;
 use Temando\Shipping\Model\LocationInterfaceFactory;
-use Temando\Shipping\Rest\Response\Type\LocationResponseType;
+use Temando\Shipping\Rest\Response\DataObject\Location;
 
 /**
  * Map API data to application data object
@@ -34,10 +34,10 @@ class LocationResponseMapper
     }
 
     /**
-     * @param LocationResponseType $apiLocation
+     * @param Location $apiLocation
      * @return LocationInterface
      */
-    public function map(LocationResponseType $apiLocation)
+    public function map(Location $apiLocation)
     {
         $location = $this->locationFactory->create(['data' => [
             LocationInterface::LOCATION_ID => $apiLocation->getId(),

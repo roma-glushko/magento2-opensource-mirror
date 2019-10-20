@@ -73,8 +73,9 @@ class StorageTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @magentoAppIsolation enabled
+     * @return void
      */
-    public function testGetFilesCollection()
+    public function testGetFilesCollection(): void
     {
         \Magento\TestFramework\Helper\Bootstrap::getInstance()
             ->loadArea(\Magento\Backend\App\Area\FrontNameResolver::AREA_CODE);
@@ -93,8 +94,9 @@ class StorageTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @magentoAppArea adminhtml
+     * @return void
      */
-    public function testGetThumbsPath()
+    public function testGetThumbsPath(): void
     {
         $this->assertStringStartsWith(
             $this->filesystem->getDirectoryRead(DirectoryList::MEDIA)->getAbsolutePath(),
@@ -102,7 +104,10 @@ class StorageTest extends \PHPUnit\Framework\TestCase
         );
     }
 
-    public function testUploadFile()
+    /**
+     * @return void
+     */
+    public function testUploadFile(): void
     {
         $fileName = 'magento_small_image.jpg';
         $tmpDirectory = $this->filesystem->getDirectoryWrite(\Magento\Framework\App\Filesystem\DirectoryList::SYS_TMP);
@@ -125,8 +130,9 @@ class StorageTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \Magento\Framework\Exception\LocalizedException
      * @expectedExceptionMessage File validation failed.
+     * @return void
      */
-    public function testUploadFileWithWrongExtension()
+    public function testUploadFileWithWrongExtension(): void
     {
         $fileName = 'text.txt';
         $tmpDirectory = $this->filesystem->getDirectoryWrite(\Magento\Framework\App\Filesystem\DirectoryList::SYS_TMP);
@@ -149,8 +155,9 @@ class StorageTest extends \PHPUnit\Framework\TestCase
     /**
      * @expectedException \Magento\Framework\Exception\LocalizedException
      * @expectedExceptionMessage File validation failed.
+     * @return void
      */
-    public function testUploadFileWithWrongFile()
+    public function testUploadFileWithWrongFile(): void
     {
         $fileName = 'file.gif';
         $tmpDirectory = $this->filesystem->getDirectoryWrite(\Magento\Framework\App\Filesystem\DirectoryList::SYS_TMP);

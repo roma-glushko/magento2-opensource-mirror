@@ -22,8 +22,6 @@ use Psr\Log\LoggerInterface;
 use PHPUnit_Framework_MockObject_MockObject as MockObject;
 
 /**
- * Test for Magento\Framework\App\StaticResource class.
- *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class StaticResourceTest extends \PHPUnit\Framework\TestCase
@@ -264,21 +262,6 @@ class StaticResourceTest extends \PHPUnit\Framework\TestCase
         $this->object->launch();
     }
 
-    /**
-     * @expectedException \InvalidArgumentException
-     */
-    public function testLaunchPathAbove()
-    {
-        $this->stateMock->expects($this->once())
-            ->method('getMode')
-            ->willReturn(State::MODE_DEVELOPER);
-        $this->requestMock->expects($this->once())
-            ->method('get')
-            ->with('resource')
-            ->willReturn('frontend/..\..\folder_above/././Magento_Ui/template/messages.html');
-        $this->object->launch();
-    }
-
     public function testCatchExceptionDeveloperMode()
     {
         $this->objectManagerMock->expects($this->once())
@@ -300,5 +283,23 @@ class StaticResourceTest extends \PHPUnit\Framework\TestCase
         $this->responseMock->expects($this->once())
             ->method('sendResponse');
         $this->assertTrue($this->object->catchException($bootstrap, $exception));
+    }
+
+    /**
+     * @expectedException \InvalidArgumentException
+     */
+    public function testLaunchPathAbove()
+    {
+        $path = 'frontend/..\..\folder_above/././Magento_Ui/template/messages.html';
+        $this->stateMock->expects($this->once())
+            ->method('getMode')
+            ->will($this->returnValue(State::MODE_DEVELOPER));
+        $this->requestMock->expects($this->once())
+            ->method('get')
+            ->with('resource')
+            ->willReturn('frontend/..\..\folder_above/././Magento_Ui/template/messages.html');
+        $this->expectExceptionMessage("Requested path '$path' is wrong.");
+
+        $this->object->launch();
     }
 }

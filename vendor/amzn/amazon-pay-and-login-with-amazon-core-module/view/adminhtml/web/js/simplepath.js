@@ -45,6 +45,7 @@ define(
                  */
                 initObservable: function () {
                     var self = this;
+
                     self.$amazonSimplepath = $('#amazon_simplepath');
                     self.$amazonFields = $('#payment_' + self.getCountry() + '_' + self.selector + ' .form-list');
                     self.$amazonCredentialsHeader = $('#payment_' + self.getCountry() + '_' + self.selector
@@ -79,6 +80,7 @@ define(
                  */
                 initEventHandlers: function () {
                     var self = this;
+
                     self.$amazonSpBack.click(function () {
                         self.showAmazonConfig();
                         return false;
@@ -93,20 +95,20 @@ define(
                         self.setupWindowLaunch();
                     });
 
-                    self.$amazonCredentialJson.on('input', function (e) {
+                    self.$amazonCredentialJson.on('input', function () {
                         self.updateCredentials(self);
                     });
                 },
 
                 /**
-                 * Detects when a properly formatted JSON block is pasted into the Credentials JSON field and auto populates
-                 * specified fields.
+                 * Detects when a properly formatted JSON block is pasted into the Credentials JSON field
+                 * and auto populates specified fields.
                  *
                  * @param self
                  */
                 updateCredentials: function (self) {
-                    var elJson = self.$amazonCredentialJson.val();
-                    var obj = null;
+                    var elJson = self.$amazonCredentialJson.val(), obj = null, success = true, item = null;
+
                     try {
                         obj = $.parseJSON($.trim(elJson));
                     }
@@ -119,15 +121,19 @@ define(
                     }
 
                     if (obj && typeof obj === 'object') {
-                        var success = true;
+
                         for (var prop in obj) {
-                            var item = $('#payment_' + self.getCountry() + '_amazon_payment_credentials_' + $.trim(prop));
-                            if (item && item.length) {
-                                $('#payment_' + self.getCountry() + '_amazon_payment_credentials_'
-                                    + $.trim(prop)).val($.trim(obj[prop]));
-                            }
-                            else {
-                                success = false;
+                            if (obj.hasOwnProperty(prop)) {
+                                item = $('#payment_' + self.getCountry() + '_amazon_payment_credentials_'
+                                    + $.trim(prop));
+
+                                if (item && item.length) {
+                                    $('#payment_' + self.getCountry() + '_amazon_payment_credentials_'
+                                        + $.trim(prop)).val($.trim(obj[prop]));
+                                }
+                                else {
+                                    success = false;
+                                }
                             }
                         }
 
@@ -141,7 +147,8 @@ define(
                         else {
                             self.$amazonCredentialJson.val('').attr(
                                 'placeholder',
-                                $t('One or more of your credential fields did not parse correctly. Please review your entry and try again.')
+                                $t('One or more of your credential fields did not parse correctly. ' +
+                                    'Please review your entry and try again.')
                             ).focus();
                         }
                     }
@@ -151,12 +158,19 @@ define(
                  * Sets up Amazon merchant key popup and polls for data update upon user completion.
                  */
                 setupWindowLaunch: function () {
-                    var self = this;
-                    var heights = [660, 720, 810, 900];
-                    var popupWidth = this.getCountry() !== 'us' ? 768 : 1050;
-                    var popupHeight = heights[0];
+                    var self = this,
+                        heights = [660, 720, 810, 900],
+                        popupWidth = this.getCountry() !== 'us' ? 768 : 1050, popupHeight = heights[0],
+                        region = self.region,
+                        elCheckDefault = $('#payment_' + self.getCountry()
+                            + '_amazon_payment_credentials_payment_region_inherit:checked'),
+                        elRegion = $('payment_' + self.getCountry() + '_amazon_payment_credentials_payment_region'),
+                        elJson = self.$amazonCredentialJson.val();
+
                     for (var i in heights) {
-                        popupHeight = (window.innerHeight >= heights[i]) ? heights[i] : popupHeight;
+                        if (heights.hasOwnProperty(i)) {
+                            popupHeight = window.innerHeight >= heights[i] ? heights[i] : popupHeight;
+                        }
                     }
 
                     self.launchPopup(self.amazonUrl, popupWidth, popupHeight);
@@ -171,6 +185,7 @@ define(
                     $('#save-json').click(function (e) {
                         e.stop();
                         var json = $('#json-import').value;
+
                         if (!json || !json.isJSON()) {
                             return;
                         }
@@ -179,16 +194,14 @@ define(
                     });
 
                     // Autoset payment region (for EU/UK)
-                    var region = self.region;
-                    if (self.region.indexOf('eu') != -1) {
+                    if (self.region.indexOf('eu') !== -1) {
                         region = 'de';
                     }
-                    var elCheckDefault = $('#payment_' + self.getCountry()
-                        + '_amazon_payment_credentials_payment_region_inherit:checked');
+
                     if (elCheckDefault && elCheckDefault.length) {
                         elCheckDefault[0].click();
                     }
-                    var elRegion = $('payment_' + self.getCountry() + '_amazon_payment_credentials_payment_region');
+
                     if (elRegion) {
                         elRegion.value = region;
                     }
@@ -231,6 +244,7 @@ define(
                  * Sets up dynamic form for capturing popup/form input for simple path setup.
                  */
                 generateSimplePathForm: function () {
+
                     this.$form = new Element('form', {
                         method: 'post',
                         action: this.amazonUrl,
@@ -243,26 +257,24 @@ define(
 
                     // Convert formParams JSON to hidden inputs
                     for (var key in this.formParams) {
-                        if (typeof this.formParams[key] === 'object' || typeof this.formParams[key] === 'array') {
+                        if ( $.isPlainObject(this.formParams[key]) || $.isArray(this.formParams[key])) {
                             for (var i in this.formParams[key]) {
                                 if (typeof this.formParams[key][i] !== 'function') {
-                                    var element = new Element('input', {
+                                    $(new Element('input', {
                                         type: 'hidden',
                                         name: key,
                                         value: this.formParams[key][i],
                                         novalidate: 'novalidate'
-                                    });
-                                    $(element).appendTo($("#simplepath_form"));
+                                    })).appendTo($("#simplepath_form"));
                                 }
                             }
                         } else {
-                            var element = new Element('input', {
+                            $(new Element('input', {
                                 type: 'hidden',
                                 name: key,
                                 novalidate: 'novalidate',
                                 value: this.formParams[key]
-                            });
-                            $(element).appendTo($("#simplepath_form"));
+                            })).appendTo($("#simplepath_form"));
                         }
                     }
 
@@ -307,11 +319,10 @@ define(
                  * @param requestedHeight
                  */
                 launchPopup: function (url, requestedWidth, requestedHeight) {
-                    var self = this;
                     var leftOffset = this.getLeftOffset(requestedWidth),
                         topOffset = this.getTopOffset(requestedHeight),
-                        newWindow = window.open(url, 'simplepath', 'scrollbars=yes, width=' + requestedWidth + ', height=' +
-                            requestedHeight + ', top=' + topOffset + ', left=' + leftOffset);
+                        newWindow = window.open(url, 'simplepath', 'scrollbars=yes, width=' + requestedWidth
+                            + ', height=' + requestedHeight + ', top=' + topOffset + ', left=' + leftOffset);
 
                     if (window.focus) {
                         newWindow.focus();
@@ -333,7 +344,8 @@ define(
                  */
                 getLeftOffset: function (requestedWidth) {
                     var dualScreenLeft = window.screenLeft !== undefined ? window.screenLeft : screen.left;
-                    return ((this.windowWidth() / 2) - (requestedWidth / 2)) + dualScreenLeft;
+
+                    return (this.windowWidth() / 2) - (requestedWidth / 2) + dualScreenLeft;
                 },
 
                 /**
@@ -343,7 +355,8 @@ define(
                  */
                 getTopOffset: function (requestedHeight) {
                     var dualScreenTop = window.screenTop !== undefined ? window.screenTop : screen.top;
-                    return ((this.windowHeight() / 2) - (requestedHeight / 2)) + dualScreenTop;
+
+                    return (this.windowHeight() / 2) - (requestedHeight / 2) + dualScreenTop;
                 },
 
                 /**
@@ -351,13 +364,9 @@ define(
                  * @returns {number}
                  */
                 windowWidth: function () {
-                    if (window.innerWidth) {
-                        return window.innerWidth;
-                    } else if (document.documentElement.clientWidth) {
-                        return document.documentElement.clientWidth;
-                    } else {
-                        return screen.width;
-                    }
+                    return window.innerWidth
+                        || document.documentElement.clientWidth
+                        || screen.width;
                 },
 
                 /**
@@ -365,13 +374,9 @@ define(
                  * @returns {number}
                  */
                 windowHeight: function () {
-                    if (window.innerHeight) {
-                        return window.innerHeight;
-                    } else if (document.documentElement.clientHeight) {
-                        return document.documentElement.clientHeight;
-                    } else {
-                        return screen.height;
-                    }
+                    return window.innerHeight
+                        || document.documentElement.clientHeight
+                        || screen.height;
                 }
             }
         );

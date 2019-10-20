@@ -3,17 +3,18 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Framework\Crontab\Test\Unit;
 
-use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Crontab\CrontabManager;
 use Magento\Framework\Crontab\CrontabManagerInterface;
+use Magento\Framework\ShellInterface;
+use Magento\Framework\Phrase;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Filesystem;
+use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\Filesystem\Directory\ReadInterface;
 use Magento\Framework\Filesystem\DriverPool;
-use Magento\Framework\Phrase;
-use Magento\Framework\ShellInterface;
 
 class CrontabManagerTest extends \PHPUnit\Framework\TestCase
 {
@@ -192,14 +193,15 @@ class CrontabManagerTest extends \PHPUnit\Framework\TestCase
     /**
      * @return void
      * @expectedException \Magento\Framework\Exception\LocalizedException
-     * @expectedExceptionMessage List of tasks is empty
+     * @expectedExceptionMessage The list of tasks is empty. Add tasks and try again.
      */
     public function testSaveTasksWithEmptyTasksList()
     {
         $baseDirMock = $this->getMockBuilder(ReadInterface::class)
             ->getMockForAbstractClass();
         $baseDirMock->expects($this->never())
-            ->method('getAbsolutePath');
+            ->method('getAbsolutePath')
+            ->willReturn('/var/www/magento2/');
         $logDirMock = $this->getMockBuilder(ReadInterface::class)
             ->getMockForAbstractClass();
         $logDirMock->expects($this->never())
@@ -218,7 +220,7 @@ class CrontabManagerTest extends \PHPUnit\Framework\TestCase
     /**
      * @return void
      * @expectedException \Magento\Framework\Exception\LocalizedException
-     * @expectedExceptionMessage Command should not be empty
+     * @expectedExceptionMessage The command shouldn't be empty. Enter and try again.
      */
     public function testSaveTasksWithoutCommand()
     {
@@ -347,7 +349,7 @@ class CrontabManagerTest extends \PHPUnit\Framework\TestCase
                     . '* * * * * ' . PHP_BINARY . ' /var/www/magento2/run.php'
                     . ' %% cron:run | grep -v \"Ran \'jobs\' by schedule\"' . PHP_EOL
                     . CrontabManagerInterface::TASKS_BLOCK_END . ' ' . md5(BP) . PHP_EOL,
-                ],
+            ],
         ];
     }
 }

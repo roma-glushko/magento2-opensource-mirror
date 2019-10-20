@@ -104,7 +104,6 @@ define([
                 }
 
                 if (event.type !== 'fieldStateChange') {
-
                     return false;
                 }
 
@@ -152,7 +151,7 @@ define([
         },
 
         /**
-         * Triggers order placing
+         * Trigger order placing
          */
         placeOrderClick: function () {
             if (this.validateCardType()) {

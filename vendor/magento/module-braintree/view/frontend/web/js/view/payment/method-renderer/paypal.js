@@ -206,7 +206,9 @@ define([
         beforePlaceOrder: function (data) {
             this.setPaymentMethodNonce(data.nonce);
 
-            if (quote.billingAddress() === null && typeof data.details.billingAddress !== 'undefined') {
+            if ((this.isRequiredBillingAddress() || quote.billingAddress() === null) &&
+                typeof data.details.billingAddress !== 'undefined'
+            ) {
                 this.setBillingAddress(data.details, data.details.billingAddress);
             }
 
@@ -265,6 +267,14 @@ define([
         },
 
         /**
+         * Is billing address required from PayPal side
+         * @returns {Boolean}
+         */
+        isRequiredBillingAddress: function () {
+            return window.checkoutConfig.payment[this.getCode()].isRequiredBillingAddress;
+        },
+
+        /**
          * Get configuration for PayPal
          * @returns {Object}
          */
@@ -314,7 +324,6 @@ define([
             var address = quote.shippingAddress();
 
             if (_.isNull(address.postcode) || _.isUndefined(address.postcode)) {
-
                 return {};
             }
 

@@ -12,10 +12,10 @@ use Magento\Framework\DataObject;
  * This model contains a subset of data that is used in the shipping module.
  * It does not contain all data as available in its platform representation.
  *
- * @package  Temando\Shipping\Model
- * @author   Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\Model
+ * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class Order extends DataObject implements OrderInterface
 {
@@ -132,7 +132,15 @@ class Order extends DataObject implements OrderInterface
     }
 
     /**
-     * @return \Temando\Shipping\Api\Data\CollectionPoint\QuoteCollectionPointInterface
+     * @return \Temando\Shipping\Api\Data\Delivery\CollectionPointSearchRequestInterface|null
+     */
+    public function getCollectionPointSearchRequest()
+    {
+        return $this->getData(OrderInterface::COLLECTION_POINT_SEARCH_REQUEST);
+    }
+
+    /**
+     * @return \Temando\Shipping\Api\Data\Delivery\QuoteCollectionPointInterface|null
      */
     public function getCollectionPoint()
     {
@@ -140,11 +148,19 @@ class Order extends DataObject implements OrderInterface
     }
 
     /**
-     * @return \Temando\Shipping\Api\Data\CollectionPoint\SearchRequestInterface
+     * @return \Temando\Shipping\Api\Data\Delivery\PickupLocationSearchRequestInterface|null
      */
-    public function getCollectionPointSearchRequest()
+    public function getPickupLocationSearchRequest()
     {
-        return $this->getData(OrderInterface::COLLECTION_POINT_SEARCH_REQUEST);
+        return $this->getData(OrderInterface::PICKUP_LOCATION_SEARCH_REQUEST);
+    }
+
+    /**
+     * @return \Temando\Shipping\Api\Data\Delivery\QuotePickupLocationInterface|null
+     */
+    public function getPickupLocation()
+    {
+        return $this->getData(OrderInterface::PICKUP_LOCATION);
     }
 
     /**

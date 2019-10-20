@@ -68,8 +68,7 @@ class DeployTranslationsDictionary
                         'fileName' => $this->jsTranslationConfig->getDictionaryFileName(),
                         'area' => $area,
                         'theme' => $theme,
-                        'locale' => $locale,
-                        'replace' => true
+                        'locale' => $locale
                     ]
                 );
             });

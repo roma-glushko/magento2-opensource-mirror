@@ -8,6 +8,8 @@
  * and LICENSE files that were distributed with this source code.
  */
 
+declare(strict_types=1);
+
 namespace Klarna\Ordermanagement\Controller\Api;
 
 use Klarna\Core\Exception as KlarnaException;
@@ -16,9 +18,11 @@ use Klarna\Core\Model\OrderRepository;
 use Klarna\Ordermanagement\Model\Api\Ordermanagement;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
 use Magento\Framework\DataObjectFactory;
-use Magento\Framework\Webapi\Exception as WebException;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\OrderRepository as MageOrderRepository;
@@ -30,7 +34,7 @@ use Psr\Log\LoggerInterface;
  * @package Klarna\Ordermanagement\Controller\Api
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class Notification extends Action
+class Notification extends Action implements CsrfAwareActionInterface
 {
     /**
      * @var ConfigHelper
@@ -116,11 +120,14 @@ class Notification extends Action
 
             /** @var \Klarna\Core\Model\Order $klarnaOrder */
             $klarnaOrder = $this->orderRepository->getByKlarnaOrderId($checkoutId);
+            if (!$klarnaOrder->getId()) {
+                throw new KlarnaException(__('Klarna order not found'));
+            }
+
             /** @var Order $order */
             $order = $this->mageOrderRepository->get($klarnaOrder->getOrderId());
-
             if (!$order->getId()) {
-                throw new KlarnaException(__('Order not found'));
+                throw new KlarnaException(__('Magento order not found'));
             }
 
             /** @var Payment $payment */
@@ -129,7 +136,7 @@ class Notification extends Action
             switch ($notification->getEventType()) {
                 case Ordermanagement::ORDER_NOTIFICATION_FRAUD_STOPPED:
                     // Intentionally fall through as logic is the same
-                    $order->addStatusHistoryComment(__('Suspected Fraud: DO NOT SHIP. If already shipped, 
+                    $order->addCommentToStatusHistory(__('Suspected Fraud: DO NOT SHIP. If already shipped,
                     please attempt to stop the carrier from delivering.'));
                     $payment->setNotificationResult(true);
                     $payment->setIsFraudDetected(true);
@@ -179,7 +186,35 @@ class Notification extends Action
         }
 
         if (Order::STATE_PROCESSING === $order->getState()) {
-            $order->addStatusHistoryComment(__('Order processed by Klarna.'), $status);
+            $order->addCommentToStatusHistory(__('Order processed by Klarna.'), $status);
         }
+    }
+
+    /**
+     * Create exception in case CSRF validation failed.
+     * Return null if default exception will suffice.
+     *
+     * @param RequestInterface $request
+     *
+     * @return InvalidRequestException|null
+     * @SuppressWarnings(PMD.UnusedFormalParameter)
+     */
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
+    {
+        return null;
+    }
+
+    /**
+     * Perform custom request validation.
+     * Return null if default validation is needed.
+     *
+     * @param RequestInterface $request
+     *
+     * @return bool|null
+     * @SuppressWarnings(PMD.UnusedFormalParameter)
+     */
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return true;
     }
 }

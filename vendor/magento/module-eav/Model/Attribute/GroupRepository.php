@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Eav\Model\Attribute;
 
 use Magento\Framework\Api\SearchCriteria\CollectionProcessorInterface;
@@ -99,7 +100,7 @@ class GroupRepository implements \Magento\Eav\Api\AttributeGroupRepositoryInterf
             }
             if ($existingGroup->getAttributeSetId() != $group->getAttributeSetId()) {
                 throw new StateException(
-                    __('Attribute group does not belong to provided attribute set')
+                    __("The attribute group doesn't belong to the provided attribute set.")
                 );
             }
         }
@@ -107,7 +108,7 @@ class GroupRepository implements \Magento\Eav\Api\AttributeGroupRepositoryInterf
         try {
             $this->groupResource->save($group);
         } catch (\Exception $e) {
-            throw new StateException(__('Cannot save attributeGroup'));
+            throw new StateException(__("The attributeGroup can't be saved."));
         }
         return $group;
     }
@@ -140,7 +141,9 @@ class GroupRepository implements \Magento\Eav\Api\AttributeGroupRepositoryInterf
         $group = $this->groupFactory->create();
         $this->groupResource->load($group, $groupId);
         if (!$group->getId()) {
-            throw new NoSuchEntityException(__('Group with id "%1" does not exist.', $groupId));
+            throw new NoSuchEntityException(
+                __('The group with the "%1" ID doesn\'t exist. Verify the ID and try again.', $groupId)
+            );
         }
         return $group;
     }
@@ -155,7 +158,7 @@ class GroupRepository implements \Magento\Eav\Api\AttributeGroupRepositoryInterf
         } catch (\Exception $e) {
             throw new StateException(
                 __(
-                    'Cannot delete attributeGroup with id %1',
+                    'The attribute group with id "%1" can\'t be deleted.',
                     $group->getId()
                 ),
                 $e
@@ -178,7 +181,7 @@ class GroupRepository implements \Magento\Eav\Api\AttributeGroupRepositoryInterf
     /**
      * @param \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
      * @return null|string
-     * @deprecated
+     * @deprecated 101.0.3
      */
     protected function retrieveAttributeSetIdFromSearchCriteria(
         \Magento\Framework\Api\SearchCriteriaInterface $searchCriteria
@@ -196,7 +199,7 @@ class GroupRepository implements \Magento\Eav\Api\AttributeGroupRepositoryInterf
     /**
      * Retrieve collection processor
      *
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      * @return CollectionProcessorInterface
      */
     private function getCollectionProcessor()

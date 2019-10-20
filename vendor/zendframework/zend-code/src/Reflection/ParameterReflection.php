@@ -11,6 +11,8 @@ namespace Zend\Code\Reflection;
 
 use ReflectionParameter;
 
+use function method_exists;
+
 class ParameterReflection extends ReflectionParameter implements ReflectionInterface
 {
     /**
@@ -35,13 +37,13 @@ class ParameterReflection extends ReflectionParameter implements ReflectionInter
     /**
      * Get class reflection object
      *
-     * @return ClassReflection
+     * @return null|ClassReflection
      */
     public function getClass()
     {
         $phpReflection = parent::getClass();
         if ($phpReflection === null) {
-            return;
+            return null;
         }
 
         $zendReflection = new ClassReflection($phpReflection->getName());

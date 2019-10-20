@@ -10,9 +10,9 @@ use Magento\Sales\Api\OrderRepositoryInterface as SalesOrderRepositoryInterface;
 use Psr\Log\LoggerInterface;
 use Temando\Shipping\Api\Data\Order\OrderReferenceInterface;
 use Temando\Shipping\Api\Data\Order\OrderReferenceInterfaceFactory;
+use Temando\Shipping\Model\Checkout\Submit\OrderDataInitializer;
 use Temando\Shipping\Model\ResourceModel\Repository\OrderRepositoryInterface;
 use Temando\Shipping\Model\Shipping\Carrier;
-use Temando\Shipping\Model\Shipping\RateRequest\RequestDataInitializer;
 use Temando\Shipping\Webservice\Processor\OrderOperationProcessorPool;
 
 /**
@@ -20,8 +20,8 @@ use Temando\Shipping\Webservice\Processor\OrderOperationProcessorPool;
  *
  * @package Temando\Shipping\Plugin
  * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link    http://www.temando.com/
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class OrderRepositoryPlugin
 {
@@ -31,9 +31,9 @@ class OrderRepositoryPlugin
     private $orderReferenceFactory;
 
     /**
-     * @var RequestDataInitializer
+     * @var OrderDataInitializer
      */
-    private $requestDataInitializer;
+    private $orderDataInitializer;
 
     /**
      * @var OrderRepositoryInterface
@@ -53,20 +53,20 @@ class OrderRepositoryPlugin
     /**
      * OrderRepositoryPlugin constructor.
      * @param OrderReferenceInterfaceFactory $orderReferenceFactory
-     * @param RequestDataInitializer $orderDataInitializer
+     * @param OrderDataInitializer $orderDataInitializer
      * @param OrderRepositoryInterface $orderRepository
      * @param OrderOperationProcessorPool $processorPool
      * @param LoggerInterface $logger
      */
     public function __construct(
         OrderReferenceInterfaceFactory $orderReferenceFactory,
-        RequestDataInitializer $orderDataInitializer,
+        OrderDataInitializer $orderDataInitializer,
         OrderRepositoryInterface $orderRepository,
         OrderOperationProcessorPool $processorPool,
         LoggerInterface $logger
     ) {
         $this->orderReferenceFactory = $orderReferenceFactory;
-        $this->requestDataInitializer = $orderDataInitializer;
+        $this->orderDataInitializer = $orderDataInitializer;
         $this->orderRepository = $orderRepository;
         $this->processorPool = $processorPool;
         $this->logger = $logger;
@@ -118,8 +118,8 @@ class OrderRepositoryPlugin
         }
 
         try {
-            // create remote order entity from local (sales) order entity
-            $order = $this->requestDataInitializer->getManifestationData($salesOrder);
+            // create request data from local (sales) order entity
+            $order = $this->orderDataInitializer->getOrder($salesOrder);
             // save order at Temando platform as well as local reference to it.
             $saveResult = $this->orderRepository->save($order);
 

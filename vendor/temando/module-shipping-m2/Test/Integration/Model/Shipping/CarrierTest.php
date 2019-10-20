@@ -14,8 +14,8 @@ use Magento\Quote\Model\Quote\Item;
 use Magento\TestFramework\Helper\Bootstrap;
 use Psr\Log\LogLevel;
 use Temando\Shipping\Api\Data\Shipment\ShipmentReferenceInterface;
-use Temando\Shipping\Model\Order\OrderReference;
 use Temando\Shipping\Model\ResourceModel\Order\OrderRepository;
+use Temando\Shipping\Model\ResourceModel\Shipment\ShipmentReferenceRepository;
 use Temando\Shipping\Model\ResourceModel\Shipment\ShipmentRepository;
 use Temando\Shipping\Model\Shipment\TrackEventInterface;
 use Temando\Shipping\Test\Integration\Provider\RateRequestProvider;
@@ -233,18 +233,23 @@ class CarrierTest extends \PHPUnit\Framework\TestCase
             ->method('addErrorMessage');
 
         $shipmentRepository = $this->getMockBuilder(ShipmentRepository::class)
-            ->setMethods(['getTrackingByNumber', 'getReferenceByTrackingNumber', 'getShipmentTrack'])
+            ->setMethods(['getTrackingByNumber'])
             ->disableOriginalConstructor()
             ->getMock();
         $shipmentRepository
             ->expects($this->once())
             ->method('getTrackingByNumber')
             ->willThrowException(new NoSuchEntityException(__($apiErrorMessage)));
-        $shipmentRepository
+
+        $shipmentReferenceRepository = $this->getMockBuilder(ShipmentReferenceRepository::class)
+            ->setMethods(['getByTrackingNumber', 'getShipmentTrack'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $shipmentReferenceRepository
             ->expects($this->once())
-            ->method('getReferenceByTrackingNumber')
+            ->method('getByTrackingNumber')
             ->willReturn($shipmentReference);
-        $shipmentRepository
+        $shipmentReferenceRepository
             ->expects($this->once())
             ->method('getShipmentTrack')
             ->willReturn($salesTrack);
@@ -253,6 +258,7 @@ class CarrierTest extends \PHPUnit\Framework\TestCase
         $carrier = Bootstrap::getObjectManager()->create(Carrier::class, [
             'messageManager' => $messageManager,
             'shipmentRepository' => $shipmentRepository,
+            'shipmentReferenceRepository' => $shipmentReferenceRepository,
         ]);
 
         /** @var \Magento\Shipping\Model\Tracking\Result\Status $trackingInfo */
@@ -289,18 +295,23 @@ class CarrierTest extends \PHPUnit\Framework\TestCase
             ->method('addErrorMessage');
 
         $shipmentRepository = $this->getMockBuilder(ShipmentRepository::class)
-            ->setMethods(['getTrackingByNumber', 'getReferenceByTrackingNumber', 'getShipmentTrack'])
+            ->setMethods(['getTrackingByNumber'])
             ->disableOriginalConstructor()
             ->getMock();
         $shipmentRepository
             ->expects($this->once())
             ->method('getTrackingByNumber')
             ->willReturn($trackEvents);
-        $shipmentRepository
+
+        $shipmentReferenceRepository = $this->getMockBuilder(ShipmentReferenceRepository::class)
+            ->setMethods(['getByTrackingNumber', 'getShipmentTrack'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $shipmentReferenceRepository
             ->expects($this->once())
-            ->method('getReferenceByTrackingNumber')
+            ->method('getByTrackingNumber')
             ->willThrowException(new NoSuchEntityException(__($repoExceptionMessage)));
-        $shipmentRepository
+        $shipmentReferenceRepository
             ->expects($this->once())
             ->method('getShipmentTrack')
             ->willReturn($salesTrack);
@@ -309,6 +320,7 @@ class CarrierTest extends \PHPUnit\Framework\TestCase
         $carrier = Bootstrap::getObjectManager()->create(Carrier::class, [
             'messageManager' => $messageManager,
             'shipmentRepository' => $shipmentRepository,
+            'shipmentReferenceRepository' => $shipmentReferenceRepository,
         ]);
 
         /** @var \Magento\Shipping\Model\Tracking\Result\Status $trackingInfo */
@@ -359,18 +371,23 @@ class CarrierTest extends \PHPUnit\Framework\TestCase
             ->method('addErrorMessage');
 
         $shipmentRepository = $this->getMockBuilder(ShipmentRepository::class)
-            ->setMethods(['getTrackingByNumber', 'getReferenceByTrackingNumber', 'getShipmentTrack'])
+            ->setMethods(['getTrackingByNumber'])
             ->disableOriginalConstructor()
             ->getMock();
         $shipmentRepository
             ->expects($this->once())
             ->method('getTrackingByNumber')
             ->willReturn($trackEvents);
-        $shipmentRepository
+
+        $shipmentReferenceRepository = $this->getMockBuilder(ShipmentReferenceRepository::class)
+            ->setMethods(['getByTrackingNumber', 'getShipmentTrack'])
+            ->disableOriginalConstructor()
+            ->getMock();
+        $shipmentReferenceRepository
             ->expects($this->once())
-            ->method('getReferenceByTrackingNumber')
+            ->method('getByTrackingNumber')
             ->willReturn($shipmentReference);
-        $shipmentRepository
+        $shipmentReferenceRepository
             ->expects($this->once())
             ->method('getShipmentTrack')
             ->willReturn($salesTrack);
@@ -379,6 +396,7 @@ class CarrierTest extends \PHPUnit\Framework\TestCase
         $carrier = Bootstrap::getObjectManager()->create(Carrier::class, [
             'messageManager' => $messageManager,
             'shipmentRepository' => $shipmentRepository,
+            'shipmentReferenceRepository' => $shipmentReferenceRepository,
         ]);
 
         /** @var \Magento\Shipping\Model\Tracking\Result\Status $trackingInfo */

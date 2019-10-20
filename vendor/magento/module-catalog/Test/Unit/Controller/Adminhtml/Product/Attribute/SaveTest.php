@@ -3,11 +3,11 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\Catalog\Test\Unit\Controller\Adminhtml\Product\Attribute;
 
 use Magento\Catalog\Api\Data\ProductAttributeInterface;
 use Magento\Catalog\Controller\Adminhtml\Product\Attribute\Save;
+use Magento\Framework\Serialize\Serializer\FormData;
 use Magento\Catalog\Test\Unit\Controller\Adminhtml\Product\AttributeTest;
 use Magento\Catalog\Model\Product\AttributeSet\BuildFactory;
 use Magento\Catalog\Model\Product\AttributeSet\Build;
@@ -15,8 +15,6 @@ use Magento\Catalog\Model\ResourceModel\Eav\AttributeFactory;
 use Magento\Eav\Api\Data\AttributeSetInterface;
 use Magento\Eav\Model\Adminhtml\System\Config\Source\Inputtype\ValidatorFactory;
 use Magento\Eav\Model\ResourceModel\Entity\Attribute\Group\CollectionFactory;
-use Magento\Framework\Message\ManagerInterface;
-use Magento\Framework\Serialize\Serializer\FormData;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Filter\FilterManager;
 use Magento\Catalog\Helper\Product as ProductHelper;
@@ -87,11 +85,6 @@ class SaveTest extends AttributeTest
     protected $inputTypeValidatorMock;
 
     /**
-     * @var ManagerInterface|\PHPUnit_Framework_MockObject_MockObject
-     */
-    private $messageManagerMock;
-
-    /**
      * @var FormData|\PHPUnit_Framework_MockObject_MockObject
      */
     private $formDataSerializerMock;
@@ -142,9 +135,6 @@ class SaveTest extends AttributeTest
         $this->inputTypeValidatorMock = $this->getMockBuilder(InputTypeValidator::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->messageManagerMock = $this->getMockBuilder(\Magento\Framework\Message\ManagerInterface::class)
-            ->disableOriginalConstructor()
-            ->getMockForAbstractClass();
         $this->formDataSerializerMock = $this->getMockBuilder(FormData::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -170,7 +160,6 @@ class SaveTest extends AttributeTest
     {
         return $this->objectManager->getObject(Save::class, [
             'context' => $this->contextMock,
-            'messageManager' => $this->messageManagerMock,
             'attributeLabelCache' => $this->attributeLabelCacheMock,
             'coreRegistry' => $this->coreRegistryMock,
             'resultPageFactory' => $this->resultPageFactoryMock,
@@ -193,7 +182,8 @@ class SaveTest extends AttributeTest
                 ['isAjax', null, null],
                 ['serialized_options', '[]', ''],
             ]);
-        $this->formDataSerializerMock->expects($this->once())
+        $this->formDataSerializerMock
+            ->expects($this->once())
             ->method('unserialize')
             ->with('')
             ->willReturn([]);
@@ -223,14 +213,15 @@ class SaveTest extends AttributeTest
                 ['isAjax', null, null],
                 ['serialized_options', '[]', ''],
             ]);
-        $this->formDataSerializerMock->expects($this->once())
+        $this->formDataSerializerMock
+            ->expects($this->once())
             ->method('unserialize')
             ->with('')
             ->willReturn([]);
-        $this->productAttributeMock->expects($this->once())
+        $this->productAttributeMock
             ->method('getId')
             ->willReturn(1);
-        $this->productAttributeMock->expects($this->once())
+        $this->productAttributeMock
             ->method('getAttributeCode')
             ->willReturn('test_code');
         $this->requestMock->expects($this->once())
@@ -268,7 +259,6 @@ class SaveTest extends AttributeTest
     }
 
     /**
-     * @return void
      * @throws \Magento\Framework\Exception\NotFoundException
      */
     public function testExecuteWithOptionsDataError()
@@ -283,11 +273,13 @@ class SaveTest extends AttributeTest
                 ['isAjax', null, true],
                 ['serialized_options', '[]', $serializedOptions],
             ]);
-        $this->formDataSerializerMock->expects($this->once())
+        $this->formDataSerializerMock
+            ->expects($this->once())
             ->method('unserialize')
             ->with($serializedOptions)
             ->willThrowException(new \InvalidArgumentException('Some exception'));
-        $this->messageManagerMock->expects($this->once())
+        $this->messageManager
+            ->expects($this->once())
             ->method('addErrorMessage')
             ->with($message);
         $this->addReturnResultConditions('catalog/*/edit', ['_current' => true], ['error' => true]);
@@ -299,7 +291,7 @@ class SaveTest extends AttributeTest
      * @param string $path
      * @param array $params
      * @param array $response
-     * @return void
+     * @return mixed
      * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     private function addReturnResultConditions(string $path = '', array $params = [], array $response = [])
@@ -307,31 +299,36 @@ class SaveTest extends AttributeTest
         $layoutMock = $this->getMockBuilder(LayoutInterface::class)
             ->setMethods(['initMessages', 'getMessagesBlock'])
             ->getMockForAbstractClass();
-        $this->layoutFactoryMock->expects($this->once())
+        $this->layoutFactoryMock
+            ->expects($this->once())
             ->method('create')
             ->with()
             ->willReturn($layoutMock);
-        $layoutMock->expects($this->once())
+        $layoutMock
             ->method('initMessages')
             ->with();
         $messageBlockMock = $this->getMockBuilder(Messages::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $layoutMock->expects($this->once())
+        $layoutMock
+            ->expects($this->once())
             ->method('getMessagesBlock')
             ->willReturn($messageBlockMock);
-        $messageBlockMock->expects($this->once())
+        $messageBlockMock
+            ->expects($this->once())
             ->method('getGroupedHtml')
             ->willReturn('message1');
-        $this->resultFactoryMock->expects($this->once())
+        $this->resultFactoryMock
+            ->expects($this->once())
             ->method('create')
             ->with(ResultFactory::TYPE_JSON)
             ->willReturn($this->redirectMock);
-        $response = array_merge($response, [
+        $response  = array_merge($response, [
             'messages' => ['message1'],
             'params' => $params,
         ]);
-        $this->redirectMock->expects($this->once())
+        $this->redirectMock
+            ->expects($this->once())
             ->method('setData')
             ->with($response)
             ->willReturnSelf();

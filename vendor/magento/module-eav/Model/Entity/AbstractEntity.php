@@ -4,8 +4,6 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\Eav\Model\Entity;
 
 use Magento\Eav\Model\Entity\Attribute\AbstractAttribute;
@@ -367,7 +365,7 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
         }
 
         if (!is_array($attributes)) {
-            throw new LocalizedException(__('Unknown parameter'));
+            throw new LocalizedException(__('This parameter is unknown. Verify and try again.'));
         }
 
         foreach ($attributes as $attrCode) {
@@ -463,14 +461,20 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
      * Adding attribute to entity
      *
      * @param AbstractAttribute $attribute
+     * @param DataObject|null $object
      * @return $this
      */
-    public function addAttribute(AbstractAttribute $attribute)
+    public function addAttribute(AbstractAttribute $attribute, $object = null)
     {
         $attribute->setEntity($this);
         $attributeCode = $attribute->getAttributeCode();
 
         $this->_attributesByCode[$attributeCode] = $attribute;
+
+        if ($object !== null) {
+            $suffix = $this->getAttributesCacheSuffix($object);
+            $this->attributesByScope[$suffix][$attributeCode] = $attribute;
+        }
 
         if ($attribute->isStatic()) {
             $this->_staticAttributes[$attributeCode] = $attribute;
@@ -482,28 +486,13 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
     }
 
     /**
-     * Adding attribute to entity by scope.
-     *
-     * @param AbstractAttribute $attribute
-     * @param DataObject|null $entity
-     * @return $this
-     */
-    public function addAttributeByScope(AbstractAttribute $attribute, $entity = null)
-    {
-        $suffix = $entity !== null ? $this->getAttributesCacheSuffix($entity) : '0-0';
-        $attributeCode = $attribute->getAttributeCode();
-        $this->attributesByScope[$suffix][$attributeCode] = $attribute;
-        return $this->addAttribute($attribute);
-    }
-
-    /**
      * Get attributes by scope
      *
      * @return array
      */
     private function getAttributesByScope($suffix)
     {
-        return !empty($this->attributesByScope[$suffix])
+        return (isset($this->attributesByScope[$suffix]) && !empty($this->attributesByScope[$suffix]))
             ? $this->attributesByScope[$suffix]
             : $this->getAttributesByCode();
     }
@@ -519,7 +508,7 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
         $attributeSetId = $object->getAttributeSetId() ?: 0;
         $storeId = $object->getStoreId() ?: 0;
         return $storeId . '-' . $attributeSetId;
-     }
+    }
 
     /**
      * Retrieve partial load flag
@@ -1021,7 +1010,6 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
             $object->isObjectNew(true);
         }
 
-
         \Magento\Framework\Profiler::stop('EAV:load_entity');
         return $this;
     }
@@ -1029,7 +1017,7 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
     /**
      * Loads attributes metadata.
      *
-     * @deprecated 100.2.0 Use self::loadAttributesForObject instead
+     * @deprecated 101.0.0 Use self::loadAttributesForObject instead
      * @param array|null $attributes
      * @return $this
      * @since 100.1.0
@@ -1989,7 +1977,7 @@ abstract class AbstractEntity extends AbstractResource implements EntityInterfac
      * @param array $attributes
      * @param AbstractEntity|null $object
      * @return void
-     * @since 100.2.0
+     * @since 101.0.0
      */
     protected function loadAttributesForObject($attributes, $object = null)
     {

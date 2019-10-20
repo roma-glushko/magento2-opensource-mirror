@@ -6,6 +6,7 @@
 
 namespace Magento\Customer\Controller\Ajax;
 
+use Magento\Framework\App\Action\HttpPostActionInterface as HttpPostActionInterface;
 use Magento\Customer\Api\AccountManagementInterface;
 use Magento\Framework\Exception\EmailNotConfirmedException;
 use Magento\Framework\Exception\InvalidEmailOrPasswordException;
@@ -13,8 +14,8 @@ use Magento\Framework\App\ObjectManager;
 use Magento\Customer\Model\Account\Redirect as AccountRedirect;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Framework\Stdlib\CookieManagerInterface;
 use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
+use Magento\Framework\Stdlib\CookieManagerInterface;
 
 /**
  * Login controller
@@ -23,7 +24,7 @@ use Magento\Framework\Stdlib\Cookie\CookieMetadataFactory;
  * @method \Magento\Framework\App\Response\Http getResponse()
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class Login extends \Magento\Framework\App\Action\Action
+class Login extends \Magento\Framework\App\Action\Action implements HttpPostActionInterface
 {
     /**
      * @var \Magento\Framework\Session\Generic
@@ -98,12 +99,10 @@ class Login extends \Magento\Framework\App\Action\Action
         $this->customerAccountManagement = $customerAccountManagement;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->resultRawFactory = $resultRawFactory;
-        $this->cookieManager = $cookieManager ?: ObjectManager::getInstance()->get(
-            CookieManagerInterface::class
-        );
-        $this->cookieMetadataFactory = $cookieMetadataFactory ?: ObjectManager::getInstance()->get(
-            CookieMetadataFactory::class
-        );
+        $this->cookieManager = $cookieManager ?:
+            ObjectManager::getInstance()->get(CookieManagerInterface::class);
+        $this->cookieMetadataFactory = $cookieMetadataFactory ?:
+            ObjectManager::getInstance()->get(CookieMetadataFactory::class);
     }
 
     /**

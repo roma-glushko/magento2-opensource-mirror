@@ -32,90 +32,92 @@ class GetPaymentNonceCommandTest extends \PHPUnit\Framework\TestCase
     /**
      * @var BraintreeAdapter|MockObject
      */
-    private $adapter;
+    private $adapterMock;
 
     /**
      * @var PaymentTokenManagement|MockObject
      */
-    private $tokenManagement;
+    private $tokenManagementMock;
 
     /**
      * @var PaymentToken|MockObject
      */
-    private $paymentToken;
+    private $paymentTokenMock;
 
     /**
      * @var ArrayResultFactory|MockObject
      */
-    private $resultFactory;
+    private $resultFactoryMock;
 
     /**
      * @var SubjectReader|MockObject
      */
-    private $subjectReader;
+    private $subjectReaderMock;
 
     /**
      * @var PaymentNonceResponseValidator|MockObject
      */
-    private $responseValidator;
+    private $responseValidatorMock;
 
     /**
      * @var ResultInterface|MockObject
      */
-    private $validationResult;
+    private $validationResultMock;
 
     protected function setUp()
     {
-        $this->paymentToken = $this->getMockBuilder(PaymentToken::class)
+        $this->paymentTokenMock = $this->getMockBuilder(PaymentToken::class)
             ->disableOriginalConstructor()
             ->setMethods(['getGatewayToken'])
             ->getMock();
 
-        $this->tokenManagement = $this->getMockBuilder(PaymentTokenManagement::class)
+        $this->tokenManagementMock = $this->getMockBuilder(PaymentTokenManagement::class)
             ->disableOriginalConstructor()
             ->setMethods(['getByPublicHash'])
             ->getMock();
 
-        $this->adapter = $this->getMockBuilder(BraintreeAdapter::class)
+        $this->adapterMock = $this->getMockBuilder(BraintreeAdapter::class)
             ->disableOriginalConstructor()
             ->setMethods(['createNonce'])
             ->getMock();
-        /** @var BraintreeAdapterFactory|MockObject $adapterFactory */
-        $adapterFactory = $this->getMockBuilder(BraintreeAdapterFactory::class)
+        /** @var BraintreeAdapterFactory|MockObject $adapterFactoryMock */
+        $adapterFactoryMock = $this->getMockBuilder(BraintreeAdapterFactory::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $adapterFactory->method('create')
-            ->willReturn($this->adapter);
+        $adapterFactoryMock->expects(self::any())
+            ->method('create')
+            ->willReturn($this->adapterMock);
 
-        $this->resultFactory = $this->getMockBuilder(ArrayResultFactory::class)
+        $this->resultFactoryMock = $this->getMockBuilder(ArrayResultFactory::class)
             ->disableOriginalConstructor()
             ->setMethods(['create'])
             ->getMock();
 
-        $this->subjectReader = $this->getMockBuilder(SubjectReader::class)
+        $this->subjectReaderMock = $this->getMockBuilder(SubjectReader::class)
             ->disableOriginalConstructor()
             ->setMethods(['readPublicHash', 'readCustomerId'])
             ->getMock();
 
-        $this->validationResult = $this->getMockBuilder(ResultInterface::class)
-            ->setMethods(['isValid', 'getFailsDescription'])
+        $this->validationResultMock = $this->getMockBuilder(ResultInterface::class)
+            ->setMethods(['isValid', 'getFailsDescription', 'getErrorCodes'])
             ->getMock();
 
-        $this->responseValidator = $this->getMockBuilder(PaymentNonceResponseValidator::class)
+        $this->responseValidatorMock = $this->getMockBuilder(PaymentNonceResponseValidator::class)
             ->disableOriginalConstructor()
             ->setMethods(['validate', 'isValid', 'getFailsDescription'])
             ->getMock();
 
         $this->command = new GetPaymentNonceCommand(
-            $this->tokenManagement,
-            $adapterFactory,
-            $this->resultFactory,
-            $this->subjectReader,
-            $this->responseValidator
+            $this->tokenManagementMock,
+            $adapterFactoryMock,
+            $this->resultFactoryMock,
+            $this->subjectReaderMock,
+            $this->responseValidatorMock
         );
     }
 
     /**
+     * @covers \Magento\Braintree\Gateway\Command\GetPaymentNonceCommand::execute
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage The "publicHash" field does not exists
      */
@@ -123,16 +125,18 @@ class GetPaymentNonceCommandTest extends \PHPUnit\Framework\TestCase
     {
         $exception = new \InvalidArgumentException('The "publicHash" field does not exists');
 
-        $this->subjectReader->method('readPublicHash')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readPublicHash')
             ->willThrowException($exception);
 
-        $this->subjectReader->expects(self::never())
+        $this->subjectReaderMock->expects(self::never())
             ->method('readCustomerId');
 
         $this->command->execute([]);
     }
 
     /**
+     * @covers \Magento\Braintree\Gateway\Command\GetPaymentNonceCommand::execute
      * @expectedException \InvalidArgumentException
      * @expectedExceptionMessage The "customerId" field does not exists
      */
@@ -140,20 +144,23 @@ class GetPaymentNonceCommandTest extends \PHPUnit\Framework\TestCase
     {
         $publicHash = '3wv2m24d2er3';
 
-        $this->subjectReader->method('readPublicHash')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readPublicHash')
             ->willReturn($publicHash);
 
         $exception = new \InvalidArgumentException('The "customerId" field does not exists');
-        $this->subjectReader->method('readCustomerId')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readCustomerId')
             ->willThrowException($exception);
 
-        $this->tokenManagement->expects(self::never())
+        $this->tokenManagementMock->expects(static::never())
             ->method('getByPublicHash');
 
         $this->command->execute(['publicHash' => $publicHash]);
     }
 
     /**
+     * @covers \Magento\Braintree\Gateway\Command\GetPaymentNonceCommand::execute
      * @expectedException \Exception
      * @expectedExceptionMessage No available payment tokens
      */
@@ -162,23 +169,27 @@ class GetPaymentNonceCommandTest extends \PHPUnit\Framework\TestCase
         $publicHash = '3wv2m24d2er3';
         $customerId = 1;
 
-        $this->subjectReader->method('readPublicHash')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readPublicHash')
             ->willReturn($publicHash);
 
-        $this->subjectReader->method('readCustomerId')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readCustomerId')
             ->willReturn($customerId);
 
         $exception = new \Exception('No available payment tokens');
-        $this->tokenManagement->method('getByPublicHash')
+        $this->tokenManagementMock->expects(static::once())
+            ->method('getByPublicHash')
             ->willThrowException($exception);
 
-        $this->paymentToken->expects(self::never())
+        $this->paymentTokenMock->expects(self::never())
             ->method('getGatewayToken');
 
         $this->command->execute(['publicHash' => $publicHash, 'customerId' => $customerId]);
     }
 
     /**
+     * @covers \Magento\Braintree\Gateway\Command\GetPaymentNonceCommand::execute
      * @expectedException \Exception
      * @expectedExceptionMessage Payment method nonce can't be retrieved.
      */
@@ -188,41 +199,52 @@ class GetPaymentNonceCommandTest extends \PHPUnit\Framework\TestCase
         $customerId = 1;
         $token = 'jd2vnq';
 
-        $this->subjectReader->method('readPublicHash')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readPublicHash')
             ->willReturn($publicHash);
 
-        $this->subjectReader->method('readCustomerId')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readCustomerId')
             ->willReturn($customerId);
 
-        $this->tokenManagement->method('getByPublicHash')
+        $this->tokenManagementMock->expects(static::once())
+            ->method('getByPublicHash')
             ->with($publicHash, $customerId)
-            ->willReturn($this->paymentToken);
+            ->willReturn($this->paymentTokenMock);
 
-        $this->paymentToken->method('getGatewayToken')
+        $this->paymentTokenMock->expects(static::once())
+            ->method('getGatewayToken')
             ->willReturn($token);
 
         $obj = new \stdClass();
         $obj->success = false;
-        $this->adapter->method('createNonce')
+        $this->adapterMock->expects(static::once())
+            ->method('createNonce')
             ->with($token)
             ->willReturn($obj);
 
-        $this->responseValidator->method('validate')
+        $this->responseValidatorMock->expects(static::once())
+            ->method('validate')
             ->with(['response' => ['object' => $obj]])
-            ->willReturn($this->validationResult);
+            ->willReturn($this->validationResultMock);
 
-        $this->validationResult->method('isValid')
+        $this->validationResultMock->expects(static::once())
+            ->method('isValid')
             ->willReturn(false);
 
-        $this->validationResult->method('getFailsDescription')
+        $this->validationResultMock->expects(static::once())
+            ->method('getFailsDescription')
             ->willReturn(['Payment method nonce can\'t be retrieved.']);
 
-        $this->resultFactory->expects(self::never())
+        $this->resultFactoryMock->expects(static::never())
             ->method('create');
 
         $this->command->execute(['publicHash' => $publicHash, 'customerId' => $customerId]);
     }
 
+    /**
+     * @covers \Magento\Braintree\Gateway\Command\GetPaymentNonceCommand::execute
+     */
     public function testExecute()
     {
         $publicHash = '3wv2m24d2er3';
@@ -230,44 +252,53 @@ class GetPaymentNonceCommandTest extends \PHPUnit\Framework\TestCase
         $token = 'jd2vnq';
         $nonce = 's1dj23';
 
-        $this->subjectReader->method('readPublicHash')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readPublicHash')
             ->willReturn($publicHash);
 
-        $this->subjectReader->method('readCustomerId')
+        $this->subjectReaderMock->expects(static::once())
+            ->method('readCustomerId')
             ->willReturn($customerId);
 
-        $this->tokenManagement->method('getByPublicHash')
+        $this->tokenManagementMock->expects(static::once())
+            ->method('getByPublicHash')
             ->with($publicHash, $customerId)
-            ->willReturn($this->paymentToken);
+            ->willReturn($this->paymentTokenMock);
 
-        $this->paymentToken->method('getGatewayToken')
+        $this->paymentTokenMock->expects(static::once())
+            ->method('getGatewayToken')
             ->willReturn($token);
 
         $obj = new \stdClass();
         $obj->success = true;
         $obj->paymentMethodNonce = new \stdClass();
         $obj->paymentMethodNonce->nonce = $nonce;
-        $this->adapter->method('createNonce')
+        $this->adapterMock->expects(static::once())
+            ->method('createNonce')
             ->with($token)
             ->willReturn($obj);
 
-        $this->responseValidator->method('validate')
+        $this->responseValidatorMock->expects(static::once())
+            ->method('validate')
             ->with(['response' => ['object' => $obj]])
-            ->willReturn($this->validationResult);
+            ->willReturn($this->validationResultMock);
 
-        $this->validationResult->method('isValid')
+        $this->validationResultMock->expects(static::once())
+            ->method('isValid')
             ->willReturn(true);
 
-        $this->validationResult->expects(self::never())
+        $this->validationResultMock->expects(self::never())
             ->method('getFailsDescription');
 
         $expected = $this->getMockBuilder(ArrayResult::class)
             ->disableOriginalConstructor()
             ->setMethods(['get'])
             ->getMock();
-        $expected->method('get')
+        $expected->expects(static::once())
+            ->method('get')
             ->willReturn(['paymentMethodNonce' => $nonce]);
-        $this->resultFactory->method('create')
+        $this->resultFactoryMock->expects(static::once())
+            ->method('create')
             ->willReturn($expected);
 
         $actual = $this->command->execute(['publicHash' => $publicHash, 'customerId' => $customerId]);

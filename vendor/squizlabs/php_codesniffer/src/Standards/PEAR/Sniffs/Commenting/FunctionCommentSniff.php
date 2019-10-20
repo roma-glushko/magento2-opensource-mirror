@@ -59,7 +59,13 @@ class FunctionCommentSniff implements Sniff
         if ($tokens[$commentEnd]['code'] !== T_DOC_COMMENT_CLOSE_TAG
             && $tokens[$commentEnd]['code'] !== T_COMMENT
         ) {
-            $phpcsFile->addError('Missing function doc comment', $stackPtr, 'Missing');
+            $function = $phpcsFile->getDeclarationName($stackPtr);
+            $phpcsFile->addError(
+                'Missing doc comment for function %s()',
+                $stackPtr,
+                'Missing',
+                [$function]
+            );
             $phpcsFile->recordMetric($stackPtr, 'Function has doc comment', 'no');
             return;
         } else {
@@ -425,7 +431,14 @@ class FunctionCommentSniff implements Sniff
                         $expected,
                         $found,
                     ];
-                    $fix   = $phpcsFile->addFixableError($error, $commentToken, 'ParamCommentAlignment', $data);
+
+                    if ($found < $expected) {
+                        $code = 'ParamCommentAlignment';
+                    } else {
+                        $code = 'ParamCommentAlignmentExceeded';
+                    }
+
+                    $fix = $phpcsFile->addFixableError($error, $commentToken, $code, $data);
                     if ($fix === true) {
                         $padding = str_repeat(' ', $expected);
                         if ($tokens[($commentToken - 1)]['code'] === T_DOC_COMMENT_WHITESPACE) {

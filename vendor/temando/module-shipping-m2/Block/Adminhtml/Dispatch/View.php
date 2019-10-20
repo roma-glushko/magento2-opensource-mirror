@@ -4,9 +4,8 @@
  */
 namespace Temando\Shipping\Block\Adminhtml\Dispatch;
 
-use Magento\Backend\Block\Widget\Context;
 use Magento\Backend\Block\Widget\Container;
-use Magento\Framework\Stdlib\DateTime\Timezone;
+use Magento\Backend\Block\Widget\Context;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterfaceFactory;
 use Temando\Shipping\Model\DispatchInterface;
 use Temando\Shipping\Model\DispatchProviderInterface;
@@ -104,8 +103,8 @@ class View extends Container
     /**
      * Obtain date. Parent method fails to convert date format returned from api.
      *
-     * @see formatDate()
-     * @see Timezone::formatDateTime()
+     * @see \Magento\Framework\View\Element\AbstractBlock::formatDate()
+     * @see \Magento\Framework\Stdlib\DateTime\Timezone::formatDateTime()
      *
      * @param string $date
      * @return \DateTime

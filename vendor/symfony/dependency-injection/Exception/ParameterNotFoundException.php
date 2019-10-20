@@ -11,12 +11,14 @@
 
 namespace Symfony\Component\DependencyInjection\Exception;
 
+use Psr\Container\NotFoundExceptionInterface;
+
 /**
  * This exception is thrown when a non-existent parameter is used.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class ParameterNotFoundException extends InvalidArgumentException
+class ParameterNotFoundException extends InvalidArgumentException implements NotFoundExceptionInterface
 {
     private $key;
     private $sourceId;
@@ -32,7 +34,7 @@ class ParameterNotFoundException extends InvalidArgumentException
      * @param string[]    $alternatives         Some parameter name alternatives
      * @param string|null $nonNestedAlternative The alternative parameter name when the user expected dot notation for nested parameters
      */
-    public function __construct($key, $sourceId = null, $sourceKey = null, \Exception $previous = null, array $alternatives = array(), $nonNestedAlternative = null)
+    public function __construct(string $key, string $sourceId = null, string $sourceKey = null, \Exception $previous = null, array $alternatives = array(), string $nonNestedAlternative = null)
     {
         $this->key = $key;
         $this->sourceId = $sourceId;
@@ -56,7 +58,7 @@ class ParameterNotFoundException extends InvalidArgumentException
         }
 
         if ($this->alternatives) {
-            if (1 == count($this->alternatives)) {
+            if (1 == \count($this->alternatives)) {
                 $this->message .= ' Did you mean this: "';
             } else {
                 $this->message .= ' Did you mean one of these: "';

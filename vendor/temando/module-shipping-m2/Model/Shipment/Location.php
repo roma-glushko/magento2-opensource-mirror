@@ -20,6 +20,16 @@ use Magento\Framework\DataObject;
 class Location extends DataObject implements LocationInterface
 {
     /**
+     * Get location name.
+     *
+     * @return string
+     */
+    public function getName()
+    {
+        return $this->getData(LocationInterface::NAME);
+    }
+
+    /**
      * Get organisation name.
      *
      * @return string
@@ -118,11 +128,21 @@ class Location extends DataObject implements LocationInterface
     }
 
     /**
-     * Get address type.
+     * Get address type, e.g. "Store", "Warehouse", etc.
      * @return string
      */
     public function getType()
     {
         return $this->getData(LocationInterface::TYPE);
+    }
+
+    /**
+     * Get location opening hours
+     *
+     * @return string[][]
+     */
+    public function getOpeningHours()
+    {
+        return $this->getData(LocationInterface::OPENING_HOURS);
     }
 }

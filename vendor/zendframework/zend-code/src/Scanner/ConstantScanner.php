@@ -13,6 +13,15 @@ use Zend\Code\Annotation;
 use Zend\Code\Exception;
 use Zend\Code\NameInformation;
 
+use function current;
+use function is_string;
+use function next;
+use function reset;
+use function strtolower;
+use function substr;
+use function strpos;
+use function var_export;
+
 class ConstantScanner implements ScannerInterface
 {
     /**
@@ -156,7 +165,7 @@ class ConstantScanner implements ScannerInterface
             return;
         }
 
-        if (!$this->tokens) {
+        if (! $this->tokens) {
             throw new Exception\RuntimeException('No tokens were provided');
         }
 
@@ -171,7 +180,7 @@ class ConstantScanner implements ScannerInterface
 
         $token = current($tokens);
 
-        if (!is_string($token)) {
+        if (! is_string($token)) {
             list($tokenType, $tokenContent, $tokenLine) = $token;
 
             switch ($tokenType) {
@@ -183,7 +192,7 @@ class ConstantScanner implements ScannerInterface
                     // fall-through
 
                 case T_STRING:
-                    $string = (is_string($token)) ? $token : $tokenContent;
+                    $string = is_string($token) ? $token : $tokenContent;
 
                     if (null === $this->name) {
                         $this->name = $string;
@@ -207,9 +216,9 @@ class ConstantScanner implements ScannerInterface
                 case T_CONSTANT_ENCAPSED_STRING:
                 case T_DNUMBER:
                 case T_LNUMBER:
-                    $string = (is_string($token)) ? $token : $tokenContent;
+                    $string = is_string($token) ? $token : $tokenContent;
 
-                    if (substr($string, 0, 1) === '"' || substr($string, 0, 1) === "'") {
+                    if (0 === strpos($string, '"') || 0 === strpos($string, "'")) {
                         $this->value = substr($string, 1, -1); // Remove quotes
                     } else {
                         $this->value = $string;

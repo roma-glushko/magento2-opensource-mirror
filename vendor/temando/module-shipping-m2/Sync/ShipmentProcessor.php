@@ -18,6 +18,7 @@ use Magento\Sales\Api\ShipmentRepositoryInterface as SalesShipmentRepositoryInte
 use Magento\Sales\Api\ShipOrderInterface;
 use Temando\Shipping\Model\DocumentationInterface;
 use Temando\Shipping\Model\ResourceModel\Order\OrderReference as OrderReferenceResource;
+use Temando\Shipping\Model\ResourceModel\Repository\ShipmentReferenceRepositoryInterface;
 use Temando\Shipping\Model\ResourceModel\Repository\ShipmentRepositoryInterface;
 use Temando\Shipping\Model\Shipment\PackageInterface;
 use Temando\Shipping\Model\Shipment\PackageItemInterface;
@@ -46,6 +47,11 @@ class ShipmentProcessor implements EntityProcessorInterface
      * @var SalesShipmentRepositoryInterface
      */
     private $salesShipmentRepository;
+
+    /**
+     * @var ShipmentReferenceRepositoryInterface
+     */
+    private $shipmentReferenceRepository;
 
     /**
      * @var ShipmentRepositoryInterface
@@ -91,6 +97,7 @@ class ShipmentProcessor implements EntityProcessorInterface
      * ShipmentEventProcessor constructor.
      * @param OrderRepositoryInterface $salesOrderRepository
      * @param SalesShipmentRepositoryInterface $salesShipmentRepository
+     * @param ShipmentReferenceRepositoryInterface $shipmentReferenceRepository
      * @param ShipmentRepositoryInterface $shipmentRepository
      * @param ShipOrderInterface $shipOrder
      * @param OrderReferenceResource $orderReferenceResource
@@ -103,6 +110,7 @@ class ShipmentProcessor implements EntityProcessorInterface
     public function __construct(
         OrderRepositoryInterface $salesOrderRepository,
         SalesShipmentRepositoryInterface $salesShipmentRepository,
+        ShipmentReferenceRepositoryInterface $shipmentReferenceRepository,
         ShipmentRepositoryInterface $shipmentRepository,
         ShipOrderInterface $shipOrder,
         OrderReferenceResource $orderReferenceResource,
@@ -114,6 +122,7 @@ class ShipmentProcessor implements EntityProcessorInterface
     ) {
         $this->salesOrderRepository = $salesOrderRepository;
         $this->salesShipmentRepository = $salesShipmentRepository;
+        $this->shipmentReferenceRepository = $shipmentReferenceRepository;
         $this->shipmentRepository = $shipmentRepository;
         $this->shipOrder = $shipOrder;
         $this->orderReferenceResource = $orderReferenceResource;
@@ -131,7 +140,7 @@ class ShipmentProcessor implements EntityProcessorInterface
     private function isShipmentNew($extShipmentId)
     {
         try {
-            $this->shipmentRepository->getReferenceByExtShipmentId($extShipmentId);
+            $this->shipmentReferenceRepository->getByExtShipmentId($extShipmentId);
             return false;
         } catch (NoSuchEntityException $e) {
             return true;
@@ -295,7 +304,7 @@ class ShipmentProcessor implements EntityProcessorInterface
             );
         }
 
-        $shipmentReference = $this->shipmentRepository->getReferenceByExtShipmentId($extShipmentId);
+        $shipmentReference = $this->shipmentReferenceRepository->getByExtShipmentId($extShipmentId);
         $salesShipmentId = $shipmentReference->getShipmentId();
 
         /** @var \Magento\Sales\Model\Order\Shipment $salesShipment */

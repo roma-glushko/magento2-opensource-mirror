@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\Catalog\Model\Product\Attribute\Backend\TierPrice;
 
 use Magento\Framework\EntityManager\Operation\ExtensionInterface;
@@ -65,6 +67,8 @@ class UpdateHandler implements ExtensionInterface
     }
 
     /**
+     * Perform action on relation/extension attribute.
+     *
      * @param \Magento\Catalog\Api\Data\ProductInterface|object $entity
      * @param array $arguments
      * @return \Magento\Catalog\Api\Data\ProductInterface|object
@@ -85,7 +89,7 @@ class UpdateHandler implements ExtensionInterface
             $websiteId = $this->storeManager->getStore($entity->getStoreId())->getWebsiteId();
             $isGlobal = $attribute->isScopeGlobal() || $websiteId === 0;
             $identifierField = $this->metadataPoll->getMetadata(ProductInterface::class)->getLinkField();
-            $productId = $entity->getData($identifierField);
+            $productId = (int) $entity->getData($identifierField);
 
             // prepare original data to compare
             $origPrices = $entity->getOrigData($attribute->getName());
@@ -129,9 +133,9 @@ class UpdateHandler implements ExtensionInterface
      * Check whether price has percentage value.
      *
      * @param array $priceRow
-     * @return integer|null
+     * @return int|null
      */
-    private function getPercentage(array $priceRow)
+    private function getPercentage(array $priceRow): ?int
     {
         return isset($priceRow['percentage_value']) && is_numeric($priceRow['percentage_value'])
             ? (int)$priceRow['percentage_value']
@@ -143,7 +147,7 @@ class UpdateHandler implements ExtensionInterface
      *
      * @param array $valuesToUpdate
      * @param array $oldValues
-     * @return boolean
+     * @return bool
      */
     private function updateValues(array $valuesToUpdate, array $oldValues): bool
     {
@@ -262,11 +266,13 @@ class UpdateHandler implements ExtensionInterface
     }
 
     /**
+     * Prepare original data to compare.
+     *
      * @param array|null $origPrices
      * @param bool $isGlobal
      * @return array
      */
-    private function prepareOriginalDataToCompare($origPrices, $isGlobal = true): array
+    private function prepareOriginalDataToCompare(?array $origPrices, bool $isGlobal = true): array
     {
         $old = [];
         if (is_array($origPrices)) {
@@ -282,12 +288,14 @@ class UpdateHandler implements ExtensionInterface
     }
 
     /**
+     * Prepare new data for save.
+     *
      * @param array $priceRows
      * @param bool $isGlobal
      * @return array
      * @throws \Magento\Framework\Exception\LocalizedException
      */
-    private function prepareNewDataForSave($priceRows, $isGlobal = true): array
+    private function prepareNewDataForSave(array $priceRows, bool $isGlobal = true): array
     {
         $new = [];
         $priceRows = array_filter($priceRows);

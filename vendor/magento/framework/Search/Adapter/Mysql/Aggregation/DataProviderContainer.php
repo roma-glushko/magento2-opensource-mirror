@@ -6,7 +6,12 @@
 namespace Magento\Framework\Search\Adapter\Mysql\Aggregation;
 
 /**
+ * MySQL search data provider container.
+ *
+ * @deprecated
+ * @see \Magento\ElasticSearch
  * @api
+ * @since 100.0.2
  */
 class DataProviderContainer
 {
@@ -24,6 +29,8 @@ class DataProviderContainer
     }
 
     /**
+     * Get data provider by index name.
+     *
      * @param string $indexName
      * @return DataProviderInterface
      */

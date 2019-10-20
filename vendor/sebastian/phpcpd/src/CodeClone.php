@@ -10,33 +10,22 @@
 
 namespace SebastianBergmann\PHPCPD;
 
-use SebastianBergmann\PHPCPD\CodeCloneFile;
-
-/**
- * Represents an exact code clone.
- *
- * @author    Sebastian Bergmann <sebastian@phpunit.de>
- * @copyright Sebastian Bergmann <sebastian@phpunit.de>
- * @license   http://www.opensource.org/licenses/BSD-3-Clause  The BSD 3-Clause License
- * @link      http://github.com/sebastianbergmann/phpcpd/tree
- * @since     Class available since Release 1.1.0
- */
 class CodeClone
 {
     /**
-     * @var integer Size of the clone (lines)
+     * @var int Size of the clone (lines)
      */
     private $size;
 
     /**
-     * @var integer Size of the clone (tokens)
+     * @var int Size of the clone (tokens)
      */
     private $tokens;
 
     /**
      * @var CodeCloneFile[] Files with this code clone
      */
-    private $files = array();
+    private $files = [];
 
     /**
      * @var string Unique ID of Code Duplicate Fragment
@@ -44,7 +33,7 @@ class CodeClone
     private $id;
 
     /**
-     * @var Lines of the clone
+     * @var string Lines of the clone
      */
     private $lines = '';
 
@@ -53,8 +42,8 @@ class CodeClone
      *
      * @param CodeCloneFile $fileA
      * @param CodeCloneFile $fileB
-     * @param integer       $size
-     * @param integer       $tokens
+     * @param int           $size
+     * @param int           $tokens
      */
     public function __construct(CodeCloneFile $fileA, CodeCloneFile $fileB, $size, $tokens)
     {
@@ -63,7 +52,7 @@ class CodeClone
 
         $this->size   = $size;
         $this->tokens = $tokens;
-        $this->id     = md5($this->getLines());
+        $this->id     = \md5($this->getLines());
     }
 
     /**
@@ -93,43 +82,28 @@ class CodeClone
     /**
      * Returns the lines of the clone.
      *
-     * @param  string $prefix
+     * @param string $indent
+     *
      * @return string The lines of the clone
      */
-    public function getLines($prefix = '')
+    public function getLines($indent = '')
     {
-        $file = current($this->files);
-
         if (empty($this->lines)) {
-            $lines = array_slice(
-                file($file->getName()),
-                $file->getStartLine() - 1,
-                $this->size
+            $file = \current($this->files);
+
+            $this->lines = \implode(
+                '',
+                \array_map(
+                    function ($line) use ($indent) {
+                        return $indent . $line;
+                    },
+                    \array_slice(
+                        \file($file->getName()),
+                        $file->getStartLine() - 1,
+                        $this->size
+                    )
+                )
             );
-
-            $indent = array();
-
-            foreach ($lines as &$line) {
-                $line    = rtrim($line, " \t\0\x0B");
-                $line    = str_replace("\t", "    ", $line);
-                $_indent = strlen($line) - strlen(ltrim($line));
-
-                if ($_indent > 1) {
-                    $indent[] = $_indent;
-                }
-            }
-
-            $indent = empty($indent) ? 0 : min($indent);
-
-            if ($indent > 0) {
-                foreach ($lines as &$line) {
-                    if (strlen($line > 1)) {
-                        $line = $prefix . substr($line, $indent);
-                    }
-                }
-            }
-
-            $this->lines = join('', $lines);
         }
 
         return $this->lines;
@@ -144,7 +118,7 @@ class CodeClone
     }
 
     /**
-     * @return integer
+     * @return int
      */
     public function getSize()
     {
@@ -152,7 +126,7 @@ class CodeClone
     }
 
     /**
-     * @return integer
+     * @return int
      */
     public function getTokens()
     {

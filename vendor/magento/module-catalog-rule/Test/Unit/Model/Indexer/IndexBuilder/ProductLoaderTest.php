@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magento\CatalogRule\Test\Unit\Model\Indexer\IndexBuilder;
 
@@ -86,7 +87,7 @@ class ProductLoaderTest extends \PHPUnit\Framework\TestCase
             ->method('getList')
             ->with($this->searchCriteria)
             ->willReturn($this->productSearchResultsInterface);
-        $iterator = new \ArrayIterator([$this->product]);
+        $iterator = [$this->product];
         $this->productSearchResultsInterface->expects($this->once())
             ->method('getItems')
             ->willReturn($iterator);

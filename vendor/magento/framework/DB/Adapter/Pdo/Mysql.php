@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\Framework\DB\Adapter\Pdo;
 
 use Magento\Framework\App\ObjectManager;
@@ -25,6 +26,7 @@ use Magento\Framework\Phrase;
 use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\Stdlib\DateTime;
 use Magento\Framework\Stdlib\StringUtils;
+use Magento\Framework\Setup\SchemaListener;
 
 // @codingStandardsIgnoreStart
 
@@ -36,6 +38,7 @@ use Magento\Framework\Stdlib\StringUtils;
  * @SuppressWarnings(PHPMD.TooManyFields)
  * @SuppressWarnings(PHPMD.ExcessiveClassComplexity)
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @since 100.0.2
  */
 class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
 {
@@ -215,6 +218,11 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
      * @var SerializerInterface
      */
     private $serializer;
+
+    /**
+     * @var SchemaListener
+     */
+    private $schemaListener;
 
     /**
      * Constructor
@@ -501,7 +509,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
             $sqlMessage = explode(' ', $sql, 3);
             $startSql = strtolower(substr($sqlMessage[0], 0, 3));
             if (in_array($startSql, $this->_ddlRoutines) && strcasecmp($sqlMessage[1], 'temporary') !== 0) {
-                trigger_error(AdapterInterface::ERROR_DDL_MESSAGE, E_USER_ERROR);
+                throw new ConnectionException(AdapterInterface::ERROR_DDL_MESSAGE, E_USER_ERROR);
             }
         }
     }
@@ -557,16 +565,16 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
                 ) {
                     $retry = true;
                     $triesCount++;
-                    
+                    $this->closeConnection();
+
                     /**
-                    * _connect() function does not allow port parameter, so put the port back with the host
-                    */
+                     * _connect() function does not allow port parameter, so put the port back with the host
+                     */
                     if (!empty($this->_config['port'])) {
                         $this->_config['host'] = implode(':', [$this->_config['host'], $this->_config['port']]);
                         unset($this->_config['port']);
                     }
 
-                    $this->closeConnection();
                     $this->_connect();
                 }
 
@@ -600,7 +608,9 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
     public function query($sql, $bind = [])
     {
         if (strpos(rtrim($sql, " \t\n\r\0;"), ';') !== false && count($this->_splitMultiQuery($sql)) > 1) {
-            throw new \Magento\Framework\Exception\LocalizedException(new Phrase('Cannot execute multiple queries'));
+            throw new \Magento\Framework\Exception\LocalizedException(
+                new Phrase("Multiple queries can't be executed. Run a single query and try again.")
+            );
         }
         return $this->_query($sql, $bind);
     }
@@ -618,7 +628,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
      * @throws \Zend_Db_Adapter_Exception To re-throw \PDOException.
      * @throws LocalizedException In case multiple queries are attempted at once, to protect from SQL injection
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
-     * @deprecated 100.2.0
+     * @deprecated 101.0.0
      */
     public function multiQuery($sql, $bind = [])
     {
@@ -866,6 +876,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
                 );
                 $this->resetDdlCache($tableName, $schemaName);
                 $this->rawQuery($sql);
+                $this->getSchemaListener()->dropForeignKey($tableName, $fkName);
             }
         }
         return $this;
@@ -952,6 +963,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
      */
     public function addColumn($tableName, $columnName, $definition, $schemaName = null)
     {
+        $this->getSchemaListener()->addColumn($tableName, $columnName, $definition);
         if ($this->tableColumnExists($tableName, $columnName, $schemaName)) {
             return true;
         }
@@ -996,12 +1008,13 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
         if (!$this->tableColumnExists($tableName, $columnName, $schemaName)) {
             return true;
         }
-
+        $this->getSchemaListener()->dropColumn($tableName, $columnName);
         $alterDrop = [];
 
         $foreignKeys = $this->getForeignKeys($tableName, $schemaName);
         foreach ($foreignKeys as $fkProp) {
             if ($fkProp['COLUMN_NAME'] == $columnName) {
+                $this->getSchemaListener()->dropForeignKey($tableName, $fkProp['FK_NAME']);
                 $alterDrop[] = 'DROP FOREIGN KEY ' . $this->quoteIdentifier($fkProp['FK_NAME']);
             }
         }
@@ -1012,6 +1025,9 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
             $idxColumnKey = array_search($columnName, $idxColumns);
             if ($idxColumnKey !== false) {
                 unset($idxColumns[$idxColumnKey]);
+                if (empty($idxColumns)) {
+                    $this->getSchemaListener()->dropIndex($tableName, $idxData['KEY_NAME'], 'index');
+                }
                 if ($idxColumns && $this->_getIndexByColumns($tableName, $idxColumns, $schemaName)) {
                     $this->dropIndex($tableName, $idxData['KEY_NAME'], $schemaName);
                 }
@@ -1071,6 +1087,12 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
         $flushData = false,
         $schemaName = null
     ) {
+        $this->getSchemaListener()->changeColumn(
+            $tableName,
+            $oldColumnName,
+            $newColumnName,
+            $definition
+        );
         if (!$this->tableColumnExists($tableName, $oldColumnName, $schemaName)) {
             throw new \Zend_Db_Exception(
                 sprintf(
@@ -1116,6 +1138,11 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
      */
     public function modifyColumn($tableName, $columnName, $definition, $flushData = false, $schemaName = null)
     {
+        $this->getSchemaListener()->modifyColumn(
+            $tableName,
+            $columnName,
+            $definition
+        );
         if (!$this->tableColumnExists($tableName, $columnName, $schemaName)) {
             throw new \Zend_Db_Exception(sprintf('Column "%s" does not exist in table "%s".', $columnName, $tableName));
         }
@@ -2012,7 +2039,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
         $bind         = [];
         $columnsCount = count($columns);
         foreach ($data as $row) {
-            if ($columnsCount != count($row)) {
+            if (is_array($row) && $columnsCount != count($row)) {
                 throw new \Zend_Db_Exception('Invalid data for insert');
             }
             $values[] = $this->_prepareInsertData($row, $bind);
@@ -2077,6 +2104,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
      */
     public function createTable(Table $table)
     {
+        $this->getSchemaListener()->createTable($table);
         $columns = $table->getColumns();
         foreach ($columns as $columnEntry) {
             if (empty($columnEntry['COMMENT'])) {
@@ -2412,6 +2440,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
                 }
                 break;
             case Table::TYPE_DECIMAL:
+            case Table::TYPE_FLOAT:
             case Table::TYPE_NUMERIC:
                 $precision  = 10;
                 $scale      = 0;
@@ -2531,6 +2560,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
             $this->query($query);
         }
         $this->resetDdlCache($tableName, $schemaName);
+        $this->getSchemaListener()->dropTable($tableName);
         return true;
     }
 
@@ -2600,7 +2630,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
         if ($this->isTableExists($newTableName, $schemaName)) {
             throw new \Zend_Db_Exception(sprintf('Table "%s" already exists', $newTableName));
         }
-
+        $this->getSchemaListener()->renameTable($oldTableName, $newTableName);
         $oldTable = $this->_getTableName($oldTableName, $schemaName);
         $newTable = $this->_getTableName($newTableName, $schemaName);
 
@@ -2637,6 +2667,12 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
         $indexType = AdapterInterface::INDEX_TYPE_INDEX,
         $schemaName = null
     ) {
+        $this->getSchemaListener()->addIndex(
+            $tableName,
+            $indexName,
+            $fields,
+            $indexType
+        );
         $columns = $this->describeTable($tableName, $schemaName);
         $keyList = $this->getIndexList($tableName, $schemaName);
 
@@ -2718,22 +2754,28 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
     public function dropIndex($tableName, $keyName, $schemaName = null)
     {
         $indexList = $this->getIndexList($tableName, $schemaName);
+        $indexType = 'index';
         $keyName = strtoupper($keyName);
         if (!isset($indexList[$keyName])) {
             return true;
         }
 
         if ($keyName == 'PRIMARY') {
+            $indexType = 'primary';
             $cond = 'DROP PRIMARY KEY';
         } else {
+            if (strpos($keyName, 'UNQ_') !== false) {
+                $indexType = 'unique';
+            }
             $cond = 'DROP KEY ' . $this->quoteIdentifier($indexList[$keyName]['KEY_NAME']);
         }
+
         $sql = sprintf(
             'ALTER TABLE %s %s',
             $this->quoteIdentifier($this->_getTableName($tableName, $schemaName)),
             $cond
         );
-
+        $this->getSchemaListener()->dropIndex($tableName, $keyName, $indexType);
         $this->resetDdlCache($tableName, $schemaName);
 
         return $this->rawQuery($sql);
@@ -2784,6 +2826,15 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
         if ($onDelete !== null) {
             $query .= ' ON DELETE ' . strtoupper($onDelete);
         }
+
+        $this->getSchemaListener()->addForeignKey(
+            $fkName,
+            $tableName,
+            $columnName,
+            $refTableName,
+            $refColumnName,
+            $onDelete
+        );
 
         $result = $this->rawQuery($query);
         $this->resetDdlCache($tableName);
@@ -3702,7 +3753,7 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
      * @param array $columns
      * @param array $values
      * @return string
-     * @since 100.2.0
+     * @since 101.0.0
      */
     protected function _getReplaceSqlQuery($tableName, array $columns, array $values)
     {
@@ -3938,5 +3989,20 @@ class Mysql extends \Zend_Db_Adapter_Pdo_Mysql implements AdapterInterface
             return current($indexes[$indexName]['COLUMNS_LIST']);
         }
         return false;
+    }
+
+    /**
+     * Get schema Listener.
+     *
+     * Required to listen all DDL changes done by 3-rd party modules with old Install/UpgradeSchema scripts.
+     *
+     * @return SchemaListener
+     */
+    public function getSchemaListener()
+    {
+        if ($this->schemaListener === null) {
+            $this->schemaListener = \Magento\Framework\App\ObjectManager::getInstance()->create(SchemaListener::class);
+        }
+        return $this->schemaListener;
     }
 }

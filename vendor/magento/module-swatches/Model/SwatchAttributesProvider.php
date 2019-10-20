@@ -3,7 +3,6 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 namespace Magento\Swatches\Model;
 
 use Magento\ConfigurableProduct\Model\Product\Type\Configurable;
@@ -39,8 +38,6 @@ class SwatchAttributesProvider
     private $swatchTypeChecker;
 
     /**
-     * SwatchAttributesProvider constructor.
-     *
      * @param Configurable $typeConfigurable
      * @param SwatchAttributeCodes $swatchAttributeCodes
      * @param SwatchAttributeType|null $swatchTypeChecker

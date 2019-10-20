@@ -92,7 +92,6 @@ class SuccessValidatorTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @param \PHPUnit_Framework_MockObject_MockObject $checkoutSession
-     *
      * @return object
      */
     protected function createSuccessValidator(\PHPUnit_Framework_MockObject_MockObject $checkoutSession)

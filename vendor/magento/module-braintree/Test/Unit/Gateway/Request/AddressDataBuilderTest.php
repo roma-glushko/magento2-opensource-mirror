@@ -5,39 +5,47 @@
  */
 namespace Magento\Braintree\Test\Unit\Gateway\Request;
 
-use Magento\Braintree\Gateway\SubjectReader;
 use Magento\Braintree\Gateway\Request\AddressDataBuilder;
-use Magento\Payment\Gateway\Data\AddressAdapterInterface;
-use Magento\Payment\Gateway\Data\OrderAdapterInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Magento\Payment\Gateway\Data\OrderAdapterInterface;
+use Magento\Payment\Gateway\Data\AddressAdapterInterface;
+use Magento\Braintree\Gateway\SubjectReader;
 use PHPUnit_Framework_MockObject_MockObject as MockObject;
 
 /**
- * Class AddressDataBuilderTest
+ * Tests \Magento\Braintree\Gateway\Request\AddressDataBuilder.
  */
 class AddressDataBuilderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var PaymentDataObjectInterface|MockObject
      */
-    private $paymentDO;
+    private $paymentDOMock;
 
     /**
      * @var OrderAdapterInterface|MockObject
      */
-    private $order;
+    private $orderMock;
 
     /**
      * @var AddressDataBuilder
      */
     private $builder;
 
+    /**
+     * @var SubjectReader|MockObject
+     */
+    private $subjectReaderMock;
+
     protected function setUp()
     {
-        $this->paymentDO = $this->createMock(PaymentDataObjectInterface::class);
-        $this->order = $this->createMock(OrderAdapterInterface::class);
+        $this->paymentDOMock = $this->createMock(PaymentDataObjectInterface::class);
+        $this->orderMock = $this->createMock(OrderAdapterInterface::class);
+        $this->subjectReaderMock = $this->getMockBuilder(SubjectReader::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $this->builder = new AddressDataBuilder(new SubjectReader());
+        $this->builder = new AddressDataBuilder($this->subjectReaderMock);
     }
 
     /**
@@ -49,24 +57,37 @@ class AddressDataBuilderTest extends \PHPUnit\Framework\TestCase
             'payment' => null,
         ];
 
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
+            ->with($buildSubject)
+            ->willThrowException(new \InvalidArgumentException());
+
         $this->builder->build($buildSubject);
     }
 
     public function testBuildNoAddresses()
     {
-        $this->paymentDO->method('getOrder')
-            ->willReturn($this->order);
+        $this->paymentDOMock->expects(static::once())
+            ->method('getOrder')
+            ->willReturn($this->orderMock);
 
-        $this->order->method('getShippingAddress')
+        $this->orderMock->expects(static::once())
+            ->method('getShippingAddress')
             ->willReturn(null);
-        $this->order->method('getBillingAddress')
+        $this->orderMock->expects(static::once())
+            ->method('getBillingAddress')
             ->willReturn(null);
 
         $buildSubject = [
-            'payment' => $this->paymentDO,
+            'payment' => $this->paymentDOMock,
         ];
 
-        self::assertEquals([], $this->builder->build($buildSubject));
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
+            ->with($buildSubject)
+            ->willReturn($this->paymentDOMock);
+
+        static::assertEquals([], $this->builder->build($buildSubject));
     }
 
     /**
@@ -77,19 +98,27 @@ class AddressDataBuilderTest extends \PHPUnit\Framework\TestCase
      */
     public function testBuild($addressData, $expectedResult)
     {
-        $address = $this->getAddressMock($addressData);
+        $addressMock = $this->getAddressMock($addressData);
 
-        $this->paymentDO->method('getOrder')
-            ->willReturn($this->order);
+        $this->paymentDOMock->expects(static::once())
+            ->method('getOrder')
+            ->willReturn($this->orderMock);
 
-        $this->order->method('getShippingAddress')
-            ->willReturn($address);
-        $this->order->method('getBillingAddress')
-            ->willReturn($address);
+        $this->orderMock->expects(static::once())
+            ->method('getShippingAddress')
+            ->willReturn($addressMock);
+        $this->orderMock->expects(static::once())
+            ->method('getBillingAddress')
+            ->willReturn($addressMock);
 
         $buildSubject = [
-            'payment' => $this->paymentDO,
+            'payment' => $this->paymentDOMock,
         ];
+
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
+            ->with($buildSubject)
+            ->willReturn($this->paymentDOMock);
 
         self::assertEquals($expectedResult, $this->builder->build($buildSubject));
     }
@@ -110,7 +139,7 @@ class AddressDataBuilderTest extends \PHPUnit\Framework\TestCase
                     'city' => 'Chicago',
                     'region_code' => 'IL',
                     'country_id' => 'US',
-                    'post_code' => '00000'
+                    'post_code' => '00000',
                 ],
                 [
                     AddressDataBuilder::SHIPPING_ADDRESS => [
@@ -122,7 +151,7 @@ class AddressDataBuilderTest extends \PHPUnit\Framework\TestCase
                         AddressDataBuilder::LOCALITY => 'Chicago',
                         AddressDataBuilder::REGION => 'IL',
                         AddressDataBuilder::POSTAL_CODE => '00000',
-                        AddressDataBuilder::COUNTRY_CODE => 'US'
+                        AddressDataBuilder::COUNTRY_CODE => 'US',
 
                     ],
                     AddressDataBuilder::BILLING_ADDRESS => [
@@ -134,10 +163,10 @@ class AddressDataBuilderTest extends \PHPUnit\Framework\TestCase
                         AddressDataBuilder::LOCALITY => 'Chicago',
                         AddressDataBuilder::REGION => 'IL',
                         AddressDataBuilder::POSTAL_CODE => '00000',
-                        AddressDataBuilder::COUNTRY_CODE => 'US'
-                    ]
-                ]
-            ]
+                        AddressDataBuilder::COUNTRY_CODE => 'US',
+                    ],
+                ],
+            ],
         ];
     }
 

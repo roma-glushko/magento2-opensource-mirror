@@ -4,7 +4,6 @@
  */
 namespace Temando\Shipping\Webservice\Processor\OrderOperation;
 
-use Magento\Framework\Exception\CouldNotSaveException;
 use Magento\Quote\Model\Quote\Address\RateRequest;
 use Temando\Shipping\Api\Data\Order\ShippingExperienceInterface;
 use Temando\Shipping\Model\OrderInterface;
@@ -15,8 +14,8 @@ use Temando\Shipping\Webservice\Response\Type\OrderResponseTypeInterface;
  *
  * @package Temando\Shipping\Webservice
  * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link    http://www.temando.com/
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class RatesProcessor implements RatesProcessorInterface
 {
@@ -33,8 +32,7 @@ class RatesProcessor implements RatesProcessorInterface
         OrderInterface $requestType,
         OrderResponseTypeInterface $responseType
     ) {
-        $collectionPointId = $requestType->getCollectionPoint()->getCollectionPointId();
-        if ($collectionPointId) {
+        if ($requestType->getCollectionPoint() || $requestType->getPickupLocation()) {
             // ignore default recipient address experiences
             return [];
         }

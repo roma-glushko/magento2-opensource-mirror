@@ -10,6 +10,7 @@ use Magento\Framework\Event\Observer;
 use Magento\Framework\Exception\AlreadyExistsException;
 use Magento\Payment\Model\MethodInterface;
 use Magento\Sales\Api\Data\OrderInterface;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Signifyd\Api\CaseCreationServiceInterface;
 use Magento\Signifyd\Model\Config;
@@ -193,14 +194,31 @@ class PlaceOrderTest extends \PHPUnit\Framework\TestCase
         $this->placeOrder->execute($this->observer);
     }
 
+    public function testExecuteWithOrderPendingPayment()
+    {
+        $orderId = 1;
+        $storeId = 2;
+
+        $this->withActiveSignifydIntegration(true, $storeId);
+        $this->withOrderEntity($orderId, $storeId);
+        $this->orderEntity->method('getState')
+            ->willReturn(Order::STATE_PENDING_PAYMENT);
+        $this->withAvailablePaymentMethod(true);
+
+        $this->creationService->expects(self::never())
+            ->method('createForOrder');
+
+        $this->placeOrder->execute($this->observer);
+    }
+
     /**
      * Specifies order entity mock execution.
      *
-     * @param int $orderId
-     * @param int $storeId
+     * @param int|null $orderId
+     * @param int|null $storeId
      * @return void
      */
-    private function withOrderEntity($orderId, $storeId)
+    private function withOrderEntity($orderId, $storeId): void
     {
         $this->orderEntity = $this->getMockBuilder(OrderInterface::class)
             ->disableOriginalConstructor()
@@ -226,7 +244,7 @@ class PlaceOrderTest extends \PHPUnit\Framework\TestCase
      * @param int|null $storeId
      * @return void
      */
-    private function withActiveSignifydIntegration($isActive, $storeId = null)
+    private function withActiveSignifydIntegration(bool $isActive, $storeId = null): void
     {
         $this->config->method('isActive')
             ->with($storeId)

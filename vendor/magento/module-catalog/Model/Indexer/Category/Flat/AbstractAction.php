@@ -4,12 +4,9 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\Catalog\Model\Indexer\Category\Flat;
 
 use Magento\Framework\App\ResourceConnection;
-use Magento\Framework\EntityManager\MetadataPool;
 
 class AbstractAction
 {
@@ -113,7 +110,7 @@ class AbstractAction
     public function getMainStoreTable($storeId = \Magento\Store\Model\Store::DEFAULT_STORE_ID)
     {
         if (is_string($storeId)) {
-            $storeId = intval($storeId);
+            $storeId = (int) $storeId;
         }
 
         $suffix = sprintf('store_%d', $storeId);
@@ -139,7 +136,9 @@ class AbstractAction
         //Adding columns
         foreach ($this->getColumns() as $fieldName => $fieldProp) {
             $default = $fieldProp['default'];
-            if ($fieldProp['type'][0] == \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP && $default == 'CURRENT_TIMESTAMP') {
+            if ($fieldProp['type'][0] == \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP
+                && $default == 'CURRENT_TIMESTAMP'
+            ) {
                 $default = \Magento\Framework\DB\Ddl\Table::TIMESTAMP_INIT;
             }
             $table->addColumn(

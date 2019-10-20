@@ -106,6 +106,7 @@ class ProductTest extends \PHPUnit\Framework\TestCase
         );
         $exportData = $this->model->export();
         $this->assertContains('simple ""1""', $exportData);
+        $this->assertContains('Category with slash\/ symbol', $exportData);
     }
 
     /**
@@ -325,8 +326,9 @@ class ProductTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @magentoDataFixture Magento/CatalogImportExport/_files/product_export_data.php
+     * @return void
      */
-    public function testExportWithCustomOptions()
+    public function testExportWithCustomOptions(): void
     {
         $storeCode = 'default';
         $expectedData = [];
@@ -358,9 +360,7 @@ class ProductTest extends \PHPUnit\Framework\TestCase
         $product->setOptions($newCustomOptions);
         $productRepository->save($product);
         $this->model->setWriter(
-            $this->objectManager->create(
-                \Magento\ImportExport\Model\Export\Adapter\Csv::class
-            )
+            $this->objectManager->create(\Magento\ImportExport\Model\Export\Adapter\Csv::class)
         );
         $exportData = $this->model->export();
         /** @var $varDirectory \Magento\Framework\Filesystem\Directory\WriteInterface */
@@ -377,14 +377,15 @@ class ProductTest extends \PHPUnit\Framework\TestCase
                 $customOptionData[$storeCode] = $this->parseExportedCustomOption($data[2][$columnNumber]);
             }
         }
+
         self::assertSame($expectedData, $customOptionData);
     }
 
     /**
-     * @param $exportedCustomOption
+     * @param string $exportedCustomOption
      * @return array
      */
-    private function parseExportedCustomOption($exportedCustomOption)
+    private function parseExportedCustomOption(string $exportedCustomOption): array
     {
         $customOptions = explode('|', $exportedCustomOption);
         $optionItems = [];
@@ -405,6 +406,7 @@ class ProductTest extends \PHPUnit\Framework\TestCase
                 $optionItems[$optionName] = [];
             }
         }
+
         return $optionItems;
     }
 }

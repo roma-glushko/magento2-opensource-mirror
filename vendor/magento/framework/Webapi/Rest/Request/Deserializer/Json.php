@@ -14,7 +14,7 @@ class Json implements \Magento\Framework\Webapi\Rest\Request\DeserializerInterfa
 {
     /**
      * @var \Magento\Framework\Json\Decoder
-     * @deprecated 101.0.1
+     * @deprecated
      */
     protected $decoder;
 

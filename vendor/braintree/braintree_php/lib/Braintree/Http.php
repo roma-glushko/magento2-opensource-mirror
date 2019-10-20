@@ -211,7 +211,8 @@ class Http
         }
 
         // build file parameter
-        $filePath = call_user_func("end", explode(DIRECTORY_SEPARATOR, $filePath));
+        $splitFilePath = explode(DIRECTORY_SEPARATOR, $filePath);
+        $filePath = end($splitFilePath);
         $filePath = str_replace($disallow, "_", $filePath);
         $body[] = implode("\r\n", [
             "Content-Disposition: form-data; name=\"file\"; filename=\"{$filePath}\"",

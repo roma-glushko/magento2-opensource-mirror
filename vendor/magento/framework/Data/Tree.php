@@ -13,6 +13,7 @@ use Magento\Framework\Data\Tree\Node\Collection as NodeCollection;
  *
  * @api
  * @author      Magento Core Team <core@magentocommerce.com>
+ * @since 100.0.2
  */
 class Tree
 {
@@ -23,13 +24,17 @@ class Tree
      */
     protected $_nodes;
 
+    /**
+     * Enter description here...
+     *
+     */
     public function __construct()
     {
         $this->_nodes = new NodeCollection($this);
     }
 
     /**
-     * Get Tree.
+     * Enter description here...
      *
      * @return \Magento\Framework\Data\Tree
      */
@@ -39,7 +44,7 @@ class Tree
     }
 
     /**
-     * Load Tree.
+     * Enter description here...
      *
      * @param Node $parentNode
      * @return void
@@ -50,7 +55,7 @@ class Tree
     }
 
     /**
-     * Load Node by Node id.
+     * Enter description here...
      *
      * @param int|string $nodeId
      * @return void
@@ -173,7 +178,7 @@ class Tree
     }
 
     /**
-     * Get Nodes.
+     * Enter description here...
      *
      * @return NodeCollection
      */
@@ -183,9 +188,9 @@ class Tree
     }
 
     /**
-     * Get Node by id.
+     * Enter description here...
      *
-     * @param string|int $nodeId
+     * @param Node $nodeId
      * @return Node
      */
     public function getNodeById($nodeId)

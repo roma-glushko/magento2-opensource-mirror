@@ -9,6 +9,8 @@ namespace Magento\Framework\Indexer;
 
 /**
  * Index Dimension object
+ *
+ * @api
  */
 class Dimension
 {

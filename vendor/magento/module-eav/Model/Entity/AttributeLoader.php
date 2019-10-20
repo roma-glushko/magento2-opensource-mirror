@@ -51,13 +51,13 @@ class AttributeLoader implements AttributeLoaderInterface
      * Retrieve configuration for all attributes
      *
      * @param AbstractEntity $resource
-     * @param DataObject|null $entity
+     * @param DataObject|null $object
      * @return AbstractEntity
      * @throws LocalizedException
      */
-    public function loadAllAttributes(AbstractEntity $resource, DataObject $entity = null)
+    public function loadAllAttributes(AbstractEntity $resource, DataObject $object = null)
     {
-        $attributes = $this->config->getEntityAttributes($resource->getEntityType(), $entity);
+        $attributes = $this->config->getEntityAttributes($resource->getEntityType(), $object);
         $attributeCodes = array_keys($attributes);
         /**
          * Check and init default attributes
@@ -67,10 +67,10 @@ class AttributeLoader implements AttributeLoaderInterface
         $resource->unsetAttributes();
 
         foreach ($defaultAttributesCodes as $attributeCode) {
-            $resource->addAttributeByScope($this->_getDefaultAttribute($resource, $attributeCode), $entity);
+            $resource->addAttribute($this->_getDefaultAttribute($resource, $attributeCode), $object);
         }
         foreach ($attributes as $attributeCode => $attribute) {
-            $resource->addAttributeByScope($attribute, $entity);
+            $resource->addAttribute($attribute, $object);
         }
         return $resource;
     }

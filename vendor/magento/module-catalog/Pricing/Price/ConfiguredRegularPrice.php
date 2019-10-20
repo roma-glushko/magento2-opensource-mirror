@@ -10,14 +10,15 @@ namespace Magento\Catalog\Pricing\Price;
 use Magento\Catalog\Model\Product;
 use Magento\Catalog\Model\Product\Configuration\Item\ItemInterface;
 use Magento\Framework\Pricing\Adjustment\CalculatorInterface;
+use Magento\Framework\Pricing\PriceCurrencyInterface;
 
 /**
- * Configured regular price model
+ * Configured regular price model.
  */
 class ConfiguredRegularPrice extends RegularPrice implements ConfiguredPriceInterface
 {
     /**
-     * Price type configured
+     * Price type configured.
      */
     const PRICE_CODE = self::CONFIGURED_REGULAR_PRICE_CODE;
 
@@ -35,7 +36,7 @@ class ConfiguredRegularPrice extends RegularPrice implements ConfiguredPriceInte
      * @param Product $saleableItem
      * @param float $quantity
      * @param CalculatorInterface $calculator
-     * @param \Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency
+     * @param PriceCurrencyInterface $priceCurrency
      * @param ConfiguredOptions $configuredOptions
      * @param ItemInterface|null $item
      */
@@ -43,7 +44,7 @@ class ConfiguredRegularPrice extends RegularPrice implements ConfiguredPriceInte
         Product $saleableItem,
         $quantity,
         CalculatorInterface $calculator,
-        \Magento\Framework\Pricing\PriceCurrencyInterface $priceCurrency,
+        PriceCurrencyInterface $priceCurrency,
         ConfiguredOptions $configuredOptions,
         ItemInterface $item = null
     ) {
@@ -56,20 +57,22 @@ class ConfiguredRegularPrice extends RegularPrice implements ConfiguredPriceInte
      * @param ItemInterface $item
      * @return $this
      */
-    public function setItem(ItemInterface $item)
+    public function setItem(ItemInterface $item) : ConfiguredRegularPrice
     {
         $this->item = $item;
+
         return $this;
     }
 
     /**
-     * Price value of product with configured options
+     * Price value of product with configured options.
      *
      * @return bool|float
      */
     public function getValue()
     {
         $basePrice = parent::getValue();
+
         return $this->item && $basePrice !== false
             ? $basePrice + $this->configuredOptions->getItemOptionsValue($basePrice, $this->item)
             : $basePrice;

@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\Paypal\Block\Adminhtml\Order;
 
 use Magento\Backend\Block\Widget\Context;
@@ -15,8 +17,9 @@ use Magento\Sales\Model\Order;
 use Magento\Framework\Exception\LocalizedException;
 
 /**
- * Adminhtml sales order view
+ * Adminhtml sales order view.
  * @api
+ * @since 100.2.2
  */
 class View extends OrderView
 {
@@ -24,6 +27,7 @@ class View extends OrderView
      * @var Express
      */
     private $express;
+
     /**
      * @param Context $context
      * @param Registry $registry
@@ -52,17 +56,18 @@ class View extends OrderView
     }
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @return void
      * @throws LocalizedException
+     * @since 100.2.2
      */
     protected function _construct()
     {
         parent::_construct();
 
         $order = $this->getOrder();
-        if (!$order) {
+        if ($order === null) {
             return;
         }
         $message = __('Are you sure you want to authorize full order amount?');
@@ -72,7 +77,7 @@ class View extends OrderView
                 [
                     'label' => __('Authorize'),
                     'class' => 'authorize',
-                    'onclick' => "confirmSetLocation('{$message}', '{$this->getPaymentAuthorizationUrl()}')"
+                    'onclick' => "confirmSetLocation('{$message}', '{$this->getPaymentAuthorizationUrl()}')",
                 ]
             );
         }
@@ -94,6 +99,7 @@ class View extends OrderView
      * @param Order $order
      * @return bool
      * @throws LocalizedException
+     * @since 100.2.2
      */
     public function canAuthorize(Order $order): bool
     {

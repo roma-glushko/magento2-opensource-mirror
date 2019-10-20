@@ -55,7 +55,6 @@ class HelperMethodTest extends \PHPUnit\Framework\TestCase
 
     /**
      * @param $input
-     *
      * @return string
      */
     public function help($input)

@@ -79,7 +79,7 @@ class ProductTypeSwitchingOnCreationTest extends Injectable
      * @param string $actionName
      * @return array
      */
-    public function test(string $createProduct, string $product, string $actionName = null) : array
+    public function test(string $createProduct, string $product, string $actionName = null): array
     {
         // Steps
         list($fixture, $dataset) = explode('::', $product);
@@ -99,10 +99,9 @@ class ProductTypeSwitchingOnCreationTest extends Injectable
      * Perform action.
      *
      * @param string $actionName
-     * @throws \Exception
      * @return void
      */
-    protected function performAction(string $actionName)
+    private function performAction(string $actionName): void
     {
         if (method_exists(__CLASS__, $actionName)) {
             $this->$actionName();
@@ -114,28 +113,12 @@ class ProductTypeSwitchingOnCreationTest extends Injectable
      *
      * @return void
      */
-    protected function clearDownloadableData()
+    private function clearDownloadableData(): void
     {
         $this->catalogProductNew->getProductForm()->openSection('downloadable_information');
         /** @var Downloadable $downloadableInfoTab */
         $downloadableInfoTab = $this->catalogProductNew->getProductForm()->getSection('downloadable_information');
         $downloadableInfoTab->getDownloadableBlock('Links')->clearDownloadableData();
         $downloadableInfoTab->setIsDownloadable('No');
-    }
-
-    /**
-     * Set "Is this downloadable Product?" value.
-     *
-     * @param string $downloadable
-     * @return void
-     *
-     * @throws \Exception
-     */
-    protected function setIsDownloadable(string $downloadable = 'Yes')
-    {
-        $this->catalogProductNew->getProductForm()->openSection('downloadable_information');
-        /** @var Downloadable $downloadableInfoTab */
-        $downloadableInfoTab = $this->catalogProductNew->getProductForm()->getSection('downloadable_information');
-        $downloadableInfoTab->setIsDownloadable($downloadable);
     }
 }

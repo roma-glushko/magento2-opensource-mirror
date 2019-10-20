@@ -4,17 +4,19 @@
  */
 namespace Temando\Shipping\Rest\EntityMapper;
 
+use Magento\Backend\Model\Session\Quote as BackendSession;
+use Magento\Checkout\Model\Session as CheckoutSession;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NotFoundException;
 use Magento\Framework\Locale\ResolverInterface;
-use Magento\Store\Model\StoreManagerInterface;
+use Magento\Framework\Session\SessionManagerInterface;
 use Psr\Log\LoggerInterface;
 use Temando\Shipping\Api\Data\Order\OrderReferenceInterfaceFactory;
 use Temando\Shipping\Api\Data\Order\ShippingExperienceInterface;
 use Temando\Shipping\Api\Data\Order\ShippingExperienceInterfaceFactory;
-use Temando\Shipping\Rest\Response\Type\Generic\Experience;
-use Temando\Shipping\Rest\Response\Type\Generic\Experience\Cost;
-use Temando\Shipping\Rest\Response\Type\Generic\Experience\Description;
+use Temando\Shipping\Rest\Response\Fields\OrderQualification\Experience;
+use Temando\Shipping\Rest\Response\Fields\OrderQualification\Experience\Cost;
+use Temando\Shipping\Rest\Response\Fields\OrderQualification\Experience\Description;
 
 /**
  * Map API data to application data object
@@ -47,22 +49,22 @@ class ShippingExperiencesMapper
     private $orderReferenceFactory;
 
     /**
-     * @var StoreManagerInterface
+     * @var SessionManagerInterface|CheckoutSession|BackendSession
      */
-    private $storeManager;
+    private $session;
 
     /**
      * ShippingExperiencesMapper constructor.
      * @param OrderReferenceInterfaceFactory $orderReferenceFactory
      * @param ResolverInterface $localeResolver
-     * @param StoreManagerInterface $storeManager
+     * @param SessionManagerInterface $session
      * @param ShippingExperienceInterfaceFactory $shippingExperienceFactory
      * @param LoggerInterface $logger
      */
     public function __construct(
         OrderReferenceInterfaceFactory $orderReferenceFactory,
         ResolverInterface $localeResolver,
-        StoreManagerInterface $storeManager,
+        SessionManagerInterface $session,
         ShippingExperienceInterfaceFactory $shippingExperienceFactory,
         LoggerInterface $logger
     ) {
@@ -70,7 +72,7 @@ class ShippingExperiencesMapper
         $this->localeResolver = $localeResolver;
         $this->logger = $logger;
         $this->shippingExperienceFactory = $shippingExperienceFactory;
-        $this->storeManager = $storeManager;
+        $this->session = $session;
     }
 
     /**
@@ -114,10 +116,13 @@ class ShippingExperiencesMapper
      */
     private function extractShippingCost(array $cost)
     {
-        /** @var \Magento\Store\Model\Store $currentStore */
-        $currentStore = $this->storeManager->getStore();
-        $baseCurrency = $currentStore->getBaseCurrencyCode();
+        if ($this->session instanceof BackendSession) {
+            $currentStore = $this->session->getStore();
+        } else {
+            $currentStore = $this->session->getQuote()->getStore();
+        }
 
+        $baseCurrency = $currentStore->getBaseCurrencyCode();
         $warningTemplate = "%1 is not a valid shipping method currency. Use %2 when configuring rates.";
 
         $applicableCosts = array_filter($cost, function (Cost $item) use ($baseCurrency, $warningTemplate) {

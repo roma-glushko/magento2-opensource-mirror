@@ -8,7 +8,7 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\UiComponent\ContextInterface;
 use Magento\Framework\View\Element\UiComponentFactory;
 use Magento\Ui\Component\Listing\Columns\Column;
-use Temando\Shipping\Model\ResourceModel\Repository\ShipmentRepositoryInterface;
+use Temando\Shipping\Model\ResourceModel\Repository\ShipmentReferenceRepositoryInterface;
 use Temando\Shipping\Model\ShipmentInterface;
 
 /**
@@ -26,27 +26,27 @@ class RmaAddedShipmentActions extends Column
     const RMA_SHIPMENT_URL_PATH_REMOVE = 'temando/rma_shipment_forward/remove';
 
     /**
-     * @var ShipmentRepositoryInterface
+     * @var ShipmentReferenceRepositoryInterface
      */
-    private $shipmentRepository;
+    private $shipmentReferenceRepository;
 
     /**
      * Constructor
      *
      * @param ContextInterface $context
      * @param UiComponentFactory $uiComponentFactory
-     * @param ShipmentRepositoryInterface $shipmentRepository
+     * @param ShipmentReferenceRepositoryInterface $shipmentReferenceRepository
      * @param mixed[] $components
      * @param mixed[] $data
      */
     public function __construct(
         ContextInterface $context,
         UiComponentFactory $uiComponentFactory,
-        ShipmentRepositoryInterface $shipmentRepository,
+        ShipmentReferenceRepositoryInterface $shipmentReferenceRepository,
         array $components = [],
         array $data = []
     ) {
-        $this->shipmentRepository = $shipmentRepository;
+        $this->shipmentReferenceRepository = $shipmentReferenceRepository;
 
         parent::__construct($context, $uiComponentFactory, $components, $data);
     }
@@ -78,8 +78,8 @@ class RmaAddedShipmentActions extends Column
                     ];
 
                     try {
-                        $shipmentReference = $this->shipmentRepository
-                            ->getReferenceByExtReturnShipmentId($extShipmentId);
+                        $shipmentReference = $this->shipmentReferenceRepository
+                            ->getByExtReturnShipmentId($extShipmentId);
                     } catch (LocalizedException $e) {
                         $shipmentReference = null;
                     }

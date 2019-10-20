@@ -18,6 +18,7 @@ use Psr\Log\LoggerInterface as Logger;
  *
  * @api
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ * @since 100.0.2
  */
 abstract class AbstractDb extends \Magento\Framework\Data\Collection
 {
@@ -219,7 +220,7 @@ abstract class AbstractDb extends \Magento\Framework\Data\Collection
             $sql = $this->getSelectCountSql();
             $this->_totalRecords = $this->getConnection()->fetchOne($sql, $this->_bindParams);
         }
-        return intval($this->_totalRecords);
+        return (int)$this->_totalRecords;
     }
 
     /**
@@ -237,7 +238,8 @@ abstract class AbstractDb extends \Magento\Framework\Data\Collection
         $countSelect->reset(\Magento\Framework\DB\Select::LIMIT_OFFSET);
         $countSelect->reset(\Magento\Framework\DB\Select::COLUMNS);
 
-        if (!count($this->getSelect()->getPart(\Magento\Framework\DB\Select::GROUP))) {
+        $part = $this->getSelect()->getPart(\Magento\Framework\DB\Select::GROUP);
+        if (!is_array($part) || !count($part)) {
             $countSelect->columns(new \Zend_Db_Expr('COUNT(*)'));
             return $countSelect;
         }
@@ -275,7 +277,7 @@ abstract class AbstractDb extends \Magento\Framework\Data\Collection
     }
 
     /**
-     * self::setOrder() alias
+     * Sets order and direction.
      *
      * @param string $field
      * @param string $direction
@@ -364,6 +366,7 @@ abstract class AbstractDb extends \Magento\Framework\Data\Collection
 
     /**
      * Hook for operations before rendering filters
+     *
      * @return void
      */
     protected function _renderFiltersBefore()
@@ -601,6 +604,7 @@ abstract class AbstractDb extends \Magento\Framework\Data\Collection
     }
 
     /**
+     * Returns an items collection.
      * Returns a collection item that corresponds to the fetched row
      * and moves the internal data pointer ahead
      *

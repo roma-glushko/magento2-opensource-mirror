@@ -8,6 +8,7 @@ declare(strict_types=1);
 namespace Magento\Framework\Indexer;
 
 /**
+ * @api
  * Run indexer by dimensions
  */
 interface DimensionalIndexerInterface

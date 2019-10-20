@@ -4,8 +4,6 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\CatalogInventory\Model;
 
 use Magento\Catalog\Model\ProductFactory;
@@ -162,7 +160,7 @@ class StockStateProvider implements StockStateProviderInterface
         }
 
         if (!$this->checkQty($stockItem, $summaryQty) || !$this->checkQty($stockItem, $qty)) {
-            $message = __('We don\'t have as many "%1" as you requested.', $stockItem->getProductName());
+            $message = __('The requested qty is not available');
             $result->setHasError(true)->setMessage($message)->setQuoteMessage($message)->setQuoteMessageIndex('qty');
             return $result;
         } else {
@@ -196,7 +194,8 @@ class StockStateProvider implements StockStateProviderInterface
                         if (!$stockItem->getIsChildItem()) {
                             $result->setMessage(
                                 __(
-                                    'We don\'t have as many "%1" as you requested, but we\'ll back order the remaining %2.',
+                                    'We don\'t have as many "%1" as you requested, '
+                                    . 'but we\'ll back order the remaining %2.',
                                     $stockItem->getProductName(),
                                     $backOrderQty * 1
                                 )
@@ -204,7 +203,8 @@ class StockStateProvider implements StockStateProviderInterface
                         } else {
                             $result->setMessage(
                                 __(
-                                    'We don\'t have "%1" in the requested quantity, so we\'ll back order the remaining %2.',
+                                    'We don\'t have "%1" in the requested quantity, '
+                                    . 'so we\'ll back order the remaining %2.',
                                     $stockItem->getProductName(),
                                     $backOrderQty * 1
                                 )
@@ -212,7 +212,7 @@ class StockStateProvider implements StockStateProviderInterface
                         }
                     } elseif ($stockItem->getShowDefaultNotificationMessage()) {
                         $result->setMessage(
-                            __('We don\'t have as many "%1" as you requested.', $stockItem->getProductName())
+                            __('The requested qty is not available')
                         );
                     }
                 }

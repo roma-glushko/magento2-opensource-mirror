@@ -18,11 +18,14 @@ use Temando\Shipping\Model\ResourceModel\Repository\QuoteCollectionPointReposito
 /**
  * Manage Collection Point Access
  *
- * @package  Temando\Shipping\Model
- * @author   Benjamin Heuer <benjamin.heuer@netresearch.de>
- * @author   Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @deprecated since 1.4.0
+ * @see \Temando\Shipping\Model\Delivery\CollectionPointManagement
+ *
+ * @package Temando\Shipping\Model
+ * @author  Benjamin Heuer <benjamin.heuer@netresearch.de>
+ * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class CollectionPointManagement
 {

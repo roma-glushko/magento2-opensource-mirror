@@ -12,6 +12,7 @@ use Magento\Framework\Filesystem\File\ReadFactory;
 /**
  * Class FileIterator
  * @api
+ * @since 100.0.2
  */
 class FileIterator implements \Iterator, \Countable
 {
@@ -66,7 +67,6 @@ class FileIterator implements \Iterator, \Countable
      */
     public function current()
     {
-        /** @var \Magento\Framework\Filesystem\File\Read $fileRead */
         $fileRead = $this->fileReadFactory->create($this->key(), DriverPool::FILE);
         return $fileRead->readAll();
     }
@@ -98,7 +98,7 @@ class FileIterator implements \Iterator, \Countable
      */
     public function valid()
     {
-        return (bool)$this->key();
+        return (bool) $this->key();
     }
 
     /**

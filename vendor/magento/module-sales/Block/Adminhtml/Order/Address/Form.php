@@ -106,14 +106,6 @@ class Form extends \Magento\Sales\Block\Adminhtml\Order\Create\Form\Address
      */
     protected function _prepareForm()
     {
-        $address = $this->_getAddress();
-        if ($address !== null) {
-            $storeId = $this->_getAddress()
-                ->getOrder()
-                ->getStoreId();
-            $this->_storeManager->setCurrentStore($storeId);
-        }
-
         parent::_prepareForm();
         $this->_form->setId('edit_form');
         $this->_form->setMethod('post');
@@ -121,6 +113,7 @@ class Form extends \Magento\Sales\Block\Adminhtml\Order\Create\Form\Address
             $this->getUrl('sales/*/addressSave', ['address_id' => $this->_getAddress()->getId()])
         );
         $this->_form->setUseContainer(true);
+
         return $this;
     }
 
@@ -142,21 +135,5 @@ class Form extends \Magento\Sales\Block\Adminhtml\Order\Create\Form\Address
     public function getFormValues()
     {
         return $this->_getAddress()->getData();
-    }
-
-    /**
-     * @inheritdoc
-     */
-    protected function processCountryOptions(
-        \Magento\Framework\Data\Form\Element\AbstractElement $countryElement,
-        $storeId = null
-    ) {
-        /** @var \Magento\Sales\Model\Order\Address $address */
-        $address = $this->_getAddress();
-        if ($address !== null) {
-            $storeId = $address->getOrder()->getStoreId();
-        }
-
-        parent::processCountryOptions($countryElement, $storeId);
     }
 }

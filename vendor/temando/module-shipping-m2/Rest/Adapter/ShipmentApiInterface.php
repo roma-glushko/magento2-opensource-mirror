@@ -6,8 +6,8 @@
 namespace Temando\Shipping\Rest\Adapter;
 
 use Temando\Shipping\Rest\Request\ItemRequestInterface;
-use Temando\Shipping\Rest\Response\Type\ShipmentResponseType;
-use Temando\Shipping\Rest\Response\Type\TrackingEventResponseType;
+use Temando\Shipping\Rest\Response\DataObject\Shipment;
+use Temando\Shipping\Rest\Response\DataObject\TrackingEvent;
 use Temando\Shipping\Rest\Exception\AdapterException;
 
 /**
@@ -25,7 +25,7 @@ interface ShipmentApiInterface
     /**
      * @param ItemRequestInterface $request
      *
-     * @return ShipmentResponseType
+     * @return Shipment
      * @throws AdapterException
      */
     public function getShipment(ItemRequestInterface $request);
@@ -33,7 +33,7 @@ interface ShipmentApiInterface
     /**
      * @param ItemRequestInterface $request
      *
-     * @return TrackingEventResponseType[]
+     * @return TrackingEvent[]
      * @throws AdapterException
      */
     public function getTrackingEvents(ItemRequestInterface $request);

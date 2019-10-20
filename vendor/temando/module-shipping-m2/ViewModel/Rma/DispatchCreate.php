@@ -6,7 +6,7 @@ namespace Temando\Shipping\ViewModel\Rma;
 
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\Element\Block\ArgumentInterface;
-use Temando\Shipping\Model\ResourceModel\Repository\ShipmentRepositoryInterface;
+use Temando\Shipping\Model\ResourceModel\Repository\ShipmentReferenceRepositoryInterface;
 use Temando\Shipping\Model\ResourceModel\Rma\RmaAccess;
 use Temando\Shipping\ViewModel\DataProvider\ShippingApiAccess;
 use Temando\Shipping\ViewModel\DataProvider\ShippingApiAccessInterface;
@@ -16,10 +16,10 @@ use Temando\Shipping\ViewModel\ShippingApiInterface;
 /**
  * View model for RMA shipment dispatch creation.
  *
- * @package  Temando\Shipping\ViewModel
- * @author   Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\ViewModel
+ * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class DispatchCreate implements ArgumentInterface, PageActionsInterface, ShippingApiInterface
 {
@@ -34,9 +34,9 @@ class DispatchCreate implements ArgumentInterface, PageActionsInterface, Shippin
     private $rmaAccess;
 
     /**
-     * @var ShipmentRepositoryInterface
+     * @var ShipmentReferenceRepositoryInterface
      */
-    private $shipmentRepository;
+    private $shipmentReferenceRepository;
 
     /**
      * @var UrlInterface
@@ -47,18 +47,18 @@ class DispatchCreate implements ArgumentInterface, PageActionsInterface, Shippin
      * DispatchCreate constructor.
      * @param ShippingApiAccess $apiAccess
      * @param RmaAccess $rmaAccess
-     * @param ShipmentRepositoryInterface $shipmentRepository
+     * @param ShipmentReferenceRepositoryInterface $shipmentReferenceRepository
      * @param UrlInterface $urlBuilder
      */
     public function __construct(
         ShippingApiAccess $apiAccess,
         RmaAccess $rmaAccess,
-        ShipmentRepositoryInterface $shipmentRepository,
+        ShipmentReferenceRepositoryInterface $shipmentReferenceRepository,
         UrlInterface $urlBuilder
     ) {
         $this->apiAccess = $apiAccess;
         $this->rmaAccess = $rmaAccess;
-        $this->shipmentRepository = $shipmentRepository;
+        $this->shipmentReferenceRepository = $shipmentReferenceRepository;
         $this->urlBuilder = $urlBuilder;
     }
 
@@ -115,7 +115,7 @@ class DispatchCreate implements ArgumentInterface, PageActionsInterface, Shippin
         $rma = $this->rmaAccess->getCurrentRma();
         if (!$rma->getEntityId()) {
             // forward-fulfillment return shipment
-            $shipment = $this->shipmentRepository->getReferenceByExtReturnShipmentId($rmaShipmentId);
+            $shipment = $this->shipmentReferenceRepository->getByExtReturnShipmentId($rmaShipmentId);
             $routeParams['shipment_id'] = $shipment->getShipmentId();
         } else {
             // ad-hoc return shipment
@@ -128,7 +128,7 @@ class DispatchCreate implements ArgumentInterface, PageActionsInterface, Shippin
     /**
      * @return string
      */
-    public function getDispatchViewPageUrlTpl(): string//http://m2-enterprise-dev.temando.io/admin/temando/dispatch/view/dispatch_id/0a57b79e-c747-4e80-a6bb-45b3aeb5e90d/
+    public function getDispatchViewPageUrlTpl(): string
     {
         return $this->urlBuilder->getUrl('temando/dispatch/view/dispatch_id/--id--/');
     }

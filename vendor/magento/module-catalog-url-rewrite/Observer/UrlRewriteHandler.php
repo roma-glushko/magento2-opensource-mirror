@@ -125,7 +125,7 @@ class UrlRewriteHandler
     {
         $mergeDataProvider = clone $this->mergeDataProviderPrototype;
         $this->isSkippedProduct[$category->getEntityId()] = [];
-        $saveRewriteHistory = $category->getData('save_rewrites_history');
+        $saveRewriteHistory = (bool)$category->getData('save_rewrites_history');
         $storeId = (int)$category->getStoreId();
 
         if ($category->getChangedProductIds()) {
@@ -230,15 +230,15 @@ class UrlRewriteHandler
      *
      * @param MergeDataProvider $mergeDataProvider
      * @param Category $category
-     * @param Product $product
      * @param int $storeId
-     * @param $saveRewriteHistory
+     * @param bool $saveRewriteHistory
+     * @return void
      */
     private function generateChangedProductUrls(
         MergeDataProvider $mergeDataProvider,
         Category $category,
         int $storeId,
-        $saveRewriteHistory
+        bool $saveRewriteHistory
     ) {
         $this->isSkippedProduct[$category->getEntityId()] = $category->getAffectedProductIds();
 

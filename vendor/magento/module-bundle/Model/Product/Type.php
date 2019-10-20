@@ -4,8 +4,6 @@
  * See COPYING.txt for license details.
  */
 
-// @codingStandardsIgnoreFile
-
 namespace Magento\Bundle\Model\Product;
 
 use Magento\Framework\App\ObjectManager;
@@ -561,7 +559,7 @@ class Type extends \Magento\Catalog\Model\Product\Type\AbstractType
      */
     public function prepareQuoteItemQty($qty, $product)
     {
-        return intval($qty);
+        return (int) $qty;
     }
 
     /**
@@ -590,7 +588,6 @@ class Type extends \Magento\Catalog\Model\Product\Type\AbstractType
         foreach ($this->getOptionsCollection($product) as $option) {
             $hasSalable = false;
 
-            /** @var Selections $selectionsCollection */
             $selectionsCollection = $this->_bundleCollection->create();
             $selectionsCollection->addAttributeToSelect('status');
             $selectionsCollection->addQuantityFilter();
@@ -712,7 +709,7 @@ class Type extends \Magento\Catalog\Model\Product\Type\AbstractType
 
                 $selections = $this->mergeSelectionsWithOptions($options, $selections);
             }
-            if (count($selections) > 0 || !$isStrictProcessMode) {
+            if ((is_array($selections) && count($selections) > 0) || !$isStrictProcessMode) {
                 $uniqueKey = [$product->getId()];
                 $selectionIds = [];
                 $qtys = $buyRequest->getBundleOptionQty();
@@ -902,8 +899,7 @@ class Type extends \Magento\Catalog\Model\Product\Type\AbstractType
         $usedOptions = $product->getData($this->_keyUsedOptions);
         $usedOptionsIds = $product->getData($this->_keyUsedOptionsIds);
 
-        if (
-            !$usedOptions
+        if (!$usedOptions
             || $this->serializer->serialize($usedOptionsIds) != $this->serializer->serialize($optionIds)
         ) {
             $usedOptions = $this->_bundleOption
@@ -1265,7 +1261,9 @@ class Type extends \Magento\Catalog\Model\Product\Type\AbstractType
         if (!$product->getSkipCheckRequiredOption() && $isStrictProcessMode) {
             foreach ($optionsCollection->getItems() as $option) {
                 if ($option->getRequired() && !isset($options[$option->getId()])) {
-                    throw new \Magento\Framework\Exception\LocalizedException(__('Please select all required options.'));
+                    throw new \Magento\Framework\Exception\LocalizedException(
+                        __('Please select all required options.')
+                    );
                 }
             }
         }
@@ -1327,8 +1325,9 @@ class Type extends \Magento\Catalog\Model\Product\Type\AbstractType
     protected function mergeSelectionsWithOptions($options, $selections)
     {
         foreach ($options as $option) {
-            if ($option->getRequired() && count($option->getSelections()) == 1) {
-                $selections = array_merge($selections, $option->getSelections());
+            $optionSelections = $option->getSelections();
+            if ($option->getRequired() && is_array($optionSelections) && count($optionSelections) == 1) {
+                $selections = array_merge($selections, $optionSelections);
             } else {
                 $selections = [];
                 break;

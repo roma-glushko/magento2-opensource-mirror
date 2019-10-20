@@ -7,9 +7,13 @@ require_once __DIR__.'/../includes/classes.php';
 
 $container = new ContainerBuilder();
 
+$container->setParameter('env(FOO)', 'Bar\FaooClass');
+$container->setParameter('foo', '%env(FOO)%');
+
 $container
-    ->register('service_from_anonymous_factory', 'Bar\FooClass')
-    ->setFactory(array(new Definition('Bar\FooClass'), 'getInstance'))
+    ->register('service_from_anonymous_factory', '%foo%')
+    ->setFactory(array(new Definition('%foo%'), 'getInstance'))
+    ->setPublic(true)
 ;
 
 $anonymousServiceWithFactory = new Definition('Bar\FooClass');
@@ -17,6 +21,7 @@ $anonymousServiceWithFactory->setFactory('Bar\FooClass::getInstance');
 $container
     ->register('service_with_method_call_and_factory', 'Bar\FooClass')
     ->addMethodCall('setBar', array($anonymousServiceWithFactory))
+    ->setPublic(true)
 ;
 
 return $container;

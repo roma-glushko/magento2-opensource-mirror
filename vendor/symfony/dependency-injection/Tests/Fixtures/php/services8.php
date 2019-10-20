@@ -19,49 +19,49 @@ class ProjectServiceContainer extends Container
     private $parameters;
     private $targetDirs = array();
 
+    /**
+     * @internal but protected for BC on cache:clear
+     */
+    protected $privates = array();
+
     public function __construct()
     {
         $this->parameters = $this->getDefaultParameters();
 
-        $this->services = array();
+        $this->services = $this->privates = array();
 
         $this->aliases = array();
     }
 
-    /**
-     * {@inheritdoc}
-     */
+    public function reset()
+    {
+        $this->privates = array();
+        parent::reset();
+    }
+
     public function compile()
     {
         throw new LogicException('You cannot compile a dumped container that was already compiled.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function isCompiled()
     {
         return true;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function isFrozen()
+    public function getRemovedIds()
     {
-        @trigger_error(sprintf('The %s() method is deprecated since Symfony 3.3 and will be removed in 4.0. Use the isCompiled() method instead.', __METHOD__), E_USER_DEPRECATED);
-
-        return true;
+        return array(
+            'Psr\\Container\\ContainerInterface' => true,
+            'Symfony\\Component\\DependencyInjection\\ContainerInterface' => true,
+        );
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getParameter($name)
     {
-        $name = strtolower($name);
+        $name = (string) $name;
 
-        if (!(isset($this->parameters[$name]) || array_key_exists($name, $this->parameters) || isset($this->loadedDynamicParameters[$name]))) {
+        if (!(isset($this->parameters[$name]) || isset($this->loadedDynamicParameters[$name]) || array_key_exists($name, $this->parameters))) {
             throw new InvalidArgumentException(sprintf('The parameter "%s" must be defined.', $name));
         }
         if (isset($this->loadedDynamicParameters[$name])) {
@@ -71,27 +71,18 @@ class ProjectServiceContainer extends Container
         return $this->parameters[$name];
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function hasParameter($name)
     {
-        $name = strtolower($name);
+        $name = (string) $name;
 
-        return isset($this->parameters[$name]) || array_key_exists($name, $this->parameters) || isset($this->loadedDynamicParameters[$name]);
+        return isset($this->parameters[$name]) || isset($this->loadedDynamicParameters[$name]) || array_key_exists($name, $this->parameters);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function setParameter($name, $value)
     {
         throw new LogicException('Impossible to call set() on a frozen ParameterBag.');
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getParameterBag()
     {
         if (null === $this->parameterBag) {
@@ -111,7 +102,7 @@ class ProjectServiceContainer extends Container
     /**
      * Computes a dynamic parameter.
      *
-     * @param string The name of the dynamic parameter to load
+     * @param string $name The name of the dynamic parameter to load
      *
      * @return mixed The value of the dynamic parameter
      *
@@ -144,6 +135,8 @@ class ProjectServiceContainer extends Container
                 6 => 'false',
                 7 => 'null',
             ),
+            'binary' => 'ננננ',
+            'binary-control-char' => 'This is a Bell char ',
         );
     }
 }

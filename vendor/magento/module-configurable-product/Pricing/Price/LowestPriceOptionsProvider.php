@@ -10,7 +10,6 @@ use Magento\Catalog\Model\ResourceModel\Product\LinkedProductSelectBuilderInterf
 use Magento\Framework\App\ResourceConnection;
 use Magento\Catalog\Model\ResourceModel\Product\CollectionFactory;
 use Magento\Store\Model\StoreManagerInterface;
-use Magento\Framework\App\ObjectManager;
 
 /**
  * Retrieve list of products where each product contains lower price than others at least for one possible price type
@@ -54,13 +53,12 @@ class LowestPriceOptionsProvider implements LowestPriceOptionsProviderInterface
         ResourceConnection $resourceConnection,
         LinkedProductSelectBuilderInterface $linkedProductSelectBuilder,
         CollectionFactory $collectionFactory,
-        StoreManagerInterface $storeManager = null
+        StoreManagerInterface $storeManager
     ) {
         $this->resource = $resourceConnection;
         $this->linkedProductSelectBuilder = $linkedProductSelectBuilder;
         $this->collectionFactory = $collectionFactory;
-        $this->storeManager = $storeManager
-            ?: ObjectManager::getInstance()->get(StoreManagerInterface::class);
+        $this->storeManager = $storeManager;
     }
 
     /**

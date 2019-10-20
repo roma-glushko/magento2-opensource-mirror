@@ -4,9 +4,9 @@
  */
 namespace Temando\Shipping\Rest\Adapter;
 
-use Temando\Shipping\Rest\Request\AuthRequestInterface;
-use Temando\Shipping\Rest\Response\Type\SessionResponseType;
 use Temando\Shipping\Rest\Exception\AdapterException;
+use Temando\Shipping\Rest\Request\AuthRequestInterface;
+use Temando\Shipping\Rest\Response\DataObject\Session;
 
 /**
  * The Temando Authentication API interface defines the supported subset of
@@ -22,7 +22,7 @@ interface AuthenticationApiInterface
 {
     /**
      * @param AuthRequestInterface $request
-     * @return SessionResponseType
+     * @return Session
      * @throws AdapterException
      */
     public function startSession(AuthRequestInterface $request);

@@ -3,14 +3,15 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
+declare(strict_types=1);
+
 namespace Magento\SalesRule\Model\Quote;
 
-use \Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
+use Magento\Quote\Model\Quote\Item\AbstractItem as QuoteItem;
 
 /**
- * Class ChildrenValidationLocator
- *
- * Used to determine necessity to validate rule on item's children that may depends on product type
+ * Used to determine necessity to validate rule on item's children that may depends on product type.
  */
 class ChildrenValidationLocator
 {
@@ -35,7 +36,7 @@ class ChildrenValidationLocator
     }
 
     /**
-     * Checks necessity to validate rule on item's children
+     * Checks necessity to validate rule on item's children.
      *
      * @param QuoteItem $item
      * @return bool
@@ -46,6 +47,7 @@ class ChildrenValidationLocator
         if (isset($this->productTypeChildrenValidationMap[$type])) {
             return (bool)$this->productTypeChildrenValidationMap[$type];
         }
+
         return true;
     }
 }

@@ -13,6 +13,11 @@ use Zend\Code\Generator\DocBlock\Tag\TagInterface;
 use Zend\Code\Generic\Prototype\PrototypeClassFactory;
 use Zend\Code\Reflection\DocBlock\Tag\TagInterface as ReflectionTagInterface;
 
+use function method_exists;
+use function substr;
+use function strpos;
+use function ucfirst;
+
 /**
  * This class is used in DocBlockGenerator and creates the needed
  * Tag classes depending on the tag. So for example an @author tag
@@ -35,6 +40,7 @@ class TagManager extends PrototypeClassFactory
         $this->addPrototype(new Tag\AuthorTag());
         $this->addPrototype(new Tag\LicenseTag());
         $this->addPrototype(new Tag\ThrowsTag());
+        $this->addPrototype(new Tag\VarTag());
         $this->setGenericPrototype(new Tag\GenericTag());
     }
 
@@ -52,12 +58,12 @@ class TagManager extends PrototypeClassFactory
         // transport any properties via accessors and mutators from reflection to codegen object
         $reflectionClass = new \ReflectionClass($reflectionTag);
         foreach ($reflectionClass->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
-            if (substr($method->getName(), 0, 3) == 'get') {
+            if (0 === strpos($method->getName(), 'get')) {
                 $propertyName = substr($method->getName(), 3);
                 if (method_exists($newTag, 'set' . $propertyName)) {
                     $newTag->{'set' . $propertyName}($reflectionTag->{'get' . $propertyName}());
                 }
-            } elseif (substr($method->getName(), 0, 2) == 'is') {
+            } elseif (0 === strpos($method->getName(), 'is')) {
                 $propertyName = ucfirst($method->getName());
                 if (method_exists($newTag, 'set' . $propertyName)) {
                     $newTag->{'set' . $propertyName}($reflectionTag->{$method->getName()}());

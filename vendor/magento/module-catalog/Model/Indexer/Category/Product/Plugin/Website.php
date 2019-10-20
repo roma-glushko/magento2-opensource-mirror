@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 namespace Magento\Catalog\Model\Indexer\Category\Product\Plugin;
 
 use Magento\Framework\Model\ResourceModel\Db\AbstractDb;
@@ -38,7 +39,7 @@ class Website
     public function afterDelete(AbstractDb $subject, AbstractDb $objectResource, AbstractModel $website)
     {
         foreach ($website->getStoreIds() as $storeId) {
-            $this->tableMaintainer->dropTablesForStore($storeId);
+            $this->tableMaintainer->dropTablesForStore((int)$storeId);
         }
         return $objectResource;
     }

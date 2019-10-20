@@ -3,6 +3,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
+
 namespace Magento\Catalog\Model\Product\Attribute\Backend\TierPrice;
 
 use Magento\Framework\EntityManager\Operation\ExtensionInterface;
@@ -89,7 +91,7 @@ class SaveHandler implements ExtensionInterface
             $isGlobal = $attribute->isScopeGlobal() || $websiteId === 0;
             $identifierField = $this->metadataPoll->getMetadata(ProductInterface::class)->getLinkField();
             $priceRows = array_filter($priceRows);
-            $productId = $entity->getData($identifierField);
+            $productId = (int) $entity->getData($identifierField);
 
             // prepare and save data
             foreach ($priceRows as $data) {
@@ -117,6 +119,7 @@ class SaveHandler implements ExtensionInterface
     /**
      * Get additional tier price fields
      *
+     * @param array $objectArray
      * @return array
      */
     private function getAdditionalFields(array $objectArray): array
@@ -132,9 +135,9 @@ class SaveHandler implements ExtensionInterface
      * Check whether price has percentage value.
      *
      * @param array $priceRow
-     * @return integer|null
+     * @return int|null
      */
-    private function getPercentage(array $priceRow)
+    private function getPercentage(array $priceRow): ?int
     {
         return isset($priceRow['percentage_value']) && is_numeric($priceRow['percentage_value'])
             ? (int)$priceRow['percentage_value']

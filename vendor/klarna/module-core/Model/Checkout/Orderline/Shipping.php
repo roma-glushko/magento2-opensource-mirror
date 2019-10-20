@@ -17,6 +17,7 @@ use Magento\Sales\Model\Order\Invoice;
 use Magento\Store\Api\Data\StoreInterface;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Tax\Model\Config as TaxConfig;
+use Magento\Quote\Api\Data\CartInterface;
 
 /**
  * Generate shipping order line details
@@ -49,10 +50,10 @@ class Shipping extends AbstractLine
         $object = $checkout->getObject();
         $store = null;
 
-        if ($object instanceof Quote) {
+        if ($object instanceof CartInterface) {
             $store = $object->getStore();
             $totals = $object->getTotals();
-            if (isset($totals['shipping']) && !$object->isVirtual()) {
+            if (isset($totals['shipping'])) {
                 /** @var \Magento\Quote\Model\Quote\Address $total */
                 $total = $totals['shipping'];
                 $address = $object->getShippingAddress();
@@ -112,20 +113,18 @@ class Shipping extends AbstractLine
      */
     public function fetch(BuilderInterface $checkout)
     {
-        if ($checkout->getShippingTotalAmount()) {
-            $checkout->addOrderLine(
-                [
-                    'type'             => self::ITEM_TYPE_SHIPPING,
-                    'reference'        => $checkout->getShippingReference(),
-                    'name'             => $checkout->getShippingTitle(),
-                    'quantity'         => 1,
-                    'unit_price'       => $checkout->getShippingUnitPrice(),
-                    'tax_rate'         => $checkout->getShippingTaxRate(),
-                    'total_amount'     => $checkout->getShippingTotalAmount(),
-                    'total_tax_amount' => $checkout->getShippingTaxAmount(),
-                ]
-            );
-        }
+        $checkout->addOrderLine(
+            [
+                'type'             => self::ITEM_TYPE_SHIPPING,
+                'reference'        => $checkout->getShippingReference(),
+                'name'             => $checkout->getShippingTitle(),
+                'quantity'         => 1,
+                'unit_price'       => $checkout->getShippingUnitPrice(),
+                'tax_rate'         => $checkout->getShippingTaxRate(),
+                'total_amount'     => $checkout->getShippingTotalAmount(),
+                'total_tax_amount' => $checkout->getShippingTaxAmount(),
+            ]
+        );
 
         return $this;
     }

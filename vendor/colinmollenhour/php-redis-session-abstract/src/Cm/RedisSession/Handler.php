@@ -73,7 +73,7 @@ class Handler implements \SessionHandlerInterface
     /**
      * Bots get shorter session lifetimes
      */
-    const BOT_REGEX          = '/^alexa|^blitz\.io|bot|^browsermob|crawl|^curl|^facebookexternalhit|feed|google web preview|^ia_archiver|indexer|^java|jakarta|^libwww-perl|^load impact|^magespeedtest|monitor|^Mozilla$|nagios |^\.net|^pinterest|postrank|slurp|spider|uptime|^wget|yandex|^elb-healthchecker/i';
+    const BOT_REGEX          = '/^alexa|^blitz\.io|bot|^browsermob|crawl|^curl|^facebookexternalhit|feed|google web preview|^ia_archiver|indexer|^java|jakarta|^libwww-perl|^load impact|^magespeedtest|monitor|^Mozilla$|nagios |^\.net|^pinterest|postrank|slurp|spider|uptime|^wget|yandex|^elb-healthchecker|binglocalsearch/i';
 
     /**
      * Default connection timeout
@@ -168,90 +168,96 @@ class Handler implements \SessionHandlerInterface
     /**
      * @var string
      */
-    private $_compressionThreshold;
+    protected $_compressionThreshold;
 
     /**
      * @var string
      */
-    private $_compressionLibrary;
+    protected $_compressionLibrary;
 
     /**
      * @var int
      */
-    private $_maxConcurrency;
+    protected $_maxConcurrency;
 
     /**
      * @var int
      */
-    private $_breakAfter;
+    protected $_breakAfter;
 
     /**
      * @var int
      */
-    private $_failAfter;
+    protected $_failAfter;
 
     /**
      * @var boolean
      */
-    private $_useLocking;
+    protected $_useLocking;
 
     /**
      * @var boolean
      */
-    private $_hasLock;
+    protected $_hasLock;
 
     /**
      * Avoid infinite loops
      *
      * @var boolean
      */
-    private $_sessionWritten;
+    protected $_sessionWritten;
 
     /**
      * Set expire time based on activity
      *
      * @var int
      */
-    private $_sessionWrites;
+    protected $_sessionWrites;
 
     /**
      * @var int
      */
-    private $_maxLifetime;
+    protected $_maxLifetime;
 
     /**
      * @var int
      */
-    private $_minLifetime;
+    protected $_minLifetime;
 
     /**
      * For debug or informational purposes
      *
      * @var int
      */
-    private $failedLockAttempts = 0;
+    protected $failedLockAttempts = 0;
 
     /**
      * @var ConfigInterface
      */
-    private $config;
+    protected $config;
 
     /**
      * @var LoggerInterface
      */
-    private $logger;
+    protected $logger;
 
     /**
      * @var int
      */
-    private $_lifeTime;
+    protected $_lifeTime;
+
+    /**
+     * @var boolean
+     */
+    private $_readOnly;
 
     /**
      * @param ConfigInterface $config
      * @param LoggerInterface $logger
+     * @param boolean $readOnly
      * @throws ConnectionFailedException
      */
-    public function __construct(ConfigInterface $config, LoggerInterface $logger)
+    public function __construct(ConfigInterface $config, LoggerInterface $logger, $readOnly = false)
     {
         $this->config = $config;
         $this->logger = $logger;
@@ -268,6 +274,7 @@ class Handler implements \SessionHandlerInterface
         $this->_dbNum =     $this->config->getDatabase() ?: self::DEFAULT_DATABASE;
 
         // General config
+        $this->_readOnly =              $readOnly;
         $this->_compressionThreshold =  $this->config->getCompressionThreshold() ?: self::DEFAULT_COMPRESSION_THRESHOLD;
         $this->_compressionLibrary =    $this->config->getCompressionLibrary() ?: self::DEFAULT_COMPRESSION_LIBRARY;
         $this->_maxConcurrency =        $this->config->getMaxConcurrency() ?: self::DEFAULT_MAX_CONCURRENCY;
@@ -279,19 +286,73 @@ class Handler implements \SessionHandlerInterface
         // Use sleep time multiplier so fail after time is in seconds
         $this->_failAfter = (int) round((1000000 / self::SLEEP_TIME) * $this->_failAfter);
 
+        // Sentinel config
+        $sentinelServers =         $this->config->getSentinelServers();
+        $sentinelMaster =          $this->config->getSentinelMaster();
+        $sentinelVerifyMaster =    $this->config->getSentinelVerifyMaster();
+        $sentinelConnectRetries =  $this->config->getSentinelConnectRetries();
+
         // Connect and authenticate
-        $this->_redis = new \Credis_Client($host, $port, $timeout, $persistent, 0, $pass);
-        if ($this->hasConnection() == false) {
-            throw new ConnectionFailedException('Unable to connect to Redis');
+        if ($sentinelServers && $sentinelMaster) {
+            $servers = preg_split('/\s*,\s*/', trim($sentinelServers), NULL, PREG_SPLIT_NO_EMPTY);
+            $sentinel = NULL;
+            $exception = NULL;
+            for ($i = 0; $i <= $sentinelConnectRetries; $i++) // Try to connect to sentinels in round-robin fashion
+            foreach ($servers as $server) {
+                try {
+                    $sentinelClient = new \Credis_Client($server, NULL, $timeout, $persistent);
+                    $sentinelClient->forceStandalone();
+                    $sentinelClient->setMaxConnectRetries(0);
+                    $sentinel = new \Credis_Sentinel($sentinelClient);
+                    $sentinel
+                        ->setClientTimeout($timeout)
+                        ->setClientPersistent($persistent);
+                    $redisMaster = $sentinel->getMasterClient($sentinelMaster);
+                    if ($pass) $redisMaster->auth($pass);
+
+                    // Verify connected server is actually master as per Sentinel client spec
+                    if ($sentinelVerifyMaster) {
+                        $roleData = $redisMaster->role();
+                        if ( ! $roleData || $roleData[0] != 'master') {
+                            usleep(100000); // Sleep 100ms and try again
+                            $redisMaster = $sentinel->getMasterClient($sentinelMaster);
+                            if ($pass) $redisMaster->auth($pass);
+                            $roleData = $redisMaster->role();
+                            if ( ! $roleData || $roleData[0] != 'master') {
+                                throw new Exception('Unable to determine master redis server.');
+                            }
+                        }
+                    }
+                    if ($this->_dbNum || $persistent) $redisMaster->select(0);
+
+                    $this->_redis = $redisMaster;
+                    break 2;
+                } catch (Exception $e) {
+                    unset($sentinelClient);
+                    $exception = $e;
+                }
+            }
+            unset($sentinel);
+
+            if ( ! $this->_redis) {
+                throw new ConnectionFailedException('Unable to connect to a Redis: '.$exception->getMessage(), $exception);
+            }
         }
+        else {
+            $this->_redis = new \Credis_Client($host, $port, $timeout, $persistent, 0, $pass);
+            if ($this->hasConnection() == false) {
+                throw new ConnectionFailedException('Unable to connect to Redis');
+            }
+        }
+
         // Destructor order cannot be predicted
         $this->_redis->setCloseOnDestruct(false);
         $this->_log(
             sprintf(
                 "%s initialized for connection to %s:%s after %.5f seconds",
                 get_class($this),
-                $host,
-                $port,
+                $this->_redis->getHost(),
+                $this->_redis->getPort(),
                 (microtime(true) - $timeStart)
             )
         );
@@ -314,7 +375,7 @@ class Handler implements \SessionHandlerInterface
      * @param $msg
      * @param $level
      */
-    private function _log($msg, $level = LoggerInterface::DEBUG)
+    protected function _log($msg, $level = LoggerInterface::DEBUG)
     {
         $this->logger->log("{$this->_getPid()}: $msg", $level);
     }
@@ -356,7 +417,7 @@ class Handler implements \SessionHandlerInterface
         $this->_log(sprintf("Attempting to take lock on ID %s", $sessionId));
 
         $this->_redis->select($this->_dbNum);
-        while ($this->_useLocking)
+        while ($this->_useLocking && !$this->_readOnly)
         {
             // Increment lock value for this session and retrieve the new value
             $oldLock = $lock;
@@ -491,7 +552,7 @@ class Handler implements \SessionHandlerInterface
 
         // Session can be read even if it was not locked by this pid!
         $timeStart2 = microtime(true);
-        list($sessionData, $sessionWrites) = $this->_redis->hMGet($sessionId, array('data','writes'));
+        list($sessionData, $sessionWrites) = array_values($this->_redis->hMGet($sessionId, array('data','writes')));
         $this->_log(sprintf("Data read for ID %s in %.5f seconds", $sessionId, (microtime(true) - $timeStart2)));
         $this->_sessionWrites = (int) $sessionWrites;
 
@@ -509,15 +570,15 @@ class Handler implements \SessionHandlerInterface
 
             // Save request data in session so if a lock is broken we can know which page it was for debugging
             if (empty($_SERVER['REQUEST_METHOD'])) {
-                $setData['req'] = $_SERVER['SCRIPT_NAME'];
+                $setData['req'] = @$_SERVER['SCRIPT_NAME'];
             } else {
-                $setData['req'] = "{$_SERVER['REQUEST_METHOD']} {$_SERVER['SERVER_NAME']}{$_SERVER['REQUEST_URI']}";
+                $setData['req'] = $_SERVER['REQUEST_METHOD']." ".@$_SERVER['SERVER_NAME'].@$_SERVER['REQUEST_URI'];
             }
             if ($lock != 1) {
                 $this->_log(
                     sprintf(
-                        "Successfully broke lock for ID %s after %.5f seconds (%d attempts). Lock: %d\nLast request of '
-                            . 'broken lock: %s",
+                        "Successfully broke lock for ID %s after %.5f seconds (%d attempts). Lock: %d\nLast request of "
+                            . "broken lock: %s",
                         $sessionId,
                         (microtime(true) - $timeStart),
                         $tries,
@@ -552,8 +613,8 @@ class Handler implements \SessionHandlerInterface
      */
     public function write($sessionId, $sessionData)
     {
-        if ($this->_sessionWritten) {
-            $this->_log(sprintf("Repeated session write detected; skipping for ID %s", $sessionId));
+        if ($this->_sessionWritten || $this->_readOnly) {
+            $this->_log(sprintf(($this->_sessionWritten ? "Repeated" : "Read-only") . " session write detected; skipping for ID %s", $sessionId));
             return true;
         }
         $this->_sessionWritten = true;
@@ -643,21 +704,20 @@ class Handler implements \SessionHandlerInterface
      *
      * @return int|mixed
      */
-    private function getLifeTime()
+    protected function getLifeTime()
     {
         if (is_null($this->_lifeTime)) {
             $lifeTime = null;
 
             // Detect bots by user agent
-            $botLifetime = $this->config->getBotLifetime() ?: self::DEFAULT_BOT_LIFETIME;
+            $botLifetime = is_null($this->config->getBotLifetime()) ? self::DEFAULT_BOT_LIFETIME : $this->config->getBotLifetime();
             if ($botLifetime) {
                 $userAgent = empty($_SERVER['HTTP_USER_AGENT']) ? false : $_SERVER['HTTP_USER_AGENT'];
                 $isBot = ! $userAgent || preg_match(self::BOT_REGEX, $userAgent);
                 if ($isBot) {
                     $this->_log(sprintf("Bot detected for user agent: %s", $userAgent));
-                    if ( $this->_sessionWrites <= 1
-                        && ($botFirstLifetime = $this->config->getBotFirstLifetime() ?: self::DEFAULT_BOT_FIRST_LIFETIME)
-                    ) {
+                    $botFirstLifetime = is_null($this->config->getBotFirstLifetime()) ? self::DEFAULT_BOT_FIRST_LIFETIME : $this->config->getBotFirstLifetime();
+                    if ($this->_sessionWrites <= 1 && $botFirstLifetime) {
                         $lifeTime = $botFirstLifetime * (1+$this->_sessionWrites);
                     } else {
                         $lifeTime = $botLifetime;
@@ -667,7 +727,7 @@ class Handler implements \SessionHandlerInterface
 
             // Use different lifetime for first write
             if ($lifeTime === null && $this->_sessionWrites <= 1) {
-                $firstLifetime = $this->config->getFirstLifetime() ?: self::DEFAULT_FIRST_LIFETIME;
+                $firstLifetime = is_null($this->config->getFirstLifetime()) ? self::DEFAULT_FIRST_LIFETIME : $this->config->getFirstLifetime();
                 if ($firstLifetime) {
                     $lifeTime = $firstLifetime * (1+$this->_sessionWrites);
                 }
@@ -763,7 +823,7 @@ class Handler implements \SessionHandlerInterface
                 'lock' => 0, // 0 so that next lock attempt will get 1
             ))
             ->hIncrBy($sessionId, 'writes', 1)
-            ->expire($sessionId, min($lifetime, $this->_maxLifetime))
+            ->expire($sessionId, min((int)$lifetime, (int)$this->_maxLifetime))
             ->exec();
     }
 
@@ -772,7 +832,7 @@ class Handler implements \SessionHandlerInterface
      *
      * @return string
      */
-    private function _getPid()
+    protected function _getPid()
     {
         return gethostname().'|'.getmypid();
     }
@@ -783,7 +843,7 @@ class Handler implements \SessionHandlerInterface
      * @param $pid
      * @return bool
      */
-    private function _pidExists($pid)
+    protected function _pidExists($pid)
     {
         list($host,$pid) = explode('|', $pid);
         if (PHP_OS != 'Linux' || $host != gethostname()) {
@@ -797,7 +857,7 @@ class Handler implements \SessionHandlerInterface
      *
      * @return int
      */
-    private function _getBreakAfter()
+    protected function _getBreakAfter()
     {
         // Has break after already been calculated? Only fetch from config once, then reuse variable.
         if (!$this->_breakAfter) {

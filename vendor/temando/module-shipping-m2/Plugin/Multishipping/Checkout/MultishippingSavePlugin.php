@@ -9,7 +9,6 @@ use Magento\Framework\Api\AttributeInterfaceFactory;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Multishipping\Model\Checkout\Type\Multishipping;
-use Magento\Store\Model\StoreManagerInterface;
 use Temando\Shipping\Api\Data\Checkout\AddressInterface;
 use Temando\Shipping\Api\Data\Checkout\AddressInterfaceFactory;
 use Temando\Shipping\Model\Checkout\Schema\CheckoutFieldsSchema;
@@ -17,10 +16,10 @@ use Temando\Shipping\Model\Config\ModuleConfigInterface;
 use Temando\Shipping\Model\ResourceModel\Repository\AddressRepositoryInterface;
 
 /**
- * @package  Temando\Shipping\Plugin
- * @author   Sebastian Ertner <sebastian.ertner@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\Plugin
+ * @author  Sebastian Ertner <sebastian.ertner@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class MultishippingSavePlugin
 {
@@ -55,11 +54,6 @@ class MultishippingSavePlugin
     private $moduleConfig;
 
     /**
-     * @var StoreManagerInterface
-     */
-    private $storeManager;
-
-    /**
      * MultishippingSavePlugin constructor.
      *
      * @param RequestInterface           $request
@@ -68,7 +62,6 @@ class MultishippingSavePlugin
      * @param CheckoutFieldsSchema       $schema
      * @param AttributeInterfaceFactory  $attributeFactory
      * @param ModuleConfigInterface      $moduleConfig
-     * @param StoreManagerInterface      $storeManager
      */
     public function __construct(
         RequestInterface $request,
@@ -76,8 +69,7 @@ class MultishippingSavePlugin
         AddressInterfaceFactory $addressFactory,
         CheckoutFieldsSchema $schema,
         AttributeInterfaceFactory $attributeFactory,
-        ModuleConfigInterface $moduleConfig,
-        StoreManagerInterface $storeManager
+        ModuleConfigInterface $moduleConfig
     ) {
         $this->request           = $request;
         $this->addressRepository = $addressRepository;
@@ -85,7 +77,6 @@ class MultishippingSavePlugin
         $this->schema            = $schema;
         $this->attributeFactory  = $attributeFactory;
         $this->moduleConfig      = $moduleConfig;
-        $this->storeManager      = $storeManager;
     }
 
     /**
@@ -161,18 +152,19 @@ class MultishippingSavePlugin
      *
      * @param Multishipping $subject
      *
-     * @return null Argument of original method remains unaltered.
+     * @return Multishipping
      */
-    public function afterSave(Multishipping $subject, $result)
+    public function afterSave(Multishipping $subject)
     {
-        if (!$this->moduleConfig->isEnabled($this->storeManager->getStore()->getId())) {
-            return $result;
+        $storeId = $subject->getQuote()->getStoreId();
+        if (!$this->moduleConfig->isEnabled($storeId)) {
+            return $subject;
         }
 
         $ship = $this->request->getParam('ship');
 
         if (empty($ship)) {
-            return null;
+            return $subject;
         }
 
         // keep user input in session, prefill fields in case of error or when going back.
@@ -187,6 +179,9 @@ class MultishippingSavePlugin
                 // obtain shipping address for current quote item
                 $addressId = $quoteItem['address'];
                 $shippingAddress = $subject->getQuote()->getShippingAddressByCustomerAddressId($addressId);
+                if (!$shippingAddress) {
+                    continue;
+                }
 
                 try {
                     $address = $this->addressRepository->getByQuoteAddressId($shippingAddress->getId());
@@ -209,6 +204,6 @@ class MultishippingSavePlugin
             }
         }
 
-        return $result;
+        return $subject;
     }
 }

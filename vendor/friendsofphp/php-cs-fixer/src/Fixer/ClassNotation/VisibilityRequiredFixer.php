@@ -42,7 +42,7 @@ final class VisibilityRequiredFixer extends AbstractFixer implements Configurati
     {
         return new FixerDefinition(
             'Visibility MUST be declared on all properties and methods; `abstract` and `final` MUST be declared before the visibility; `static` MUST be declared after the visibility.',
-            array(
+            [
                 new CodeSample(
 '<?php
 class Sample
@@ -64,9 +64,9 @@ class Sample
 }
 ',
                     new VersionSpecification(70100),
-                    array('elements' => array('const'))
+                    ['elements' => ['const']]
                 ),
-            )
+            ]
         );
     }
 
@@ -87,7 +87,7 @@ class Sample
         $elements = $tokensAnalyzer->getClassyElements();
 
         foreach (array_reverse($elements, true) as $index => $element) {
-            if (!in_array($element['type'], $this->configuration['elements'], true)) {
+            if (!\in_array($element['type'], $this->configuration['elements'], true)) {
                 continue;
             }
 
@@ -106,22 +106,20 @@ class Sample
      */
     protected function createConfigurationDefinition()
     {
-        $elements = new FixerOptionBuilder('elements', 'The structural elements to fix (PHP >= 7.1 required for `const`).');
-        $elements = $elements
-            ->setAllowedTypes(array('array'))
-            ->setAllowedValues(array(new AllowedValueSubset(array('property', 'method', 'const'))))
-            ->setNormalizer(function (Options $options, $value) {
-                if (PHP_VERSION_ID < 70100 && in_array('const', $value, true)) {
-                    throw new InvalidOptionsForEnvException('"const" option can only be enabled with PHP 7.1+.');
-                }
+        return new FixerConfigurationResolverRootless('elements', [
+            (new FixerOptionBuilder('elements', 'The structural elements to fix (PHP >= 7.1 required for `const`).'))
+                ->setAllowedTypes(['array'])
+                ->setAllowedValues([new AllowedValueSubset(['property', 'method', 'const'])])
+                ->setNormalizer(static function (Options $options, $value) {
+                    if (\PHP_VERSION_ID < 70100 && \in_array('const', $value, true)) {
+                        throw new InvalidOptionsForEnvException('"const" option can only be enabled with PHP 7.1+.');
+                    }
 
-                return $value;
-            })
-            ->setDefault(array('property', 'method'))
-            ->getOption()
-        ;
-
-        return new FixerConfigurationResolverRootless('elements', array($elements));
+                    return $value;
+                })
+                ->setDefault(['property', 'method'])
+                ->getOption(),
+        ], $this->getName());
     }
 
     /**
@@ -134,7 +132,7 @@ class Sample
 
         // force whitespace between function keyword and function name to be single space char
         if ($tokens[$index + 1]->isWhitespace()) {
-            $tokens[$index + 1] = new Token(array(T_WHITESPACE, ' '));
+            $tokens[$index + 1] = new Token([T_WHITESPACE, ' ']);
         }
     }
 
@@ -144,7 +142,7 @@ class Sample
      */
     private function fixPropertyVisibility(Tokens $tokens, $index)
     {
-        $prevIndex = $tokens->getPrevTokenOfKind($index, array(';', ',', '{'));
+        $prevIndex = $tokens->getPrevTokenOfKind($index, [';', ',', '{']);
 
         if (null === $prevIndex || !$tokens[$prevIndex]->equals(',')) {
             $this->overrideAttribs($tokens, $index, $this->grabAttribsBeforePropertyToken($tokens, $index));
@@ -158,12 +156,12 @@ class Sample
     private function fixConstVisibility(Tokens $tokens, $index)
     {
         $prev = $tokens->getPrevMeaningfulToken($index);
-        if ($tokens[$prev]->isGivenKind(array(T_PRIVATE, T_PROTECTED, T_PUBLIC))) {
+        if ($tokens[$prev]->isGivenKind([T_PRIVATE, T_PROTECTED, T_PUBLIC])) {
             return;
         }
 
-        $tokens->insertAt($index, new Token(array(T_WHITESPACE, ' ')));
-        $tokens->insertAt($index, new Token(array(T_PUBLIC, 'public')));
+        $tokens->insertAt($index, new Token([T_WHITESPACE, ' ']));
+        $tokens->insertAt($index, new Token([T_PUBLIC, 'public']));
     }
 
     /**
@@ -178,25 +176,25 @@ class Sample
      */
     private function grabAttribsBeforeMethodToken(Tokens $tokens, $index)
     {
-        static $tokenAttribsMap = array(
+        static $tokenAttribsMap = [
             T_PRIVATE => 'visibility',
             T_PROTECTED => 'visibility',
             T_PUBLIC => 'visibility',
             T_ABSTRACT => 'abstract',
             T_FINAL => 'final',
             T_STATIC => 'static',
-        );
+        ];
 
         return $this->grabAttribsBeforeToken(
             $tokens,
             $index,
             $tokenAttribsMap,
-            array(
+            [
                 'abstract' => null,
                 'final' => null,
-                'visibility' => array('index' => null, 'token' => new Token(array(T_PUBLIC, 'public'))),
+                'visibility' => ['index' => null, 'token' => new Token([T_PUBLIC, 'public'])],
                 'static' => null,
-            )
+            ]
         );
     }
 
@@ -211,7 +209,7 @@ class Sample
      */
     private function overrideAttribs(Tokens $tokens, $memberIndex, array $attribs)
     {
-        $toOverride = array();
+        $toOverride = [];
         $firstAttribIndex = $memberIndex;
 
         foreach ($attribs as $attrib) {
@@ -225,7 +223,7 @@ class Sample
 
             if (!$attrib['token']->isGivenKind(T_VAR) && '' !== $attrib['token']->getContent()) {
                 $toOverride[] = $attrib['token'];
-                $toOverride[] = new Token(array(T_WHITESPACE, ' '));
+                $toOverride[] = new Token([T_WHITESPACE, ' ']);
             }
         }
 
@@ -246,22 +244,22 @@ class Sample
      */
     private function grabAttribsBeforePropertyToken(Tokens $tokens, $index)
     {
-        static $tokenAttribsMap = array(
+        static $tokenAttribsMap = [
             T_VAR => 'var',
             T_PRIVATE => 'visibility',
             T_PROTECTED => 'visibility',
             T_PUBLIC => 'visibility',
             T_STATIC => 'static',
-        );
+        ];
 
         return $this->grabAttribsBeforeToken(
             $tokens,
             $index,
             $tokenAttribsMap,
-            array(
-                'visibility' => array('index' => null, 'token' => new Token(array(T_PUBLIC, 'public'))),
+            [
+                'visibility' => ['index' => null, 'token' => new Token([T_PUBLIC, 'public'])],
                 'static' => null,
-            )
+            ]
         );
     }
 
@@ -281,7 +279,7 @@ class Sample
             $token = $tokens[--$index];
 
             if (!$token->isArray()) {
-                if ($token->equalsAny(array('{', '}', '(', ')'))) {
+                if ($token->equalsAny(['{', '}', '(', ')'])) {
                     break;
                 }
 
@@ -290,15 +288,15 @@ class Sample
 
             // if token is attribute, set token attribute name
             if (isset($tokenAttribsMap[$token->getId()])) {
-                $attribs[$tokenAttribsMap[$token->getId()]] = array(
+                $attribs[$tokenAttribsMap[$token->getId()]] = [
                     'token' => clone $token,
                     'index' => $index,
-                );
+                ];
 
                 continue;
             }
 
-            if ($token->isGivenKind(array(T_WHITESPACE, T_COMMENT, T_DOC_COMMENT))) {
+            if ($token->isGivenKind([T_WHITESPACE, T_COMMENT, T_DOC_COMMENT])) {
                 continue;
             }
 

@@ -10,20 +10,21 @@ use Psr\Log\LoggerInterface;
 use Temando\Shipping\Model\LocationInterface;
 use Temando\Shipping\Model\ResourceModel\Repository\LocationRepositoryInterface;
 use Temando\Shipping\Rest\Adapter\LocationApiInterface;
-use Temando\Shipping\Rest\Exception\AdapterException;
 use Temando\Shipping\Rest\EntityMapper\LocationResponseMapper;
+use Temando\Shipping\Rest\Exception\AdapterException;
 use Temando\Shipping\Rest\Request\ItemRequestInterfaceFactory;
 use Temando\Shipping\Rest\Request\ListRequestInterfaceFactory;
-use Temando\Shipping\Rest\Response\Type\LocationResponseType;
+use Temando\Shipping\Rest\Response\DataObject\Location;
+use Temando\Shipping\Webservice\Pagination\PaginationFactory;
 
 /**
  * Temando Location Repository
  *
- * @package  Temando\Shipping\Model
- * @author   Sebastian Ertner <sebastian.ertner@netresearch.de>
- * @author   Christoph Aßmann <christoph.assmann@netresearch.de>
- * @license  http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
- * @link     http://www.temando.com/
+ * @package Temando\Shipping\Model
+ * @author  Sebastian Ertner <sebastian.ertner@netresearch.de>
+ * @author  Christoph Aßmann <christoph.assmann@netresearch.de>
+ * @license https://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @link    https://www.temando.com/
  */
 class LocationRepository implements LocationRepositoryInterface
 {
@@ -31,6 +32,11 @@ class LocationRepository implements LocationRepositoryInterface
      * @var LocationApiInterface
      */
     private $apiAdapter;
+
+    /**
+     * @var PaginationFactory
+     */
+    private $paginationFactory;
 
     /**
      * @var ListRequestInterfaceFactory
@@ -53,26 +59,28 @@ class LocationRepository implements LocationRepositoryInterface
     private $logger;
 
     /**
-     * CarrierRepository constructor.
-     *
-     * @param LocationApiInterface        $apiAdapter
+     * LocationRepository constructor.
+     * @param LocationApiInterface $apiAdapter
+     * @param PaginationFactory $paginationFactory
      * @param ListRequestInterfaceFactory $listRequestFactory
      * @param ItemRequestInterfaceFactory $itemRequestFactory
-     * @param LocationResponseMapper      $locationMapper
-     * @param LoggerInterface             $logger
+     * @param LocationResponseMapper $locationMapper
+     * @param LoggerInterface $logger
      */
     public function __construct(
         LocationApiInterface $apiAdapter,
+        PaginationFactory $paginationFactory,
         ListRequestInterfaceFactory $listRequestFactory,
         ItemRequestInterfaceFactory $itemRequestFactory,
         LocationResponseMapper $locationMapper,
         LoggerInterface $logger
     ) {
-        $this->apiAdapter         = $apiAdapter;
+        $this->apiAdapter = $apiAdapter;
+        $this->paginationFactory = $paginationFactory;
         $this->listRequestFactory = $listRequestFactory;
         $this->itemRequestFactory = $itemRequestFactory;
-        $this->locationMapper     = $locationMapper;
-        $this->logger             = $logger;
+        $this->locationMapper = $locationMapper;
+        $this->logger = $logger;
     }
 
     /**
@@ -84,13 +92,17 @@ class LocationRepository implements LocationRepositoryInterface
     public function getList($offset = null, $limit = null)
     {
         try {
-            $request = $this->listRequestFactory->create([
+            $pagination = $this->paginationFactory->create([
                 'offset' => $offset,
-                'limit'  => $limit,
+                'limit' => $limit,
+            ]);
+
+            $request = $this->listRequestFactory->create([
+                'pagination' => $pagination,
             ]);
 
             $apiLocations = $this->apiAdapter->getLocations($request);
-            $locations = array_map(function (LocationResponseType $apiLocation) {
+            $locations = array_map(function (Location $apiLocation) {
                 return $this->locationMapper->map($apiLocation);
             }, $apiLocations);
         } catch (AdapterException $e) {

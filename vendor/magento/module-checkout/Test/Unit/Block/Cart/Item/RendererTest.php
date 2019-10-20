@@ -53,7 +53,9 @@ class RendererTest extends \PHPUnit\Framework\TestCase
             ->disableOriginalConstructor()
             ->getMock();
 
-        $this->itemResolver = $this->createMock(ItemResolverInterface::class);
+        $this->itemResolver = $this->createMock(
+            ItemResolverInterface::class
+        );
 
         $this->renderer = $objectManagerHelper->getObject(
             \Magento\Checkout\Block\Cart\Item\Renderer::class,
@@ -213,19 +215,8 @@ class RendererTest extends \PHPUnit\Framework\TestCase
         $imageMock = $this->createMock(Image::class);
 
         $this->imageBuilder->expects($this->once())
-            ->method('setProduct')
-            ->with($product)
-            ->willReturnSelf();
-        $this->imageBuilder->expects($this->once())
-            ->method('setImageId')
-            ->with($imageId)
-            ->willReturnSelf();
-        $this->imageBuilder->expects($this->once())
-            ->method('setAttributes')
-            ->with($attributes)
-            ->willReturnSelf();
-        $this->imageBuilder->expects($this->once())
             ->method('create')
+            ->with($product, $imageId, $attributes)
             ->willReturn($imageMock);
 
         $this->assertInstanceOf(

@@ -98,7 +98,7 @@ class RulesApplierTest extends \PHPUnit\Framework\TestCase
 
         $this->childrenValidationLocator->expects($this->any())
             ->method('isChildrenValidationRequired')
-            ->will($this->returnValue(true));
+            ->willReturn(true);
 
         $this->validatorUtility->expects($this->atLeastOnce())
             ->method('canProcessRule')

@@ -1000,22 +1000,8 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
     public function getOrderTableDescription()
     {
         $salesTable = $this->adapter->getTableName('sales_order');
-        $adapter = $this->adapter->getConnection('read');
+        $adapter = $this->adapter->getConnection('sales');
         $columns = $adapter->describeTable($salesTable);
-
-        return $columns;
-    }
-
-    /**
-     * Get quote table description.
-     *
-     * @return array
-     */
-    public function getQuoteTableDescription()
-    {
-        $quoteTable = $this->adapter->getTableName('quote');
-        $adapter = $this->adapter->getConnection('read');
-        $columns = $adapter->describeTable($quoteTable);
 
         return $columns;
     }
@@ -1262,7 +1248,7 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
      *
      * @param \Magento\Store\Api\Data\WebsiteInterface $website
      *
-     * @return string|boolean
+     * @return array|boolean
      */
     public function getWebsiteCustomerMappingDatafields($website)
     {

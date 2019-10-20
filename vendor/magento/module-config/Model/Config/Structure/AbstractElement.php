@@ -5,6 +5,7 @@
  */
 namespace Magento\Config\Model\Config\Structure;
 
+use Magento\Config\Model\Config\StructureElementInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Framework\App\ObjectManager;
@@ -13,7 +14,7 @@ use Magento\Framework\App\ObjectManager;
  * @api
  * @since 100.0.2
  */
-abstract class AbstractElement implements ElementInterface
+abstract class AbstractElement implements StructureElementInterface
 {
     /**
      * Element data
@@ -222,10 +223,10 @@ abstract class AbstractElement implements ElementInterface
      * Get instance of ElementVisibilityInterface.
      *
      * @return ElementVisibilityInterface
-     * @deprecated 100.2.0 Added to not break backward compatibility of the constructor signature
+     * @deprecated 101.0.0 Added to not break backward compatibility of the constructor signature
      *             by injecting the new dependency directly.
      *             The method can be removed in a future major release, when constructor signature can be changed.
-     * @since 100.2.0
+     * @since 101.0.0
      */
     public function getElementVisibility()
     {

@@ -5,36 +5,47 @@
  */
 namespace Magento\Braintree\Test\Unit\Gateway\Request;
 
-use Magento\Braintree\Gateway\SubjectReader;
 use Magento\Braintree\Gateway\Request\CustomerDataBuilder;
-use Magento\Payment\Gateway\Data\AddressAdapterInterface;
-use Magento\Payment\Gateway\Data\OrderAdapterInterface;
 use Magento\Payment\Gateway\Data\PaymentDataObjectInterface;
+use Magento\Payment\Gateway\Data\OrderAdapterInterface;
+use Magento\Payment\Gateway\Data\AddressAdapterInterface;
+use Magento\Braintree\Gateway\SubjectReader;
 use PHPUnit_Framework_MockObject_MockObject as MockObject;
 
+/**
+ * Tests \Magento\Braintree\Gateway\Request\CustomerDataBuilder.
+ */
 class CustomerDataBuilderTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var PaymentDataObjectInterface|MockObject
      */
-    private $paymentDO;
+    private $paymentDOMock;
 
     /**
      * @var OrderAdapterInterface|MockObject
      */
-    private $order;
+    private $orderMock;
 
     /**
      * @var CustomerDataBuilder
      */
     private $builder;
 
+    /**
+     * @var SubjectReader|MockObject
+     */
+    private $subjectReaderMock;
+
     protected function setUp()
     {
-        $this->paymentDO = $this->createMock(PaymentDataObjectInterface::class);
-        $this->order = $this->createMock(OrderAdapterInterface::class);
+        $this->paymentDOMock = $this->createMock(PaymentDataObjectInterface::class);
+        $this->orderMock = $this->createMock(OrderAdapterInterface::class);
+        $this->subjectReaderMock = $this->getMockBuilder(SubjectReader::class)
+            ->disableOriginalConstructor()
+            ->getMock();
 
-        $this->builder = new CustomerDataBuilder(new SubjectReader());
+        $this->builder = new CustomerDataBuilder($this->subjectReaderMock);
     }
 
     /**
@@ -45,6 +56,11 @@ class CustomerDataBuilderTest extends \PHPUnit\Framework\TestCase
         $buildSubject = [
             'payment' => null,
         ];
+
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
+            ->with($buildSubject)
+            ->willThrowException(new \InvalidArgumentException());
 
         $this->builder->build($buildSubject);
     }
@@ -59,14 +75,21 @@ class CustomerDataBuilderTest extends \PHPUnit\Framework\TestCase
     {
         $billingMock = $this->getBillingMock($billingData);
 
-        $this->paymentDO->method('getOrder')
-            ->willReturn($this->order);
-        $this->order->method('getBillingAddress')
+        $this->paymentDOMock->expects(static::once())
+            ->method('getOrder')
+            ->willReturn($this->orderMock);
+        $this->orderMock->expects(static::once())
+            ->method('getBillingAddress')
             ->willReturn($billingMock);
 
         $buildSubject = [
-            'payment' => $this->paymentDO,
+            'payment' => $this->paymentDOMock,
         ];
+
+        $this->subjectReaderMock->expects(self::once())
+            ->method('readPayment')
+            ->with($buildSubject)
+            ->willReturn($this->paymentDOMock);
 
         self::assertEquals($expectedResult, $this->builder->build($buildSubject));
     }
@@ -83,7 +106,7 @@ class CustomerDataBuilderTest extends \PHPUnit\Framework\TestCase
                     'last_name' => 'Smith',
                     'company' => 'Magento',
                     'phone' => '555-555-555',
-                    'email' => 'john@magento.com'
+                    'email' => 'john@magento.com',
                 ],
                 [
                     CustomerDataBuilder::CUSTOMER => [
@@ -92,9 +115,9 @@ class CustomerDataBuilderTest extends \PHPUnit\Framework\TestCase
                         CustomerDataBuilder::COMPANY => 'Magento',
                         CustomerDataBuilder::PHONE => '555-555-555',
                         CustomerDataBuilder::EMAIL => 'john@magento.com',
-                    ]
-                ]
-            ]
+                    ],
+                ],
+            ],
         ];
     }
 
@@ -104,19 +127,24 @@ class CustomerDataBuilderTest extends \PHPUnit\Framework\TestCase
      */
     private function getBillingMock($billingData)
     {
-        $address = $this->createMock(AddressAdapterInterface::class);
+        $addressMock = $this->createMock(AddressAdapterInterface::class);
 
-        $address->method('getFirstname')
+        $addressMock->expects(static::once())
+            ->method('getFirstname')
             ->willReturn($billingData['first_name']);
-        $address->method('getLastname')
+        $addressMock->expects(static::once())
+            ->method('getLastname')
             ->willReturn($billingData['last_name']);
-        $address->method('getCompany')
+        $addressMock->expects(static::once())
+            ->method('getCompany')
             ->willReturn($billingData['company']);
-        $address->method('getTelephone')
+        $addressMock->expects(static::once())
+            ->method('getTelephone')
             ->willReturn($billingData['phone']);
-        $address->method('getEmail')
+        $addressMock->expects(static::once())
+            ->method('getEmail')
             ->willReturn($billingData['email']);
 
-        return $address;
+        return $addressMock;
     }
 }

@@ -12,7 +12,6 @@ namespace PHP_CodeSniffer\Util;
 use PHP_CodeSniffer\Autoload;
 use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Ruleset;
-use PHP_CodeSniffer\Util\Common;
 
 class Cache
 {
@@ -124,8 +123,8 @@ class Cache
             }
         );
 
-        $iterator  = new \RecursiveIteratorIterator($filter);
-        $coreFiles = [];
+        $iterator      = new \RecursiveIteratorIterator($filter);
+        $codeHashFiles = [];
         foreach ($iterator as $file) {
             if (PHP_CODESNIFFER_VERBOSITY > 1) {
                 echo "\t\t=> core file: $file".PHP_EOL;
@@ -147,27 +146,40 @@ class Cache
         // in the cache file name.
         $rulesetHash = md5(var_export($ruleset->ignorePatterns, true).var_export($ruleset->includePatterns, true));
         $configData  = [
+            'phpVersion'   => PHP_VERSION_ID,
             'tabWidth'     => $config->tabWidth,
             'encoding'     => $config->encoding,
             'recordErrors' => $config->recordErrors,
             'annotations'  => $config->annotations,
+            'configData'   => Config::getAllConfigData(),
             'codeHash'     => $codeHash,
             'rulesetHash'  => $rulesetHash,
         ];
 
-        $configString = implode(',', $configData);
+        $configString = var_export($configData, true);
         $cacheHash    = substr(sha1($configString), 0, 12);
 
         if (PHP_CODESNIFFER_VERBOSITY > 1) {
             echo "\tGenerating cache key data".PHP_EOL;
-            echo "\t\t=> tabWidth: ".$configData['tabWidth'].PHP_EOL;
-            echo "\t\t=> encoding: ".$configData['encoding'].PHP_EOL;
-            echo "\t\t=> recordErrors: ".(int) $configData['recordErrors'].PHP_EOL;
-            echo "\t\t=> annotations: ".(int) $configData['annotations'].PHP_EOL;
-            echo "\t\t=> codeHash: ".$configData['codeHash'].PHP_EOL;
-            echo "\t\t=> rulesetHash: ".$configData['rulesetHash'].PHP_EOL;
+            foreach ($configData as $key => $value) {
+                if (is_array($value) === true) {
+                    echo "\t\t=> $key:".PHP_EOL;
+                    foreach ($value as $subKey => $subValue) {
+                        echo "\t\t\t=> $subKey: $subValue".PHP_EOL;
+                    }
+
+                    continue;
+                }
+
+                if ($value === true || $value === false) {
+                    $value = (int) $value;
+                }
+
+                echo "\t\t=> $key: $value".PHP_EOL;
+            }
+
             echo "\t\t=> cacheHash: $cacheHash".PHP_EOL;
-        }
+        }//end if
 
         if ($config->cacheFile !== null) {
             $cacheFile = $config->cacheFile;

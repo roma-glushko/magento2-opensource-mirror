@@ -27,7 +27,12 @@ class GridTest extends \PHPUnit\Framework\TestCase
      */
     private $resourceFactoryMock;
 
-    protected function setUp()
+    /**
+     * Set up mock objects for tested class
+     *
+     * @return void
+     */
+    protected function setUp(): void
     {
         $this->storeManagerMock = $this->getMockBuilder(\Magento\Store\Model\StoreManagerInterface::class)
             ->getMock();
@@ -55,13 +60,14 @@ class GridTest extends \PHPUnit\Framework\TestCase
      * @param int $priceRuleType
      * @param int $collectionSize
      * @param bool $expectedCountTotals
+     * @return void
      */
     public function testGetCountTotals(
         string $reportType,
         int $priceRuleType,
         int $collectionSize,
         bool $expectedCountTotals
-    ) {
+    ): void {
         $filterData = new \Magento\Framework\DataObject();
         $filterData->setData('report_type', $reportType);
         $filterData->setData('period_type', 'day');

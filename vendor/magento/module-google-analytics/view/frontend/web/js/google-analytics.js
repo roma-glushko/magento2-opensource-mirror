@@ -56,7 +56,6 @@ define([
             if (config.ordersTrackingData.hasOwnProperty('currency')) {
                 ga('require', 'ec', 'ec.js');
 
-                //Set currency code
                 ga('set', 'currencyCode', config.ordersTrackingData.currency);
 
                 // Collect product data for GA
@@ -74,7 +73,7 @@ define([
                 }
 
                 ga('send', 'pageview');
-            }else{
+            } else {
                 // Process Data if not orders
                 ga('send', 'pageview' + config.pageTrackingData.optPageUrl);
             }

@@ -36,6 +36,11 @@ class RuleProductsSelectBuilder
     private $metadataPool;
 
     /**
+     * @var ActiveTableSwitcher
+     */
+    private $activeTableSwitcher;
+
+    /**
      * @var TableSwapper
      */
     private $tableSwapper;
@@ -47,8 +52,6 @@ class RuleProductsSelectBuilder
      * @param \Magento\Framework\EntityManager\MetadataPool $metadataPool
      * @param ActiveTableSwitcher $activeTableSwitcher
      * @param TableSwapper|null $tableSwapper
-     *
-     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
      */
     public function __construct(
         \Magento\Framework\App\ResourceConnection $resource,
@@ -62,6 +65,7 @@ class RuleProductsSelectBuilder
         $this->storeManager = $storeManager;
         $this->metadataPool = $metadataPool;
         $this->resource = $resource;
+        $this->activeTableSwitcher = $activeTableSwitcher;
         $this->tableSwapper = $tableSwapper ??
             ObjectManager::getInstance()->get(TableSwapper::class);
     }

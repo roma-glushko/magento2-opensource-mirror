@@ -18,6 +18,8 @@ use PhpCsFixer\Tokenizer\Tokens;
  * @author Carlos Cirello <carlos.cirello.nl@gmail.com>
  *
  * @internal
+ *
+ * @deprecated
  */
 abstract class AbstractAlignFixerHelper
 {
@@ -45,7 +47,7 @@ abstract class AbstractAlignFixerHelper
         // To handle that unwanted behavior we work on clone of Tokens collection and then override original collection with fixed collection.
         $tokensClone = clone $tokens;
 
-        $this->injectAlignmentPlaceholders($tokensClone, 0, count($tokens));
+        $this->injectAlignmentPlaceholders($tokensClone, 0, \count($tokens));
         $content = $this->replacePlaceholder($tokensClone);
 
         $tokens->setCode($content);
@@ -79,22 +81,22 @@ abstract class AbstractAlignFixerHelper
             }
 
             $lines = explode("\n", $tmpCode);
-            $linesWithPlaceholder = array();
+            $linesWithPlaceholder = [];
             $blockSize = 0;
 
-            $linesWithPlaceholder[$blockSize] = array();
+            $linesWithPlaceholder[$blockSize] = [];
 
             foreach ($lines as $index => $line) {
                 if (substr_count($line, $placeholder) > 0) {
                     $linesWithPlaceholder[$blockSize][] = $index;
                 } else {
                     ++$blockSize;
-                    $linesWithPlaceholder[$blockSize] = array();
+                    $linesWithPlaceholder[$blockSize] = [];
                 }
             }
 
             foreach ($linesWithPlaceholder as $group) {
-                if (count($group) < 1) {
+                if (\count($group) < 1) {
                     continue;
                 }
 

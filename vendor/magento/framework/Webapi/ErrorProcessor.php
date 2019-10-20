@@ -8,7 +8,7 @@ namespace Magento\Framework\Webapi;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\State;
-use Magento\Framework\Exception\AbstractAggregateException;
+use Magento\Framework\Exception\AggregateExceptionInterface;
 use Magento\Framework\Exception\AuthenticationException;
 use Magento\Framework\Exception\AuthorizationException;
 use Magento\Framework\Exception\LocalizedException;
@@ -22,6 +22,7 @@ use Magento\Framework\Webapi\Exception as WebapiException;
  *
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  * @api
+ * @since 100.0.2
  */
 class ErrorProcessor
 {
@@ -126,7 +127,7 @@ class ErrorProcessor
                 $httpCode = WebapiException::HTTP_BAD_REQUEST;
             }
 
-            if ($exception instanceof AbstractAggregateException) {
+            if ($exception instanceof AggregateExceptionInterface) {
                 $errors = $exception->getErrors();
             } else {
                 $errors = null;

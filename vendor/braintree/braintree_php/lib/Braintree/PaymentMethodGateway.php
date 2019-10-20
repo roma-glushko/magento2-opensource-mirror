@@ -75,6 +75,8 @@ class PaymentMethodGateway
                 return VisaCheckoutCard::factory($response['visaCheckoutCard']);
             } else if (isset($response['masterpassCard'])) {
                 return MasterpassCard::factory($response['masterpassCard']);
+            } else if (isset($response['samsungPayCard'])) {
+                return SamsungPayCard::factory($response['samsungPayCard']);
             } else if (is_array($response)) {
                 return UnknownPaymentMethod::factory($response);
             }
@@ -138,6 +140,7 @@ class PaymentMethodGateway
             'verificationMerchantAccountId',
             'verifyCard',
             'verificationAmount',
+            'usBankAccountVerificationMethod',
             ['paypal' => [
                 'payee_email',
                 'payeeEmail',
@@ -292,11 +295,6 @@ class PaymentMethodGateway
                 AmexExpressCheckoutCard::factory($response['amexExpressCheckoutCard']),
                 "paymentMethod"
             );
-        } else if (isset($response['europeBankAccount'])) {
-            return new Result\Successful(
-                EuropeBankAccount::factory($response['europeBankAccount']),
-                "paymentMethod"
-            );
         } else if (isset($response['usBankAccount'])) {
             return new Result\Successful(
                 UsBankAccount::factory($response['usBankAccount']),
@@ -315,6 +313,11 @@ class PaymentMethodGateway
         } else if (isset($response['masterpassCard'])) {
             return new Result\Successful(
                 MasterpassCard::factory($response['masterpassCard']),
+                "paymentMethod"
+            );
+        } else if (isset($response['samsungPayCard'])) {
+            return new Result\Successful(
+                MasterpassCard::factory($response['samsungPayCard']),
                 "paymentMethod"
             );
         } else if (isset($response['paymentMethodNonce'])) {

@@ -15,6 +15,8 @@ use Magento\Payment\Gateway\Validator\ResultInterfaceFactory;
 use Magento\Braintree\Gateway\SubjectReader;
 
 /**
+ * Decorates the general response validator to handle specific cases.
+ *
  * This validator decorates the general response validator to handle specific cases like
  * an expired or already voided on Braintree side authorization transaction.
  */
@@ -38,6 +40,7 @@ class CancelResponseValidator extends AbstractValidator
     /**
      * @param ResultInterfaceFactory $resultFactory
      * @param GeneralResponseValidator $generalResponseValidator
+     * @param SubjectReader $subjectReader
      */
     public function __construct(
         ResultInterfaceFactory $resultFactory,
@@ -81,6 +84,7 @@ class CancelResponseValidator extends AbstractValidator
 
         /** @var Validation $error */
         $error = array_pop($errors);
+
         return (int)$error->code === self::$acceptableTransactionCode;
     }
 }

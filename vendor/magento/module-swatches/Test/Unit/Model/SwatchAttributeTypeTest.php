@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+declare(strict_types=1);
 
 namespace Magento\Swatches\Test\Unit\Model;
 
@@ -11,14 +12,19 @@ use Magento\Framework\Serialize\Serializer\Json;
 use Magento\Swatches\Model\Swatch;
 use Magento\Swatches\Model\SwatchAttributeType;
 
+/**
+ * Tests for \Magento\Swatches\Model\SwatchAttributeType class.
+ */
 class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
 {
-
     /**
      * @var SwatchAttributeType
      */
     private $swatchType;
 
+    /**
+     * @inheritdoc
+     */
     protected function setUp()
     {
         parent::setUp();
@@ -29,8 +35,9 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
      * @dataProvider provideIsSwatchAttributeTestData
      * @param string $dataValue
      * @param bool $expected
+     * @return void
      */
-    public function testIsSwatchAttribute($dataValue, $expected)
+    public function testIsSwatchAttribute(string $dataValue, bool $expected) : void
     {
         $this->assertEquals(
             $expected,
@@ -41,10 +48,11 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * DataProvider for testIsSwatchAttribute
+     * DataProvider for testIsSwatchAttribute.
+     *
      * @return array
      */
-    public function provideIsSwatchAttributeTestData()
+    public function provideIsSwatchAttributeTestData() : array
     {
         return [
             [Swatch::SWATCH_INPUT_TYPE_TEXT, true],
@@ -57,8 +65,9 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
      * @dataProvider provideIsTextSwatchAttributeTestData
      * @param string $dataValue
      * @param bool $expected
+     * @return void
      */
-    public function testIsTextSwatch($dataValue, $expected)
+    public function testIsTextSwatch(string $dataValue, bool $expected) : void
     {
         $this->assertEquals(
             $expected,
@@ -69,10 +78,11 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * DataProvider for testIsTextSwatch
+     * DataProvider for testIsTextSwatch.
+     *
      * @return array
      */
-    public function provideIsTextSwatchAttributeTestData()
+    public function provideIsTextSwatchAttributeTestData() : array
     {
         return [
             [Swatch::SWATCH_INPUT_TYPE_TEXT, true],
@@ -85,8 +95,9 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
      * @dataProvider provideIsVisualSwatchAttributeTestData
      * @param string $dataValue
      * @param bool $expected
+     * @return void
      */
-    public function testIsVisualSwatch($dataValue, $expected)
+    public function testIsVisualSwatch(string $dataValue, bool $expected) : void
     {
         $this->assertEquals(
             $expected,
@@ -97,10 +108,11 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * DataProvider for testIsTextSwatch
+     * DataProvider for testIsTextSwatch.
+     *
      * @return array
      */
-    public function provideIsVisualSwatchAttributeTestData()
+    public function provideIsVisualSwatchAttributeTestData() : array
     {
         return [
             [Swatch::SWATCH_INPUT_TYPE_VISUAL, true],
@@ -109,7 +121,10 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
         ];
     }
 
-    public function testIfAttributeHasNotAdditionData()
+    /**
+     * @return void
+     */
+    public function testIfAttributeHasNotAdditionData() : void
     {
         /** @var Json $json */
         $json = new Json();
@@ -122,10 +137,15 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
             ->getMockForAbstractClass();
 
         $attributeMock->expects($this->any())->method('hasData')->willReturn(false);
-        $attributeMock->expects($this->at(0))->method('getData')->willReturn('test');
-        $attributeMock->expects($this->at(1))->method('getData')->willReturn($encodedAdditionData);
-        $attributeMock->expects($this->at(2))->method('getData')->willReturn(Swatch::SWATCH_INPUT_TYPE_TEXT);
-        $attributeMock->expects($this->at(3))->method('getData')->willReturn(Swatch::SWATCH_INPUT_TYPE_TEXT);
+
+        $attributeMock->expects($this->any())
+            ->method('getData')
+            ->willReturnMap(
+                [
+                    ['additional_data', $encodedAdditionData],
+                    [Swatch::SWATCH_INPUT_TYPE_KEY, Swatch::SWATCH_INPUT_TYPE_TEXT],
+                ]
+            );
 
         $this->assertEquals(true, $this->swatchType->isTextSwatch($attributeMock));
         $this->assertEquals(false, $this->swatchType->isVisualSwatch($attributeMock));
@@ -136,7 +156,7 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
      * @param bool $hasDataReturns
      * @return AttributeInterface | \PHPUnit_Framework_MockObject_MockObject
      */
-    protected function createAttributeMock($getDataReturns, $hasDataReturns = true)
+    protected function createAttributeMock($getDataReturns, bool $hasDataReturns = true)
     {
         $attributeMock = $this->getMockBuilder(AttributeInterface::class)
             ->disableOriginalConstructor()
@@ -145,6 +165,7 @@ class SwatchAttributeTypeTest extends \PHPUnit\Framework\TestCase
 
         $attributeMock->expects($this->any())->method('hasData')->willReturn($hasDataReturns);
         $attributeMock->expects($this->any())->method('getData')->willReturn($getDataReturns);
+
         return $attributeMock;
     }
 }
