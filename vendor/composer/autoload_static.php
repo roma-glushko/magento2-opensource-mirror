@@ -4,7 +4,7 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInit02a8343e65882e99a896e06053e9a421
+class ComposerStaticInit37faa5314624df2dd50f700845b03862
 {
     public static $files = array (
         '320cde22f66dd4f5d3fd621d3e88b98f' => __DIR__ . '/..' . '/symfony/polyfill-ctype/bootstrap.php',
@@ -43,57 +43,59 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         '489864ea263482896f9bb483ed58a3cc' => __DIR__ . '/..' . '/magento/module-customer/registration.php',
         '7d65523658f618d8d26b8219ea46bbd7' => __DIR__ . '/..' . '/magento/module-indexer/registration.php',
         '525ee31af56481824fb617fb584819fe' => __DIR__ . '/..' . '/magento/module-catalog/registration.php',
-        'd297a3999f459b564a6bdc8eac3e49e4' => __DIR__ . '/..' . '/magento/module-eav/registration.php',
-        '4fff475f7f487ba5858a82163df5d0b1' => __DIR__ . '/..' . '/magento/module-theme/registration.php',
-        '5e0667def8057f122d18fe9bd1e06cbb' => __DIR__ . '/..' . '/magento/module-email/registration.php',
-        '47402ddfee46771bcf36e616cf38b137' => __DIR__ . '/..' . '/magento/module-variable/registration.php',
         'b933412926ebf8771a098bdecf1017b7' => __DIR__ . '/..' . '/magento/module-cms/registration.php',
+        '5e0667def8057f122d18fe9bd1e06cbb' => __DIR__ . '/..' . '/magento/module-email/registration.php',
+        'd297a3999f459b564a6bdc8eac3e49e4' => __DIR__ . '/..' . '/magento/module-eav/registration.php',
+        '47402ddfee46771bcf36e616cf38b137' => __DIR__ . '/..' . '/magento/module-variable/registration.php',
         'abdeab164c8404da5b237afbed559c74' => __DIR__ . '/..' . '/magento/module-widget/registration.php',
-        'b6b63f684deb9dbde7a9fc9f251c982b' => __DIR__ . '/..' . '/magento/module-tax/registration.php',
-        'a09428fb5202148efdc033b11ca2bc1c' => __DIR__ . '/..' . '/magento/module-rule/registration.php',
+        '4fff475f7f487ba5858a82163df5d0b1' => __DIR__ . '/..' . '/magento/module-theme/registration.php',
+        '44e7790b83e1936666da9a3a94daac39' => __DIR__ . '/..' . '/magento/module-downloadable/registration.php',
         '488f7c33a6ecd00a43d62e548d61b8d3' => __DIR__ . '/..' . '/magento/module-newsletter/registration.php',
-        '5c7dcd6ec83d6cf2988a97cdcba365ed' => __DIR__ . '/..' . '/magento/module-catalog-rule/registration.php',
         'cbc7f0674bf1ae1a1c481a581c6ca4fd' => __DIR__ . '/..' . '/magento/module-review/registration.php',
         '502392721e9fd20e70182378639f4ff5' => __DIR__ . '/..' . '/magento/module-reports/registration.php',
+        'b6b63f684deb9dbde7a9fc9f251c982b' => __DIR__ . '/..' . '/magento/module-tax/registration.php',
+        '4e49f9b77cfaca5ecee9e68485c07e5a' => __DIR__ . '/..' . '/magento/module-contact/registration.php',
+        '53814a716d73013b1489c928a2cb4164' => __DIR__ . '/..' . '/magento/module-shipping/registration.php',
+        'a09428fb5202148efdc033b11ca2bc1c' => __DIR__ . '/..' . '/magento/module-rule/registration.php',
+        '5c7dcd6ec83d6cf2988a97cdcba365ed' => __DIR__ . '/..' . '/magento/module-catalog-rule/registration.php',
         '3f1662385885db186423ec0b74dfe6e9' => __DIR__ . '/..' . '/magento/module-sales-rule/registration.php',
         'e54a2a6d4f945c30feee43a0713bfb8b' => __DIR__ . '/..' . '/magento/module-checkout/registration.php',
         '4725125cbaeab31cd4e5c5c07061fa43' => __DIR__ . '/..' . '/magento/module-payment/registration.php',
         'a6d2049b4013058aebdab5256bfc92a1' => __DIR__ . '/..' . '/magento/module-import-export/registration.php',
-        '4e49f9b77cfaca5ecee9e68485c07e5a' => __DIR__ . '/..' . '/magento/module-contact/registration.php',
-        '53814a716d73013b1489c928a2cb4164' => __DIR__ . '/..' . '/magento/module-shipping/registration.php',
-        '108fd301b720a30c9ec42a785ee00656' => __DIR__ . '/..' . '/magento/module-gift-message/registration.php',
         '08592fdd5b9e829727a7db2f953d82b2' => __DIR__ . '/..' . '/magento/module-vault/registration.php',
         '7b11c4dc42b3b3023073cb14e519683c' => __DIR__ . '/..' . '/ralouphie/getallheaders/src/getallheaders.php',
         'a0edc8309cc5e1d60e3047b5df6b7052' => __DIR__ . '/..' . '/guzzlehttp/psr7/src/functions_include.php',
-        '19b03cc33c349b5e5fbc6577c2f9dc87' => __DIR__ . '/..' . '/magento/module-catalog-url-rewrite/registration.php',
-        '44e7790b83e1936666da9a3a94daac39' => __DIR__ . '/..' . '/magento/module-downloadable/registration.php',
-        'ff4a42fb48f753f6d1e6177223059e3d' => __DIR__ . '/..' . '/magento/module-msrp/registration.php',
-        '9b847ffefadc507b5f1aa851d341f914' => __DIR__ . '/..' . '/magento/module-captcha/registration.php',
-        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        '2d0debaab8ec34dfba214036a43af24e' => __DIR__ . '/..' . '/magento/module-url-rewrite/registration.php',
         '3ce6447b6ef8a0e6e2a3cec20fba30e3' => __DIR__ . '/..' . '/magento/module-instant-purchase/registration.php',
-        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
-        '4a78493fd48e24e9ec5cd7b77605aa2f' => __DIR__ . '/..' . '/magento/module-developer/registration.php',
-        '0e991a783d700a320f90da58cc8a38fc' => __DIR__ . '/..' . '/magento/module-rss/registration.php',
+        '9b847ffefadc507b5f1aa851d341f914' => __DIR__ . '/..' . '/magento/module-captcha/registration.php',
+        'cf44f9b1253939f955772534aabbf624' => __DIR__ . '/..' . '/magento/module-grouped-product/registration.php',
+        '19b03cc33c349b5e5fbc6577c2f9dc87' => __DIR__ . '/..' . '/magento/module-catalog-url-rewrite/registration.php',
         '069005ffe7b4e7c23b0b9b5c1807ec74' => __DIR__ . '/..' . '/magento/module-paypal/registration.php',
+        '4a78493fd48e24e9ec5cd7b77605aa2f' => __DIR__ . '/..' . '/magento/module-developer/registration.php',
+        'c964ee0ededf28c96ebd9db5099ef910' => __DIR__ . '/..' . '/guzzlehttp/promises/src/functions_include.php',
+        '108fd301b720a30c9ec42a785ee00656' => __DIR__ . '/..' . '/magento/module-gift-message/registration.php',
+        '37a3dc5111fe8f707ab4c132ef1dbc62' => __DIR__ . '/..' . '/guzzlehttp/guzzle/src/functions_include.php',
+        'ff4a42fb48f753f6d1e6177223059e3d' => __DIR__ . '/..' . '/magento/module-msrp/registration.php',
+        '0e991a783d700a320f90da58cc8a38fc' => __DIR__ . '/..' . '/magento/module-rss/registration.php',
         '8b48eeee7117a5637507d2216d9c896d' => __DIR__ . '/..' . '/magento/module-bundle/registration.php',
         'bb6621289f135d14ac7bffe9e45ad6ef' => __DIR__ . '/..' . '/magento/module-catalog-import-export/registration.php',
         'dfd9907262eacfe8b22fef82dc6725c9' => __DIR__ . '/..' . '/magento/module-integration/registration.php',
         '571be93292212396d8ebf8febc7bed8f' => __DIR__ . '/..' . '/magento/module-wishlist/registration.php',
-        '41e3c70b13a38be15b2f71a5ab57282e' => __DIR__ . '/..' . '/magento/module-cron/registration.php',
-        'beef4a50b960435d4b145e8d222f5f10' => __DIR__ . '/..' . '/magento/module-configurable-product/registration.php',
-        'c9fb735ab634382388c979a129298db3' => __DIR__ . '/..' . '/klarna/module-core/registration.php',
         '6ff2dbcf71beba80c7e8b1b9bd4f500b' => __DIR__ . '/..' . '/amzn/amazon-pay-and-login-with-amazon-core-module/registration.php',
-        '2d0debaab8ec34dfba214036a43af24e' => __DIR__ . '/..' . '/magento/module-url-rewrite/registration.php',
+        'beef4a50b960435d4b145e8d222f5f10' => __DIR__ . '/..' . '/magento/module-configurable-product/registration.php',
+        '41e3c70b13a38be15b2f71a5ab57282e' => __DIR__ . '/..' . '/magento/module-cron/registration.php',
+        'c9fb735ab634382388c979a129298db3' => __DIR__ . '/..' . '/klarna/module-core/registration.php',
         '9d3c0cffdf7ae2ab7dc3179a4aeef794' => __DIR__ . '/..' . '/magento/module-checkout-agreements/registration.php',
+        '7262a266e3433bc7d1f53ddcb1dab374' => __DIR__ . '/..' . '/magento/module-multishipping/registration.php',
+        'a1f5b6a8ff5d430c2944fcabffb41b9e' => __DIR__ . '/..' . '/amzn/login-with-amazon-module/registration.php',
         'b2a251005c112dee4a8e7f7580a475f5' => __DIR__ . '/..' . '/magento/module-cookie/registration.php',
         '34901568a1e26d13dd475cb2c85e0284' => __DIR__ . '/..' . '/zendframework/zend-form/autoload/formElementManagerPolyfill.php',
-        'cf44f9b1253939f955772534aabbf624' => __DIR__ . '/..' . '/magento/module-grouped-product/registration.php',
         '814a46999bb03138827ea41c6c97733f' => __DIR__ . '/..' . '/magento/module-product-alert/registration.php',
         '157e241791c95df2d41c00e4314f115e' => __DIR__ . '/..' . '/magento/module-search/registration.php',
-        '7262a266e3433bc7d1f53ddcb1dab374' => __DIR__ . '/..' . '/magento/module-multishipping/registration.php',
+        'c0b4e657bfc52b8949a8980203e7ae6e' => __DIR__ . '/..' . '/msp/recaptcha/registration.php',
+        'e94d0d1147cf36b49464173d27662e5a' => __DIR__ . '/..' . '/magento/module-paypal-captcha/registration.php',
         '8f9987d497a96705daba7e84677815c2' => __DIR__ . '/..' . '/klarna/module-ordermanagement/registration.php',
         '22aefa74994c2bb709889bd54ea6acda' => __DIR__ . '/..' . '/magento/module-send-friend/registration.php',
-        'a1f5b6a8ff5d430c2944fcabffb41b9e' => __DIR__ . '/..' . '/amzn/login-with-amazon-module/registration.php',
         '056cd8d2398ceabe9e3cff88f4cf877b' => __DIR__ . '/..' . '/magento/theme-frontend-blank/registration.php',
         '73a8e4290482dda77755fd5545cb64f4' => __DIR__ . '/..' . '/magento/module-webapi/registration.php',
         '266075d7d4c1215b5af2b6f860324839' => __DIR__ . '/..' . '/magento/module-usps/registration.php',
@@ -107,13 +109,14 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         '87bb82aba4e6954227316088ec049d42' => __DIR__ . '/..' . '/magento/module-translation/registration.php',
         '212190e3b4423a19a199def12317e1fc' => __DIR__ . '/..' . '/magento/module-cms-url-rewrite/registration.php',
         '349afecbd3cb361d96461e67f4585179' => __DIR__ . '/..' . '/magento/module-backup/registration.php',
+        'f3cd155021d4ab171214e8fdcd3c1eb7' => __DIR__ . '/..' . '/amzn/amazon-pay-module/registration.php',
         'fc5563a6d8ed33909f8031d05dec9433' => __DIR__ . '/..' . '/magento/module-catalog-search/registration.php',
         'eda65932675b68b5aee4503e0762d64d' => __DIR__ . '/..' . '/magento/magento2-functional-testing-framework/src/Magento/FunctionalTestingFramework/_bootstrap.php',
         '1a1fad76fd106d3fa4f1bece70880e7e' => __DIR__ . '/..' . '/vertex/module-tax/registration.php',
         '153a7817726e1caca4e6c3b7bc76f329' => __DIR__ . '/..' . '/temando/module-shipping-m2/registration.php',
+        '12064f5fb29ce709d87bf517f80523cc' => __DIR__ . '/..' . '/magento/module-paypal-recaptcha/registration.php',
         '8aca0117faafc71d886b81082decf918' => __DIR__ . '/..' . '/klarna/module-kp/registration.php',
         'c50de754cae7b09410961baeb67416a8' => __DIR__ . '/..' . '/dotmailer/dotmailer-magento2-extension/registration.php',
-        'f3cd155021d4ab171214e8fdcd3c1eb7' => __DIR__ . '/..' . '/amzn/amazon-pay-module/registration.php',
         '2c05a36d82e2b7ee5f7251e6c0fe6974' => __DIR__ . '/..' . '/magento/language-zh_hans_cn/registration.php',
         '1333e9398ed91c6506c6cfdd4bd91013' => __DIR__ . '/..' . '/magento/language-pt_br/registration.php',
         '10715a404306a4a0101bb75402cc0c4f' => __DIR__ . '/..' . '/magento/language-nl_nl/registration.php',
@@ -164,6 +167,7 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         '9e0caea6fa38df38076224e2c284a06d' => __DIR__ . '/..' . '/magento/module-cache-invalidate/registration.php',
         '3f7befdb3fd10d6e2a914b0320605b6e' => __DIR__ . '/..' . '/magento/module-bundle-import-export/registration.php',
         '8bdf0196411074f729314d3aa8a79d2c' => __DIR__ . '/..' . '/magento/module-braintree/registration.php',
+        '3fc1362d89bb5113c7dc64ea3ecc8814' => __DIR__ . '/..' . '/magento/module-authorizenet-acceptjs/registration.php',
         'fe60032170052cc0b3c0fbfff3e3af81' => __DIR__ . '/..' . '/magento/module-authorizenet/registration.php',
         'a8c41acf1bcf2c8c39616ad2b1e630fb' => __DIR__ . '/..' . '/magento/module-analytics/registration.php',
         '4137e072aca869574ccb2dd0da693e02' => __DIR__ . '/..' . '/magento/module-advanced-pricing-import-export/registration.php',
@@ -266,6 +270,7 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         'R' => 
         array (
             'Robo\\' => 5,
+            'ReCaptcha\\' => 10,
             'Ramsey\\Uuid\\' => 12,
         ),
         'P' => 
@@ -336,6 +341,8 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
             'Magento\\ProductAlert\\' => 21,
             'Magento\\Persistent\\' => 19,
             'Magento\\Paypal\\' => 15,
+            'Magento\\PaypalReCaptcha\\' => 24,
+            'Magento\\PaypalCaptcha\\' => 22,
             'Magento\\Payment\\' => 16,
             'Magento\\PageCache\\' => 18,
             'Magento\\OfflineShipping\\' => 24,
@@ -402,11 +409,13 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
             'Magento\\Backup\\' => 15,
             'Magento\\Backend\\' => 16,
             'Magento\\Authorizenet\\' => 21,
+            'Magento\\AuthorizenetAcceptjs\\' => 29,
             'Magento\\Authorization\\' => 22,
             'Magento\\Analytics\\' => 18,
             'Magento\\AdvancedPricingImportExport\\' => 36,
             'Magento\\AdminNotification\\' => 26,
             'Magento\\' => 8,
+            'MSP\\ReCaptcha\\' => 14,
             'MFTF\\' => 5,
         ),
         'L' => 
@@ -449,6 +458,7 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
             'Dotenv\\' => 7,
             'Dotdigitalgroup\\Email\\' => 22,
             'Doctrine\\Instantiator\\' => 22,
+            'Doctrine\\Common\\Lexer\\' => 22,
             'Doctrine\\Common\\Annotations\\' => 28,
             'DeepCopy\\' => 9,
         ),
@@ -759,6 +769,10 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         array (
             0 => __DIR__ . '/..' . '/consolidation/robo/src',
         ),
+        'ReCaptcha\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/google/recaptcha/src/ReCaptcha',
+        ),
         'Ramsey\\Uuid\\' => 
         array (
             0 => __DIR__ . '/..' . '/ramsey/uuid/src',
@@ -1014,6 +1028,14 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         'Magento\\Paypal\\' => 
         array (
             0 => __DIR__ . '/..' . '/magento/module-paypal',
+        ),
+        'Magento\\PaypalReCaptcha\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/magento/module-paypal-recaptcha',
+        ),
+        'Magento\\PaypalCaptcha\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/magento/module-paypal-captcha',
         ),
         'Magento\\Payment\\' => 
         array (
@@ -1280,6 +1302,10 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         array (
             0 => __DIR__ . '/..' . '/magento/module-authorizenet',
         ),
+        'Magento\\AuthorizenetAcceptjs\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/magento/module-authorizenet-acceptjs',
+        ),
         'Magento\\Authorization\\' => 
         array (
             0 => __DIR__ . '/..' . '/magento/module-authorization',
@@ -1299,6 +1325,10 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         'Magento\\' => 
         array (
             0 => __DIR__ . '/../..' . '/app/code/Magento',
+        ),
+        'MSP\\ReCaptcha\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/msp/recaptcha',
         ),
         'MFTF\\' => 
         array (
@@ -1371,6 +1401,10 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         'Doctrine\\Instantiator\\' => 
         array (
             0 => __DIR__ . '/..' . '/doctrine/instantiator/src/Doctrine/Instantiator',
+        ),
+        'Doctrine\\Common\\Lexer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/doctrine/lexer/lib/Doctrine/Common/Lexer',
         ),
         'Doctrine\\Common\\Annotations\\' => 
         array (
@@ -1548,10 +1582,6 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
         ),
         'D' => 
         array (
-            'Doctrine\\Common\\Lexer\\' => 
-            array (
-                0 => __DIR__ . '/..' . '/doctrine/lexer/lib',
-            ),
             'Doctrine\\Common\\Collections\\' => 
             array (
                 0 => __DIR__ . '/..' . '/doctrine/collections/lib',
@@ -2169,11 +2199,11 @@ class ComposerStaticInit02a8343e65882e99a896e06053e9a421
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$prefixDirsPsr4;
-            $loader->prefixesPsr0 = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$prefixesPsr0;
-            $loader->fallbackDirsPsr0 = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$fallbackDirsPsr0;
-            $loader->classMap = ComposerStaticInit02a8343e65882e99a896e06053e9a421::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit37faa5314624df2dd50f700845b03862::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit37faa5314624df2dd50f700845b03862::$prefixDirsPsr4;
+            $loader->prefixesPsr0 = ComposerStaticInit37faa5314624df2dd50f700845b03862::$prefixesPsr0;
+            $loader->fallbackDirsPsr0 = ComposerStaticInit37faa5314624df2dd50f700845b03862::$fallbackDirsPsr0;
+            $loader->classMap = ComposerStaticInit37faa5314624df2dd50f700845b03862::$classMap;
 
         }, null, ClassLoader::class);
     }
