@@ -34,6 +34,7 @@ return array(
     'Zend\\Console\\' => array($vendorDir . '/zendframework/zend-console/src'),
     'Zend\\Config\\' => array($vendorDir . '/zendframework/zend-config/src'),
     'Zend\\Code\\' => array($vendorDir . '/zendframework/zend-code/src'),
+    'Symfony\\Polyfill\\Ctype\\' => array($vendorDir . '/symfony/polyfill-ctype'),
     'Symfony\\Component\\Yaml\\' => array($vendorDir . '/symfony/yaml'),
     'Symfony\\Component\\Stopwatch\\' => array($vendorDir . '/symfony/stopwatch'),
     'Symfony\\Component\\Process\\' => array($vendorDir . '/symfony/process'),
