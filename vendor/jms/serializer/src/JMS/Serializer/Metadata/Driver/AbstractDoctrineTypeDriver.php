@@ -1,27 +1,14 @@
 <?php
 
-/*
- * Copyright 2013 Johannes M. Schmitt <schmittjoh@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 namespace JMS\Serializer\Metadata\Driver;
 
 use Doctrine\Common\Persistence\ManagerRegistry;
-use JMS\Serializer\Metadata\ClassMetadata;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata as DoctrineClassMetadata;
+use JMS\Serializer\Metadata\ClassMetadata;
+use JMS\Serializer\Metadata\ExpressionPropertyMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
+use JMS\Serializer\Metadata\StaticPropertyMetadata;
+use JMS\Serializer\Metadata\VirtualPropertyMetadata;
 use Metadata\Driver\DriverInterface;
 
 /**
@@ -35,26 +22,27 @@ abstract class AbstractDoctrineTypeDriver implements DriverInterface
      * @var array
      */
     protected $fieldMapping = array(
-        'string'       => 'string',
-        'text'         => 'string',
-        'blob'         => 'string',
+        'string' => 'string',
+        'text' => 'string',
+        'blob' => 'string',
+        'guid' => 'string',
 
-        'integer'      => 'integer',
-        'smallint'     => 'integer',
-        'bigint'       => 'integer',
+        'integer' => 'integer',
+        'smallint' => 'integer',
+        'bigint' => 'integer',
 
-        'datetime'     => 'DateTime',
-        'datetimetz'   => 'DateTime',
-        'time'         => 'DateTime',
-        'date'         => 'DateTime',
+        'datetime' => 'DateTime',
+        'datetimetz' => 'DateTime',
+        'time' => 'DateTime',
+        'date' => 'DateTime',
 
-        'float'        => 'float',
-        'decimal'      => 'float',
+        'float' => 'float',
+        'decimal' => 'float',
 
-        'boolean'      => 'boolean',
+        'boolean' => 'boolean',
 
-        'array'        => 'array',
-        'json_array'   => 'array',
+        'array' => 'array',
+        'json_array' => 'array',
         'simple_array' => 'array<string>',
     );
 
@@ -92,7 +80,7 @@ abstract class AbstractDoctrineTypeDriver implements DriverInterface
             /** @var $propertyMetadata PropertyMetadata */
 
             // If the inner driver provides a type, don't guess anymore.
-            if ($propertyMetadata->type) {
+            if ($propertyMetadata->type || $this->isVirtualProperty($propertyMetadata)) {
                 continue;
             }
 
@@ -104,6 +92,13 @@ abstract class AbstractDoctrineTypeDriver implements DriverInterface
         }
 
         return $classMetadata;
+    }
+
+    private function isVirtualProperty(PropertyMetadata $propertyMetadata)
+    {
+        return $propertyMetadata instanceof VirtualPropertyMetadata
+            || $propertyMetadata instanceof StaticPropertyMetadata
+            || $propertyMetadata instanceof ExpressionPropertyMetadata;
     }
 
     /**

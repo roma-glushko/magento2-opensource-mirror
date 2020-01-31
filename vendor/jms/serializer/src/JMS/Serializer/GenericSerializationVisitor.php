@@ -1,27 +1,15 @@
 <?php
 
-/*
- * Copyright 2013 Johannes M. Schmitt <schmittjoh@gmail.com>
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *     http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 namespace JMS\Serializer;
 
-use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Exception\InvalidArgumentException;
+use JMS\Serializer\Metadata\ClassMetadata;
 use JMS\Serializer\Metadata\PropertyMetadata;
+use JMS\Serializer\Naming\AdvancedNamingStrategyInterface;
 
+/**
+ * @deprecated
+ */
 abstract class GenericSerializationVisitor extends AbstractVisitor
 {
     private $navigator;
@@ -55,7 +43,7 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
             $this->root = $data;
         }
 
-        return (string) $data;
+        return (string)$data;
     }
 
     public function visitBoolean($data, array $type, Context $context)
@@ -64,7 +52,7 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
             $this->root = $data;
         }
 
-        return (boolean) $data;
+        return (boolean)$data;
     }
 
     public function visitInteger($data, array $type, Context $context)
@@ -73,7 +61,7 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
             $this->root = $data;
         }
 
-        return (int) $data;
+        return (int)$data;
     }
 
     public function visitDouble($data, array $type, Context $context)
@@ -82,7 +70,7 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
             $this->root = $data;
         }
 
-        return (float) $data;
+        return (float)$data;
     }
 
     /**
@@ -91,22 +79,34 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
      */
     public function visitArray($data, array $type, Context $context)
     {
+        $this->dataStack->push($data);
+
+        $isHash = isset($type['params'][1]);
+
         if (null === $this->root) {
-            $this->root = array();
+            $this->root = $isHash ? new \ArrayObject() : array();
             $rs = &$this->root;
         } else {
-            $rs = array();
+            $rs = $isHash ? new \ArrayObject() : array();
         }
+
+        $isList = isset($type['params'][0]) && !isset($type['params'][1]);
 
         foreach ($data as $k => $v) {
             $v = $this->navigator->accept($v, $this->getElementType($type), $context);
 
-            if (null === $v && (!is_string($k) || !$context->shouldSerializeNull())) {
+            if (null === $v && $context->shouldSerializeNull() !== true) {
                 continue;
             }
 
-            $rs[$k] = $v;
+            if ($isList) {
+                $rs[] = $v;
+            } else {
+                $rs[$k] = $v;
+            }
         }
+
+        $this->dataStack->pop();
 
         return $rs;
     }
@@ -135,17 +135,21 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
 
     public function visitProperty(PropertyMetadata $metadata, $data, Context $context)
     {
-        $v = $metadata->getValue($data);
+        $v = $this->accessor->getValue($data, $metadata);
 
         $v = $this->navigator->accept($v, $metadata->type, $context);
-        if (null === $v && !$context->shouldSerializeNull()) {
+        if (null === $v && $context->shouldSerializeNull() !== true) {
             return;
         }
 
-        $k = $this->namingStrategy->translateName($metadata);
+        if ($this->namingStrategy instanceof AdvancedNamingStrategyInterface) {
+            $k = $this->namingStrategy->getPropertyName($metadata, $context);
+        } else {
+            $k = $this->namingStrategy->translateName($metadata);
+        }
 
         if ($metadata->inline) {
-            if (is_array($v)) {
+            if (\is_array($v)) {
                 $this->data = array_merge($this->data, $v);
             }
         } else {
@@ -155,10 +159,10 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
 
     /**
      * Allows you to add additional data to the current object/root element.
-     *
+     * @deprecated use setData instead
      * @param string $key
-     * @param scalar|array $value This value must either be a regular scalar, or an array.
-     *                            It must not contain any objects anymore.
+     * @param integer|float|boolean|string|array|null $value This value must either be a regular scalar, or an array.
+     *                                                       It must not contain any objects anymore.
      */
     public function addData($key, $value)
     {
@@ -166,6 +170,29 @@ abstract class GenericSerializationVisitor extends AbstractVisitor
             throw new InvalidArgumentException(sprintf('There is already data for "%s".', $key));
         }
 
+        $this->data[$key] = $value;
+    }
+
+    /**
+     * Checks if some data key exists.
+     *
+     * @param string $key
+     * @return boolean
+     */
+    public function hasData($key)
+    {
+        return isset($this->data[$key]);
+    }
+
+    /**
+     * Allows you to replace existing data on the current object/root element.
+     *
+     * @param string $key
+     * @param integer|float|boolean|string|array|null $value This value must either be a regular scalar, or an array.
+     *                                                       It must not contain any objects anymore.
+     */
+    public function setData($key, $value)
+    {
         $this->data[$key] = $value;
     }
 

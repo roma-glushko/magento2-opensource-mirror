@@ -2,6 +2,55 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.14.3 - 2019-10-04
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#235](https://github.com/zendframework/zend-form/pull/235) fixes PHP 7.4 compatibility.
+
+## 2.14.2 - 2019-10-03
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#232](https://github.com/zendframework/zend-form/pull/232) fixes validating `$creationOption`
+  of `Zend\Form\ElementFactory`. Allowed values are: array, Traversable or null.
+  If invalid value provided exception will be thrown.
+
+- [#234](https://github.com/zendframework/zend-form/pull/234) registers `Search` and `Tel` form elements
+  within `Zend\Form\FormElementManager` plugin manager.
+
 ## 2.14.1 - 2019-02-26
 
 ### Added

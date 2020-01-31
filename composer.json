@@ -11,7 +11,7 @@
         "sort-packages": true
     },
     "require": {
-        "magento/product-community-edition": "2.3.3"
+        "magento/product-community-edition": "2.3.3-p1"
     },
     "require-dev": {
         "allure-framework/allure-phpunit": "~1.2.0",
@@ -59,7 +59,7 @@
             "Magento\\TestFramework\\Utility\\": "dev/tests/static/framework/Magento/TestFramework/Utility/"
         }
     },
-    "version": "2.3.3",
+    "version": "2.3.3-p1",
     "minimum-stability": "stable",
     "repositories": [
         {

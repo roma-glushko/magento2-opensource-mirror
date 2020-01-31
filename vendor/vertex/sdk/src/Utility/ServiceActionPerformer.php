@@ -9,6 +9,7 @@ namespace Vertex\Utility;
 use Vertex\Data\LoginInterface;
 use Vertex\Exception\ApiException;
 use Vertex\Mapper\AuthenticatorInterface;
+use Vertex\Services\SoapCallResponseInterface;
 
 /**
  * Contains the primary logic for performing a Vertex SOAP Request
@@ -95,12 +96,22 @@ class ServiceActionPerformer
         $rawRequest = $this->authenticator->addLogin($rawRequest, $login);
 
         try {
+            $start = microtime(true);
             $rawResponse = $client->{$this->method}($rawRequest);
+            $stop = microtime(true);
         } catch (\SoapFault $e) {
             $convertedFault = $this->faultConverter->convert($e);
             throw $convertedFault ?: new ApiException($e->getMessage(), 0, $e);
         }
 
-        return $this->responseMapper->build($rawResponse);
+        // Determine delta (-), Convert from seconds to milliseconds (*), remove microseconds (floor)
+        $timeTaken = floor(($stop - $start) * 1000);
+
+        $response = $this->responseMapper->build($rawResponse);
+        if ($response instanceof SoapCallResponseInterface) {
+            $response->setHttpCallTime($timeTaken);
+        }
+
+        return $response;
     }
 }

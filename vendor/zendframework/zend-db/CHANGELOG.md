@@ -2,6 +2,64 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.11.0 - 2019-12-31
+
+### Added
+
+- [#336](https://github.com/zendframework/zend-db/pull/336) adds `InsertIgnore` class for "INSERT IGNORE" usage (usable in `MySQL` platform).
+
+- [#356](https://github.com/zendframework/zend-db/pull/356) adds support for `IN (NULL)` for empty value-set.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#146](https://github.com/zendframework/zend-db/pull/146) fixes setting correct value for `lastInsertValue` pre-insert in `SequenceFeature`.
+
+## 2.10.1 - 2019-12-31
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#382](https://github.com/zendframework/zend-db/pull/382) fixes `Zend\Db\Sql\Expression` to allow `0` value for parameter.
+
+- [#395](https://github.com/zendframework/zend-db/pull/395) fixes PHP 7.4 compatibility.
+
+- [#392](https://github.com/zendframework/zend-db/pull/392) fixes `MetadataFeature` to work with `TableIdentifier`.
+
+- [#399](https://github.com/zendframework/zend-db/pull/399) fixes accessing constraint metadata within the Oracle adapter.
+
+- [#375](https://github.com/zendframework/zend-db/pull/375) fixes detecting number of replacements in `Zend\Db\Sql\Expression`.
+
+- [#377](https://github.com/zendframework/zend-db/pull/377) allows any `AdapterInterface` instance in `RowGateway`.
+
+- [#342](https://github.com/zendframework/zend-db/pull/342) fixes deleting from aliased tables.
+
+- [#386](https://github.com/zendframework/zend-db/pull/386) fixes too strongly casting integer parameters in PDO adapter.
+
 ## 2.10.0 - 2019-02-25
 
 ### Added

@@ -2,6 +2,28 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.12.0 - 2019-12-27
+
+### Added
+
+- [#99](https://github.com/zendframework/zend-log/pull/99) adds `Zend\Log\PsrLoggerAbstractAdapterFactory`, which will create instances of `PsrLoggerAdapter`. Usage is exactly like with `Zend\Log\LoggerAbstractServiceFactory`, with the exception that it looks under the `psr_log` configuration key instead of the `log` key for logger configuration.
+
+### Changed
+
+- [#100](https://github.com/zendframework/zend-log/pull/100) updates the psr/log constraint to 1.1.2, removing the need for an extra autoloader in this package.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- Nothing.
+
 ## 2.11.0 - 2019-08-23
 
 ### Added

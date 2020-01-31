@@ -1,13 +1,13 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Update\Queue;
 
 use Magento\Update\Queue\JobFactory;
 
-class JobFactoryTest extends \PHPUnit_Framework_TestCase
+class JobFactoryTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var JobFactory
@@ -42,10 +42,8 @@ class JobFactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testCreateInvalidJob()
     {
-        $this->setExpectedException(
-            '\RuntimeException',
-            '"invalid" job is not supported.'
-        );
+        $this->expectExceptionMessage('"invalid" job is not supported.');
+        $this->expectException(\RuntimeException::class);
         $this->jobFactory->create('invalid', []);
     }
 }

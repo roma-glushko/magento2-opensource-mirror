@@ -4,7 +4,7 @@
  * @author     Mediotype                     https://www.mediotype.com/
  */
 
-namespace Vertex\Tax\Model\Flexfield\Processor;
+namespace Vertex\Tax\Model\FlexField\Processor;
 
 use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Quote\Api\CartRepositoryInterface;

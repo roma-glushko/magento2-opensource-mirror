@@ -80,6 +80,11 @@ abstract class Extension implements ExtensionInterface, ConfigurationExtensionIn
     public function getConfiguration(array $config, ContainerBuilder $container)
     {
         $class = \get_class($this);
+
+        if (false !== strpos($class, "\0")) {
+            return null; // ignore anonymous classes
+        }
+
         $class = substr_replace($class, '\Configuration', strrpos($class, '\\'));
         $class = $container->getReflectionClass($class);
 
@@ -111,7 +116,7 @@ abstract class Extension implements ExtensionInterface, ConfigurationExtensionIn
     /**
      * @internal
      */
-    final public function getProcessedConfigs()
+    final public function getProcessedConfigs(): array
     {
         try {
             return $this->processedConfigs;

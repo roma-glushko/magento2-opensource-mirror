@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.8.4 - 2019-10-28
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#91](https://github.com/zendframework/zend-modulemanager/pull/91) fixes permission on cache file.
+  The permission denied issue occurs on reading the cache file, when cache has been build using different user account.
+
+## 2.8.3 - 2019-10-18
+
+### Added
+
+- [#85](https://github.com/zendframework/zend-modulemanager/pull/85) adds support for PHP 7.3.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#88](https://github.com/zendframework/zend-modulemanager/pull/88) fixes
+  how cache files are created. Temporary file is created first and when
+  completed it is renamed to target file. It prevents from loading uncompleted
+  files.
+
 ## 2.8.2 - 2017-12-02
 
 ### Added
@@ -22,7 +70,7 @@ All notable changes to this project will be documented in this file, in reverse 
 
 ### Fixed
 
-- [#74](https://github.com/zendframework/zend-modulemanager/pull/74) Fixes
+- [#74](https://github.com/zendframework/zend-modulemanager/pull/74) fixes
   exception message in ConfigListener
 
 ## 2.8.1 - 2017-11-01

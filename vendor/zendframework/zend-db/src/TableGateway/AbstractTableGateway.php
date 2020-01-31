@@ -216,7 +216,8 @@ abstract class AbstractTableGateway implements TableGatewayInterface
     protected function executeSelect(Select $select)
     {
         $selectState = $select->getRawState();
-        if ($selectState['table'] != $this->table
+        if (isset($selectState['table'])
+            && $selectState['table'] != $this->table
             && (is_array($selectState['table'])
                 && end($selectState['table']) != $this->table)
         ) {
@@ -225,7 +226,8 @@ abstract class AbstractTableGateway implements TableGatewayInterface
             );
         }
 
-        if ($selectState['columns'] == [Select::SQL_STAR]
+        if (isset($selectState['columns'])
+            && $selectState['columns'] == [Select::SQL_STAR]
             && $this->columns !== []) {
             $select->columns($this->columns);
         }
@@ -449,11 +451,23 @@ abstract class AbstractTableGateway implements TableGatewayInterface
         // pre delete update
         $this->featureSet->apply(EventFeatureEventsInterface::EVENT_PRE_DELETE, [$delete]);
 
+        $unaliasedTable = false;
+        if (is_array($deleteState['table'])) {
+            $tableData      = array_values($deleteState['table']);
+            $unaliasedTable = array_shift($tableData);
+            $delete->from($unaliasedTable);
+        }
+
         $statement = $this->sql->prepareStatementForSqlObject($delete);
         $result = $statement->execute();
 
         // apply postDelete features
         $this->featureSet->apply(EventFeatureEventsInterface::EVENT_POST_DELETE, [$statement, $result]);
+
+        // Reset original table information in Delete instance, if necessary
+        if ($unaliasedTable) {
+            $delete->from($deleteState['table']);
+        }
 
         return $result->getAffectedRows();
     }

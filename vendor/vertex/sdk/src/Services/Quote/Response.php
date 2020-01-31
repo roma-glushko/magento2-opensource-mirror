@@ -10,12 +10,16 @@ namespace Vertex\Services\Quote;
 use Vertex\Data\CustomerInterface;
 use Vertex\Data\LineItemInterface;
 use Vertex\Data\SellerInterface;
+use Vertex\Services\SoapCallResponseInterface;
 
 /**
  * {@inheritDoc}
  */
-class Response implements ResponseInterface
+class Response implements ResponseInterface, SoapCallResponseInterface
 {
+    /** @var string */
+    private $currencyCode;
+
     /** @var CustomerInterface */
     private $customer;
 
@@ -27,6 +31,9 @@ class Response implements ResponseInterface
 
     /** @var string */
     private $documentNumber;
+
+    /** @var int */
+    private $httpCallTime;
 
     /** @var LineItemInterface[] */
     private $lineItems = [];
@@ -52,8 +59,13 @@ class Response implements ResponseInterface
     /** @var string */
     private $transactionType;
 
-    /** @var string */
-    private $currencyCode;
+    /**
+     * @inheritdoc
+     */
+    public function getCurrencyCode()
+    {
+        return $this->currencyCode;
+    }
 
     /**
      * @inheritdoc
@@ -85,6 +97,14 @@ class Response implements ResponseInterface
     public function getDocumentNumber()
     {
         return $this->documentNumber;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function getHttpCallTime()
+    {
+        return $this->httpCallTime;
     }
 
     /**
@@ -154,9 +174,10 @@ class Response implements ResponseInterface
     /**
      * @inheritdoc
      */
-    public function getCurrencyCode()
+    public function setCurrencyCode($currencyCode)
     {
-        return $this->currencyCode;
+        $this->currencyCode = $currencyCode;
+        return $this;
     }
 
     /**
@@ -192,6 +213,15 @@ class Response implements ResponseInterface
     public function setDocumentNumber($documentNumber)
     {
         $this->documentNumber = $documentNumber;
+        return $this;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setHttpCallTime($milliseconds)
+    {
+        $this->httpCallTime = $milliseconds;
         return $this;
     }
 
@@ -269,15 +299,6 @@ class Response implements ResponseInterface
     public function setTransactionType($transactionType)
     {
         $this->transactionType = $transactionType;
-        return $this;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function setCurrencyCode($currencyCode)
-    {
-        $this->currencyCode = $currencyCode;
         return $this;
     }
 }
