@@ -269,6 +269,9 @@ class Category extends AbstractResource
         $object->setAttributeSetId(
             $object->getAttributeSetId() ?: $this->getEntityType()->getDefaultAttributeSetId()
         );
+
+        $this->castPathIdsToInt($object);
+
         if ($object->isObjectNew()) {
             if ($object->getPosition() === null) {
                 $object->setPosition($this->_getMaxPosition($object->getPath()) + 1);
@@ -631,10 +634,9 @@ class Category extends AbstractResource
      */
     public function findWhereAttributeIs($entityIdsFilter, $attribute, $expectedValue)
     {
-        // @codingStandardsIgnoreStart
         $serializeData = $this->serializer->serialize($entityIdsFilter);
+        // phpcs:ignore
         $entityIdsFilterHash = md5($serializeData);
-        // @codingStandardsIgnoreEnd
 
         if (!isset($this->entitiesWhereAttributesIs[$entityIdsFilterHash][$attribute->getId()][$expectedValue])) {
             $linkField = $this->getLinkField();
@@ -755,6 +757,8 @@ class Category extends AbstractResource
             'custom_layout_update'
         )->addAttributeToSelect(
             'custom_apply_to_products'
+        )->addAttributeToSelect(
+            'custom_layout_update_file'
         )->addFieldToFilter(
             'entity_id',
             ['in' => $pathIds]
@@ -1124,5 +1128,24 @@ class Category extends AbstractResource
                 ->get(\Magento\Catalog\Model\ResourceModel\Category\AggregateCount::class);
         }
         return $this->aggregateCount;
+    }
+
+    /**
+     * Cast category path ids to int.
+     *
+     * @param DataObject $object
+     * @return void
+     */
+    private function castPathIdsToInt(DataObject $object)
+    {
+        $pathIds = explode('/', (string)$object->getPath());
+
+        array_walk(
+            $pathIds,
+            function (&$pathId) {
+                $pathId = (int)$pathId;
+            }
+        );
+        $object->setPath(implode('/', $pathIds));
     }
 }

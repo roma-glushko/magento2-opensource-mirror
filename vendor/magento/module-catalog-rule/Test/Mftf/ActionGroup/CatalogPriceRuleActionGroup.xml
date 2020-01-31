@@ -150,7 +150,7 @@
         <fillField selector="{{AdminCatalogPriceRuleActionsSection.discountAmount}}" userInput="{{catalogRule.discount_amount}}" stepKey="fillDiscountValue"/>
         <selectOption selector="{{AdminCatalogPriceRuleActionsSection.disregardRules}}" userInput="Yes" stepKey="discardSubsequentRules"/>
     </actionGroup>
-    
+
     <actionGroup name="AdminFillCatalogRuleConditionActionGroup">
         <arguments>
             <argument name="condition" type="string"/>
@@ -181,4 +181,13 @@
         <see selector="{{AdminMessagesSection.success}}" userInput="Updated rules applied." stepKey="assertApplySuccess"/>
     </actionGroup>
 
+    <actionGroup name="AdminSaveCatalogPriceRuleActionGroup" extends="AdminSaveAndApplyCatalogPriceRuleActionGroup">
+        <annotations>
+            <description>EXTENDS: AdminSaveAndApplyCatalogPriceRuleActionGroup. Clicks on the Save button.</description>
+        </annotations>
+
+        <remove keyForRemoval="saveAndApply"/>
+        <remove keyForRemoval="assertApplySuccess"/>
+        <click selector="{{AdminMainActionsSection.save}}" after="scrollToPageTop" stepKey="clickSaveButton"/>
+    </actionGroup>
 </actionGroups>

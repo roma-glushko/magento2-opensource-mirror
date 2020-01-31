@@ -27,4 +27,16 @@
             <click selector="{{AdminDataGridTableSection.firstRow}}" after="clickOrderApplyFilters" stepKey="openOrderViewPage"/>
             <waitForPageLoad after="openOrderViewPage" stepKey="waitForOrderViewPageOpened"/>
         </actionGroup>
+
+        <actionGroup name="OpenOrderByName" extends="filterOrderGridById">
+            <arguments>
+                <argument name="orderName" type="string"/>
+            </arguments>
+            <remove keyForRemoval="openOrderGridFilters"/>
+            <remove keyForRemoval="fillOrderIdFilter"/>
+            <remove keyForRemoval="clickOrderApplyFilters"/>
+
+            <click selector="{{AdminDataGridTableSection.rowTemplate(orderName)}}" stepKey="openOrderViewPage"/>
+            <waitForPageLoad after="openOrderViewPage" stepKey="waitForOrderViewPageOpened"/>
+        </actionGroup>
 </actionGroups>

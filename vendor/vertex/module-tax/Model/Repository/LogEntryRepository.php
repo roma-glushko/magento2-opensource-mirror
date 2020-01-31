@@ -155,10 +155,8 @@ class LogEntryRepository implements LogEntryRepositoryInterface
             [
                 LogEntryInterface::FIELD_ID => $logEntry->getId(),
                 LogEntryInterface::FIELD_TYPE => $logEntry->getType(),
-                LogEntryInterface::FIELD_CART_ID => $logEntry->getCartId(),
                 LogEntryInterface::FIELD_ORDER_ID => $logEntry->getOrderId(),
                 LogEntryInterface::FIELD_TOTAL_TAX => $logEntry->getTotalTax(),
-                LogEntryInterface::FIELD_SOURCE_PATH => $logEntry->getSourcePath(),
                 LogEntryInterface::FIELD_TAX_AREA_ID => $logEntry->getTaxAreaId(),
                 LogEntryInterface::FIELD_SUBTOTAL => $logEntry->getSubTotal(),
                 LogEntryInterface::FIELD_TOTAL => $logEntry->getTotal(),
@@ -166,6 +164,7 @@ class LogEntryRepository implements LogEntryRepositoryInterface
                 LogEntryInterface::FIELD_REQUEST_DATE => $logEntry->getDate(),
                 LogEntryInterface::FIELD_REQUEST_XML => $logEntry->getRequestXml(),
                 LogEntryInterface::FIELD_RESPONSE_XML => $logEntry->getResponseXml(),
+                LogEntryInterface::FIELD_RESPONSE_TIME => $logEntry->getResponseTime(),
             ]
         );
         return $model;

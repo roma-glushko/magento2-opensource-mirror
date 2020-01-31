@@ -119,7 +119,7 @@ class EavAttributeExtractor
             $attribute = $this->attributeFactory->create();
             $attributeCode = $prefix . '.' . $eavAttribute->getAttributeCode();
             $attribute->setAttributeCode($attributeCode);
-            $attribute->setLabel($eavAttribute->getDefaultFrontendLabel());
+            $attribute->setLabel($eavAttribute->getDefaultFrontendLabel() ?: $eavAttribute->getAttributeCode());
             $attribute->setOptionGroup(__($optionGroup)->render());
             $attribute->setType($type);
             $attribute->setProcessor($processor);

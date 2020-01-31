@@ -40,8 +40,7 @@ class CustomOptionsSource implements OptionSourceInterface
     public function __construct(
         Config $config,
         $scopeCode = null,
-        $scopeType =
-        ScopeInterface::SCOPE_WEBSITE
+        $scopeType = ScopeInterface::SCOPE_WEBSITE
     ) {
         $this->config = $config;
         $this->scopeCode = $scopeCode;
@@ -100,9 +99,10 @@ class CustomOptionsSource implements OptionSourceInterface
                 continue;
             }
 
+            $typeNamePieces = static::TYPE_NAMES[$pieces[1]];
             $availableFlexFields[] = [
                 'value' => $pieces[1] . '.' . $fieldId,
-                'label' => __(static::TYPE_NAMES[$pieces[1]] . ' Field #%1', $fieldId),
+                'label' => __($typeNamePieces . ' Field #%1', $fieldId),
                 'type' => $indexedType[$pieces[1]]
             ];
         }

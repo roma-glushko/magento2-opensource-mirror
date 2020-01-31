@@ -48,6 +48,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         $this->upgradeOneOneZeoToTwoTwoOne($setup, $context, $connection);
         $this->upgradeTwoThreeSixToTwoFiveFour($setup, $context);
+        $this->upgradeThreeTwoTwo($setup, $context);
 
         $setup->endSetup();
     }
@@ -451,6 +452,30 @@ class UpgradeSchema implements UpgradeSchemaInterface
 
         if (version_compare($context->getVersion(), '2.5.4', '<')) {
             $this->modifyWishlistTable($setup);
+        }
+    }
+
+    /**
+     * Adds last_subscribed_date to email_contact
+     *
+     * @param SchemaSetupInterface $setup
+     * @param ModuleContextInterface $context
+     */
+    private function upgradeThreeTwoTwo(
+        SchemaSetupInterface $setup,
+        ModuleContextInterface $context
+    ) {
+        if (version_compare($context->getVersion(), '3.2.2', '<')) {
+            $definition = [
+                'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                'nullable' => true,
+                'comment' => 'Last subscribed date'
+            ];
+            $setup->getConnection()->addColumn(
+                $setup->getTable('email_contact'),
+                'last_subscribed_at',
+                $definition
+            );
         }
     }
 }

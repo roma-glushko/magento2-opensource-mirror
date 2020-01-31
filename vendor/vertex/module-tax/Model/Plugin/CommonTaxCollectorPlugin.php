@@ -87,20 +87,24 @@ class CommonTaxCollectorPlugin
             return $items;
         }
 
-        /** @var QuoteDetailsItemInterface[] $processItems indexed by product sku */
-        $processItems = array_reduce(
+        $result = array_reduce(
             $items,
-            function ($carry, QuoteDetailsItemInterface $item) {
+            static function ($result, QuoteDetailsItemInterface $item) {
                 if ($item->getExtensionAttributes() && $item->getExtensionAttributes()->getVertexIsConfigurable()) {
-                    $carry[strtoupper($item->getExtensionAttributes()->getVertexProductCode())] = $item;
+                    $code = strtoupper($item->getExtensionAttributes()->getVertexProductCode());
+                    $result['processItems'][$code] = $item;
+                    $result['productCodes'][] = $code;
                 }
-                return $carry;
+                return $result;
             },
-            []
+            ['processItems' => [], 'productCodes' => []]
         );
 
+        /** @var QuoteDetailsItemInterface[] $processItems indexed by product sku */
+        $processItems = $result['processItems'];
+
         /** @var string[] $productCodes List of SKUs we want to know the tax classes of */
-        $productCodes = array_keys($processItems);
+        $productCodes = $result['productCodes'];
 
         /** @var SearchCriteriaBuilder $criteriaBuilder */
         $criteriaBuilder = $this->criteriaBuilderFactory->create();

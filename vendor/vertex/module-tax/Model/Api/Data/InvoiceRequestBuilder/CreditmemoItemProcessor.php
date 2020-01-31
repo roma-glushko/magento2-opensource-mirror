@@ -9,11 +9,13 @@ namespace Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder;
 use Magento\Framework\Stdlib\StringUtils;
 use Magento\Sales\Api\Data\CreditmemoInterface;
 use Magento\Sales\Api\Data\CreditmemoItemInterface;
+use Magento\Sales\Api\Data\OrderItemInterface;
 use Vertex\Data\LineItemInterface;
 use Vertex\Data\LineItemInterfaceFactory;
 use Vertex\Services\Invoice\RequestInterface;
 use Vertex\Tax\Model\Api\Data\FlexFieldBuilder;
 use Vertex\Tax\Model\Api\Utility\MapperFactoryProxy;
+use Vertex\Tax\Model\Api\Utility\PriceForTax;
 use Vertex\Tax\Model\Repository\TaxClassNameRepository;
 
 /**
@@ -39,6 +41,9 @@ class CreditmemoItemProcessor implements CreditmemoProcessorInterface
     /** @var MapperFactoryProxy */
     private $mapperFactory;
 
+    /** @var PriceForTax */
+    private $priceForTaxCalculation;
+
     /**
      * @param ItemProcessor $itemProcessor
      * @param LineItemInterfaceFactory $lineItemFactory
@@ -46,6 +51,7 @@ class CreditmemoItemProcessor implements CreditmemoProcessorInterface
      * @param FlexFieldBuilder $flexFieldBuilder
      * @param StringUtils $stringUtils
      * @param MapperFactoryProxy $mapperFactory
+     * @param PriceForTax $priceForTaxCalculation
      */
     public function __construct(
         ItemProcessor $itemProcessor,
@@ -53,7 +59,8 @@ class CreditmemoItemProcessor implements CreditmemoProcessorInterface
         TaxClassNameRepository $taxClassNameRepository,
         FlexFieldBuilder $flexFieldBuilder,
         StringUtils $stringUtils,
-        MapperFactoryProxy $mapperFactory
+        MapperFactoryProxy $mapperFactory,
+        PriceForTax $priceForTaxCalculation
     ) {
         $this->itemProcessor = $itemProcessor;
         $this->lineItemFactory = $lineItemFactory;
@@ -61,6 +68,7 @@ class CreditmemoItemProcessor implements CreditmemoProcessorInterface
         $this->flexFieldBuilder = $flexFieldBuilder;
         $this->stringUtilities = $stringUtils;
         $this->mapperFactory = $mapperFactory;
+        $this->priceForTaxCalculation = $priceForTaxCalculation;
     }
 
     /**
@@ -95,8 +103,8 @@ class CreditmemoItemProcessor implements CreditmemoProcessorInterface
         $taxClasses = [];
 
         foreach ($memoItems as $item) {
-            $product = $products[$item->getSku()];
-            $taxClassAttribute = $product->getCustomAttribute('tax_class_id');
+            $product = $products[$item->getProductId()] ?? false;
+            $taxClassAttribute = $product ? $product->getCustomAttribute('tax_class_id') : false;
             $taxClassId = $taxClassAttribute ? $taxClassAttribute->getValue() : 0;
 
             if ($item->getBaseRowTotal() === null) {
@@ -104,21 +112,28 @@ class CreditmemoItemProcessor implements CreditmemoProcessorInterface
                 continue;
             }
 
+            /** @var OrderItemInterface $orderItem */
+            $orderItem = $item->getOrderItem();
+
             /** @var LineItemInterface $lineItem */
             $lineItem = $this->lineItemFactory->create();
             $lineItem->setProductCode(
                 $this->stringUtilities->substr($item->getSku(), 0, $lineItemMapper->getProductCodeMaxLength())
             );
+
+            $baseItemPrice = $item->getBasePrice();
+            $basePriceOriginal = $this->priceForTaxCalculation->getPriceForTaxCalculationFromOrderItem(
+                $orderItem,
+                $baseItemPrice
+            );
+            $extendedPrice = ($basePriceOriginal * $item->getQty()) - $item->getBaseDiscountAmount();
             $lineItem->setQuantity($item->getQty());
-            $lineItem->setUnitPrice(-1 * $item->getBasePrice());
-            $lineItem->setExtendedPrice(-1 * ($item->getBaseRowTotal() - $item->getBaseDiscountAmount()));
+            $lineItem->setUnitPrice(-1 * $baseItemPrice);
+            $lineItem->setExtendedPrice(-1 * $extendedPrice);
             $lineItem->setLineItemId($item->getOrderItemId());
 
             $taxClasses[$item->getOrderItemId()] = $taxClassId;
 
-            if ($lineItem->getExtendedPrice() == 0) {
-                continue;
-            }
             $lineItem->setFlexibleFields($this->flexFieldBuilder->buildAllFromCreditMemoItem($item, $storeId));
             $lineItems[] = $lineItem;
         }

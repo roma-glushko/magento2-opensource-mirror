@@ -101,15 +101,13 @@ class LogEntryRepositoryTest extends TestCase
         /** @var LogEntry $modelToSave */
         $modelToSave = $this->getObject(LogEntry::class);
         $modelToSave->setType(uniqid('type-'));
-        $modelToSave->setCartId(mt_rand());
-        $modelToSave->setOrderId(mt_rand());
-        $modelToSave->setTotalTax(mt_rand() / 100);
-        $modelToSave->setSourcePath(uniqid('path-'));
-        $modelToSave->setTaxAreaId(mt_rand());
-        $modelToSave->setSubTotal(mt_rand() / 100);
-        $modelToSave->setTotal(mt_rand() / 100);
+        $modelToSave->setOrderId(random_int(0, PHP_INT_MAX));
+        $modelToSave->setTotalTax(random_int(0, PHP_INT_MAX) / 100);
+        $modelToSave->setTaxAreaId(random_int(0, PHP_INT_MAX));
+        $modelToSave->setSubTotal(random_int(0, PHP_INT_MAX) / 100);
+        $modelToSave->setTotal(random_int(0, PHP_INT_MAX) / 100);
         $modelToSave->setLookupResult(uniqid('lookup-result-'));
-        $modelToSave->setDate(date('Y-m-d', mt_rand(strtotime('2015-01-01'), strtotime('2017-01-01'))));
+        $modelToSave->setDate(date('Y-m-d', random_int(strtotime('2015-01-01'), strtotime('2017-01-01'))));
         $modelToSave->setRequestXml(uniqid('request-xml-'));
         $modelToSave->setResponseXml(uniqid('response-xml-'));
 
@@ -120,10 +118,8 @@ class LogEntryRepositoryTest extends TestCase
                 $this->callback(
                     function ($parameter) use ($modelToSave) {
                         $this->assertEquals($modelToSave->getType(), $parameter->getType());
-                        $this->assertEquals($modelToSave->getCartId(), $parameter->getCartId());
                         $this->assertEquals($modelToSave->getOrderId(), $parameter->getOrderId());
                         $this->assertEquals($modelToSave->getTotalTax(), $parameter->getTotalTax());
-                        $this->assertEquals($modelToSave->getSourcePath(), $parameter->getSourcePath());
                         $this->assertEquals($modelToSave->getTaxAreaId(), $parameter->getTaxAreaId());
                         $this->assertEquals($modelToSave->getSubTotal(), $parameter->getSubTotal());
                         $this->assertEquals($modelToSave->getTotal(), $parameter->getTotal());

@@ -145,10 +145,6 @@ class ShippingProcessor
      */
     private function buildLineItems($totalShipmentCost, $shippingCosts, $orderAmount, $order)
     {
-        if ($orderAmount == 0) {
-            return [];
-        }
-
         $storeCode = $order->getStoreId();
         $lineItemMapper = $this->mapperFactory->getForClass(LineItemInterface::class, $storeCode);
 
@@ -159,12 +155,8 @@ class ShippingProcessor
         $lineItems = [];
 
         foreach ($shippingCosts as $method => $cost) {
-            $percentage = $cost / $orderAmount; // as a decimal
+            $percentage = (float)$orderAmount === 0.0 ? 0 : $cost / $orderAmount; // as a decimal
             $invoicedCost = round($totalShipmentCost * $percentage, 2);
-
-            if ($invoicedCost == 0) {
-                continue;
-            }
 
             /** @var LineItemInterface $lineItem */
             $lineItem = $this->lineItemFactory->create();

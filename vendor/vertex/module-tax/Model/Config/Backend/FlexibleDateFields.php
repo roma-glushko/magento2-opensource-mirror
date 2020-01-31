@@ -85,7 +85,7 @@ class FlexibleDateFields extends Value
     protected function _afterLoad()
     {
         parent::_afterLoad();
-        $value = $this->flexibleFieldSerializer->unserialize($this->getValue());
+        $value = $this->flexibleFieldSerializer->unserialize($this->getValue()) ?? [];
         $result = $this->utilities->assembleValues($value, 5);
         $this->setValue($result);
         return $this;

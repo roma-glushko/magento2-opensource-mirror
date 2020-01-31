@@ -4,66 +4,74 @@
  * @copyright 2019 Mediotype. All rights reserved.
  */
 
+declare(strict_types=1);
+
 namespace Vertex\Tax\Model\FlexField\Cache;
+
+use Magento\Framework\Serialize\SerializerInterface;
+use Vertex\Tax\Model\FlexField\FlexFieldProcessableAttribute;
+use Vertex\Tax\Model\FlexField\FlexFieldProcessableAttributeFactory;
 
 /**
  * Handle data exchange serialization for StorageInterface.
  */
 class Serializer
 {
-    /**
-     * Convert from serialized to array or string format
-     *
-     * @param array|string $value
-     * @return string
-     */
-    public function unserialize($value)
-    {
-        if (is_array($value)) {
-            foreach ($value as $k => $v) {
-                if ($this->isSerialized($v)) {
-                    $result[$k] = $this->unserialize($v);
-                }
-            }
-        }
+    /** @var SerializerInterface */
+    private $serializer;
 
-        return \unserialize($value, ['allow_classes' => false]);
+    /** @var FlexFieldProcessableAttributeFactory */
+    private $attributeFactory;
+
+    public function __construct(
+        SerializerInterface $serializer,
+        FlexFieldProcessableAttributeFactory $attributeFactory
+    ) {
+        $this->serializer = $serializer;
+        $this->attributeFactory = $attributeFactory;
     }
 
-    /**
-     * Check if value is serialized string
-     *
-     * @param string $value
-     * @return boolean
-     */
-    private function isSerialized($value)
+    public function unserialize(string $value): array
     {
-        if (getType($value) === 'object') {
-            return false;
+        $attributesFromCache = $this->serializer->unserialize($value);
+        $attributes = [];
+        foreach ($attributes as $k => $attributeData) {
+            $attributes[$k] = $this->revertProcessableAttributeToArrayAction($attributeData);
         }
 
-        return (boolean) preg_match('/^((s|i|d|b|a|O|C):|N;)/', $value);
+        return $attributes;
     }
 
-    /**
-     * Convert from serialized format
-     *
-     * @param string|array|object $value
-     * @return string|array|object
-     */
-    public function serialize($value)
+    public function serialize(array $attributes): string
     {
-        if (is_array($value)) {
-            foreach ($value as $k => $v) {
-                if (!$this->isSerialized($v)) {
-                    $attributes[$k] = $this->serialize($v);
-                }
-            }
-        }
-        if ($value instanceof \Closure) {
-            $value = $value();
+        $serializable = [];
+        foreach ($attributes as $k => $attribute) {
+            $serializable[$k] = $this->convertProcessableAttributeToArray($attribute);
         }
 
-        return \serialize($value);
+        return $this->serializer->serialize($serializable);
+    }
+
+    private function convertProcessableAttributeToArray(FlexFieldProcessableAttribute $attribute): array
+    {
+        return [
+            'attributeCode' => $attribute->getAttributeCode(),
+            'label' => $attribute->getLabel(),
+            'optionGroup' => $attribute->getOptionGroup(),
+            'type' => $attribute->getType(),
+            'processor' => $attribute->getProcessor(),
+        ];
+    }
+
+    private function revertProcessableAttributeToArrayAction(array $attributeData): FlexFieldProcessableAttribute
+    {
+        $attribute = $this->attributeFactory->create();
+        $attribute->setAttributeCode($attributeData['attributeCode']);
+        $attribute->setLabel($attributeData['label']);
+        $attribute->setOptionGroup($attributeData['optionGroup']);
+        $attribute->setType($attributeData['type']);
+        $attribute->setProcessor($attributeData['processor']);
+
+        return $attribute;
     }
 }

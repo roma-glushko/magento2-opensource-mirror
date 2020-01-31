@@ -3,7 +3,12 @@
  * @author     Mediotype                     https://www.mediotype.com/
  */
 
-define(['uiComponent', 'ko', 'uiLayout'], function (Component, ko, layout) {
+define([
+    'uiComponent',
+    'ko',
+    'uiLayout',
+    'Vertex_Tax/js/form/caption-formatter'
+], function (Component, ko, layout, captionFormatter) {
     'use strict';
 
     return Component.extend({
@@ -12,6 +17,7 @@ define(['uiComponent', 'ko', 'uiLayout'], function (Component, ko, layout) {
             fieldType: '', // One of code, numeric, or date
             tableId: '',
             template: 'Vertex_Tax/flex-field-table',
+            defaultPlaceholder: 'No Data',
             selectOptions: [
                 {
                     label: 'No Data',
@@ -38,43 +44,56 @@ define(['uiComponent', 'ko', 'uiLayout'], function (Component, ko, layout) {
          * Initialize the select components and link them to the form values
          */
         initializeFields: function () {
-            var i, name, toLayOut = [];
+            var i, name, fieldId, fieldSource, toLayOut = [];
 
             for (i in this.values) {
                 if (this.values.hasOwnProperty(i)) {
-                    name = this.fieldType + 'FlexField' + this.values[i]['field_id'];
-
-                    toLayOut.push({
-                        component: 'Vertex_Tax/js/form/flex-field-select',
-                        template: 'ui/grid/filters/elements/ui-select',
-                        parent: this.name,
-                        name: name,
-                        dataScope: '',
-                        multiple: false,
-                        selectType: 'optgroup',
-                        selectedPlaceholders: {
-                            defaultPlaceholder: 'No Data'
-                        },
-                        showOpenLevelsActionIcon: true,
-                        presets: {
-                            optgroup: {
-                                showOpenLevelsActionIcon: true
-                            }
-                        },
-                        filterOptions: true,
-                        isDisplayMissingValuePlaceholder: true,
-                        options: this.selectOptions,
-                        value: this.values[i]['field_source']
-                    });
+                    fieldSource = this.values[i]['field_source'];
+                    fieldId = this.values[i]['field_id'];
+                    name = this.fieldType + 'FlexField' + fieldId;
 
                     this.retrieveFields.push({
-                        fieldId: this.values[i]['field_id'],
+                        fieldId: fieldId,
+                        fieldSource: fieldSource,
+                        fieldLabel: this.getFieldLabelFromSource(fieldSource),
+                        editMode: ko.observable(false),
                         childName: name
                     });
                 }
             }
 
             layout(toLayOut);
+        },
+
+        /**
+         * Replace the label value with a dropdown
+         * @param {Object} child
+         */
+        enableEditMode: function (child) {
+            child.editMode(true);
+
+            layout([{
+                component: 'Vertex_Tax/js/form/flex-field-select',
+                template: 'ui/grid/filters/elements/ui-select',
+                parent: this.name,
+                name: child.childName,
+                dataScope: '',
+                multiple: false,
+                selectType: 'optgroup',
+                selectedPlaceholders: {
+                    defaultPlaceholder: this.defaultPlaceholder
+                },
+                showOpenLevelsActionIcon: true,
+                presets: {
+                    optgroup: {
+                        showOpenLevelsActionIcon: true
+                    }
+                },
+                filterOptions: true,
+                isDisplayMissingValuePlaceholder: true,
+                options: this.selectOptions,
+                value: child.fieldSource
+            }]);
         },
 
         /**
@@ -85,6 +104,29 @@ define(['uiComponent', 'ko', 'uiLayout'], function (Component, ko, layout) {
          */
         getFieldIdInputName: function (fieldId) {
             return this.elementName + '[' + fieldId + '][field_id]';
+        },
+
+        /**
+         * Retrieve the label for the selected source
+         * @param {String} source
+         * @returns {String}
+         */
+        getFieldLabelFromSource: function (source) {
+            var i, j, selected;
+
+            for (i in this.selectOptions) {
+                if (this.selectOptions[i].optgroup === undefined) {
+                    continue;
+                }
+                for (j in this.selectOptions[i].optgroup) {
+                    selected = this.selectOptions[i].optgroup[j];
+
+                    if (selected.value === source) {
+                        return captionFormatter.getFormattedValue(selected);
+                    }
+                }
+            }
+            return this.defaultPlaceholder;
         },
 
         /**

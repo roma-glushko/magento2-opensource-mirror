@@ -10,6 +10,8 @@ use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductRepositoryInterface;
 use Magento\Framework\Api\SearchCriteriaBuilder;
 use Magento\Framework\Api\SearchCriteriaBuilderFactory;
+use Magento\Sales\Api\Data\OrderItemInterface;
+use Magento\Sales\Api\OrderItemRepositoryInterface;
 
 /**
  * Contains logic common to processing items on Invoices and Creditmemos
@@ -22,16 +24,17 @@ class ItemProcessor
     /** @var ProductRepositoryInterface */
     private $productRepository;
 
-    /**
-     * @param SearchCriteriaBuilderFactory $criteriaBuilderFactory
-     * @param ProductRepositoryInterface $productRepository
-     */
+    /** @var OrderItemRepositoryInterface  */
+    private $orderItemRepository;
+
     public function __construct(
         SearchCriteriaBuilderFactory $criteriaBuilderFactory,
-        ProductRepositoryInterface $productRepository
+        ProductRepositoryInterface $productRepository,
+        OrderItemRepositoryInterface $orderItemRepository
     ) {
         $this->criteriaBuilderFactory = $criteriaBuilderFactory;
         $this->productRepository = $productRepository;
+        $this->orderItemRepository = $orderItemRepository;
     }
 
     /**
@@ -57,16 +60,30 @@ class ItemProcessor
     {
         /** @var SearchCriteriaBuilder $criteriaBuilder */
         $criteriaBuilder = $this->criteriaBuilderFactory->create();
-        $criteriaBuilder->addFilter(ProductInterface::SKU, $productSku, 'in');
+        $criteriaBuilder->addFilter(OrderItemInterface::SKU, $productSku, 'in');
         $criteria = $criteriaBuilder->create();
 
-        $items = $this->productRepository->getList($criteria)->getItems();
+        $items = $this->orderItemRepository->getList($criteria)->getItems();
+
+        $productIds = [];
+        foreach ($items as $item) {
+            if ($item->getBaseRowTotal() === null) {
+                continue;
+            }
+            $productIds[$item->getProductId()] = $item->getProductId();
+        }
+
+        $productCriteriaBuilder = $this->criteriaBuilderFactory->create();
+        $productCriteriaBuilder->addFilter('entity_id', $productIds, 'in');
+
+        $productSearchCriteria = $productCriteriaBuilder->create();
+        $products = $this->productRepository->getList($productSearchCriteria)->getItems();
 
         /** @var ProductInterface[] $products */
         return array_reduce(
-            $items,
+            $products,
             function (array $carry, ProductInterface $product) {
-                $carry[$product->getSku()] = $product;
+                $carry[$product->getId()] = $product;
                 return $carry;
             },
             []

@@ -95,6 +95,36 @@ class UpgradeSchema implements UpgradeSchemaInterface
         if (version_compare($context->getVersion(), '100.4.0') < 0) {
             $this->createCustomOptionFlexFieldTable($setup);
         }
+      
+        if (version_compare($context->getVersion(), '100.5.0') < 0) {
+            $this->addResponseTimeToLogTable($setup);
+        }
+    }
+
+    /**
+     * Create a response_time column on the logging table
+     *
+     * @param SchemaSetupInterface $setup
+     * @return void
+     */
+    private function addResponseTimeToLogTable(SchemaSetupInterface $setup)
+    {
+        $tableName = $setup->getTable('vertex_taxrequest');
+
+        if (!$setup->getConnection()->tableColumnExists($tableName, 'response_time')) {
+            $setup->getConnection()->addColumn(
+                $tableName,
+                'response_time',
+                [
+                    'type' => Table::TYPE_INTEGER,
+                    'nullable' => true,
+                    'default' => null,
+                    'unsigned' => true,
+                    'comment' => 'Milliseconds taken for Vertex API call to complete',
+                    'after' => 'request_type',
+                ]
+            );
+        }
     }
 
     /**

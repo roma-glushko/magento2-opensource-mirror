@@ -31,6 +31,20 @@
                         </a>
                     <?php endif; ?>
                 </p>
+
+                <div class="temando-deprecation-warning message message-warning">
+                    <p>
+                        <?= $block->escapeHtml(__('Please note: ')) ?>
+                        <?= $block->escapeHtml(__(
+                            'Magento Shipping is retiring and will be removed from future Magento Commerce releases.'
+                        )) ?>
+                        <?= $block->escapeHtml(__('We kindly advise permanently turning off the integration.')) ?>
+                        <?= /** @noEscpae */ __(
+                            'You can read more about the details <a href="%1" target="_blank">here</a>.',
+                            'https://magento.com/shipping'
+                        )?>
+                    </p>
+                </div>
             </td>
         </tr>
     </tbody>

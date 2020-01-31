@@ -2,7 +2,14 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="carriers">
-            <group id="temando" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="temando" translate="label" type="text" sortOrder="999" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="temando_active" type="hidden"  sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_class>temando-activation-flag</frontend_class>
+                    <config_path>carriers/temando/active</config_path>
+                </field>
+                <depends>
+                    <field id="carriers/temando/temando_active">1</field>
+                </depends>
                 <label>Magento Shipping</label>
                 <field id="activation" type="note" translate="label" sortOrder="0" showInDefault="1" showInWebsite="0" showInStore="0">
                     <frontend_model>Temando\Shipping\Block\Adminhtml\System\Config\Form\Field\Activation</frontend_model>

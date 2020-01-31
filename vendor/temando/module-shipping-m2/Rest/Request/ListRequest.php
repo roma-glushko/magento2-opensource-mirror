@@ -36,7 +36,7 @@ class ListRequest implements ListRequestInterface
      * @param int $limit
      * @param string[] $filter
      */
-    public function __construct($offset, $limit, array $filter = [])
+    public function __construct($offset = 0, $limit = 1000, array $filter = [])
     {
         $this->limit  = $limit;
         $this->offset = $offset;

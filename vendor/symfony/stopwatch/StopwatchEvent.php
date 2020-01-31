@@ -50,7 +50,7 @@ class StopwatchEvent
      *
      * @throws \InvalidArgumentException When the raw time is not valid
      */
-    public function __construct($origin, $category = null, $morePrecision = false)
+    public function __construct(float $origin, string $category = null, bool $morePrecision = false)
     {
         $this->origin = $this->formatTime($origin);
         $this->category = \is_string($category) ? $category : 'default';
@@ -154,7 +154,15 @@ class StopwatchEvent
      */
     public function getStartTime()
     {
-        return isset($this->periods[0]) ? $this->periods[0]->getStartTime() : 0;
+        if (isset($this->periods[0])) {
+            return $this->periods[0]->getStartTime();
+        }
+
+        if ($this->started) {
+            return $this->started[0];
+        }
+
+        return 0;
     }
 
     /**
@@ -177,12 +185,10 @@ class StopwatchEvent
     public function getDuration()
     {
         $periods = $this->periods;
-        $stopped = \count($periods);
-        $left = \count($this->started) - $stopped;
+        $left = \count($this->started);
 
-        for ($i = 0; $i < $left; ++$i) {
-            $index = $stopped + $i;
-            $periods[] = new StopwatchPeriod($this->started[$index], $this->getNow(), $this->morePrecision);
+        for ($i = $left - 1; $i >= 0; --$i) {
+            $periods[] = new StopwatchPeriod($this->started[$i], $this->getNow(), $this->morePrecision);
         }
 
         $total = 0;
@@ -223,18 +229,10 @@ class StopwatchEvent
     /**
      * Formats a time.
      *
-     * @param int|float $time A raw time
-     *
-     * @return float The formatted time
-     *
      * @throws \InvalidArgumentException When the raw time is not valid
      */
-    private function formatTime($time)
+    private function formatTime(float $time): float
     {
-        if (!is_numeric($time)) {
-            throw new \InvalidArgumentException('The time must be a numerical value');
-        }
-
         return round($time, 1);
     }
 

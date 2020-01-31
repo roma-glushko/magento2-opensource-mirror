@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ .'/ResetMocks.php';
 
-class StubTraitTest extends \Codeception\PHPUnit\TestCase
+class StubTraitTest extends \PHPUnit\Framework\TestCase
 {
     use ResetMocks;
     use \Codeception\Test\Feature\Stub;
@@ -10,7 +10,7 @@ class StubTraitTest extends \Codeception\PHPUnit\TestCase
      */
     protected $dummy;
 
-    public function _setUp()
+    public function setUp()
     {
         require_once $file = __DIR__. '/_data/DummyOverloadableClass.php';
         require_once $file = __DIR__. '/_data/DummyClass.php';
@@ -61,7 +61,7 @@ class StubTraitTest extends \Codeception\PHPUnit\TestCase
         try {
             $this->dummy->helloWorld();
         } catch (Exception $e) {
-            $this->assertTrue(strpos('was not expected to be called more than once', $e->getMessage()) >= 0, 'String contains');
+            $this->assertContains('was not expected to be called more than once', $e->getMessage());
             $this->resetMockObjects();
             return;
         }

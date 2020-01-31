@@ -74,8 +74,7 @@ class Data extends AbstractHelper
         StoreManagerInterface $storeManager,
         ClientIp $clientIpHelper,
         StatusFactory $moduleStatusFactory
-    )
-    {
+    ) {
         parent::__construct($context);
         $this->moduleList = $moduleList;
         $this->encryptor = $encryptor;
@@ -185,6 +184,20 @@ class Data extends AbstractHelper
         ];
 
         return array_key_exists($paymentRegion, $currencyCodeMap) ? $currencyCodeMap[$paymentRegion] : '';
+    }
+
+    /**
+     * @return array
+     */
+    public function getScaRegions($scope = ScopeInterface::SCOPE_STORE, $scopeCode = null)
+    {
+        $regionList = $this->scopeConfig->getValue(
+            'payment/amazon_payment/sca_regions',
+            $scope,
+            $scopeCode
+        );
+        $regions = explode(',', $regionList);
+        return is_array($regions) ? $regions : [];
     }
 
     /*

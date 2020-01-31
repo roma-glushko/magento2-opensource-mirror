@@ -12,7 +12,6 @@ use Vertex\Services\Invoice\RequestInterface;
 use Vertex\Services\Invoice\RequestInterfaceFactory;
 use Vertex\Tax\Model\Api\Data\CustomerBuilder;
 use Vertex\Tax\Model\Api\Data\SellerBuilder;
-use Vertex\Tax\Model\Api\Utility\DeliveryTerm;
 use Vertex\Tax\Model\Api\Utility\MapperFactoryProxy;
 use Vertex\Tax\Model\Config;
 use Vertex\Tax\Model\DateTimeImmutableFactory;
@@ -30,9 +29,6 @@ class OrderProcessor
 
     /** @var DateTimeImmutableFactory */
     private $dateTimeFactory;
-
-    /** @var DeliveryTerm */
-    private $deliveryTerm;
 
     /** @var OrderProcessorInterface */
     private $processorPool;
@@ -54,7 +50,6 @@ class OrderProcessor
      * @param DateTimeImmutableFactory $dateTimeFactory
      * @param SellerBuilder $sellerBuilder
      * @param CustomerBuilder $customerBuilder
-     * @param DeliveryTerm $deliveryTerm
      * @param Config $config
      * @param OrderProcessorInterface $processorPool
      * @param StringUtils $stringUtils
@@ -65,7 +60,6 @@ class OrderProcessor
         DateTimeImmutableFactory $dateTimeFactory,
         SellerBuilder $sellerBuilder,
         CustomerBuilder $customerBuilder,
-        DeliveryTerm $deliveryTerm,
         Config $config,
         OrderProcessorInterface $processorPool,
         StringUtils $stringUtils,
@@ -75,7 +69,6 @@ class OrderProcessor
         $this->dateTimeFactory = $dateTimeFactory;
         $this->sellerBuilder = $sellerBuilder;
         $this->customerBuilder = $customerBuilder;
-        $this->deliveryTerm = $deliveryTerm;
         $this->config = $config;
         $this->processorPool = $processorPool;
         $this->stringUtilities = $stringUtils;
@@ -118,7 +111,6 @@ class OrderProcessor
         $request->setSeller($seller);
         $request->setCustomer($customer);
         $request->setCurrencyCode($order->getBaseCurrencyCode());
-        $this->deliveryTerm->addIfApplicable($request);
 
         $configLocationCode = $this->config->getLocationCode($scopeCode);
 

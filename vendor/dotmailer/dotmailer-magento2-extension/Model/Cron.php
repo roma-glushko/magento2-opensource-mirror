@@ -172,7 +172,7 @@ class Cron
     {
         //sync subscribers
         $subscriberModel = $this->subscriberFactory->create();
-        $result = $subscriberModel->sync();
+        $result = $subscriberModel->runExport();
 
         //un-subscribe suppressed contacts
         $subscriberModel->unsubscribe();

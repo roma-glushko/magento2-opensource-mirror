@@ -14,6 +14,7 @@
              dependsOnModule="Temando_Shipping"
              resource="Temando_Shipping::shipping"
              parent="Magento_Backend::stores"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::carriers"
              title="Carriers"
@@ -22,6 +23,7 @@
              resource="Temando_Shipping::carriers"
              parent="Temando_Shipping::shipping"
              action="temando/configuration_carrier/index"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::locations"
              title="Locations"
@@ -30,6 +32,7 @@
              resource="Temando_Shipping::locations"
              parent="Temando_Shipping::shipping"
              action="temando/configuration_location/index"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::packaging"
              title="Packaging"
@@ -38,6 +41,7 @@
              resource="Temando_Shipping::packaging"
              parent="Temando_Shipping::shipping"
              action="temando/configuration_packaging/index"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::experiences"
              title="Experiences"
@@ -47,6 +51,7 @@
              parent="Temando_Shipping::shipping"
              action="temando/configuration_portal/experience"
              target="_blank"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::dispatches"
              title="Dispatches"
@@ -55,6 +60,7 @@
              resource="Temando_Shipping::dispatches"
              parent="Magento_Sales::sales_operation"
              action="temando/dispatch/index"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::batches"
              title="Batches"
@@ -63,6 +69,7 @@
              resource="Temando_Shipping::batches"
              parent="Magento_Sales::sales_operation"
              action="temando/batch/index"
+             dependsOnConfig="carriers/temando/active"
         />
     </menu>
 </config>

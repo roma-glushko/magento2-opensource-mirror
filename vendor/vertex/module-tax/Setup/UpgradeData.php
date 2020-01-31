@@ -14,6 +14,10 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Setup\ModuleContextInterface;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\UpgradeDataInterface;
+use Magento\Framework\App\Cache\StateInterface;
+use Magento\Framework\App\Cache\State;
+use Vertex\Tax\Model\Cache\Type;
+use Magento\Framework\App\DeploymentConfig;
 
 /**
  * Data Upgrade Script
@@ -22,6 +26,9 @@ use Magento\Framework\Setup\UpgradeDataInterface;
  */
 class UpgradeData implements UpgradeDataInterface
 {
+    /** @var StateInterface */
+    private $cacheState;
+
     /** @var AttributeRepositoryInterface */
     private $attributeRepository;
 
@@ -31,19 +38,28 @@ class UpgradeData implements UpgradeDataInterface
     /** @var Config */
     private $eavConfig;
 
+    /** @var DeploymentConfig */
+    private $deploymentConfig;
+
     /**
      * @param Config $eavConfig
      * @param AttributeRepositoryInterface $attributeRepository
      * @param TypeListInterface $cacheTypeList
+     * @param StateInterface $cacheState
+     * @param DeploymentConfig $deploymentConfig
      */
     public function __construct(
         Config $eavConfig,
         AttributeRepositoryInterface $attributeRepository,
-        TypeListInterface $cacheTypeList
+        TypeListInterface $cacheTypeList,
+        StateInterface $cacheState,
+        DeploymentConfig $deploymentConfig
     ) {
         $this->eavConfig = $eavConfig;
         $this->attributeRepository = $attributeRepository;
         $this->cacheTypeList = $cacheTypeList;
+        $this->cacheState = $cacheState;
+        $this->deploymentConfig = $deploymentConfig;
     }
 
     /**
@@ -60,6 +76,9 @@ class UpgradeData implements UpgradeDataInterface
         if (version_compare($context->getVersion(), '100.2.1') < 0) {
             $this->migrateVertexCalculationSetting($setup);
         }
+        if (version_compare($context->getVersion(), '100.5.1') < 0) {
+            $this->enableCacheType($setup);
+        }
     }
 
     /**
@@ -75,6 +94,22 @@ class UpgradeData implements UpgradeDataInterface
             return;
         }
         $this->attributeRepository->delete($attribute);
+    }
+
+    /**
+     * Enable the cache type if undefined in the config
+     *
+     * @param ModuleDataSetupInterface $setup
+     * @return void
+     */
+    private function enableCacheType(ModuleDataSetupInterface $setup)
+    {
+        $statuses = $this->deploymentConfig->getConfigData(State::CACHE_KEY);
+
+        if (!array_key_exists(Type::TYPE_IDENTIFIER, $statuses)) {
+            $this->cacheState->setEnabled(Type::TYPE_IDENTIFIER, true);
+            $this->cacheState->persist();
+        }
     }
 
     /**

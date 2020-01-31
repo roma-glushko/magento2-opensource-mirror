@@ -76,7 +76,7 @@ class LogEntryRotator
         $findCriteriaBuilder->setPageSize(100);
         $findCriteria = $findCriteriaBuilder->create();
 
-        while(($entries = $this->logEntryRepository->getList($findCriteria)) && $entries->getTotalCount()) {
+        while (($entries = $this->logEntryRepository->getList($findCriteria)) && $entries->getTotalCount()) {
             /** @var LogEntrySearchResultsInterface $entries */
 
             if ($this->config->getRotationAction() === RotationAction::TYPE_EXPORT) {

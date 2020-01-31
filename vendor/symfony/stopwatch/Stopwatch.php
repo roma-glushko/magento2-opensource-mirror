@@ -11,12 +11,14 @@
 
 namespace Symfony\Component\Stopwatch;
 
+use Symfony\Contracts\Service\ResetInterface;
+
 /**
  * Stopwatch provides a way to profile code.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class Stopwatch
+class Stopwatch implements ResetInterface
 {
     /**
      * @var bool
@@ -36,7 +38,7 @@ class Stopwatch
     /**
      * @param bool $morePrecision If true, time is stored as float to keep the original microsecond precision
      */
-    public function __construct($morePrecision = false)
+    public function __construct(bool $morePrecision = false)
     {
         $this->morePrecision = $morePrecision;
         $this->reset();

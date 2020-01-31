@@ -99,9 +99,18 @@ class Subscriber
     }
 
     /**
+     * Sync subscribers and unsubscribes in EC
+     */
+    public function sync(\DateTime $from = null)
+    {
+        $this->runExport();
+        $this->unsubscribe();
+    }
+
+    /**
      * @return array
      */
-    public function sync()
+    public function runExport()
     {
         $response    = ['success' => true, 'message' => ''];
         $this->start = microtime(true);
@@ -113,6 +122,7 @@ class Subscriber
             $apiEnabled = $this->helper->isEnabled($websiteId);
             $addressBook = $this->helper->getSubscriberAddressBook($websiteId);
             $subscriberEnabled = $this->helper->isSubscriberSyncEnabled($websiteId);
+
             //enabled and mapped
             if ($apiEnabled && $addressBook && $subscriberEnabled) {
                 //ready to start sync
@@ -161,6 +171,7 @@ class Subscriber
         //Guest Subscribers
         $subscribersAreGuest = $emailContactModel->getSubscribersToImport($website, $limit, false);
         $subscribersGuestEmails = $subscribersAreGuest->getColumnValues('email');
+
         $existInSales = [];
         //Only if subscriber with sales data enabled
         if ($isSubscriberSalesDataEnabled && ! empty($subscribersGuestEmails)) {
@@ -170,6 +181,7 @@ class Subscriber
         $emailsNotInSales = array_diff($subscribersGuestEmails, $existInSales);
         $customerSubscribers = $subscribersAreCustomers->getColumnValues('email');
         $emailsWithNoSaleData = array_merge($emailsNotInSales, $customerSubscribers);
+
         //subscriber that are customer or/and the one that do not exist in sales order table.
         $subscribersWithNoSaleData = [];
         if (! empty($emailsWithNoSaleData)) {
@@ -235,52 +247,21 @@ class Subscriber
                 continue;
             }
 
-            $suppressedEmails = $this->getSuppressedContacts($website);
-        }
-        //Mark suppressed contacts
-        if (! empty($suppressedEmails)) {
-            $result['customers'] = $this->emailContactResource->unsubscribe($suppressedEmails);
-        }
-        return $result;
-    }
-
-    /**
-     * @param \Magento\Store\Api\Data\WebsiteInterface $website
-     * @return array
-     */
-    private function getSuppressedContacts($website)
-    {
-        $limit = 5;
-        $maxToSelect = 1000;
-        $skip = $i = 0;
-        $contacts = [];
-        $suppressedEmails = [];
-        $date = $this->timezone->date()->sub($this->dateIntervalFactory->create(['interval_spec' => 'PT24H']));
-        $dateString = $date->format(\DateTime::W3C);
-        $client = $this->helper->getWebsiteApiClient($website);
-
-        //there is a maximum of request we need to loop to get more suppressed contacts
-        for ($i=0; $i<= $limit; $i++) {
-            $apiContacts = $client->getContactsSuppressedSinceDate($dateString, $maxToSelect, $skip);
-
-            // skip no more contacts or the api request failed
-            if (empty($apiContacts) || isset($apiContacts->message)) {
-                break;
-            }
-            $contacts = array_merge($contacts, $apiContacts);
-            $skip += 1000;
-        }
-
-        // Contacts to un-subscribe
-        foreach ($contacts as $apiContact) {
-            if (isset($apiContact->suppressedContact)) {
-                $suppressedContactEmail = $apiContact->suppressedContact->email;
-                if (!in_array($suppressedContactEmail, $suppressedEmails, true)) {
-                    $suppressedEmails[] = $suppressedContactEmail;
+            // add unique contact emails
+            foreach ($this->helper->getSuppressedContacts($website) as $suppressedContact) {
+                if (!array_key_exists($suppressedContact['email'], $suppressedEmails)) {
+                    $suppressedEmails[$suppressedContact['email']] = [
+                        'email' => $suppressedContact['email'],
+                        'removed_at' => $suppressedContact['removed_at'],
+                    ];
                 }
             }
         }
 
-        return $suppressedEmails;
+        //Mark suppressed contacts
+        if (! empty($suppressedEmails)) {
+            $result['customers'] = $this->emailContactResource->unsubscribeWithResubscriptionCheck(array_values($suppressedEmails));
+        }
+        return $result;
     }
 }

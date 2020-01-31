@@ -3,7 +3,11 @@
  * @author     Mediotype                     https://www.mediotype.com/
  */
 
-define(['underscore', 'Magento_Ui/js/form/element/ui-select'], function (_, Component) {
+define([
+    'underscore',
+    'Magento_Ui/js/form/element/ui-select',
+    'Vertex_Tax/js/form/caption-formatter'
+], function (_, Component, captionFormatter) {
     'use strict';
 
     return Component.extend({
@@ -20,9 +24,7 @@ define(['underscore', 'Magento_Ui/js/form/element/ui-select'], function (_, Comp
          * Set Caption
          */
         setCaption: function () {
-            var length,
-                label = '',
-                selected;
+            var length, label;
 
             if (!_.isArray(this.value()) && this.value()) {
                 length = 1;
@@ -34,12 +36,7 @@ define(['underscore', 'Magento_Ui/js/form/element/ui-select'], function (_, Comp
             }
 
             if (length && this.getSelected().length) {
-                selected = this.getSelected()[0];
-
-                if (selected.parent) {
-                    label = selected.parent + ' - ';
-                }
-                label += selected.label;
+                label = captionFormatter.getFormattedValue(this.getSelected()[0]);
                 this.placeholder(label);
             } else {
                 this.placeholder(this.selectedPlaceholders.defaultPlaceholder);
