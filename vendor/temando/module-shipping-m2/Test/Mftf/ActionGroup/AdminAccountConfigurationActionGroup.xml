@@ -15,17 +15,11 @@
         <magentoCLI stepKey="flushCache" command="cache:flush config" after="removeCollectionPoints" />
     </actionGroup>
     <!-- Enable the shipping method -->
-    <actionGroup name="AdminEnableShippingMethod" extends="AdminNavigateToShippingConfiguration">
-        <scrollTo stepKey="scrollToEnabled" y="85" selector="{{MagentoShippingSection.isTemandoActive}}" after="waitForShippingConfigurationToLoad" />
-        <selectOption selector="{{MagentoShippingSection.isTemandoActive}}" stepKey="seeShippingEnabled" userInput="1" />
-        <fillField stepKey="fillApiEndpoint" selector="{{MagentoShippingSection.sessionEndpoint}}" userInput="{{_CREDS.carriers_temando_session_endpoint}}" />
-        <fillField stepKey="fillAccountId" selector="{{MagentoShippingSection.accountId}}" userInput="{{_CREDS.carriers_temando_account_id}}" />
-        <fillField stepKey="fillBearerToken" selector="{{MagentoShippingSection.bearerToken}}" userInput="{{_CREDS.carriers_temando_bearer_token}}" />
-
-        <click stepKey="clickSave" selector="{{MagentoShippingSection.ButtonSave}}" />
-        <seeInCurrentUrl stepKey="returnToConfigurationPage" url="{{TemandoAdminConfigPage.url}}" />
-        <waitForPageLoad stepKey="waitForSuccess" />
-        <see stepKey="seeSuccessMessage" userInput="{{ConfigurationMessages.saved}}" />
+    <actionGroup name="AdminEnableShippingMethod">
+        <magentoCLI stepKey="setEndpoint" command="config:set carriers/temando/session_endpoint '{{_CREDS.carriers_temando_session_endpoint}}'" />
+        <magentoCLI stepKey="setAccountId" command="config:set carriers/temando/account_id '{{_CREDS.carriers_temando_account_id}}'" />
+        <magentoCLI stepKey="setBearerToken" command="config:set carriers/temando/bearer_token '{{_CREDS.carriers_temando_bearer_token}}'" />
+        <magentoCLI stepKey="enableShippingMethod" command="config:set carriers/temando/active 1" />
     </actionGroup>
     <!-- Admin menu links -->
     <actionGroup name="AdminShippingModuleMenuLinks">

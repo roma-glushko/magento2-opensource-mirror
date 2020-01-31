@@ -64,13 +64,18 @@ class AddProductToCart
     {
         if ($this->scopeConfig->getValue(\Magento\GoogleShoppingAds\Cron\GTagRetriever::PATH_GTAG_CONFIG)) {
             $superAttributes = $subject->getRequest()->getParam('super_attribute');
-            if (is_array($superAttributes) && !empty($superAttributes)) {
-                $product = $this->productRepository->getById((int)$subject->getRequest()->getParam('product'));
-                $itemId = $this->configurableType->getProductByAttributes($superAttributes, $product)->getId();
+            if (!$this->isSwatchOptionsSelected($superAttributes)) {
+                return $result;
+            }
+
+            $productId = (int)$subject->getRequest()->getParam('product');
+            $product = $this->configurableType->getProductByAttributes($superAttributes, $this->productRepository->getById($productId));
+            if ($product && $product->getId()) {
+                $itemId = $product->getId();
             } elseif ((int)$subject->getRequest()->getParam('selected_configurable_option')) {
                 $itemId = (int)$subject->getRequest()->getParam('selected_configurable_option');
             } else {
-                $itemId = (int)$subject->getRequest()->getParam('product');
+                $itemId = $productId;
             }
 
             $addedQuantity = (int)$subject->getRequest()->getParam('qty');
@@ -85,7 +90,21 @@ class AddProductToCart
                 ]]
             );
         }
-
         return $result;
+    }
+
+    private function isSwatchOptionsSelected($attribute): bool
+    {
+        $isOptionsSelected = true;
+        if (is_array($attribute) && !empty($attribute)) {
+            $optionsSelected = array_filter($attribute, function($value) {
+                return $value !== null & $value !== '';
+            });
+
+            if (count($optionsSelected) !== count($attribute)) {
+                $isOptionsSelected = false;
+            }
+        }
+        return $isOptionsSelected;
     }
 }

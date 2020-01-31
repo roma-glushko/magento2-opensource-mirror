@@ -2,6 +2,51 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.9.1 - 2019-10-28
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#123](https://github.com/zendframework/zend-session/pull/123) fixes a bug preventing two first hash functions from `hash_algos()`
+  (usually `md2` and `md4`) from being used in `SessionConfig::setHashFunction`.
+
+## 2.9.0 - 2019-09-20
+
+### Added
+
+- [#115](https://github.com/zendframework/zend-session/pull/115) adds support for PHP 7.3.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- [#115](https://github.com/zendframework/zend-session/pull/115) removes support for zend-stdlib v2 releases.
+
+### Fixed
+
+- Nothing.
+
 ## 2.8.7 - 2019-09-19
 
 ### Added
@@ -86,7 +131,7 @@ All notable changes to this project will be documented in this file, in reverse 
 ### Fixed
 
 - [#108](https://github.com/zendframework/zend-session/pull/108) fixes a dependency
-  conflict in `composer.json` which prevented `phpunit/phpunit` 6.5 or newer from 
+  conflict in `composer.json` which prevented `phpunit/phpunit` 6.5 or newer from
   being installed together with `zendframework/zend-session`.
 
 ## 2.8.4 - 2018-01-31

@@ -59,15 +59,17 @@ class DeleteProductFromShoppingCart
             $itemId = (int)$subject->getRequest()->getParam('id');
             $quoteItems = $this->cart->getQuote();
             $item = $quoteItems->getItemById($itemId);
-            $this->cookieSender->sendCookie(
-                GtagQuoteItemsHandler::REGISTRY_NAMESPACE_REMOVE_FROM_CART,
-                [[
-                    'sku'   => $item->getSku(),
-                    'name'  => $item->getName(),
-                    'price' => $item->getPrice(),
-                    'qty'   => $item->getQty()
-                ]]
-            );
+            if ($item) {
+                $this->cookieSender->sendCookie(
+                    GtagQuoteItemsHandler::REGISTRY_NAMESPACE_REMOVE_FROM_CART,
+                    [[
+                        'sku'   => $item->getSku(),
+                        'name'  => $item->getName(),
+                        'price' => $item->getPrice(),
+                        'qty'   => $item->getQty()
+                    ]]
+                );
+            }
         }
 
         return $result;

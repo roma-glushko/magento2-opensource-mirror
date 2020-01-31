@@ -60,6 +60,15 @@
                             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                             <comment>Allow customer data to be shared with Klarna before customer places the order. (Enabling this option has an effect in the US only)</comment>
                         </field>
+                        <field id="data_sharing_on_load" translate="label comment" type="select" showInDefault="1" showInWebsite="1"
+                               showInStore="1">
+                            <label>Data sharing on load</label>
+                            <config_path>payment/klarna_kp/data_sharing_onload</config_path>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                            <comment>If this is disabled, it will mean that Klarna will not receive the consumers billing and shipping
+                                addresses until "authorize" is called. If there are any errors with the address, the authorization will fail and the user
+                                will be instructed to return to a previous step to fix the issue.</comment>
+                        </field>
                         <field id="sort_order" translate="label" type="text" showInDefault="1" showInWebsite="1"
                                showInStore="1">
                             <label>Sort Order</label>

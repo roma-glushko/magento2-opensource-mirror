@@ -13,20 +13,21 @@ namespace Klarna\Kp\Setup\Patch\Data;
 use Magento\Framework\Setup\ModuleDataSetupInterface;
 use Magento\Framework\Setup\Patch\DataPatchInterface;
 use Magento\Framework\Setup\Patch\PatchVersionInterface;
+use Magento\Sales\Setup\SalesSetup;
 
 class RemoveHtmlTag implements DataPatchInterface, PatchVersionInterface
 {
     /**
-     * @var ModuleDataSetupInterface
+     * @var SalesSetup
      */
-    private $moduleDataSetup;
+    private $salesSetup;
 
     /**
-     * @param ModuleDataSetupInterface $moduleDataSetup
+     * @param SalesSetup $salesSetup
      */
-    public function __construct(ModuleDataSetupInterface $moduleDataSetup)
+    public function __construct(SalesSetup $salesSetup)
     {
-        $this->moduleDataSetup = $moduleDataSetup;
+        $this->salesSetup = $salesSetup;
     }
 
     /**
@@ -34,9 +35,9 @@ class RemoveHtmlTag implements DataPatchInterface, PatchVersionInterface
      */
     public function apply()
     {
-        $this->moduleDataSetup->getConnection()->startSetup();
+        $this->salesSetup->getConnection()->startSetup();
         $this->removeStrongHtmlTag();
-        $this->moduleDataSetup->getConnection()->endSetup();
+        $this->salesSetup->getConnection()->endSetup();
     }
 
     /**
@@ -74,9 +75,9 @@ class RemoveHtmlTag implements DataPatchInterface, PatchVersionInterface
         ];
         foreach ($values as $value) {
             $manipulation = new \Zend_Db_Expr("replace(`additional_information`, '$value', '')");
-            $this->moduleDataSetup->getConnection()
+            $this->salesSetup->getConnection()
                 ->update(
-                    $this->moduleDataSetup->getTable('sales_order_payment'),
+                    $this->salesSetup->getTable('sales_order_payment'),
                     ['additional_information' => $manipulation],
                     "`method` = 'klarna_kp'"
                 );

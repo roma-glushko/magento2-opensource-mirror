@@ -1,4 +1,28 @@
 
+6.4.1 / 2019-11-04
+==================
+
+  * MAGE-1410 Add MFTF test for percentage coupon as guest
+  * MAGE-1411 Add MFTF test for percentage coupon as logged in customer
+  * MAGE-1413 Add MFTF test for virtual products with percentage coupon
+  * MAGE-1414 Add MFTF test for partial payment with gift card as guest
+  * MAGE-1415 Add MFTF test for free shipping as guest
+  * MAGE-1416 Add MFTF test for bundled products as logged in customer
+  * MAGE-1417 Add MFTF test for bundled products as guest
+  * MAGE-1481 Clear organizationName if B2B is disabled
+  * MAGE-1501 MFTF: Only login and out of admin when needed
+  * MAGE-1502 MFTF: Create commerce group and split suite into two
+  * MAGE-1504 Fix bug with passing the wrong address object
+
+6.4.0 / 2019-10-22
+==================
+ 
+  * MAGE-2 Add unit tests
+  * MAGE-518 Fix issue with placing a reorder
+  * MAGE-698 Add switch to allow disabling sharing info during load JS call
+  * MAGE-1254 Fix issues with split DB
+  * MAGE-1412 Add MFTF test for virtual products
+
 6.3.4 / 2019-08-28
 ==================
 

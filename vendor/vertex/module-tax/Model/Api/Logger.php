@@ -7,6 +7,7 @@
 namespace Vertex\Tax\Model\Api;
 
 use Magento\Framework\Exception\CouldNotSaveException;
+use Vertex\Services\SoapCallResponseInterface;
 use Vertex\Tax\Model\Api\Utility\SoapClientRegistry;
 use Vertex\Tax\Model\Config;
 use Vertex\Tax\Model\ExceptionLogger;
@@ -58,13 +59,15 @@ class Logger
      */
     public function wrapCall(callable $callable, $type, $scopeCode = null)
     {
+        $result = null;
         try {
-            return $callable();
+            $result = $callable();
+            return $result;
         } catch (\Exception $exception) {
             $this->logException($exception);
             throw $exception;
         } finally {
-            $this->logRequest($type, $scopeCode);
+            $this->logRequest($type, $result, $scopeCode);
         }
     }
 
@@ -83,21 +86,25 @@ class Logger
      * Log an API call to the database
      *
      * @param string $requestType
+     * @param mixed $result
      * @param string|null $scopeCode Store ID
      * @return void
      */
-    private function logRequest($requestType, $scopeCode = null)
+    private function logRequest($requestType, $result, $scopeCode = null)
     {
         if (!$this->config->isLoggingEnabled($scopeCode)) {
             return;
         }
+
+        $responseTime = $result instanceof SoapCallResponseInterface ? $result->getHttpCallTime() : null;
 
         $soapClient = $this->soapClientRegistry->getLastClient();
         try {
             $this->requestLogger->log(
                 $requestType,
                 $soapClient ? $soapClient->__getLastRequest() : null,
-                $soapClient ? $soapClient->__getLastResponse() : null
+                $soapClient ? $soapClient->__getLastResponse() : null,
+                $responseTime
             );
         } catch (CouldNotSaveException $originalException) {
             $loggedException = new \Exception('Failed to log Vertex Request', 0, $originalException);

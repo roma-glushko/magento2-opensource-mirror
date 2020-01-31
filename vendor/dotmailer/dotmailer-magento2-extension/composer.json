@@ -2,7 +2,7 @@
   "name": "dotmailer/dotmailer-magento2-extension",
   "description": "dotmailer integration for magento 2",
   "type": "magento2-module",
-  "version": "3.3.0",
+  "version": "4.1.0",
   "license": "MIT",
   "repositories": [
     {
@@ -26,6 +26,7 @@
     "magento/module-backend": ">=100 <102",
     "magento/module-checkout": "100.*",
     "magento/module-ui": ">=100 <102",
+    "magento/module-theme": ">=100 <102",
     "magento/module-cron": "100.*",
     "magento/module-customer": ">=100 <103",
     "magento/module-eav": ">=100 <103",
@@ -56,5 +57,8 @@
     "psr-4": {
       "Dotdigitalgroup\\Email\\": ""
     }
+  },
+  "suggest": {
+    "dotmailer/dotmailer-magento2-extension-chat": "Adds Engagement Cloud Chat to your Magento store"
   }
 }

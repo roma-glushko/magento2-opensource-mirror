@@ -141,7 +141,9 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
             ParagonIE_Sodium_Compat::memzero($nonce);
             ParagonIE_Sodium_Compat::memzero($ephKeypair);
         } catch (SodiumException $ex) {
-            unset($ephKeypair);
+            if (isset($ephKeypair)) {
+                unset($ephKeypair);
+            }
         }
         return $res;
     }
@@ -328,7 +330,9 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
             ParagonIE_Sodium_Compat::memzero($nonce);
             ParagonIE_Sodium_Compat::memzero($ephKeypair);
         } catch (SodiumException $ex) {
-            unset($ephKeypair);
+            if (isset($ephKeypair)) {
+                unset($ephKeypair);
+            }
         }
         return $res;
     }
@@ -679,7 +683,11 @@ class ParagonIE_Sodium_File extends ParagonIE_Sodium_Core_Util
         }
 
         /* Security checks */
-        if (ParagonIE_Sodium_Core_Ed25519::check_S_lt_L(self::substr($sig, 32, 32))) {
+        if (
+            (ParagonIE_Sodium_Core_Ed25519::chrToInt($sig[63]) & 240)
+                &&
+            ParagonIE_Sodium_Core_Ed25519::check_S_lt_L(self::substr($sig, 32, 32))
+        ) {
             throw new SodiumException('S < L - Invalid signature');
         }
         if (ParagonIE_Sodium_Core_Ed25519::small_order($sig)) {

@@ -5,7 +5,7 @@
             <api>
                 <enabled>0</enabled>
                 <username></username>
-                <password></password>
+                <password backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
             </api>
         </connector_api_credentials>
         <sync_settings>
@@ -145,6 +145,7 @@
         <transactional_emails>
             <ddg_transactional>
                 <enabled>0</enabled>
+                <password backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
             </ddg_transactional>
         </transactional_emails>
         <connector_configuration>
@@ -170,6 +171,7 @@
                 <expire_time>24</expire_time>
             </abandoned_carts>
             <tracking>
+                <integration_insights>1</integration_insights>
                 <roi_enabled>1</roi_enabled>
                 <page_enabled>1</page_enabled>
                 <script_version></script_version>
@@ -283,6 +285,7 @@
                 <transactional_data>50</transactional_data>
                 <importer_bulk_limit>1</importer_bulk_limit>
                 <subscriber_sales_data_enabled>0</subscriber_sales_data_enabled>
+                <strip_pub_from_media_paths>0</strip_pub_from_media_paths>
             </import_settings>
             <sync_settings>
                 <setup_data_fields></setup_data_fields>

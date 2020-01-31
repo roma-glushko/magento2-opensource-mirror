@@ -23,15 +23,18 @@
         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
     <default>
         <msp_securitysuite_recaptcha>
+            <general>
+                <type>recaptcha_v3</type>
+            </general>
             <backend>
                 <enabled>0</enabled>
                 <size>normal</size>
                 <theme>light</theme>
+                <min_score>0.9</min_score>
             </backend>
             <frontend>
                 <enabled>0</enabled>
                 <size>normal</size>
-                <type>standard</type>
                 <position>inline</position>
                 <theme>light</theme>
                 <lang></lang>
@@ -42,6 +45,7 @@
                 <enabled_review>1</enabled_review>
                 <enabled_newsletter>1</enabled_newsletter>
                 <enabled_sendfriend>1</enabled_sendfriend>
+                <min_score>0.6</min_score>
             </frontend>
         </msp_securitysuite_recaptcha>
     </default>

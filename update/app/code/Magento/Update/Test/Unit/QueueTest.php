@@ -1,13 +1,13 @@
 <?php
 /**
- * Copyright © 2013-2017 Magento, Inc. All rights reserved.
+ * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
 namespace Magento\Update\Test\Unit;
 
 use Magento\Update\Queue;
 
-class QueueTest extends \PHPUnit_Framework_TestCase
+class QueueTest extends \PHPUnit\Framework\TestCase
 {
     /**
      * @var \PHPUnit_Framework_MockObject_MockObject|\Magento\Update\Queue\Reader
@@ -31,9 +31,15 @@ class QueueTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->reader = $this->getMock('Magento\Update\Queue\Reader', [], [], '', false);
-        $this->writer = $this->getMock('Magento\Update\Queue\Writer', [], [], '', false);
-        $this->jobFactory = $this->getMock('Magento\Update\Queue\JobFactory', [], [], '', false);
+        $this->reader = $this->getMockBuilder('Magento\Update\Queue\Reader')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->writer = $this->getMockBuilder('Magento\Update\Queue\Writer')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->jobFactory = $this->getMockBuilder('Magento\Update\Queue\JobFactory')
+            ->disableOriginalConstructor()
+            ->getMock();
         $this->queue = new Queue($this->reader, $this->writer, $this->jobFactory);
     }
 

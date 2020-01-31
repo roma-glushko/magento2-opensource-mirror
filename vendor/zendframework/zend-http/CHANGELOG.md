@@ -2,6 +2,120 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.11.2 - 2019-12-30
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#207](https://github.com/zendframework/zend-http/pull/207) fixes case sensitivity for SameSite directive.
+
+## 2.11.1 - 2019-12-04
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#204](https://github.com/zendframework/zend-http/pull/204) fixes numerous header classes to cast field value to string (since `HeaderInterface::getFieldValue()` specifies a return value of a string).
+
+- [#182](https://github.com/zendframework/zend-http/pull/182) fixes detecting base uri in Request. Now `argv` is used only for CLI request as a fallback to detect script filename.
+
+## 2.11.0 - 2019-12-03
+
+### Added
+
+- [#175](https://github.com/zendframework/zend-http/pull/175) adds support for Content Security Policy Level 3 Header directives.
+
+- [#200](https://github.com/zendframework/zend-http/pull/200) adds support for additional directives in Content Security Policy header:
+  - `block-all-mixed-content`,
+  - `require-sri-for`,
+  - `trusted-types`,
+  - `upgrade-insecure-requests`.
+
+- [#177](https://github.com/zendframework/zend-http/pull/177) adds support for Feature Policy header.
+
+- [#186](https://github.com/zendframework/zend-http/pull/186) adds support for SameSite directive in Set-Cookie header.
+
+### Changed
+
+- [#194](https://github.com/zendframework/zend-http/pull/194) changes range of valid HTTP status codes to 100-599 (inclusive).
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#200](https://github.com/zendframework/zend-http/pull/200) fixes support for directives without value in Content Security Policy header.
+
+## 2.10.1 - 2019-12-02
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- [#190](https://github.com/zendframework/zend-http/pull/190) changes `ContentSecurityPolicy` to allow multiple values. Before it was not possible to provide multiple headers of that type.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#184](https://github.com/zendframework/zend-http/pull/184) fixes responses for request through the proxy with `HTTP/1.1 200 Connection established` header. 
+
+- [#187](https://github.com/zendframework/zend-http/pull/187) fixes infinite recursion on invalid header. Now `InvalidArgumentException` exception is thrown. 
+
+- [#188](https://github.com/zendframework/zend-http/pull/188) fixes `Client::setCookies` method to properly handle array of `SetCookie` objects. Per [documentation](https://docs.zendframework.com/zend-http/client/cookies/#usage) it should be allowed. 
+
+- [#189](https://github.com/zendframework/zend-http/pull/189) fixes `Headers::toArray` method to properly handle headers of the same type. Behaviour was different depends how header has been attached (`addHeader` or `addHeaderLine` broken before). 
+
+- [#198](https://github.com/zendframework/zend-http/pull/198) fixes merging options in Curl adapter. It was not possible to override integer-key options (constants) set via constructor with method `setOptions`. 
+
+- [#198](https://github.com/zendframework/zend-http/pull/198) fixes allowed options type in `Proxy::setOptions`. `Traversable`, `array` or `Zend\Config` object is expected.
+
+- [#198](https://github.com/zendframework/zend-http/pull/198) fixes various issues with `Proxy` adapter.
+
+- [#199](https://github.com/zendframework/zend-http/pull/199) fixes saving resource to the file when streaming while client supports compression. Before, incorrectly, compressed resource was saved into the file.
+
 ## 2.10.0 - 2019-02-19
 
 ### Added

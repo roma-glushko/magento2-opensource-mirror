@@ -9,6 +9,9 @@
             <stories value="Confirm shipping rates appear for admin orders." />
             <severity value="CRITICAL" />
             <group value="Temando_Shipping_Admin_Processing" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4494" />
         </annotations>
         <before>

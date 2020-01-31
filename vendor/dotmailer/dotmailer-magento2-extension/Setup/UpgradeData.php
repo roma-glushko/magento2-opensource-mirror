@@ -2,18 +2,19 @@
 
 namespace Dotdigitalgroup\Email\Setup;
 
-use Magento\Framework\Setup\UpgradeDataInterface;
-use Magento\Framework\Setup\ModuleContextInterface;
-use Magento\Framework\Setup\ModuleDataSetupInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Store\Model\ScopeInterface;
 use Dotdigitalgroup\Email\Helper\Config;
+use Dotdigitalgroup\Email\Helper\Data;
 use Dotdigitalgroup\Email\Helper\Transactional;
 use Magento\Config\Model\ResourceModel\Config\Data\CollectionFactory;
-use Dotdigitalgroup\Email\Helper\Data;
 use Magento\Framework\App\Config\ReinitableConfigInterface;
-use Magento\User\Model\ResourceModel\User\CollectionFactory as UserCollectionFactory;
+use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Encryption\EncryptorInterface;
+use Magento\Framework\Setup\ModuleContextInterface;
+use Magento\Framework\Setup\ModuleDataSetupInterface;
+use Magento\Framework\Setup\UpgradeDataInterface;
+use Magento\Store\Model\ScopeInterface;
 use Magento\User\Model\ResourceModel\User;
+use Magento\User\Model\ResourceModel\User\CollectionFactory as UserCollectionFactory;
 
 /**
  * @codeCoverageIgnore
@@ -46,26 +47,33 @@ class UpgradeData implements UpgradeDataInterface
     private $userResource;
 
     /**
+     * @var EncryptorInterface
+     */
+    private $encryptor;
+
+    /**
      * UpgradeData constructor.
-     *
      * @param Data $helper
      * @param CollectionFactory $configCollectionFactory
      * @param ReinitableConfigInterface $config
      * @param UserCollectionFactory $userCollectionFactory
      * @param User $userResource
+     * @param EncryptorInterface $encryptor
      */
     public function __construct(
         Data $helper,
         CollectionFactory $configCollectionFactory,
         ReinitableConfigInterface $config,
         UserCollectionFactory $userCollectionFactory,
-        User $userResource
+        User $userResource,
+        EncryptorInterface $encryptor
     ) {
         $this->configCollectionFactory = $configCollectionFactory;
         $this->helper = $helper;
         $this->config = $config;
         $this->userCollectionFactory = $userCollectionFactory;
         $this->userResource = $userResource;
+        $this->encryptor = $encryptor;
     }
 
     /**
@@ -121,6 +129,8 @@ class UpgradeData implements UpgradeDataInterface
             $this->config->reinit();
         }
 
+        $this->upgradeFourOhOne($setup, $context);
+
         $installer->endSetup();
     }
 
@@ -145,7 +155,7 @@ class UpgradeData implements UpgradeDataInterface
     private function encryptAndSaveRefreshToken($user)
     {
         $user->setRefreshToken(
-            $this->helper->encryptor->encrypt($user->getRefreshToken())
+            $this->encryptor->encrypt($user->getRefreshToken())
         );
         $this->userResource->save($user);
     }
@@ -197,11 +207,39 @@ class UpgradeData implements UpgradeDataInterface
             if ($value) {
                 $this->helper->saveConfigData(
                     $path,
-                    $this->helper->encryptor->encrypt($value),
+                    $this->encryptor->encrypt($value),
                     $scope,
                     $id
                 );
             }
+        }
+    }
+
+    /**
+     * Maps 'imported' data to 'processed' in email_catalog.
+     * Released in 4.0.1, this replaces the previous updateThreeFourTwo.
+     * For merchants on 3.4.2 <> 4.0.0 no data upgrade is required.
+     *
+     * @param SchemaSetupInterface $setup
+     * @param ModuleContextInterface $context
+     */
+    private function upgradeFourOhOne(
+        ModuleDataSetupInterface $setup,
+        ModuleContextInterface $context
+    ) {
+        if (version_compare($context->getVersion(), '3.4.2', '<')) {
+            $catalogTable = $setup->getTable(Schema::EMAIL_CATALOG_TABLE);
+
+            $setup->getConnection()->update(
+                $catalogTable,
+                [
+                    'processed' => 1
+                ],
+                [
+                    'imported' => 1,
+                    'modified IS NULL OR modified = 0'
+                ]
+            );
         }
     }
 }

@@ -1038,14 +1038,21 @@ class InstallSchema implements InstallSchemaInterface
             \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
             null,
             ['unsigned' => true, 'nullable' => true],
-            'Product Imported'
+            'Product imported [deprecated]'
         )
         ->addColumn(
             'modified',
             \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
             null,
             ['unsigned' => true, 'nullable' => true],
-            'Product Modified'
+            'Product modified [deprecated]'
+        )
+        ->addColumn(
+            'processed',
+            \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+            null,
+            ['unsigned' => true, 'nullable' => false],
+            'Product processed'
         )
         ->addColumn(
             'created_at',
@@ -1060,6 +1067,13 @@ class InstallSchema implements InstallSchemaInterface
             null,
             [],
             'Update Time'
+        )
+        ->addColumn(
+            'last_imported_at',
+            \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+            null,
+            [],
+            'Last imported date'
         );
     }
 
@@ -1080,16 +1094,9 @@ class InstallSchema implements InstallSchemaInterface
         ->addIndex(
             $installer->getIdxName(
                 $installer->getTable(Schema::EMAIL_CATALOG_TABLE),
-                ['imported']
+                ['processed']
             ),
-            ['imported']
-        )
-        ->addIndex(
-            $installer->getIdxName(
-                $installer->getTable(Schema::EMAIL_CATALOG_TABLE),
-                ['modified']
-            ),
-            ['modified']
+            ['processed']
         )
         ->addIndex(
             $installer->getIdxName(
@@ -1104,6 +1111,13 @@ class InstallSchema implements InstallSchemaInterface
                 ['updated_at']
             ),
             ['updated_at']
+        )
+        ->addIndex(
+            $installer->getIdxName(
+                $installer->getTable(Schema::EMAIL_CATALOG_TABLE),
+                ['last_imported_at']
+            ),
+            ['last_imported_at']
         );
     }
 
@@ -1446,7 +1460,7 @@ class InstallSchema implements InstallSchemaInterface
             \Magento\Framework\DB\Ddl\Table::TYPE_TEXT,
             255,
             ['nullable' => false],
-            'Entrolment Status'
+            'Enrolment Status'
         )
         ->addColumn(
             'email',

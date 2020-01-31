@@ -14,20 +14,29 @@
         </thead>
         <tbody>
         <!-- ko foreach: retrieveFields -->
-        <tr>
-            <td>
-                <input type="hidden"
-                       data-bind="attr: { name: $parent.getFieldIdInputName(fieldId) }, value: fieldId"/>
-                <span data-bind="text: fieldId"></span>
-            </td>
-            <td>
-                <input type="hidden"
-                       data-bind="attr: { name: $parent.getFieldValueInputName(fieldId) }, value: $parent.getChild(childName) ? $parent.getChild(childName).value : ''"/>
-                <!-- ko with: $parent.getChild(childName) -->
-                    <!-- ko template: getTemplate() --><!-- /ko -->
-                <!-- /ko -->
-            </td>
-        </tr>
+            <tr>
+                <td>
+                    <input type="hidden"
+                           data-bind="attr: { name: $parent.getFieldIdInputName(fieldId) }, value: fieldId"/>
+                    <span data-bind="text: fieldId"></span>
+                </td>
+                <td>
+                    <input type="hidden"
+                           data-bind="attr: { name: $parent.getFieldValueInputName(fieldId) }, value: $parent.getChild(childName) ? $parent.getChild(childName).value : fieldSource"/>
+
+                    <!-- ko if: editMode() -->
+                        <!-- ko with: $parent.getChild(childName) -->
+                            <!-- ko template: getTemplate() --><!-- /ko -->
+                        <!-- /ko -->
+                    <!-- /ko -->
+                    <!-- ko ifnot: editMode() -->
+                        <a class="field-edit" data-bind="click: $parent.enableEditMode.bind($parent)">
+                            <span data-bind="text: fieldLabel"></span>
+                            <span class="icon-edit" data-bind="title: $t('Edit')"></span>
+                        </a>
+                    <!-- /ko -->
+                </td>
+            </tr>
         <!-- /ko -->
         </tbody>
     </table>

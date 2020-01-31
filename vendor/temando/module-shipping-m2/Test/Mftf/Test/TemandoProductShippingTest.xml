@@ -9,6 +9,9 @@
             <stories value="Ship a product with simple prepackaged configuration." />
             <severity value="CRITICAL" />
             <group value="Temando_Shipping_Product_Shipping" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-106" />
         </annotations>
         <before>
@@ -25,14 +28,8 @@
 
         <!-- Start testing -->
         <!-- Enable shipping -->
-        <actionGroup ref="LoginAsAdmin" stepKey="loginToEnableShipping" />
-        <actionGroup ref="AdminNavigateToShippingConfiguration" stepKey="navigateToShippingConfiguration" />
-        <actionGroup ref="AdminUpdateShippingConfigurationWithSave" stepKey="enableShippingMethod">
-            <argument name="isActive" value="{{TemandoConfigurationData.enableMagentoShipping}}" />
-            <argument name="apiEndpoint" value="{{_CREDS.carriers_temando_session_endpoint}}" />
-            <argument name="apiAccountId" value="{{_CREDS.carriers_temando_account_id}}" />
-            <argument name="apiBearerToken" value="{{_CREDS.carriers_temando_bearer_token}}" />
-        </actionGroup>
+        <actionGroup ref="AdminEnableShippingMethod" stepKey="enableShippingMethod" />
+        <actionGroup ref="LoginAsAdmin" stepKey="loginToReconfigureEnabledShipping" />
 
         <!-- Navigate to product -->
         <actionGroup ref="NavigateToProductShippingSection" stepKey="navigateToProductShippingSection">
@@ -85,6 +82,9 @@
             <stories value="Ship a product with simple assigned configuration." />
             <severity value="CRITICAL" />
             <group value="Temando_Product_Shipping" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-106" />
         </annotations>
         <before>
@@ -101,14 +101,8 @@
 
         <!-- Start testing -->
         <!-- Enable shipping -->
-        <actionGroup ref="LoginAsAdmin" stepKey="loginToEnableShipping" />
-        <actionGroup ref="AdminNavigateToShippingConfiguration" stepKey="navigateToShippingConfiguration" />
-        <actionGroup ref="AdminUpdateShippingConfigurationWithSave" stepKey="enableShippingMethod">
-            <argument name="isActive" value="{{TemandoConfigurationData.enableMagentoShipping}}" />
-            <argument name="apiEndpoint" value="{{_CREDS.carriers_temando_session_endpoint}}" />
-            <argument name="apiAccountId" value="{{_CREDS.carriers_temando_account_id}}" />
-            <argument name="apiBearerToken" value="{{_CREDS.carriers_temando_bearer_token}}" />
-        </actionGroup>
+        <actionGroup ref="AdminEnableShippingMethod" stepKey="enableShippingMethod" />
+        <actionGroup ref="LoginAsAdmin" stepKey="loginToReconfigureEnabledShipping" />
 
         <!-- Navigate to product -->
         <actionGroup ref="NavigateToProductShippingSection" stepKey="navigateToProductShippingSection">
@@ -160,6 +154,9 @@
             <stories value="Ship a product with simple configurable configuration." />
             <severity value="CRITICAL" />
             <group value="Temando_Product_Shipping" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-106" />
         </annotations>
         <before>
@@ -269,14 +266,8 @@
 
         <!-- Start testing -->
         <!-- Enable shipping -->
-        <actionGroup ref="LoginAsAdmin" stepKey="loginToEnableShipping" />
-        <actionGroup ref="AdminNavigateToShippingConfiguration" stepKey="navigateToShippingConfiguration" />
-        <actionGroup ref="AdminUpdateShippingConfigurationWithSave" stepKey="enableShippingMethod">
-            <argument name="isActive" value="{{TemandoConfigurationData.enableMagentoShipping}}" />
-            <argument name="apiEndpoint" value="{{_CREDS.carriers_temando_session_endpoint}}" />
-            <argument name="apiAccountId" value="{{_CREDS.carriers_temando_account_id}}" />
-            <argument name="apiBearerToken" value="{{_CREDS.carriers_temando_bearer_token}}" />
-        </actionGroup>
+        <actionGroup ref="AdminEnableShippingMethod" stepKey="enableShippingMethod" />
+        <actionGroup ref="LoginAsAdmin" stepKey="loginToReconfigureEnabledShipping" />
 
         <!-- Navigate to product -->
         <actionGroup ref="NavigateToProductShippingSection" stepKey="navigateToProductShippingSection">
@@ -334,6 +325,9 @@
             <stories value="Ship a product with configurable assigned configuration." />
             <severity value="CRITICAL" />
             <group value="Temando_Product_Shipping" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-106" />
         </annotations>
         <before>
@@ -444,14 +438,8 @@
 
         <!-- Start testing -->
         <!-- Enable shipping -->
-        <actionGroup ref="LoginAsAdmin" stepKey="loginToEnableShipping" />
-        <actionGroup ref="AdminNavigateToShippingConfiguration" stepKey="navigateToShippingConfiguration" />
-        <actionGroup ref="AdminUpdateShippingConfigurationWithSave" stepKey="enableShippingMethod">
-            <argument name="isActive" value="{{TemandoConfigurationData.enableMagentoShipping}}" />
-            <argument name="apiEndpoint" value="{{_CREDS.carriers_temando_session_endpoint}}" />
-            <argument name="apiAccountId" value="{{_CREDS.carriers_temando_account_id}}" />
-            <argument name="apiBearerToken" value="{{_CREDS.carriers_temando_bearer_token}}" />
-        </actionGroup>
+        <actionGroup ref="AdminEnableShippingMethod" stepKey="enableShippingMethod" />
+        <actionGroup ref="LoginAsAdmin" stepKey="loginToReconfigureEnabledShipping" />
 
         <!-- Navigate to product -->
         <actionGroup ref="NavigateToProductShippingSection" stepKey="navigateToProductShippingSection">
@@ -508,6 +496,9 @@
             <stories value="Ship a product with bundled together configuration." />
             <severity value="CRITICAL" />
             <group value="Temando_Product_Shipping" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-106" />
         </annotations>
         <before>
@@ -557,14 +548,8 @@
 
         <!-- Start testing -->
         <!-- Enable shipping -->
-        <actionGroup ref="LoginAsAdmin" stepKey="loginToEnableShipping" />
-        <actionGroup ref="AdminNavigateToShippingConfiguration" stepKey="navigateToShippingConfiguration" />
-        <actionGroup ref="AdminUpdateShippingConfigurationWithSave" stepKey="enableShippingMethod">
-            <argument name="isActive" value="{{TemandoConfigurationData.enableMagentoShipping}}" />
-            <argument name="apiEndpoint" value="{{_CREDS.carriers_temando_session_endpoint}}" />
-            <argument name="apiAccountId" value="{{_CREDS.carriers_temando_account_id}}" />
-            <argument name="apiBearerToken" value="{{_CREDS.carriers_temando_bearer_token}}" />
-        </actionGroup>
+        <actionGroup ref="AdminEnableShippingMethod" stepKey="enableShippingMethod" />
+        <actionGroup ref="LoginAsAdmin" stepKey="loginToReconfigureEnabledShipping" />
 
         <!-- Navigate to product -->
         <actionGroup ref="NavigateToProductShippingSection" stepKey="navigateToProductShippingSection">
@@ -628,6 +613,9 @@
             <stories value="Ship a product with bundled separately configuration." />
             <severity value="CRITICAL" />
             <group value="Temando_Product_Shipping" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-106" />
         </annotations>
         <before>
@@ -676,14 +664,8 @@
 
         <!-- Start testing -->
         <!-- Enable shipping -->
-        <actionGroup ref="LoginAsAdmin" stepKey="loginToEnableShipping" />
-        <actionGroup ref="AdminNavigateToShippingConfiguration" stepKey="navigateToShippingConfiguration" />
-        <actionGroup ref="AdminUpdateShippingConfigurationWithSave" stepKey="enableShippingMethod">
-            <argument name="isActive" value="{{TemandoConfigurationData.enableMagentoShipping}}" />
-            <argument name="apiEndpoint" value="{{_CREDS.carriers_temando_session_endpoint}}" />
-            <argument name="apiAccountId" value="{{_CREDS.carriers_temando_account_id}}" />
-            <argument name="apiBearerToken" value="{{_CREDS.carriers_temando_bearer_token}}" />
-        </actionGroup>
+        <actionGroup ref="AdminEnableShippingMethod" stepKey="enableShippingMethod" />
+        <actionGroup ref="LoginAsAdmin" stepKey="loginToReconfigureEnabledShipping" />
 
         <!-- Navigate to product 1 -->
         <actionGroup ref="NavigateToProductShippingSection" stepKey="navigateToProductShippingSectionForProduct1">

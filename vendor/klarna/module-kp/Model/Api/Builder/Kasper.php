@@ -26,6 +26,7 @@ use Magento\Framework\DataObjectFactory;
 use Magento\Framework\Event\ManagerInterface as EventManager;
 use Magento\Framework\Url;
 use Magento\Quote\Model\Quote\Address;
+use Klarna\Core\Api\BuilderInterface;
 
 /**
  * Class Kasper

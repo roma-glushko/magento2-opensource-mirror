@@ -64,8 +64,7 @@ class AuthenticationPopupPlugin
                 = $this->layoutSettings->getCaptchaSettings();
         }
 
-        if(
-            isset($layout['components']['authenticationPopup']['children']['msp_recaptcha'])
+        if (isset($layout['components']['authenticationPopup']['children']['msp_recaptcha'])
             && !$this->config->isEnabledFrontend()
         ) {
             unset($layout['components']['authenticationPopup']['children']['msp_recaptcha']);

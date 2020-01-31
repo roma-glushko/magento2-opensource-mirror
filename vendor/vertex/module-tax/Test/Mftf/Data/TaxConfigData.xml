@@ -130,6 +130,23 @@
     <entity name="VertexTaxAllowedCountriesUsCaIrItNoSpConfigValue" type="VertexAllowedCountries">
         <data key="value">US,CA,IR,IT,NO,ES</data>
     </entity>
+    <entity name="VertexInvoiceOrderDuringOrderStatusChangedValue" type="VertexInvoiceOrderDuring">
+        <data key="value">order_status</data>
+    </entity>
+    <entity name="VertexInvoiceOrderDuringOrderStatusChangedPendingValue" type="VertexInvoiceOrderWithStatus">
+        <data key="value">pending</data>
+    </entity>
+    <entity name="VertexInvoiceOrderDuringOrderStatusChangedProcessingValue" type="VertexInvoiceOrderWithStatus">
+        <data key="value">processing</data>
+    </entity>
+    <entity name="VertexTaxConfigStatusChangeOrderStatusPending" type="vertex_config">
+        <requiredEntity type="VertexInvoiceOrderDuring">VertexInvoiceOrderDuringOrderStatusChangedValue</requiredEntity>
+        <requiredEntity type="VertexInvoiceOrderWithStatus">VertexInvoiceOrderDuringOrderStatusChangedPendingValue</requiredEntity>
+    </entity>
+    <entity name="VertexTaxConfigStatusChangeOrderStatusProcessing" type="vertex_config">
+        <requiredEntity type="VertexInvoiceOrderDuring">VertexInvoiceOrderDuringOrderStatusChangedValue</requiredEntity>
+        <requiredEntity type="VertexInvoiceOrderWithStatus">VertexInvoiceOrderDuringOrderStatusChangedProcessingValue</requiredEntity>
+    </entity>
     <entity name="VertexTaxAllowedCountriesUsCaIrItNoSp" type="vertex_config">
         <requiredEntity type="VertexAllowedCountries">VertexTaxAllowedCountriesUsCaIrItNoSpConfigValue</requiredEntity>
     </entity>

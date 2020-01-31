@@ -16,6 +16,7 @@
           xsi:noNamespaceSchemaLocation="urn:magento:mftf:Page/etc/SectionObject.xsd">
     <section name="CheckoutPaymentSection">
         <element name="klarnaPaymentsMethod" type="text" selector="label[for='{{paymentMethodLabel}}']" parameterized="true"/>
+        <element name="klarnaPaymentsIframeElement" type="text" selector="#{{paymentMethodIframe}}" parameterized="true"/>
         <element name="klarnaPaymentsIframe" type="iframe" selector="{{paymentMethodIframe}}" parameterized="true"/>
         <element name="klarnaPaymentsPaymentSelector" type="text" selector="#payment-selector"/>
         <element name="klarnaPaymentsPaymentSelectorLoader" type="text" selector="div:not(#klarna-logo) > svg"/>

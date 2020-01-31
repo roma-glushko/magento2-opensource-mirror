@@ -14,6 +14,7 @@
              dependsOnModule="Temando_Shipping"
              resource="Temando_Shipping::shipping"
              parent="Magento_Backend::stores"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::carriers"
              title="Carriers"
@@ -23,6 +24,7 @@
              parent="Temando_Shipping::shipping"
              action="temando/configuration_portal/carriers"
              target="_blank"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::locations"
              title="Locations"
@@ -32,6 +34,7 @@
              parent="Temando_Shipping::shipping"
              action="temando/configuration_portal/location"
              target="_blank"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::packaging"
              title="Packaging"
@@ -40,6 +43,7 @@
              resource="Temando_Shipping::packaging"
              parent="Temando_Shipping::shipping"
              action="temando/configuration_packaging/index"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::experiences"
              title="Experiences"
@@ -49,6 +53,7 @@
              parent="Temando_Shipping::shipping"
              action="temando/configuration_portal/experience"
              target="_blank"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::pickups"
              title="Pickups"
@@ -57,6 +62,7 @@
              resource="Temando_Shipping::pickups"
              parent="Magento_Sales::sales_operation"
              action="temando/pickup/index"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::dispatches"
              title="Dispatches"
@@ -65,6 +71,7 @@
              resource="Temando_Shipping::dispatches"
              parent="Magento_Sales::sales_operation"
              action="temando/dispatch/index"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::batches"
              title="Batches"
@@ -73,6 +80,7 @@
              resource="Temando_Shipping::batches"
              parent="Magento_Sales::sales_operation"
              action="temando/batch/index"
+             dependsOnConfig="carriers/temando/active"
         />
         <add id="Temando_Shipping::product"
              title="Attribute Mapping"
@@ -83,6 +91,7 @@
              resource="Temando_Shipping::product"
              parent="Temando_Shipping::shipping"
              action="temando/attribute_mapping_product/edit"
+             dependsOnConfig="carriers/temando/active"
         />
     </menu>
 </config>

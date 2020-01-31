@@ -28,6 +28,14 @@
         <click selector="#save" stepKey="saveVertexConfiguration"/>
     </actionGroup>
 
+    <actionGroup name="VertexTaxConfigOrderStatusPending">
+        <createData entity="VertexTaxConfigStatusChangeOrderStatusPending" stepKey="setTaxConfigOrderStatusPending"/>
+    </actionGroup>
+
+    <actionGroup name="VertexTaxConfigOrderStatusProcessing">
+        <createData entity="VertexTaxConfigStatusChangeOrderStatusProcessing" stepKey="setTaxConfigOrderStatusProcessing"/>
+    </actionGroup>
+
     <actionGroup name="VertexCheckProductPricingInMiniCart">
         <arguments>
             <argument name="product"/>
@@ -491,6 +499,9 @@
 
     <actionGroup name="VertexCheckInvoiceSuccessMessage">
         <see stepKey="seeVertexSuccessMessage" selector="{{AdminOrderDetailsMessagesSection.vertexSuccessMessage}}" userInput="The Vertex invoice has been sent."/>
+    </actionGroup>
+    <actionGroup name="VertexCheckNoInvoiceSuccessMessage">
+        <see stepKey="seeNoVertexSuccessMessage" selector="{{AdminOrderDetailsMessagesSection.vertexSuccessMessage}}" userInput=""/>
     </actionGroup>
     <actionGroup name="VertexCheckInvoiceSuccessNote">
         <arguments>

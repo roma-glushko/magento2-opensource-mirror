@@ -64,6 +64,9 @@ class Config
     const VERTEX_CREDITMEMO_ADJUSTMENT_CLASS = 'tax/classes/creditmemo_adjustment_class';
     const VERTEX_CREDITMEMO_ADJUSTMENT_NEGATIVE_CODE = 'tax/classes/creditmemo_adjustment_negative_code';
     const VERTEX_CREDITMEMO_ADJUSTMENT_POSITIVE_CODE = 'tax/classes/creditmemo_adjustment_positive_code';
+    const VERTEX_FPT_CUSTOM_TAX_CLASS_ENABLE = 'tax/classes/custom_tax_class';
+    const VERTEX_FPT_ITEM_CODE = 'tax/classes/fpt_item_code';
+    const VERTEX_FPT_TAX_CLASS = 'tax/classes/fpt_tax_class';
     const VERTEX_GIFTWRAP_ITEM_CLASS = 'tax/classes/giftwrap_item_class';
     const VERTEX_GIFTWRAP_ITEM_CODE_PREFIX = 'tax/classes/giftwrap_item_code';
     const VERTEX_GIFTWRAP_ORDER_CLASS = 'tax/classes/giftwrap_order_class';
@@ -72,6 +75,8 @@ class Config
     const VERTEX_PRINTED_GIFTCARD_CLASS = 'tax/classes/printed_giftcard_class';
     const VERTEX_PRINTED_GIFTCARD_CODE = 'tax/classes/printed_giftcard_code';
     const VERTEX_SUMMARIZE_TAX = 'tax/vertex_settings/summarize_tax';
+    const XML_PATH_FPT_ENABLED = 'tax/weee/enable';
+    const XML_PATH_FPT_TAXABLE = 'tax/weee/apply_vat';
 
     /** @var DeliveryTerm */
     private $deliveryTermConfig;
@@ -400,6 +405,18 @@ class Config
     }
 
     /**
+     * The prefix value for the the fixed product tax for invoice
+     *
+     * @param string|null $scopeId
+     * @param string $scope
+     * @return bool
+     */
+    public function getItemPrefixCodeForFixedProductTax($store = null, $scope = ScopeInterface::SCOPE_STORE)
+    {
+        return $this->getConfigValue(self::VERTEX_FPT_ITEM_CODE, $store, $scope);
+    }
+
+    /**
      * Retrieve a list of countries grouped by Vertex region
      *
      * @param string|null $store
@@ -559,6 +576,30 @@ class Config
     }
 
     /**
+     * Determine if the fixed product tax is enabled
+     *
+     * @param string|null $scopeId
+     * @param string $scope
+     * @return bool
+     */
+    public function isFixedProductTaxEnabled($scopeId = null, $scope = ScopeInterface::SCOPE_STORE): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_FPT_ENABLED, $scope, $scopeId);
+    }
+
+    /**
+     * Determine if the FPT is taxable
+     *
+     * @param string|null $scopeId
+     * @param string $scope
+     * @return bool
+     */
+    public function isFixedProductTaxTaxable($scopeId = null, $scope = ScopeInterface::SCOPE_STORE): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::XML_PATH_FPT_TAXABLE, $scope, $scopeId);
+    }
+
+    /**
      * Determine if Vertex Archiving has been enabled.
      *
      * @return bool
@@ -605,6 +646,18 @@ class Config
     }
 
     /**
+     * Determine if the FPT custom tax is enabled
+     *
+     * @param string|null $scopeId
+     * @param string $scope
+     * @return bool
+     */
+    public function isVertexFixedProductTaxCustom($scopeId = null, $scope = ScopeInterface::SCOPE_STORE): bool
+    {
+        return $this->scopeConfig->isSetFlag(self::VERTEX_FPT_CUSTOM_TAX_CLASS_ENABLE, $scope, $scopeId);
+    }
+
+    /**
      * Determine if we commit to the Tax Log during Invoice Creation or not
      *
      * @param string|null $store
@@ -630,6 +683,18 @@ class Config
         $vertexInvoiceEvent = $this->getConfigValue(self::CONFIG_XML_PATH_VERTEX_INVOICE_ORDER, $store, $scope);
 
         return $vertexInvoiceEvent === 'order_status';
+    }
+
+    /**
+     * The tax class selected that is to be used for FPT
+     *
+     * @param string|null $scopeId
+     * @param string $scope
+     * @return bool
+     */
+    public function vertexTaxClassUsedForFixedProductTax($store = null, $scope = ScopeInterface::SCOPE_STORE)
+    {
+        return $this->getConfigValue(self::VERTEX_FPT_TAX_CLASS, $store, $scope);
     }
 
     /**

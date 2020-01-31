@@ -9,6 +9,9 @@
             <stories value="Configure product attribute mappings" />
             <severity value="CRITICAL" />
             <group value="Temando_Shipping_Attribute_Mapping" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-136" />
         </annotations>
         <before>

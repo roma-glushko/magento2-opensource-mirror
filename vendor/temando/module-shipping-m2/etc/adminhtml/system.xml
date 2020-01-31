@@ -2,7 +2,14 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
     <system>
         <section id="carriers">
-            <group id="temando" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+            <group id="temando" translate="label" type="text" sortOrder="999" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="temando_active" type="hidden"  sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_class>temando-activation-flag</frontend_class>
+                    <config_path>carriers/temando/active</config_path>
+                </field>
+                <depends>
+                    <field id="carriers/temando/temando_active">1</field>
+                </depends>
                 <label>Magento Shipping</label>
                 <field id="activation" type="note" translate="label" sortOrder="0" showInDefault="1" showInWebsite="0" showInStore="0">
                     <frontend_model>Temando\Shipping\Block\Adminhtml\System\Config\Form\Field\Activation</frontend_model>
@@ -15,6 +22,7 @@
                     <label>Enabled</label>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
                     <backend_model>Temando\Shipping\Model\Config\Backend\Active</backend_model>
+                    <frontend_class>temando-activation-flag</frontend_class>
                 </field>
                 <field id="title" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
                     <label>Title</label>
@@ -99,14 +107,27 @@
                     <label>Magento Shipping Cancellation Email Template</label>
                     <comment>Email template chosen based on theme fallback when "Default" option is selected.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <depends>
+                        <field id="sales_email/temando_pickup/temando_active">1</field>
+                    </depends>
                 </field>
                 <field id="cancel_guest_template" translate="label comment" type="select" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Magento Shipping Cancellation Email Template for Guest</label>
                     <comment>Email template chosen based on theme fallback when "Default" option is selected.</comment>
                     <source_model>Magento\Config\Model\Config\Source\Email\Template</source_model>
+                    <depends>
+                        <field id="sales_email/temando_pickup/temando_active">1</field>
+                    </depends>
                 </field>
             </group>
             <group id="temando_pickup" translate="label" type="text" sortOrder="9" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="temando_active" type="hidden"  sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_class>temando-activation-flag</frontend_class>
+                    <config_path>carriers/temando/active</config_path>
+                </field>
+                <depends>
+                    <field id="sales_email/temando_pickup/temando_active">1</field>
+                </depends>
                 <label>Magento Shipping Pickup</label>
                 <field id="enabled" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Enabled</label>

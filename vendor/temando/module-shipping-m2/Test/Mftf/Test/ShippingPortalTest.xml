@@ -9,6 +9,9 @@
             <stories value="Verify the Shipping Portal link appears in the menu and is clickable." />
             <severity value="MINOR" />
             <group value="Temando_Shipping_Portal" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4443, MG-56" />
         </annotations>
         <before>
@@ -31,6 +34,9 @@
             <stories value="Verify the Shipping Portal Account link appears on the configuration page and is clickable." />
             <severity value="MINOR" />
             <group value="Temando_Shipping_Portal" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4444" />
         </annotations>
         <before>
@@ -53,6 +59,9 @@
             <stories value="Verify the Shipping Experiences button is clickable." />
             <severity value="MINOR" />
             <group value="Temando_Shipping_Portal" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4445" />
         </annotations>
         <before>
@@ -75,6 +84,9 @@
             <stories value="Verify the Shipping Experiences button is clickable." />
             <severity value="MINOR" />
             <group value="Temando_Shipping_Portal" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MG-56" />
         </annotations>
         <before>
@@ -97,6 +109,9 @@
             <stories value="Verify the Carriers button is clickable." />
             <severity value="MINOR" />
             <group value="Temando_Shipping_Portal" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MG-103" />
         </annotations>
         <before>

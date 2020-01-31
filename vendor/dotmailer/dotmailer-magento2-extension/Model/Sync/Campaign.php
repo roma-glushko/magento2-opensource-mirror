@@ -3,7 +3,7 @@
 namespace Dotdigitalgroup\Email\Model\Sync;
 
 /**
- * Send email campaings.
+ * Send email campaigns.
  */
 class Campaign implements SyncInterface
 {
@@ -163,14 +163,14 @@ class Campaign implements SyncInterface
             //Only if valid client is returned
             if ($client && $this->isCampaignValid($campaign)) {
                 $campaignsToSend[$campaignId]['client'] = $client;
-                $contact = $this->helper->getContact(
+                $contact = $this->helper->getOrCreateContact(
                     $campaign->getEmail(),
                     $websiteId
                 );
                 if ($contact && isset($contact->id)) {
                     //update data fields
                     if ($campaign->getEventName() == 'Order Review') {
-                        $this->updateDataFieldsForORderReviewCampaigns($campaign, $websiteId, $client, $email);
+                        $this->updateDataFieldsForOrderReviewCampaigns($campaign, $websiteId, $client, $email);
                     } elseif ($campaign->getEventName() ==
                         \Dotdigitalgroup\Email\Model\Campaign::CAMPAIGN_EVENT_LOST_BASKET
                     ) {
@@ -273,7 +273,7 @@ class Campaign implements SyncInterface
      *
      * @return null
      */
-    private function updateDataFieldsForORderReviewCampaigns($campaign, $websiteId, $client, $email)
+    private function updateDataFieldsForOrderReviewCampaigns($campaign, $websiteId, $client, $email)
     {
         $order = $this->salesOrderFactory->create()->loadByIncrementId(
             $campaign->getOrderIncrementId()

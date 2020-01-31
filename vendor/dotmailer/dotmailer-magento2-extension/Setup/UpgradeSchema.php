@@ -50,6 +50,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $this->upgradeTwoThreeSixToTwoFiveFour($setup, $context);
         $this->upgradeTwoFiveFourToThreeZeroThree($setup, $context);
         $this->upgradeThreeTwoTwo($setup, $context);
+        $this->upgradeFourOhOne($setup, $context);
 
         $setup->endSetup();
     }
@@ -504,6 +505,117 @@ class UpgradeSchema implements UpgradeSchemaInterface
                 'last_subscribed_at',
                 $definition
             );
+        }
+    }
+
+    private function upgradeFourOhOne(
+        SchemaSetupInterface $setup,
+        ModuleContextInterface $context
+    ) {
+        if (version_compare($context->getVersion(), '4.0.1', '<')) {
+
+            $catalogTable = $setup->getTable(Schema::EMAIL_CATALOG_TABLE);
+
+            if (version_compare($context->getVersion(), '3.4.2', '>=')) {
+
+                // restore modified and imported columns
+                if (!$setup->getConnection()->tableColumnExists(
+                    $catalogTable,
+                    'imported'
+                )) {
+                    $setup->getConnection()->addColumn(
+                        $catalogTable,
+                        'imported',
+                        [
+                            'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                            'nullable' => true,
+                            'unsigned' => true,
+                            'comment' => 'Product imported [deprecated]'
+                        ]
+                    );
+                }
+
+                if (!$setup->getConnection()->tableColumnExists(
+                    $catalogTable,
+                    'modified'
+                )) {
+                    $setup->getConnection()->addColumn(
+                        $catalogTable,
+                        'modified',
+                        [
+                            'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                            'nullable' => true,
+                            'unsigned' => true,
+                            'comment' => 'Product modified [deprecated]'
+                        ]
+                    );
+                }
+
+            } else {
+
+                // Remove indexes on 'imported' and 'modified' columns
+                try {
+                    $setup->getConnection()->dropIndex(
+                        $catalogTable,
+                        'EMAIL_CATALOG_IMPORTED'
+                    );
+                } catch (\Exception $e) {
+                    // Not critical. Continue upgrade.
+                }
+
+                try {
+                    $setup->getConnection()->dropIndex(
+                        $catalogTable,
+                        'EMAIL_CATALOG_MODIFIED'
+                    );
+                } catch (\Exception $e) {
+                    // Not critical. Continue upgrade.
+                }
+
+                // add processed and last_imported_at columns
+                if (!$setup->getConnection()->tableColumnExists(
+                    $catalogTable,
+                    'processed'
+                )) {
+                    $setup->getConnection()->addColumn(
+                        $catalogTable,
+                        'processed',
+                        [
+                            'type' => \Magento\Framework\DB\Ddl\Table::TYPE_SMALLINT,
+                            'nullable' => false,
+                            'unsigned' => true,
+                            'comment' => 'Product processed'
+                        ]
+                    );
+
+                    $setup->getConnection()->addIndex(
+                        $catalogTable,
+                        $setup->getIdxName($catalogTable, ['processed']),
+                        ['processed']
+                    );
+                }
+
+                if (!$setup->getConnection()->tableColumnExists(
+                    $catalogTable,
+                    'last_imported_at'
+                )) {
+                    $setup->getConnection()->addColumn(
+                        $catalogTable,
+                        'last_imported_at',
+                        [
+                            'type' => \Magento\Framework\DB\Ddl\Table::TYPE_TIMESTAMP,
+                            'nullable' => true,
+                            'comment' => 'Last imported date'
+                        ]
+                    );
+
+                    $setup->getConnection()->addIndex(
+                        $catalogTable,
+                        $setup->getIdxName($catalogTable, ['last_imported_at']),
+                        ['last_imported_at']
+                    );
+                }
+            }
         }
     }
 }

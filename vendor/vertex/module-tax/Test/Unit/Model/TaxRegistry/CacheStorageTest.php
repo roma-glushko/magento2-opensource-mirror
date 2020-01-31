@@ -6,6 +6,7 @@
 
 namespace Vertex\Tax\Test\Unit\Model\TaxRegistry;
 
+use Magento\Framework\Serialize\Serializer\Serialize as SerializeSerializer;
 use Magento\Framework\App\Cache\StateInterface;
 use Magento\Framework\Cache\FrontendInterface;
 use Vertex\Tax\Model\Cache\Serializer;
@@ -29,6 +30,9 @@ class CacheStorageTest extends TestCase
     /** @var \PHPUnit_Framework_MockObject_MockObject|Serializer */
     private $serializerMock;
 
+    /** @var SerializeSerializer */
+    private $serializer;
+
     /**
      * Perform test setup.
      */
@@ -42,6 +46,10 @@ class CacheStorageTest extends TestCase
 
         $this->cacheStateMock->method('isEnabled')
             ->willReturn(true);
+
+        $this->serializer = $this->getObject(
+            SerializeSerializer::class
+        );
 
         $this->cacheStorage = $this->getObject(
             CacheStorage::class,
@@ -135,7 +143,10 @@ class CacheStorageTest extends TestCase
         $actualResult = $this->cacheStorage->get($storageKey);
 
         $this->assertEquals(gettype($actualResult), 'array');
-        $this->assertEquals(serialize($data), serialize($actualResult));
+        $this->assertEquals(
+            $this->serializer->serialize($data),
+            $this->serializer->serialize($actualResult)
+        );
     }
 
     /**
@@ -178,7 +189,7 @@ class CacheStorageTest extends TestCase
 
         $this->serializerMock->expects($this->once())
             ->method('serialize')
-            ->willReturn(serialize($data));
+            ->willReturn($this->serializer->serialize($data));
 
         $storageKey = 'test_type_array';
 

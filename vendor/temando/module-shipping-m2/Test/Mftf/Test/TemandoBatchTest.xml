@@ -9,6 +9,9 @@
             <stories value="Create New Batch Of Shipments" />
             <severity value="CRITICAL" />
             <group value="Temando_Shipping_Batch" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4689, MPI-4690, MPI-4691" />
         </annotations>
 
@@ -32,16 +35,9 @@
         </after>
 
         <!-- begin test -->
+        <actionGroup ref="AdminEnableShippingMethod" stepKey="enableShippingMethod" />
         <actionGroup ref="LoginAsAdmin" stepKey="loginToEnableShipping" />
-
-        <!-- enable shipping -->
         <actionGroup ref="AdminNavigateToShippingConfiguration" stepKey="navigateToShippingConfiguration" />
-        <actionGroup ref="AdminUpdateShippingConfigurationWithSave" stepKey="enableShippingMethod">
-            <argument name="isActive" value="{{TemandoConfigurationData.enableMagentoShipping}}" />
-            <argument name="apiEndpoint" value="{{_CREDS.carriers_temando_session_endpoint}}" />
-            <argument name="apiAccountId" value="{{_CREDS.carriers_temando_account_id}}" />
-            <argument name="apiBearerToken" value="{{_CREDS.carriers_temando_bearer_token}}" />
-        </actionGroup>
 
         <!-- enable shipment sync -->
         <actionGroup ref="AdminNavigateToAdvancedSettings" stepKey="navigateToAdvanceSettings" />

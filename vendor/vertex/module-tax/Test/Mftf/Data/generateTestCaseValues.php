@@ -191,6 +191,14 @@ $entities = [
         'tax' => 61 * TAX_RATE_PA_ONLY / 100,
         'taxPercent' => TAX_RATE_PA_ONLY,
     ],
+    'Vertex_Bundle_Partial_PA_Values_Qty1' => [
+        'price' => 42,
+        'priceInclTax' => 42 * (TAX_RATE_PA_ONLY / 100 + 1),
+        'subtotal' => 42,
+        'subtotalInclTax' => 42 * (TAX_RATE_PA_ONLY / 100 + 1),
+        'tax' => 42 * TAX_RATE_PA_ONLY / 100,
+        'taxPercent' => TAX_RATE_PA_ONLY,
+    ],
     'Vertex_Grouped_First_Values' => [
         'price' => 14,
         'priceInclTax' => 14 * (TAX_RATE_ROMA / 100 + 1),
@@ -343,6 +351,14 @@ $totals = [
     'Vertex_Bundle_PA_Totals_Qty3' => [
         'pieces' => [
             'Vertex_Bundle_PA_Values_Qty3',
+        ],
+        'shipping' => 15,
+        'shippingTax' => 15 * TAX_RATE_PA_ONLY / 100,
+        'shippingInclTax' => 15 * (TAX_RATE_PA_ONLY / 100 + 1),
+    ],
+    'Vertex_Bundle_Brick_Strap_Ball_PA_Totals_Qty3_Qty1' => [
+        'pieces' => [
+            'Vertex_Bundle_Partial_PA_Values_Qty1',
         ],
         'shipping' => 15,
         'shippingTax' => 15 * TAX_RATE_PA_ONLY / 100,

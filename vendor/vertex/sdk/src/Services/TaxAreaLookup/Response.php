@@ -8,14 +8,26 @@
 namespace Vertex\Services\TaxAreaLookup;
 
 use Vertex\Data\TaxAreaLookupResultInterface;
+use Vertex\Services\SoapCallResponseInterface;
 
 /**
  * {@inheritDoc}
  */
-class Response implements ResponseInterface
+class Response implements ResponseInterface, SoapCallResponseInterface
 {
+    /** @var int */
+    private $httpCallTime;
+
     /** @var TaxAreaLookupResultInterface[] */
     private $results = [];
+
+    /**
+     * @inheritDoc
+     */
+    public function getHttpCallTime()
+    {
+        return $this->httpCallTime;
+    }
 
     /**
      * @inheritdoc
@@ -26,13 +38,22 @@ class Response implements ResponseInterface
     }
 
     /**
+     * @inheritDoc
+     */
+    public function setHttpCallTime($milliseconds)
+    {
+        $this->httpCallTime = $milliseconds;
+        return $this;
+    }
+
+    /**
      * @inheritdoc
      */
     public function setResults(array $results)
     {
         array_walk(
             $results,
-            function ($result) {
+            static function ($result) {
                 if (!($result instanceof TaxAreaLookupResultInterface)) {
                     throw new \InvalidArgumentException(
                         'Lookup results must be instances of TaxAreaLookupResultInterface'

@@ -2,6 +2,54 @@
 
 All notable changes to this project will be documented in this file, in reverse chronological order by release.
 
+## 2.11.4 - 2019-12-04
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#203](https://github.com/zendframework/zend-view/pull/203) fixes PHP 7.4 compatibility.
+
+## 2.11.3 - 2019-10-11
+
+### Added
+
+- Nothing.
+
+### Changed
+
+- Nothing.
+
+### Deprecated
+
+- Nothing.
+
+### Removed
+
+- Nothing.
+
+### Fixed
+
+- [#192](https://github.com/zendframework/zend-view/pull/192) changes
+  curly braces in array and string offset access to square brackets
+  in order to prevent issues under the upcoming PHP 7.4 release.
+
+- [#195](https://github.com/zendframework/zend-view/pull/195) fixes PHP 7.4 compatibility.
+
 ## 2.11.2 - 2019-02-19
 
 ### Added

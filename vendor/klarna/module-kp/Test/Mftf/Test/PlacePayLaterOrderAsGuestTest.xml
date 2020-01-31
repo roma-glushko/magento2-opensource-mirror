@@ -35,8 +35,9 @@
             <deleteData createDataKey="createSimpleProduct" stepKey="deleteSimpleProduct"/>
         </after>
         <!--Go to product page-->
-        <amOnPage url="$$createSimpleProduct.custom_attributes[url_key]$$.html" stepKey="navigateToSimpleProductPage"/>
-        <waitForPageLoad stepKey="waitForCatalogPageLoad"/>
+        <actionGroup ref="GoToCreatedProductPageAndWaitForAddToCart" stepKey="goToCreatedProductPageAndWaitForAddToCart">
+            <argument name="url" value="$$createSimpleProduct.custom_attributes[url_key]$$.html"/>
+        </actionGroup>
 
         <!--Add product to shopping cart-->
         <actionGroup ref="addToCartFromStorefrontProductPage" stepKey="addToCartFromStorefrontProductPage">

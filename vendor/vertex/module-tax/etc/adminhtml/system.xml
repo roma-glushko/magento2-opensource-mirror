@@ -47,6 +47,7 @@
                 <field id="trustedId" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
                     <label>Vertex Trusted Id</label>
                     <validate>required-entry validate-length maximum-length-16 minimum-length-6</validate>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
                     <depends>
                         <field id="enable_vertex">1</field>
                     </depends>
@@ -315,6 +316,35 @@
                     <label>Product Code For Reward Points Discount Line Item</label>
                     <validate>required-entry</validate>
                     <comment><![CDATA[Product code for reward points order discount]]></comment>
+                </field>
+
+                <field id="fpt_item_code" translate="label" type="text" sortOrder="150" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
+                    <depends>
+                        <field id="enable">1</field>
+                        <field id="apply_vat">1</field>
+                        <field id="tax/vertex_settings/enable_vertex">1</field>
+                    </depends>
+                    <label>Vertex FPT Invoice Code Prefix</label>
+                    <validate>required-entry</validate>
+                    <comment><![CDATA[Product code prefix which will be used for fixed product price tax on invoice]]></comment>
+                </field>
+                <field id="custom_tax_class" translate="label" type="select" sortOrder="160" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <depends>
+                        <field id="enable">1</field>
+                        <field id="apply_vat">1</field>
+                        <field id="tax/vertex_settings/enable_vertex">1</field>
+                    </depends>
+                    <label>Vertex Custom FPT Tax Class</label>
+                    <source_model>Magento\Config\Model\Config\Source\Enabledisable</source_model>
+                    <comment><![CDATA[If disabled will use Product Tax Class. If enabled you can chouse a custom tax class for the FPT sent to Vertex.]]></comment>
+                </field>
+                <field id="fpt_tax_class" translate="label" type="select" sortOrder="170" showInDefault="1" showInWebsite="1" showInStore="0" canRestore="1">
+                    <depends>
+                        <field id="custom_tax_class">1</field>
+                    </depends>
+                    <label>Vertex Tax Class for FPT</label>
+                    <source_model>Magento\Tax\Model\TaxClass\Source\Product</source_model>
+                    <comment><![CDATA[The tax class that will be applied to the vertex item]]></comment>
                 </field>
             </group>
             <group id="vertex_logging" translate="label" sortOrder="900" showInDefault="1" showInWebsite="1"

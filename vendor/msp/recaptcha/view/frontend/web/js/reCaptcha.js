@@ -86,7 +86,7 @@ define(
              * @returns {Boolean}
              */
             getIsInvisibleRecaptcha: function () {
-                return this.settings.size !== 'invisible';
+                return this.settings.size === 'invisible';
             },
 
             /**
@@ -147,7 +147,7 @@ define(
                     }
                 });
 
-                if (this.settings.size === 'invisible') {
+                if (this.settings.size === 'invisible' && $parentForm.length > 0) {
                     $parentForm.submit(function (event) {
                         if (!me.tokenField.value) {
                             // eslint-disable-next-line no-undef

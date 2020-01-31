@@ -22,9 +22,6 @@ namespace MSP\ReCaptcha\Model\Config\Source;
 
 class Type implements \Magento\Framework\Option\ArrayInterface
 {
-    const TYPE_RECAPTCHA = 'recaptcha';
-    const TYPE_INVISIBLE = 'invisible';
-
     /**
      * Options getter
      *
@@ -33,8 +30,9 @@ class Type implements \Magento\Framework\Option\ArrayInterface
     public function toOptionArray()
     {
         return [
+            ['value' => 'recaptcha_v3', 'label' => __('Invisible reCaptcha v3')],
+            ['value' => 'invisible', 'label' => __('Invisible reCaptcha v2')],
             ['value' => 'recaptcha', 'label' => __('reCaptcha v2')],
-            ['value' => 'invisible', 'label' => __('Invisible reCaptcha')],
         ];
     }
 

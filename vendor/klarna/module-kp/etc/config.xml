@@ -18,6 +18,7 @@
                 <group>klarna</group>
                 <active>0</active>
                 <data_sharing>1</data_sharing>
+                <data_sharing_onload>1</data_sharing_onload>
                 <allowspecific>0</allowspecific>
                 <order_status>processing</order_status>
                 <!-- Begin variables for virtual type -->

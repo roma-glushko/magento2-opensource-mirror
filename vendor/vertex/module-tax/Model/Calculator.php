@@ -21,6 +21,7 @@ use Magento\Tax\Api\Data\TaxDetailsItemInterfaceFactory;
 use Vertex\Data\LineItemInterface;
 use Vertex\Data\TaxInterface;
 use Vertex\Tax\Model\Api\Data\QuotationRequestBuilder;
+use Vertex\Tax\Model\Api\Utility\PriceForTax;
 use Vertex\Tax\Model\Config\Source\SummarizeTax;
 use Vertex\Tax\Model\TaxQuote\TaxQuoteRequest;
 
@@ -67,6 +68,9 @@ class Calculator
     /** @var TaxDetailsItemInterfaceFactory */
     private $taxDetailsItemFactory;
 
+    /** @var PriceForTax */
+    private $priceForTaxCalculation;
+
     /**
      * @param TaxDetailsInterfaceFactory $taxDetailsFactory
      * @param TaxDetailsItemInterfaceFactory $taxDetailsItemFactory
@@ -79,6 +83,7 @@ class Calculator
      * @param Config $config
      * @param ManagerInterface $messageManager
      * @param bool $addMessageToVertexGroup
+     * @param PriceForTax $priceForTaxCalculation
      */
     public function __construct(
         TaxDetailsInterfaceFactory $taxDetailsFactory,
@@ -91,6 +96,7 @@ class Calculator
         ExceptionLogger $logger,
         Config $config,
         ManagerInterface $messageManager,
+        PriceForTax $priceForTaxCalculation,
         $addMessageToVertexGroup = true
     ) {
         $this->taxDetailsFactory = $taxDetailsFactory;
@@ -104,6 +110,7 @@ class Calculator
         $this->config = $config;
         $this->messageManager = $messageManager;
         $this->addMessageToVertexGroup = $addMessageToVertexGroup;
+        $this->priceForTaxCalculation = $priceForTaxCalculation;
     }
 
     /**
@@ -420,24 +427,21 @@ class Calculator
         LineItemInterface $vertexLineItem,
         $round = true
     ) {
-        /** @var TaxDetailsItemInterface $taxDetailsItem */
-        $taxDetailsItem = $this->taxDetailsItemFactory->create();
-
         // Combine the rates of all taxes applicable to the Line Item
         $effectiveRate = array_reduce(
             $vertexLineItem->getTaxes(),
-            function ($result, TaxInterface $tax) {
+            static function ($result, TaxInterface $tax) {
                 return $result + $tax->getEffectiveRate();
             },
             0
         );
 
         $perItemTax = $vertexLineItem->getTotalTax() / $vertexLineItem->getQuantity();
+        $unitPrice = $quoteDetailsItem->getUnitPrice();
+        $extendedPrice = $this->priceForTaxCalculation->getOriginalItemPriceOnQuote($quoteDetailsItem, $unitPrice);
 
-        $unitPrice = $vertexLineItem->getUnitPrice();
-
-        // Vertex extended price is less discount - so add it back
-        $extendedPrice = $vertexLineItem->getExtendedPrice() + $quoteDetailsItem->getDiscountAmount();
+        /** @var TaxDetailsItemInterface $taxDetailsItem */
+        $taxDetailsItem = $this->taxDetailsItemFactory->create();
 
         $taxDetailsItem->setCode($vertexLineItem->getLineItemId())
             ->setType($quoteDetailsItem->getType())

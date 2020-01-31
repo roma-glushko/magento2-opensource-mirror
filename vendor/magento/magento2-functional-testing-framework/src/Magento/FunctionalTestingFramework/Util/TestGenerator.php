@@ -6,6 +6,7 @@
 
 namespace Magento\FunctionalTestingFramework\Util;
 
+use Magento\FunctionalTestingFramework\Config\MftfApplicationConfig;
 use Magento\FunctionalTestingFramework\DataGenerator\Handlers\CredentialStore;
 use Magento\FunctionalTestingFramework\DataGenerator\Handlers\PersistedObjectHandler;
 use Magento\FunctionalTestingFramework\DataGenerator\Objects\EntityDataObject;
@@ -24,6 +25,7 @@ use Magento\FunctionalTestingFramework\Util\Manifest\TestManifestFactory;
 use Magento\FunctionalTestingFramework\Test\Util\ActionObjectExtractor;
 use Magento\FunctionalTestingFramework\Test\Util\TestObjectExtractor;
 use Magento\FunctionalTestingFramework\Util\Filesystem\DirSetupUtil;
+use Magento\FunctionalTestingFramework\Test\Util\ActionMergeUtil;
 
 /**
  * Class TestGenerator
@@ -226,14 +228,14 @@ class TestGenerator
      * @throws TestReferenceException
      * @throws \Exception
      */
-    private function assembleTestPhp($testObject)
+    public function assembleTestPhp($testObject)
     {
         $usePhp = $this->generateUseStatementsPhp();
         $classAnnotationsPhp = $this->generateAnnotationsPhp($testObject->getAnnotations());
 
         $className = $testObject->getCodeceptionName();
         try {
-            if (!$testObject->isSkipped()) {
+            if (!$testObject->isSkipped() && !MftfApplicationConfig::getConfig()->allowSkipped()) {
                 $hookPhp = $this->generateHooksPhp($testObject->getHooks());
             } else {
                 $hookPhp = null;
@@ -652,7 +654,10 @@ class TestGenerator
             }
 
             if (isset($customActionAttributes['function'])) {
-                $function = $this->addUniquenessFunctionCall($customActionAttributes['function']);
+                $function = $this->addUniquenessFunctionCall(
+                    $customActionAttributes['function'],
+                    $actionObject->getType() !== "executeInSelenium"
+                );
                 if (in_array($actionObject->getType(), ActionObject::FUNCTION_CLOSURE_ACTIONS)) {
                     // Argument must be a closure function, not a string.
                     $function = trim($function, '"');
@@ -1481,8 +1486,10 @@ class TestGenerator
             $persistedVarRefInvoked = "PersistedObjectHandler::getInstance()->retrieveEntityField('"
                 . $stepKey . $testInvocationKey . "', 'field', 'test')";
 
+            // only replace when whole word matches exactly
+            // e.g. testVar => $testVar but not $testVar2
             if (strpos($output, $stepKeyVarRef) !== false) {
-                $output = str_replace($stepKeyVarRef, $stepKeyVarRef . $testInvocationKey, $output);
+                $output = preg_replace('/\B\\' .$stepKeyVarRef. '\b/', $stepKeyVarRef . $testInvocationKey, $output);
             }
 
             if (strpos($output, $persistedVarRef) !== false) {
@@ -1603,7 +1610,7 @@ class TestGenerator
         $testName = str_replace(' ', '', $testName);
         $testAnnotations = $this->generateAnnotationsPhp($test->getAnnotations(), true);
         $dependencies = 'AcceptanceTester $I';
-        if ($test->isSkipped()) {
+        if ($test->isSkipped() && !MftfApplicationConfig::getConfig()->allowSkipped()) {
             $skipString = "This test is skipped due to the following issues:\\n";
             $issues = $test->getAnnotations()['skip'] ?? null;
             if (isset($issues)) {
@@ -1732,12 +1739,17 @@ class TestGenerator
     /**
      * Add uniqueness function call to input string based on regex pattern.
      *
-     * @param string $input
+     * @param string  $input
+     * @param boolean $wrapWithDoubleQuotes
      * @return string
      */
-    private function addUniquenessFunctionCall($input)
+    private function addUniquenessFunctionCall($input, $wrapWithDoubleQuotes = true)
     {
-        $output = $this->wrapWithDoubleQuotes($input);
+        if ($wrapWithDoubleQuotes) {
+            $output = $this->wrapWithDoubleQuotes($input);
+        } else {
+            $output = $input;
+        }
 
         //Match on msq(\"entityName\")
         preg_match_all('/' . EntityDataObject::CEST_UNIQUE_FUNCTION . '\(\\\\"[\w]+\\\\"\)/', $output, $matches);
@@ -1904,7 +1916,7 @@ class TestGenerator
     {
         $runtimeReferenceRegex = [
             "/{{_ENV\.([\w]+)}}/" => 'getenv',
-            "/{{_CREDS\.([\w]+)}}/" => 'CredentialStore::getInstance()->getSecret'
+            ActionMergeUtil::CREDS_REGEX => 'CredentialStore::getInstance()->getSecret'
         ];
 
         $argResult = $args;

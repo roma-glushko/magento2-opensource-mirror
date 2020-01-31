@@ -1,3 +1,8 @@
+## [1.6.2] - 2019-10-30
+### Added
+- Disable possibility to enable integration for new customers
+- Deprecation warning banner for existing customers 
+
 ## [1.6.1] - 2019-08-16
 ###Fixed
 

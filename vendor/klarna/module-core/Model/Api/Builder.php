@@ -7,22 +7,31 @@
  * For the full copyright and license information, please view the NOTICE
  * and LICENSE files that were distributed with this source code.
  */
+declare(strict_types=1);
 
 namespace Klarna\Core\Model\Api;
 
+use Exception;
 use Klarna\Core\Api\BuilderInterface;
 use Klarna\Core\Helper\ConfigHelper;
 use Klarna\Core\Helper\KlarnaConfig;
+use Klarna\Core\Model\Checkout\Orderline\AbstractLine;
 use Klarna\Core\Model\Checkout\Orderline\Collector;
 use Magento\Customer\Api\Data\AddressInterface;
+use Magento\Customer\Model\AddressRegistry;
 use Magento\Customer\Model\Data\Address as CustomerAddress;
 use Magento\Directory\Helper\Data as DirectoryHelper;
 use Magento\Framework\DataObject;
+use Magento\Framework\DataObject\Copy;
 use Magento\Framework\DataObjectFactory;
 use Magento\Framework\Event\ManagerInterface as EventManager;
-use Magento\Framework\Stdlib\DateTime;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Stdlib\DateTime\DateTime;
 use Magento\Framework\Url;
+use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address;
+use Magento\Sales\Model\AbstractModel;
 use Magento\Store\Api\Data\StoreInterface;
 
 /**
@@ -78,7 +87,7 @@ abstract class Builder extends DataObject implements BuilderInterface
      */
     protected $orderLines = [];
     /**
-     * @var \Magento\Sales\Model\AbstractModel|\Magento\Quote\Model\Quote
+     * @var AbstractModel|Quote
      */
     protected $object = null;
     /**
@@ -102,7 +111,7 @@ abstract class Builder extends DataObject implements BuilderInterface
      */
     protected $directoryHelper;
     /**
-     * @var \Magento\Framework\Stdlib\DateTime\DateTime
+     * @var DateTime
      */
     protected $coreDate;
     /**
@@ -114,28 +123,28 @@ abstract class Builder extends DataObject implements BuilderInterface
      */
     protected $dataObjectFactory;
     /**
-     * @var DataObject\Copy
+     * @var Copy
      */
     private $objCopyService;
     /**
-     * @var \Magento\Customer\Model\AddressRegistry
+     * @var AddressRegistry
      */
     private $addressRegistry;
 
     /**
      * Init
      *
-     * @param EventManager                            $eventManager
-     * @param Collector                               $collector
-     * @param Url                                     $url
-     * @param ConfigHelper                            $configHelper
-     * @param DirectoryHelper                         $directoryHelper
-     * @param DateTime\DateTime                       $coreDate
-     * @param DataObject\Copy                         $objCopyService
-     * @param \Magento\Customer\Model\AddressRegistry $addressRegistry
-     * @param KlarnaConfig                            $klarnaConfig
-     * @param DataObjectFactory                       $dataObjectFactory
-     * @param array                                   $data
+     * @param EventManager      $eventManager
+     * @param Collector         $collector
+     * @param Url               $url
+     * @param ConfigHelper      $configHelper
+     * @param DirectoryHelper   $directoryHelper
+     * @param DateTime          $coreDate
+     * @param Copy              $objCopyService
+     * @param AddressRegistry   $addressRegistry
+     * @param KlarnaConfig      $klarnaConfig
+     * @param DataObjectFactory $dataObjectFactory
+     * @param array             $data
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
      */
     public function __construct(
@@ -144,32 +153,32 @@ abstract class Builder extends DataObject implements BuilderInterface
         Url $url,
         ConfigHelper $configHelper,
         DirectoryHelper $directoryHelper,
-        \Magento\Framework\Stdlib\DateTime\DateTime $coreDate,
-        \Magento\Framework\DataObject\Copy $objCopyService,
-        \Magento\Customer\Model\AddressRegistry $addressRegistry,
+        DateTime $coreDate,
+        Copy $objCopyService,
+        AddressRegistry $addressRegistry,
         KlarnaConfig $klarnaConfig,
         DataObjectFactory $dataObjectFactory,
         array $data = []
     ) {
         parent::__construct($data);
-        $this->eventManager = $eventManager;
+        $this->eventManager       = $eventManager;
         $this->orderLineCollector = $collector;
-        $this->url = $url;
-        $this->configHelper = $configHelper;
-        $this->directoryHelper = $directoryHelper;
-        $this->coreDate = $coreDate;
-        $this->objCopyService = $objCopyService;
-        $this->addressRegistry = $addressRegistry;
-        $this->klarnaConfig = $klarnaConfig;
-        $this->dataObjectFactory = $dataObjectFactory;
+        $this->url                = $url;
+        $this->configHelper       = $configHelper;
+        $this->directoryHelper    = $directoryHelper;
+        $this->coreDate           = $coreDate;
+        $this->objCopyService     = $objCopyService;
+        $this->addressRegistry    = $addressRegistry;
+        $this->klarnaConfig       = $klarnaConfig;
+        $this->dataObjectFactory  = $dataObjectFactory;
     }
 
     /**
      * Generate order body
      *
      * @param string $type
-     * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return BuilderInterface
+     * @throws LocalizedException
      */
     public function generateRequest($type = self::GENERATE_TYPE_CREATE)
     {
@@ -181,12 +190,12 @@ abstract class Builder extends DataObject implements BuilderInterface
      * Collect order lines
      *
      * @param StoreInterface $store
-     * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @return BuilderInterface
+     * @throws LocalizedException
      */
-    public function collectOrderLines(StoreInterface $store)
+    public function collectOrderLines(StoreInterface $store): self
     {
-        /** @var \Klarna\Core\Model\Checkout\Orderline\AbstractLine $model */
+        /** @var AbstractLine $model */
         foreach ($this->getOrderLinesCollector()->getCollectors($store) as $model) {
             $model->collect($this);
         }
@@ -197,9 +206,9 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Get totals collector model
      *
-     * @return \Klarna\Core\Model\Checkout\Orderline\Collector
+     * @return Collector
      */
-    public function getOrderLinesCollector()
+    public function getOrderLinesCollector(): Collector
     {
         return $this->orderLineCollector;
     }
@@ -207,7 +216,7 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Get the object used to generate request
      *
-     * @return \Magento\Sales\Model\AbstractModel|\Magento\Quote\Model\Quote
+     * @return AbstractModel|Quote
      */
     public function getObject()
     {
@@ -217,11 +226,10 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Set the object used to generate request
      *
-     * @param \Magento\Sales\Model\AbstractModel|\Magento\Quote\Model\Quote $object
-     *
-     * @return $this
+     * @param AbstractModel|Quote $object
+     * @return BuilderInterface
      */
-    public function setObject($object)
+    public function setObject($object): self
     {
         $this->object = $object;
 
@@ -240,10 +248,9 @@ abstract class Builder extends DataObject implements BuilderInterface
      *
      * @param array  $request
      * @param string $type
-     *
-     * @return $this
+     * @return BuilderInterface
      */
-    public function setRequest(array $request, $type = self::GENERATE_TYPE_CREATE)
+    public function setRequest(array $request, $type = self::GENERATE_TYPE_CREATE): self
     {
         $this->request = $this->cleanNulls($request);
 
@@ -274,7 +281,7 @@ abstract class Builder extends DataObject implements BuilderInterface
      * @param array $request
      * @return array
      */
-    protected function cleanNulls(array $request)
+    protected function cleanNulls(array $request): array
     {
         $disallowNulls = [
             'customer',
@@ -295,13 +302,12 @@ abstract class Builder extends DataObject implements BuilderInterface
      *
      * @param StoreInterface $store
      * @param bool           $orderItemsOnly
-     *
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function getOrderLines(StoreInterface $store, $orderItemsOnly = false)
+    public function getOrderLines(StoreInterface $store, $orderItemsOnly = false): array
     {
-        /** @var \Klarna\Core\Model\Checkout\Orderline\AbstractLine $model */
+        /** @var AbstractLine $model */
         foreach ($this->getOrderLinesCollector()->getCollectors($store) as $model) {
             if ($model->isIsTotalCollector() && $orderItemsOnly) {
                 continue;
@@ -317,10 +323,9 @@ abstract class Builder extends DataObject implements BuilderInterface
      * Add an order line
      *
      * @param array $orderLine
-     *
-     * @return $this
+     * @return BuilderInterface
      */
-    public function addOrderLine(array $orderLine)
+    public function addOrderLine(array $orderLine): self
     {
         $this->orderLines[] = $orderLine;
 
@@ -330,9 +335,9 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Remove all order lines
      *
-     * @return $this
+     * @return BuilderInterface
      */
-    public function resetOrderLines()
+    public function resetOrderLines(): self
     {
         $this->orderLines = [];
 
@@ -342,10 +347,10 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Get merchant references
      *
-     * @param $quote
+     * @param CartInterface $quote
      * @return DataObject
      */
-    public function getMerchantReferences($quote)
+    public function getMerchantReferences(CartInterface $quote): DataObject
     {
         $merchantReferences = $this->dataObjectFactory->create([
             'data' => [
@@ -367,11 +372,11 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Get Terms URL
      *
-     * @param $store
-     * @param $configPath
+     * @param StoreInterface $store
+     * @param string         $configPath
      * @return mixed|string
      */
-    public function getTermsUrl($store, $configPath = 'terms_url')
+    public function getTermsUrl(StoreInterface $store, string $configPath = 'terms_url')
     {
         $termsUrl = $this->configHelper->getCheckoutConfig($configPath, $store);
         if (!empty($termsUrl) && !parse_url($termsUrl, PHP_URL_SCHEME)) {
@@ -384,12 +389,12 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Populate prefill values
      *
-     * @param $create
-     * @param $quote
-     * @param $store
+     * @param array          $create
+     * @param CartInterface  $quote
+     * @param StoreInterface $store
      * @return mixed
      */
-    public function prefill($create, $quote, $store)
+    public function prefill(array $create, CartInterface $quote, StoreInterface $store)
     {
         /**
          * Customer
@@ -415,10 +420,10 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Get customer details
      *
-     * @param $quote
-     * @return array|null
+     * @param CartInterface $quote
+     * @return array
      */
-    public function getCustomerData($quote)
+    public function getCustomerData(CartInterface $quote): ?array
     {
         if (!$quote->getCustomerIsGuest() && $quote->getCustomerDob()) {
             return [
@@ -432,63 +437,33 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * Auto fill user address details
      *
-     * @param \Magento\Quote\Api\Data\CartInterface $quote
-     * @param string                                $type
+     * @param CartInterface $quote
+     * @param string        $type
      *
      * @return array
      */
-    protected function getAddressData($quote, $type = null)
+    protected function getAddressData(CartInterface $quote, $type = null): array
     {
         $result = [];
         if ($quote->getCustomerEmail()) {
             $result['email'] = $quote->getCustomerEmail();
         }
-        $customer = $quote->getCustomer();
 
-        if ($quote->isVirtual() || $type === Address::TYPE_BILLING) {
+        $address = $quote->getShippingAddress();
+        if ($type === Address::TYPE_BILLING || $quote->isVirtual()) {
             $address = $quote->getBillingAddress();
-
-            if ($customer->getId() && !$address->getPostcode()) {
-                $address = $this->getCustomerAddress($customer->getDefaultBilling());
-            }
-        } else {
-            $address = $quote->getShippingAddress();
-
-            if ($customer->getId() && !$address->getPostcode()) {
-                $address = $this->getCustomerAddress($customer->getDefaultShipping());
-            }
         }
 
-        return $this->processAddress($result, $address);
+        return $this->processAddress($result, $quote, $address);
     }
 
     /**
-     * Retrieve customer address
-     *
-     * @param AddressInterface|string $address_id
-     * @return CustomerAddress|AddressInterface
-     */
-    private function getCustomerAddress($address_id)
-    {
-        if (!$address_id) {
-            return null;
-        }
-        if ($address_id instanceof AddressInterface) {
-            return $address_id;
-        }
-        try {
-            return $this->addressRegistry->retrieve($address_id);
-        } catch (\Exception $e) {
-            return null;
-        }
-    }
-
-    /**
-     * @param $result
-     * @param $address
+     * @param array         $result
+     * @param CartInterface $quote
+     * @param Address       $address
      * @return array
      */
-    private function processAddress($result, $address = null)
+    private function processAddress(array $result, CartInterface $quote, Address $address = null): array
     {
         $resultObject = $this->dataObjectFactory->create(['data' => $result]);
         if ($address) {
@@ -499,6 +474,14 @@ abstract class Builder extends DataObject implements BuilderInterface
                 $address,
                 $resultObject
             );
+
+            /*
+             * Making sure the billing address' organization name is empty
+             * during requests to prevent error when B2B is disabled
+             */
+            if ($this->shouldClearOrganizationName($quote, $address)) {
+                $resultObject->setOrganizationName('');
+            }
             if ($address->getCountryId() === 'US') {
                 $resultObject->setRegion($address->getRegionCode());
             }
@@ -516,10 +499,10 @@ abstract class Builder extends DataObject implements BuilderInterface
     }
 
     /**
-     * @param $resultObject
+     * @param DataObject $resultObject
      * @return array
      */
-    private function prepareStreetAddressArray($resultObject)
+    private function prepareStreetAddressArray(DataObject $resultObject): array
     {
         $street_address = $resultObject->getStreetAddress();
         if (!is_array($street_address)) {
@@ -532,10 +515,26 @@ abstract class Builder extends DataObject implements BuilderInterface
     }
 
     /**
-     * @param $items
-     * @return $this
+     * Verifies if we should clear the organization name from the address object
+     *
+     * @param CartInterface $quote
+     * @param Address       $address
+     * @return bool
      */
-    public function setItems($items)
+    private function shouldClearOrganizationName(CartInterface $quote, Address $address): bool
+    {
+        $store = $quote->getStore();
+        $b2bEnabled = $this->configHelper->isPaymentConfigFlag('enable_b2b', $store);
+        $isBillingAddress = $address->getAddressType() === Address::TYPE_BILLING;
+
+        return !$b2bEnabled && $isBillingAddress;
+    }
+
+    /**
+     * @param array $items
+     * @return BuilderInterface
+     */
+    public function setItems($items): self
     {
         $this->setData('items', $items);
         return $this;
@@ -544,7 +543,7 @@ abstract class Builder extends DataObject implements BuilderInterface
     /**
      * @return array
      */
-    public function getItems()
+    public function getItems(): array
     {
         return $this->getData('items');
     }

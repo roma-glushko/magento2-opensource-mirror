@@ -19,7 +19,7 @@ use Vertex\Exception\ConfigurationException;
 use Vertex\Services\Quote\RequestInterface;
 use Vertex\Services\Quote\RequestInterfaceFactory;
 use Vertex\Tax\Model\AddressDeterminer;
-use Vertex\Tax\Model\Api\Utility\DeliveryTerm;
+use Vertex\Tax\Model\Api\Data\QuotationDeliveryTermProcessor;
 use Vertex\Tax\Model\Api\Utility\MapperFactoryProxy;
 use Vertex\Tax\Model\Config;
 use Vertex\Tax\Model\DateTimeImmutableFactory;
@@ -43,7 +43,7 @@ class QuotationRequestBuilder
     /** @var DateTimeImmutableFactory */
     private $dateTimeFactory;
 
-    /** @var DeliveryTerm */
+    /** @var OrderDeliveryTermProcessor */
     private $deliveryTerm;
 
     /** @var LineItemBuilder */
@@ -70,7 +70,7 @@ class QuotationRequestBuilder
      * @param CustomerBuilder $customerBuilder
      * @param SellerBuilder $sellerBuilder
      * @param Config $config
-     * @param DeliveryTerm $deliveryTerm
+     * @param OrderDeliveryTermProcessor $deliveryTerm
      * @param DateTimeImmutableFactory $dateTimeFactory
      * @param AddressDeterminer $addressDeterminer
      * @param StoreManagerInterface $storeManager
@@ -83,7 +83,7 @@ class QuotationRequestBuilder
         CustomerBuilder $customerBuilder,
         SellerBuilder $sellerBuilder,
         Config $config,
-        DeliveryTerm $deliveryTerm,
+        QuotationDeliveryTermProcessor $deliveryTerm,
         DateTimeImmutableFactory $dateTimeFactory,
         AddressDeterminer $addressDeterminer,
         StoreManagerInterface $storeManager,
@@ -156,7 +156,7 @@ class QuotationRequestBuilder
             )
         );
 
-        $this->deliveryTerm->addIfApplicable($request);
+        $this->deliveryTerm->addDeliveryTerm($request);
 
         $configLocationCode = $this->config->getLocationCode($scopeCode);
 

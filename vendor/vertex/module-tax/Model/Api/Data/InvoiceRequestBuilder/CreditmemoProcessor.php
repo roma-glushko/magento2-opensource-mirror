@@ -17,7 +17,6 @@ use Vertex\Services\Invoice\RequestInterface;
 use Vertex\Services\Invoice\RequestInterfaceFactory;
 use Vertex\Tax\Model\Api\Data\CustomerBuilder;
 use Vertex\Tax\Model\Api\Data\SellerBuilder;
-use Vertex\Tax\Model\Api\Utility\DeliveryTerm;
 use Vertex\Tax\Model\Api\Utility\MapperFactoryProxy;
 use Vertex\Tax\Model\Config;
 
@@ -34,9 +33,6 @@ class CreditmemoProcessor
 
     /** @var DateTimeFactory */
     private $dateTimeFactory;
-
-    /** @var DeliveryTerm */
-    private $deliveryTerm;
 
     /** @var OrderAddressRepositoryInterface */
     private $orderAddressRepository;
@@ -65,7 +61,6 @@ class CreditmemoProcessor
      * @param CustomerBuilder $customerBuilder
      * @param RequestInterfaceFactory $requestFactory
      * @param Config $config
-     * @param DeliveryTerm $deliveryTerm
      * @param DateTimeFactory $dateTimeFactory
      * @param CreditmemoProcessorInterface $processorPool
      * @param OrderRepositoryInterface $orderRepository
@@ -78,7 +73,6 @@ class CreditmemoProcessor
         CustomerBuilder $customerBuilder,
         RequestInterfaceFactory $requestFactory,
         Config $config,
-        DeliveryTerm $deliveryTerm,
         DateTimeFactory $dateTimeFactory,
         CreditmemoProcessorInterface $processorPool,
         OrderRepositoryInterface $orderRepository,
@@ -90,7 +84,6 @@ class CreditmemoProcessor
         $this->customerBuilder = $customerBuilder;
         $this->requestFactory = $requestFactory;
         $this->config = $config;
-        $this->deliveryTerm = $deliveryTerm;
         $this->dateTimeFactory = $dateTimeFactory;
         $this->processorPool = $processorPool;
         $this->orderRepository = $orderRepository;
@@ -138,7 +131,6 @@ class CreditmemoProcessor
         $request->setSeller($seller);
         $request->setCustomer($customer);
         $request->setCurrencyCode($creditmemo->getBaseCurrencyCode());
-        $this->deliveryTerm->addIfApplicable($request);
 
         $configLocationCode = $this->config->getLocationCode($scopeCode);
 

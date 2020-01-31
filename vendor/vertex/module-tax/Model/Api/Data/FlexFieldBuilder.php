@@ -194,7 +194,9 @@ class FlexFieldBuilder
      */
     public function buildAllFromQuoteDetailsItem(QuoteDetailsItemInterface $item)
     {
-        $fields = $this->config->getFlexFieldsList($item->getExtensionAttributes()->getStoreId());
+        $storeId = $item->getExtensionAttributes() ? $item->getExtensionAttributes()->getStoreId() : null;
+
+        $fields = $this->config->getFlexFieldsList($storeId);
         $flexFields = [];
 
         foreach ($fields as $field) {
@@ -223,12 +225,7 @@ class FlexFieldBuilder
                 continue;
             }
             try {
-                $flexField = $this->createFlexibleField(
-                    $attribute->getType(),
-                    $fieldId,
-                    $value,
-                    $item->getExtensionAttributes() ? $item->getExtensionAttributes()->getStoreId() : null
-                );
+                $flexField = $this->createFlexibleField($attribute->getType(), $fieldId, $value, $storeId);
                 $flexFields[] = $flexField;
             } catch (Exception $exception) {
                 $this->exceptionLogger->error($exception);

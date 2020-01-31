@@ -71,11 +71,11 @@ class Serializer
             throw new \InvalidArgumentException(
                 sprintf('Cannot serialize unsupported type "%s"', gettype($input))
             );
-        } elseif (gettype($input) === 'object' && !($input instanceof \stdClass)) {
+        } elseif (is_object($input) && !($input instanceof \stdClass)) {
             throw new \InvalidArgumentException(
                 sprintf('Cannot serialize unsupported object type "%s"', get_class($input))
             );
-        } elseif (gettype($input) === 'array') {
+        } elseif (is_array($input)) {
             $depth++;
 
             if ($depth > self::MAX_ARRAY_DEPTH) {

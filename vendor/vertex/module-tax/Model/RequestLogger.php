@@ -52,16 +52,18 @@ class RequestLogger
      * @param string $type
      * @param string $requestXml
      * @param string $responseXml
+     * @param int|null $responseTime
      * @return void
      * @throws \Magento\Framework\Exception\CouldNotSaveException
      */
-    public function log($type, $requestXml, $responseXml)
+    public function log($type, $requestXml, $responseXml, $responseTime = null)
     {
         /** @var LogEntryInterface $logEntry */
         $logEntry = $this->factory->create();
         $timestamp = $this->dateTime->date('Y-m-d H:i:s');
         $logEntry->setType($type);
         $logEntry->setDate($timestamp);
+        $logEntry->setResponseTime($responseTime);
 
         $requestXml = $this->formatXml($requestXml);
         $responseXml = $this->formatXml($responseXml);
@@ -134,6 +136,13 @@ class RequestLogger
 
         $dom->preserveWhiteSpace = false;
         $dom->loadXML($xml);
+
+        // Secure TrustedId
+        $trustedId = $dom->getElementsByTagName('TrustedId');
+        if ($trustedId->length) {
+            $trustedId->item(0)->textContent = '*****';
+        }
+
         $dom->formatOutput = true;
         return $dom->saveXML();
     }

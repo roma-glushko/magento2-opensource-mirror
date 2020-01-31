@@ -3,10 +3,11 @@ namespace Flow\JSONPath\Test;
 
 use Flow\JSONPath\JSONPathLexer;
 use Flow\JSONPath\JSONPathToken;
+use PHPUnit\Framework\TestCase;
 
 require_once __DIR__ . "/../vendor/autoload.php";
 
-class JSONPathLexerTest extends \PHPUnit_Framework_TestCase
+class JSONPathLexerTest extends TestCase
 {
     public function test_Index_Wildcard()
     {
@@ -89,10 +90,10 @@ class JSONPathLexerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['start' => 0, 'end' => 1, 'step' => 2], $tokens[0]->value);
     }
 
-    public function test_Slice_NegativeIndex()
+    public function test_Index_NegativeIndex()
     {
         $tokens = (new \Flow\JSONPath\JSONPathLexer('[-1]'))->parseExpression();
-        $this->assertEquals(JSONPathToken::T_SLICE, $tokens[0]->type);
+        $this->assertEquals(JSONPathToken::T_INDEX, $tokens[0]->type);
         $this->assertEquals(['start' => -1, 'end' => null, 'step' => null], $tokens[0]->value);
     }
 
@@ -133,7 +134,6 @@ class JSONPathLexerTest extends \PHPUnit_Framework_TestCase
 
     }
 
-
     public function test_Recursive_Simple()
     {
         $tokens = (new \Flow\JSONPath\JSONPathLexer('..foo'))->parseExpression();
@@ -142,7 +142,6 @@ class JSONPathLexerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(null, $tokens[0]->value);
         $this->assertEquals('foo', $tokens[1]->value);
     }
-
 
     public function test_Recursive_Wildcard()
     {
@@ -153,7 +152,6 @@ class JSONPathLexerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('*', $tokens[1]->value);
     }
 
-
     /**
      * @expectedException           Flow\JSONPath\JSONPathException
      * @expectedExceptionMessage    Unable to parse token ba^r in expression: ..ba^r
@@ -162,7 +160,6 @@ class JSONPathLexerTest extends \PHPUnit_Framework_TestCase
     {
         $tokens = (new JSONPathLexer('..ba^r'))->parseExpression();
     }
-
 
     /**
      */
@@ -181,7 +178,10 @@ class JSONPathLexerTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals([1,2,3], $tokens[0]->value);
     }
 
-
+    public function test_Root_Expression()
+    {
+        $tokens = (new JSONPathLexer('$'));
+    }
 
 
 

@@ -24,6 +24,7 @@
         <click selector="{{CheckoutPaymentSection.klarnaPaymentsMethod(paymentMethod.label)}}" stepKey="selectKlarnaPaymentsMethod"/>
 
         <!--Wait for Klarna Payments iframe content to render and resize-->
+        <waitForElementVisible selector="{{CheckoutPaymentSection.klarnaPaymentsIframeElement(paymentMethod.iframe)}}" stepKey="waitForKlarnaPaymentsIframe"/>
         <switchToIFrame selector="{{CheckoutPaymentSection.klarnaPaymentsIframe(paymentMethod.iframe)}}" stepKey="enterKlarnaPaymentsIframe"/>
         <waitForElementNotVisible selector="{{CheckoutPaymentSection.klarnaPaymentsPaymentSelectorLoader}}" stepKey="waitForLoaderToDisappear"/>
         <waitForElementVisible selector="{{CheckoutPaymentSection.klarnaPaymentsPaymentSelector}}" stepKey="waitForKlarnaPaymentSelector"/>

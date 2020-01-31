@@ -44,6 +44,8 @@
                 <item name="invoice-item" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\InvoiceItemProcessor</item>
                 <item name="shipping" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\InvoiceShippingProcessor</item>
                 <item name="giftwrap" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\InvoiceGiftwrapProcessor</item>
+                <item name="fpt-item" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\InvoiceItemFixedPriceProcessor</item>
+                <item name="deliveryTerm" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\InvoiceDeliveryTermProcessor</item>
             </argument>
         </arguments>
     </type>
@@ -58,6 +60,7 @@
                 <item name="order-item" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\OrderItemProcessor</item>
                 <item name="shipping" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\OrderShippingProcessor</item>
                 <item name="giftwrap" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\OrderGiftwrapProcessor</item>
+                <item name="deliveryTerm" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\OrderDeliveryTermProcessor</item>
             </argument>
         </arguments>
     </type>
@@ -73,6 +76,8 @@
                 <item name="shipping" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\CreditmemoShippingProcessor</item>
                 <item name="giftwrap" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\CreditmemoGiftwrapProcessor</item>
                 <item name="adjustments" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\CreditmemoAdjustmentProcessor</item>
+                <item name="fpt-item" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\CreditmemoItemFixedPriceProcessor</item>
+                <item name="deliveryTerm" xsi:type="object">Vertex\Tax\Model\Api\Data\InvoiceRequestBuilder\CreditMemoDeliveryTermProcessor</item>
             </argument>
         </arguments>
     </type>

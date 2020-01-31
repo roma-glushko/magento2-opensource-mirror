@@ -214,4 +214,20 @@ class LogEntry extends AbstractModel implements LogEntryInterface
     {
         return $this->setData(static::FIELD_RESPONSE_XML, $responseXml);
     }
+
+    /**
+     * @inheritDoc
+     */
+    public function getResponseTime()
+    {
+        return $this->getData(static::FIELD_RESPONSE_TIME);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function setResponseTime($milliseconds)
+    {
+        return $this->setData(static::FIELD_RESPONSE_TIME, $milliseconds);
+    }
 }

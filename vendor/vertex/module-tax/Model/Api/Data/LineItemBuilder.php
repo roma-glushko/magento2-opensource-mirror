@@ -12,8 +12,8 @@ use Magento\Tax\Api\Data\TaxClassKeyInterface;
 use Vertex\Data\LineItemInterface;
 use Vertex\Data\LineItemInterfaceFactory;
 use Vertex\Exception\ConfigurationException;
-use Vertex\Tax\Model\Api\Data\FlexFieldBuilder;
 use Vertex\Tax\Model\Api\Utility\MapperFactoryProxy;
+use Vertex\Tax\Model\Api\Utility\PriceForTax;
 use Vertex\Tax\Model\Repository\TaxClassNameRepository;
 
 /**
@@ -37,24 +37,32 @@ class LineItemBuilder
     private $mapperFactory;
 
     /**
+     * @var PriceForTax
+     */
+    private $priceForTaxCalculation;
+
+    /**
      * @param TaxClassNameRepository $taxClassNameRepository
      * @param LineItemInterfaceFactory $factory
      * @param \Vertex\Tax\Model\Api\Data\FlexFieldBuilder $flexFieldBuilder
      * @param StringUtils $stringUtil
      * @param MapperFactoryProxy $mapperFactory
+     * @param PriceForTax $priceForTaxCalculation
      */
     public function __construct(
         TaxClassNameRepository $taxClassNameRepository,
         LineItemInterfaceFactory $factory,
         FlexFieldBuilder $flexFieldBuilder,
         StringUtils $stringUtil,
-        MapperFactoryProxy $mapperFactory
+        MapperFactoryProxy $mapperFactory,
+        PriceForTax $priceForTaxCalculation
     ) {
         $this->taxClassNameRepository = $taxClassNameRepository;
         $this->factory = $factory;
         $this->flexFieldBuilder = $flexFieldBuilder;
         $this->stringUtilities = $stringUtil;
         $this->mapperFactory = $mapperFactory;
+        $this->priceForTaxCalculation = $priceForTaxCalculation;
     }
 
     /**
@@ -96,7 +104,11 @@ class LineItemBuilder
         $lineItem->setQuantity($quantity);
         $lineItem->setUnitPrice($item->getUnitPrice());
 
-        $rowTotal = $item->getUnitPrice() * $quantity;
+        $unitPrice = $item->getUnitPrice();
+        $priceForTax = $this->priceForTaxCalculation
+            ->getPriceForTaxCalculationFromQuoteItem($item, $unitPrice);
+
+        $rowTotal = $priceForTax * $quantity;
 
         $lineItem->setExtendedPrice($rowTotal - $item->getDiscountAmount());
         $lineItem->setLineItemId($item->getCode());

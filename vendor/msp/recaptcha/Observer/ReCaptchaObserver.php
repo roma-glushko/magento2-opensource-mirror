@@ -20,6 +20,7 @@
 
 namespace MSP\ReCaptcha\Observer;
 
+use Magento\Framework\App\Action\Action;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\HTTP\PhpEnvironment\RemoteAddress;
@@ -56,7 +57,6 @@ class ReCaptchaObserver implements ObserverInterface
     private $isCheckRequired;
 
     /**
-     * ReCaptchaObserver constructor.
      * @param ResponseProviderInterface $responseProvider
      * @param ValidateInterface $validate
      * @param FailureProviderInterface $failureProvider
@@ -87,11 +87,11 @@ class ReCaptchaObserver implements ObserverInterface
             $reCaptchaResponse = $this->responseProvider->execute();
             $remoteIp = $this->remoteAddress->getRemoteAddress();
 
-            /** @var \Magento\Framework\App\Action\Action $controller */
+            /** @var Action $controller */
             $controller = $observer->getControllerAction();
 
             if (!$this->validate->validate($reCaptchaResponse, $remoteIp)) {
-                $this->failureProvider->execute($controller ? $controller->getResponse(): null);
+                $this->failureProvider->execute($controller ? $controller->getResponse() : null);
             }
         }
     }

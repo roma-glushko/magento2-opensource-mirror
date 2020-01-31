@@ -9,6 +9,9 @@
             <stories value="Confirm module menu links are visible." />
             <severity value="MINOR" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4443" />
         </annotations>
         <before>
@@ -30,6 +33,9 @@
             <stories value="Confirm messaging on packaging configuration when module is disabled." />
             <severity value="MAJOR" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4448, MPI-4449" />
         </annotations>
         <before>
@@ -52,6 +58,9 @@
             <stories value="Confirm messaging on checkout view settings configuration when module is disabled." />
             <severity value="MAJOR" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4452, MPI-4453" />
         </annotations>
         <before>
@@ -75,6 +84,9 @@
             <stories value="Confirm messaging on advanced settings configuration when module is disabled." />
             <severity value="MAJOR" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4554, MPI-4455" />
         </annotations>
         <before>
@@ -97,6 +109,9 @@
             <stories value="Confirm configure buttons can't be clicked when module is disabled." />
             <severity value="MAJOR" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4456, MPI-4457, MPI-4458, MPI-4459" />
         </annotations>
         <before>
@@ -119,6 +134,9 @@
             <stories value="Enable the shipping method without API credentials." />
             <severity value="CRITICAL" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4461, MPI-4532, MPI-4538" />
         </annotations>
         <before>
@@ -147,6 +165,9 @@
             <stories value="Enable the shipping method with API credentials." />
             <severity value="CRITICAL" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4450, MPI-4451, MPI-4460, MPI-5301, MPI-4610" />
         </annotations>
         <before>
@@ -186,6 +207,9 @@
             <stories value="Enable sync via advanced settings" />
             <severity value="CRITICAL" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4481, MPI-4482" />
         </annotations>
         <before>
@@ -212,6 +236,9 @@
             <stories value="Enable additional checkout fields" />
             <severity value="CRITICAL" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4475, MPI-4476, MPI-4477, MPI-4478, MPI-4480" />
         </annotations>
         <before>
@@ -256,6 +283,9 @@
             <stories value="Save configuration with only an endpoint" />
             <severity value="AVERAGE" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4531" />
         </annotations>
         <before>
@@ -281,6 +311,9 @@
             <stories value="Save configuration with account ID and bearer token only" />
             <severity value="AVERAGE" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4533, MPI-4534" />
         </annotations>
         <before>
@@ -311,6 +344,9 @@
             <stories value="Save configuration with valid credentials but disabled" />
             <severity value="AVERAGE" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4535" />
         </annotations>
         <before>
@@ -338,6 +374,9 @@
             <stories value="Save configuration with no credentials and disabled" />
             <severity value="AVERAGE" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4536" />
         </annotations>
         <before>
@@ -361,6 +400,9 @@
             <stories value="Save configuration with invalid credentials" />
             <severity value="AVERAGE" />
             <group value="Temando_Shipping_Account_Configuration" />
+            <skip>
+                <issueId value="MPI-4443"/>
+            </skip>
             <testCaseId value="MPI-4537" />
         </annotations>
         <before>

@@ -162,6 +162,14 @@
     <data key="tax">3.66</data>
     <data key="taxPercent">6</data>
   </entity>
+  <entity name="Vertex_Bundle_Partial_PA_Values_Qty1">
+    <data key="price">42.00</data>
+    <data key="priceInclTax">44.52</data>
+    <data key="subtotal">42.00</data>
+    <data key="subtotalInclTax">44.52</data>
+    <data key="tax">2.52</data>
+    <data key="taxPercent">6</data>
+  </entity>
   <entity name="Vertex_Grouped_First_Values">
     <data key="price">14.00</data>
     <data key="priceInclTax">17.08</data>
@@ -324,6 +332,17 @@
     <data key="totalInclTax">209.88</data>
     <data key="tax">11.88</data>
     <data key="productTax">10.98</data>
+    <data key="shipping">15.00</data>
+    <data key="shippingTax">0.90</data>
+    <data key="shippingInclTax">15.90</data>
+  </entity>
+  <entity name="Vertex_Bundle_Brick_Strap_Ball_PA_Totals_Qty3_Qty1">
+    <data key="subtotal">42.00</data>
+    <data key="subtotalInclTax">44.52</data>
+    <data key="total">57.00</data>
+    <data key="totalInclTax">60.42</data>
+    <data key="tax">3.42</data>
+    <data key="productTax">2.52</data>
     <data key="shipping">15.00</data>
     <data key="shippingTax">0.90</data>
     <data key="shippingInclTax">15.90</data>

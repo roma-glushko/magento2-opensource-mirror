@@ -35,5 +35,5 @@
     "magento/module-store": ">=100.2.3",
     "magento/module-ui": ">=101.0.4"
   },
-  "version": "3.0.1"
+  "version": "3.0.2"
 }

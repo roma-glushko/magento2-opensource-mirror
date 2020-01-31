@@ -1,4 +1,10 @@
 
+5.2.4 / 2019-11-04
+==================
+
+  * MAGE-1481 Clear organizationName if B2B is disabled
+  * MAGE-1504 Fix bug with passing the wrong address object
+
 5.2.1 / 2019-08-02
 ==================
 
