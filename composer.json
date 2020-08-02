@@ -11,7 +11,7 @@
         "sort-packages": true
     },
     "require": {
-        "magento/product-community-edition": "2.3.5-p1"
+        "magento/product-community-edition": "2.3.5-p2"
     },
     "require-dev": {
         "allure-framework/allure-phpunit": "~1.2.0",
@@ -63,7 +63,7 @@
             "Magento\\PhpStan\\": "dev/tests/static/framework/Magento/PhpStan/"
         }
     },
-    "version": "2.3.5-p1",
+    "version": "2.3.5-p2",
     "minimum-stability": "stable",
     "repositories": [
         {
