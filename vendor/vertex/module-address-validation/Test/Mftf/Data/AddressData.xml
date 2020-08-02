@@ -60,6 +60,22 @@
         <data key="default_shipping">true</data>
         <data key="default_billing">true</data>
     </entity>
+    <entity name="Vertex_Customer_PhiladelphiaPennsylvania_Address_Incorrect" type="address">
+        <data key="firstname">Philadelphia</data>
+        <data key="lastname">Pennsylvania</data>
+        <array key="street">
+            <item>30 N 3rd</item>
+        </array>
+        <data key="city">philadelphia</data>
+        <requiredEntity type="region">RegionPA</requiredEntity>
+        <data key="state">Pennsylvania</data>
+        <data key="postcode">99999</data>
+        <data key="country">US</data>
+        <data key="country_id">US</data>
+        <data key="telephone">111-111-1111</data>
+        <data key="default_shipping">true</data>
+        <data key="default_billing">true</data>
+    </entity>
     <entity name="Vertex_Customer_PhiladelphiaPennsylvania_Address" type="address">
         <data key="firstname">Philadelphia</data>
         <data key="lastname">Pennsylvania</data>

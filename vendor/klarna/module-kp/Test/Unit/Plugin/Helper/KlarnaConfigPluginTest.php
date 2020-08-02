@@ -10,8 +10,8 @@
 
 namespace Klarna\Kp\Tests\Unit\Plugin\Helper;
 
-use Klarna\Kp\Test\Unit\Mock\MockFactory;
-use Klarna\Kp\Test\Unit\Mock\TestObjectFactory;
+use Klarna\Core\Test\Unit\Mock\MockFactory;
+use Klarna\Core\Test\Unit\Mock\TestObjectFactory;
 use PHPUnit\Framework\TestCase;
 use Klarna\Kp\Plugin\Helper\KlarnaConfigPlugin;
 use Klarna\Core\Helper\KlarnaConfig;
@@ -83,7 +83,7 @@ class KlarnaConfigPluginTest extends TestCase
     /**
      * Basic setup for test
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $mockFactory              = new MockFactory();
         $objectFactory            = new TestObjectFactory($mockFactory);

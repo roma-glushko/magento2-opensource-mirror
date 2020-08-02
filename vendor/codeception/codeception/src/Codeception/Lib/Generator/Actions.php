@@ -30,7 +30,6 @@ trait {{name}}Actions
 
 EOF;
 
-
     protected $methodTemplate = <<<EOF
 
     /**
@@ -39,8 +38,8 @@ EOF;
      {{doc}}
      * @see \{{module}}::{{method}}()
      */
-    public function {{action}}({{params}}) {
-        return \$this->getScenario()->runStep(new \Codeception\Step\{{step}}('{{method}}', func_get_args()));
+    public function {{action}}({{params}}){{return_type}} {
+        {{return}}\$this->getScenario()->runStep(new \Codeception\Step\{{step}}('{{method}}', func_get_args()));
     }
 EOF;
 
@@ -49,6 +48,11 @@ EOF;
     protected $modules = [];
     protected $actions;
     protected $numMethods = 0;
+
+    /**
+     * @var array GeneratedStep[]
+     */
+    protected $generatedSteps = [];
 
     public function __construct($settings)
     {
@@ -62,6 +66,8 @@ EOF;
         }
         $this->modules = $this->moduleContainer->all();
         $this->actions = $this->moduleContainer->getActions();
+
+        $this->generatedSteps = (array) $settings['step_decorators'];
     }
 
 
@@ -103,31 +109,17 @@ EOF;
         if (!$doc) {
             $doc = "*";
         }
-
-        $conditionalDoc = $doc . "\n     * Conditional Assertion: Test won't be stopped on fail";
+        $returnType = $this->createReturnTypeHint($refMethod);
 
         $methodTemplate = (new Template($this->methodTemplate))
             ->place('module', $module)
             ->place('method', $refMethod->name)
+            ->place('return_type', $returnType)
+            ->place('return', $returnType === ': void' ? '' : 'return ')
             ->place('params', $params);
 
-        // generate conditional assertions
         if (0 === strpos($refMethod->name, 'see')) {
             $type = 'Assertion';
-            $body .= $methodTemplate
-                ->place('doc', $conditionalDoc)
-                ->place('action', 'can' . ucfirst($refMethod->name))
-                ->place('step', 'ConditionalAssertion')
-                ->produce();
-
-            // generate negative assertion
-        } elseif (0 === strpos($refMethod->name, 'dontSee')) {
-            $type = 'Assertion';
-            $body .= $methodTemplate
-                ->place('doc', $conditionalDoc)
-                ->place('action', str_replace('dont', 'cant', $refMethod->name))
-                ->place('step', 'ConditionalAssertion')
-                ->produce();
         } elseif (0 === strpos($refMethod->name, 'am')) {
             $type = 'Condition';
         } else {
@@ -139,6 +131,17 @@ EOF;
             ->place('action', $refMethod->name)
             ->place('step', $type)
             ->produce();
+
+        // add auto generated steps
+        foreach (array_unique($this->generatedSteps) as $generator) {
+            if (!is_callable([$generator, 'getTemplate'])) {
+                throw new \Exception("Wrong configuration for generated steps. $generator doesn't implement \Codeception\Step\GeneratedStep interface");
+            }
+            $template = call_user_func([$generator, 'getTemplate'], clone $methodTemplate);
+            if ($template) {
+                $body .= $template->produce();
+            }
+        }
 
         return $body;
     }
@@ -198,11 +201,36 @@ EOF;
             $actions[$moduleName] = get_class_methods(get_class($module));
         }
 
-        return md5(Codecept::VERSION . serialize($actions) . serialize($settings['modules']));
+        return md5(Codecept::VERSION . serialize($actions) . serialize($settings['modules']) . implode(',', (array) $settings['step_decorators']));
     }
 
     public function getNumMethods()
     {
         return $this->numMethods;
+    }
+
+    private function createReturnTypeHint(\ReflectionMethod $refMethod)
+    {
+        if (PHP_VERSION_ID < 70000) {
+            return '';
+        }
+
+        $returnType = $refMethod->getReturnType();
+
+        if ($returnType === null) {
+            return '';
+        }
+
+        if (PHP_VERSION_ID < 70100) {
+            $returnTypeString = (string)$returnType;
+        } else {
+            $returnTypeString = $returnType->getName();
+        }
+        return sprintf(
+            ': %s%s%s',
+            $returnType->allowsNull() ? '?' : '',
+            $returnType->isBuiltin() ? '' : '\\',
+            $returnTypeString
+        );
     }
 }

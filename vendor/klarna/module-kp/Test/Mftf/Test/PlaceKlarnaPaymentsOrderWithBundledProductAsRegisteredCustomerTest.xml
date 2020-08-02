@@ -68,7 +68,7 @@
             <deleteData createDataKey="createBundleProduct" stepKey="deleteBundleProduct"/>
             <deleteData createDataKey="createSubCategory" stepKey="deleteCategory"/>
             <deleteData createDataKey="createCustomer" stepKey="deleteCustomer"/>
-            <actionGroup ref="logout" stepKey="signOutFromAdmin"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="signOutFromAdmin"/>
         </after>
 
         <!--Log in to store front as customer-->
@@ -110,9 +110,11 @@
         <grabTextFrom selector="{{CheckoutSuccessMainSection.orderNumber22}}" stepKey="grabOrderNumber"/>
 
         <!--Verify order summary in admin-->
-        <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
-        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateOrderSummary">
-            <argument name="orderNumber" value="{$grabOrderNumber}"/>
+        <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
+        <actionGroup ref="OpenOrderByIdActionGroup" stepKey="goToOrderPage">
+            <argument name="orderId" value="{$grabOrderNumber}"/>
+        </actionGroup>
+        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateGrandTotal">
             <argument name="grandTotalAmount" value="{$grabTotalAmount}"/>
         </actionGroup>
     </test>

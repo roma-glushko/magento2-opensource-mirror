@@ -113,7 +113,7 @@ class TaxCalculationPlugin
             && $this->usageDeterminer->shouldUseVertex(
                 $storeId,
                 $quoteDetails->getShippingAddress(),
-                $quoteDetails->getCustomerId(),
+                $quoteDetails->getCustomerId() === null ? null : (int)$quoteDetails->getCustomerId(),
                 $isVirtual,
                 $checkCalculation
             );

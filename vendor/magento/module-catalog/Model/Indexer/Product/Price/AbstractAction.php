@@ -401,8 +401,6 @@ abstract class AbstractAction
     }
 
     /**
-     * Delete index data
-     *
      * @param array $entityIds
      * @return void
      */
@@ -499,8 +497,6 @@ abstract class AbstractAction
     }
 
     /**
-     * Retrieve product id field name
-     *
      * @return string
      */
     protected function getProductIdFieldName()
@@ -537,7 +533,6 @@ abstract class AbstractAction
 
     /**
      * Get parent products types
-     *
      * Used for add composite products to reindex if we have only simple products in changed ids set
      *
      * @param array $productsIds

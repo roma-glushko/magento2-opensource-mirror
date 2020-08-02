@@ -40,12 +40,13 @@
         </actionGroup>
 
         <!--Add product to shopping cart-->
-        <actionGroup ref="addToCartFromStorefrontProductPage" stepKey="addToCartFromStorefrontProductPage">
+        <actionGroup ref="AddToCartFromStorefrontProductPageActionGroup" stepKey="addToCartFromStorefrontProductPage">
             <argument name="productName" value="$$createSimpleProduct.name$$"/>
         </actionGroup>
 
         <!--Go to checkout-->
         <actionGroup ref="GoToCheckoutFromMinicartActionGroup" stepKey="goToCheckoutFromMinicart"/>
+        <waitForPageLoad stepKey="waitForCheckoutPageLoad"/>
 
         <!--Enter shipping information and continue to payments-->
         <actionGroup ref="GuestCheckoutFillingShippingSectionActionGroup" stepKey="guestCheckoutFillingShipping">

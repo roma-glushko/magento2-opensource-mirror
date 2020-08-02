@@ -10,6 +10,7 @@ use Magento\Catalog\Api\Data\ProductAttributeMediaGalleryEntryInterface;
 use Magento\Catalog\Api\Data\ProductInterface;
 use Magento\Catalog\Api\ProductLinkRepositoryInterface;
 use Magento\Catalog\Model\Product\Attribute\Backend\Media\EntryConverterPool;
+use Magento\Catalog\Model\Product\Configuration\Item\Option\OptionInterface;
 use Magento\Catalog\Model\FilterProductCustomAttribute;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\App\Filesystem\DirectoryList;
@@ -72,9 +73,9 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
     const STORE_ID = 'store_id';
 
     /**
-     * @var string
+     * @var string|bool
      */
-    protected $_cacheTag = self::CACHE_TAG;
+    protected $_cacheTag = false;
 
     /**
      * @var string
@@ -108,7 +109,7 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
     /**
      * Product object customization (not stored in DB)
      *
-     * @var array
+     * @var OptionInterface[]
      */
     protected $_customOptions = [];
 
@@ -461,6 +462,9 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
         $this->mediaGalleryEntryConverterPool = $mediaGalleryEntryConverterPool;
         $this->dataObjectHelper = $dataObjectHelper;
         $this->joinProcessor = $joinProcessor;
+        $this->eavConfig = $config ?? ObjectManager::getInstance()->get(\Magento\Eav\Model\Config::class);
+        $this->filterCustomAttribute = $filterCustomAttribute
+            ?? ObjectManager::getInstance()->get(FilterProductCustomAttribute::class);
         parent::__construct(
             $context,
             $registry,
@@ -471,9 +475,6 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
             $resourceCollection,
             $data
         );
-        $this->eavConfig = $config ?? ObjectManager::getInstance()->get(\Magento\Eav\Model\Config::class);
-        $this->filterCustomAttribute = $filterCustomAttribute
-            ?? ObjectManager::getInstance()->get(FilterProductCustomAttribute::class);
     }
 
     /**
@@ -726,9 +727,14 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
      */
     public function getCategoryId()
     {
+        if ($this->hasData('category_id')) {
+            return $this->getData('category_id');
+        }
         $category = $this->_registry->registry('current_category');
-        if ($category && in_array($category->getId(), $this->getCategoryIds())) {
-            return $category->getId();
+        $categoryId = $category ? $category->getId() : null;
+        if ($categoryId && in_array($categoryId, $this->getCategoryIds())) {
+            $this->setData('category_id', $categoryId);
+            return $categoryId;
         }
         return false;
     }
@@ -874,7 +880,6 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
      */
     public function beforeSave()
     {
-        $this->cleanCache();
         $this->setTypeHasOptions(false);
         $this->setTypeHasRequiredOptions(false);
         $this->setHasOptions(false);
@@ -1164,7 +1169,7 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
     /**
      * Get formatted by currency product price
      *
-     * @return array|double
+     * @return  array|double
      * @since 102.0.6
      */
     public function getFormattedPrice()
@@ -2065,7 +2070,7 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
     /**
      * Sets custom options for the product
      *
-     * @param array $options Array of options
+     * @param OptionInterface[] $options Array of options
      * @return void
      */
     public function setCustomOptions(array $options)
@@ -2076,7 +2081,7 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
     /**
      * Get all custom options of the product
      *
-     * @return array
+     * @return OptionInterface[]
      */
     public function getCustomOptions()
     {
@@ -2087,14 +2092,11 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
      * Get product custom option info
      *
      * @param   string $code
-     * @return  array
+     * @return  OptionInterface|null
      */
     public function getCustomOption($code)
     {
-        if (isset($this->_customOptions[$code])) {
-            return $this->_customOptions[$code];
-        }
-        return null;
+        return $this->_customOptions[$code] ?? null;
     }
 
     /**
@@ -2104,11 +2106,7 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
      */
     public function hasCustomOptions()
     {
-        if (count($this->_customOptions)) {
-            return true;
-        } else {
-            return false;
-        }
+        return (bool)count($this->_customOptions);
     }
 
     /**
@@ -2163,6 +2161,7 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
      */
     public function getCacheIdTags()
     {
+        // phpstan:ignore
         $tags = parent::getCacheIdTags();
         $affectedCategoryIds = $this->getAffectedCategoryIds();
         if (!$affectedCategoryIds) {
@@ -2343,6 +2342,7 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
     public function getImage()
     {
         $this->getTypeInstance()->setImageFromChildProduct($this);
+        // phpstan:ignore
         return parent::getImage();
     }
 
@@ -2412,7 +2412,7 @@ class Product extends \Magento\Catalog\Model\AbstractModel implements
      * @return array
      * @todo refactor with converter for AbstractExtensibleModel
      */
-    public function __toArray()
+    public function __toArray() //phpcs:ignore PHPCompatibility.FunctionNameRestrictions.ReservedFunctionNames
     {
         $data = $this->_data;
         $hasToArray = function ($model) {

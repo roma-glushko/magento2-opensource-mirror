@@ -33,6 +33,15 @@
             </settings>
         </dataProvider>
     </dataSource>
+    <container name="messages"
+               sortOrder="10"
+               component="Magento_MediaGalleryUi/js/grid/messages">
+        <argument name="data" xsi:type="array">
+            <item name="config" xsi:type="array">
+                <item name="messageDelay" xsi:type="number">10</item>
+            </item>
+        </argument>
+    </container>
     <listingToolbar name="listing_top" template="Magento_AdobeStockImageAdminUi/grid/toolbar">
         <bookmark name="bookmarks"/>
         <filterSearch name="words"/>
@@ -48,7 +57,7 @@
 		provider="adobe_stock_images_listing.adobe_stock_images_listing_data_source"
 		displayArea="sorting"
 		sortOrder="20"
-		component="Magento_AdobeStockImageAdminUi/js/components/sorting">
+		component="Magento_Ui/js/grid/sortBy">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
                     <item name="deps" xsi:type="array">
@@ -60,6 +69,11 @@
             </argument>
         </container>
         <filters name="listing_filters" sortOrder="10">
+            <settings>
+                <chipsConfig>
+                    <param name="template" xsi:type="string">Magento_AdobeStockImageAdminUi/grid/filter/chips</param>
+                </chipsConfig>
+            </settings>
             <filterSelect name="content_type_filter" provider="${ $.parentName }" sortOrder="10">
                 <settings>
                     <caption translate="true">All</caption>
@@ -191,6 +205,18 @@
             </settings>
         </column>
         <column name="preview" class="Magento\AdobeStockImageAdminUi\Ui\Component\Listing\Columns\ImagePreview" component="Magento_AdobeStockImageAdminUi/js/components/grid/column/image-preview">
+            <argument name="data" xsi:type="array">
+                <item name="config" xsi:type="array">
+                    <item name="mediaGalleryName" xsi:type="string">media_gallery_listing.media_gallery_listing.media_gallery_directories</item>
+                    <item name="mediaGalleryComponent" xsi:type="string">media_gallery_listing.media_gallery_listing.media_gallery_columns.thumbnail_url</item>
+                    <item name="mediaGalleryProvider" xsi:type="string">media_gallery_listing.media_gallery_listing_data_source</item>
+                    <item name="mediaGallerySortBy" xsi:type="string">media_gallery_listing.media_gallery_listing.listing_top.sorting</item>
+                    <item name="mediaGallerySearchInput" xsi:type="string">media_gallery_listing.media_gallery_listing.listing_top.fulltext</item>
+                    <item name="mediaGalleryListingFilters" xsi:type="string">media_gallery_listing.media_gallery_listing.listing_top.listing_filters</item>
+                    <item name="listingPaging" xsi:type="string">media_gallery_listing.media_gallery_listing.listing_top.listing_paging</item>
+                    <item name="sortByComponentName" xsi:type="string">adobe_stock_images_listing.adobe_stock_images_listing.listing_top.sorting</item>
+                </item>
+            </argument>
             <settings>
                 <label translate="true">Image Preview</label>
                 <bodyTmpl>Magento_AdobeStockImageAdminUi/grid/column/image-preview</bodyTmpl>

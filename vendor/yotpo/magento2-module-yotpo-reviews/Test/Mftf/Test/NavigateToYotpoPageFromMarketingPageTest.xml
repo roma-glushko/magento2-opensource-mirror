@@ -18,7 +18,7 @@
       <group value="magento-navigation-to-yotpo"/>
     </annotations>
 
-    <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+    <actionGroup ref="AdminLoginActionGroup" stepKey="AdminLoginActionGroup"/>
 
     <actionGroup ref="EnableYotpoPlugin" stepKey="enableYotpoPlugin">
       <argument name="storeView" value="_defaultStore.name"/>

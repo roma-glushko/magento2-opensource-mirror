@@ -5,8 +5,7 @@
 define([
     'uiComponent',
     'underscore',
-    'jquery',
-    'mage/backend/tabs'
+    'jquery'
 ], function (Component, _, $) {
     'use strict';
 
@@ -14,8 +13,9 @@ define([
         defaults: {
             template: 'Magento_AdobeStockImageAdminUi/grid/column/preview/related',
             filterChipsProvider: 'componentType = filters, ns = ${ $.ns }',
-            filterTitleSelector: '.admin__current-filters-title-wrap',
+            filterBookmarksSelector: '.admin__data-grid-action-bookmarks',
             tabImagesLimit: 4,
+            tabsContainerId: '#adobe-stock-tabs',
             serieFilterValue: '',
             modelFilterValue: '',
             selectedTab: null,
@@ -51,6 +51,19 @@ define([
         },
 
         /**
+         * Disable keydown event for related content tabs
+         */
+        disableTabsKeyDownEvent: function () {
+            if ($(this.tabsContainerId + ' li[role=tab]').length === 0) {
+                setTimeout(function () {
+                    this.disableTabsKeyDownEvent();
+                }.bind(this), 100);
+            } else {
+                $(this.tabsContainerId + ' li[role=tab]').unbind('keydown');
+            }
+        },
+
+        /**
          * Init observable variables
          * @return {Object}
          */
@@ -68,34 +81,13 @@ define([
         },
 
         /**
-         * Check if related images are present for the record
-         *
-         * @param {Object} record
-         * @returns boolean
-         */
-        _isLoaded: function (record) {
-            return this.getSeries(record).length || this.getModel(record).length;
-        },
-
-        /**
-         * Check if related images has Data
-         *
-         * @param {Object} record
-         * @returns boolean
-         */
-        _hasData: function (record) {
-            return typeof this.relatedImages().series[record.id] !== 'undefined' ||
-                typeof this.relatedImages().model[record.id] !== 'undefined';
-        },
-
-        /**
          * Check if visible container
          *
          * @param {Object} record
          * @returns boolean
          */
         isVisible: function (record) {
-            return !this._isLoaded(record) || this._hasData(record);
+            return this.showSeriesTab(record) && this.showModelTab(record);
         },
 
         /**
@@ -134,7 +126,7 @@ define([
                 this.preview().updateHeight();
 
                 /* Switch to the model tab if the series tab is hidden */
-                if (relatedImages.series[record.id].length === 0) {
+                if (relatedImages.series[record.id].length === 0 && relatedImages.model[record.id].length > 0) {
                     $('#adobe-stock-tabs').data().mageTabs.select(1);
                 }
             }.bind(this));
@@ -214,12 +206,7 @@ define([
                 return;
             }
             this.serieFilterValue(record.id);
-            this.filterChips().set(
-                'applied',
-                {
-                    'serie_id': record.id.toString()
-                }
-            );
+            this.applyFilter('serie_id', record.id.toString());
         },
 
         /**
@@ -234,12 +221,25 @@ define([
                 return;
             }
             this.modelFilterValue(record.id);
-            this.filterChips().set(
-                'applied',
-                {
-                    'model_id': record.id.toString()
-                }
-            );
+            this.applyFilter('model_id', record.id.toString());
+        },
+
+        /**
+         * Apply series or model id filter and scroll to top of the page
+         *
+         * @param {String} typeId
+         * @param {String} recordId
+         */
+        applyFilter: function (typeId, recordId) {
+            var data = {};
+
+            data[typeId] = recordId;
+
+            this.filterChips().clear();
+            this.filterChips().setData(data, true);
+            this.filterChips().apply();
+
+            this.scrollToFilter();
         },
 
         /**
@@ -263,10 +263,10 @@ define([
         },
 
         /**
-         * Scrolls user window to the filter title
+         * Scrolls user window to the filter bookmarks
          */
         scrollToFilter: function () {
-            $(this.filterTitleSelector).get(0).scrollIntoView({
+            $(this.preview().adobeStockModalSelector + ' ' + this.filterBookmarksSelector).get(0).scrollIntoView({
                 behavior: 'smooth',
                 block: 'center',
                 inline: 'nearest'

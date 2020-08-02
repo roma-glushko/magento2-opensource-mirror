@@ -80,6 +80,7 @@ $entities = [
         'taxPercent' => TAX_RATE_PA_ONLY,
     ],
     'Vertex_100USD_Clothing_PA_Only_Values' => [
+        // Clothing is not taxed in PA
         'price' => 100,
         'priceInclTax' => 100,
         'subtotal' => 100,

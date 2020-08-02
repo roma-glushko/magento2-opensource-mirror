@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <tests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-       xsi:noNamespaceSchemaLocation="../../../../../../../vendor/magento/magento2-functional-testing-framework/src/Magento/FunctionalTestingFramework/Test/etc/testSchema.xsd">
+       xsi:noNamespaceSchemaLocation="urn:magento:mftf:Test/etc/testSchema.xsd">
     <test name="ButtonsAreDisabledWhenApiCredsAreInvalidTest">
         <annotations>
             <features value="Engagement Cloud module"/>
@@ -13,7 +13,7 @@
 
         <before>
             <!-- Log in and set API credentials -->
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin1"/>
+            <actionGroup ref="AdminLoginActionGroup" stepKey="AdminLoginActionGroup1"/>
 
             <!-- Fill in invalid API credentials and enable -->
             <actionGroup ref="SetDotmailerAccountData" stepKey="SetDotmailerAccountData">
@@ -26,7 +26,7 @@
         <after>
             <!-- Reset and log out -->
             <actionGroup ref="ResetDotmailerAccountData" stepKey="resetAccountData"/>
-            <actionGroup ref="logout" stepKey="logout"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
         </after>
 
         <amOnPage url="{{AdminEngagementCloudChatSettingsPage.url}}" stepKey="dotDigitalChatSettingsOnAssert"/>

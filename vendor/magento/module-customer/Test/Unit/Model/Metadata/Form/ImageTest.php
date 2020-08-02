@@ -3,16 +3,17 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
-
 declare(strict_types=1);
 
 namespace Magento\Customer\Test\Unit\Model\Metadata\Form;
 
 use Magento\Customer\Api\AddressMetadataInterface;
 use Magento\Customer\Api\CustomerMetadataInterface;
+use Magento\Customer\Api\Data\ValidationRuleInterface;
 use Magento\Customer\Model\FileProcessor;
 use Magento\Customer\Model\FileProcessorFactory;
 use Magento\Customer\Model\Metadata\Form\Image;
+use Magento\Framework\Api\Data\ImageContentInterface;
 use Magento\Framework\Api\Data\ImageContentInterfaceFactory;
 use Magento\Framework\App\Filesystem\DirectoryList;
 use Magento\Framework\App\Request\Http;
@@ -26,7 +27,7 @@ use Magento\Framework\Filesystem\Driver\File as Driver;
 use Magento\Framework\Filesystem\Io\File;
 use Magento\Framework\Url\EncoderInterface;
 use Magento\MediaStorage\Model\File\Validator\NotProtectedExtension;
-use PHPUnit_Framework_MockObject_MockObject;
+use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * Tests Metadata/Form/Image class
@@ -36,80 +37,80 @@ use PHPUnit_Framework_MockObject_MockObject;
 class ImageTest extends AbstractFormTestCase
 {
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|EncoderInterface
+     * @var MockObject|EncoderInterface
      */
     private $urlEncode;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|NotProtectedExtension
+     * @var MockObject|NotProtectedExtension
      */
     private $fileValidatorMock;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|Filesystem
+     * @var MockObject|Filesystem
      */
     private $fileSystemMock;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|Http
+     * @var MockObject|Http
      */
     private $requestMock;
 
     /**
-     * @var PHPUnit_Framework_MockObject_MockObject|UploaderFactory
+     * @var MockObject|UploaderFactory
      */
     private $uploaderFactoryMock;
 
     /**
-     * @var FileProcessor|PHPUnit_Framework_MockObject_MockObject
+     * @var FileProcessor|MockObject
      */
     private $fileProcessorMock;
 
     /**
-     * @var ImageContentInterfaceFactory|PHPUnit_Framework_MockObject_MockObject
+     * @var ImageContentInterfaceFactory|MockObject
      */
     private $imageContentFactory;
 
     /**
-     * @var FileProcessorFactory|PHPUnit_Framework_MockObject_MockObject
+     * @var FileProcessorFactory|MockObject
      */
     private $fileProcessorFactoryMock;
 
     /**
-     * @var File|PHPUnit_Framework_MockObject_MockObject
+     * @var File|\PHPUnit\Framework\MockObject\MockObject
      */
     private $ioFileSystemMock;
 
     /**
-     * @var DirectoryList|PHPUnit_Framework_MockObject_MockObject
+     * @var DirectoryList|\PHPUnit\Framework\MockObject\MockObject
      */
     private $directoryListMock;
 
     /**
-     * @var WriteFactory|PHPUnit_Framework_MockObject_MockObject
+     * @var WriteFactory|\PHPUnit\Framework\MockObject\MockObject
      */
     private $writeFactoryMock;
 
     /**
-     * @var Write|PHPUnit_Framework_MockObject_MockObject
+     * @var Write|\PHPUnit\Framework\MockObject\MockObject
      */
     private $mediaEntityTmpDirectoryMock;
 
     /**
-     * @var Driver|PHPUnit_Framework_MockObject_MockObject
+     * @var Driver|\PHPUnit\Framework\MockObject\MockObject
      */
     private $driverMock;
 
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
         $this->urlEncode = $this->getMockBuilder(EncoderInterface::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMockForAbstractClass();
         $this->fileValidatorMock = $this->getMockBuilder(NotProtectedExtension::class)
             ->disableOriginalConstructor()
             ->getMock();
@@ -229,6 +230,14 @@ class ImageTest extends AbstractFormTestCase
             'name' => 'logo.gif',
         ];
 
+        $this->ioFileSystemMock->expects($this->any())
+            ->method('getPathInfo')
+            ->with($value['name'])
+            ->willReturn([
+                'filename' => 'logo',
+                'extension' => 'gif'
+            ]);
+
         $this->attributeMetadataMock->expects($this->once())
             ->method('getStoreLabel')
             ->willReturn('File Input Field Label');
@@ -237,6 +246,11 @@ class ImageTest extends AbstractFormTestCase
             ->method('isExist')
             ->with(FileProcessor::TMP_DIR . '/' . $value['name'])
             ->willReturn(true);
+
+        $this->ioFileSystemMock->expects($this->once())
+            ->method('getPathInfo')
+            ->with($value['name'])
+            ->willReturn(['extension' => 'gif']);
 
         $model = $this->initialize([
             'value' => $value,
@@ -262,7 +276,7 @@ class ImageTest extends AbstractFormTestCase
         $maxFileSize = 1;
 
         $validationRuleMock = $this->getMockBuilder(
-            \Magento\Customer\Api\Data\ValidationRuleInterface::class
+            ValidationRuleInterface::class
         )->getMockForAbstractClass();
         $validationRuleMock->expects($this->any())
             ->method('getName')
@@ -270,6 +284,14 @@ class ImageTest extends AbstractFormTestCase
         $validationRuleMock->expects($this->any())
             ->method('getValue')
             ->willReturn($maxFileSize);
+
+        $this->ioFileSystemMock->expects($this->any())
+            ->method('getPathInfo')
+            ->with($value['name'])
+            ->willReturn([
+                'filename' => 'logo',
+                'extension' => 'gif'
+            ]);
 
         $this->attributeMetadataMock->expects($this->once())
             ->method('getStoreLabel')
@@ -282,6 +304,11 @@ class ImageTest extends AbstractFormTestCase
             ->method('isExist')
             ->with(FileProcessor::TMP_DIR . '/' . $value['name'])
             ->willReturn(true);
+
+        $this->ioFileSystemMock->expects($this->once())
+            ->method('getPathInfo')
+            ->with($value['name'])
+            ->willReturn(['extension' => 'gif']);
 
         $model = $this->initialize([
             'value' => $value,
@@ -306,7 +333,7 @@ class ImageTest extends AbstractFormTestCase
         $maxImageWidth = 1;
 
         $validationRuleMock = $this->getMockBuilder(
-            \Magento\Customer\Api\Data\ValidationRuleInterface::class
+            ValidationRuleInterface::class
         )->getMockForAbstractClass();
         $validationRuleMock->expects($this->any())
             ->method('getName')
@@ -314,6 +341,14 @@ class ImageTest extends AbstractFormTestCase
         $validationRuleMock->expects($this->any())
             ->method('getValue')
             ->willReturn($maxImageWidth);
+
+        $this->ioFileSystemMock->expects($this->any())
+            ->method('getPathInfo')
+            ->with($value['name'])
+            ->willReturn([
+                'filename' => 'logo',
+                'extension' => 'gif'
+            ]);
 
         $this->attributeMetadataMock->expects($this->once())
             ->method('getStoreLabel')
@@ -326,6 +361,11 @@ class ImageTest extends AbstractFormTestCase
             ->method('isExist')
             ->with(FileProcessor::TMP_DIR . '/' . $value['name'])
             ->willReturn(true);
+
+        $this->ioFileSystemMock->expects($this->once())
+            ->method('getPathInfo')
+            ->with($value['name'])
+            ->willReturn(['extension' => 'gif']);
 
         $model = $this->initialize([
             'value' => $value,
@@ -350,7 +390,7 @@ class ImageTest extends AbstractFormTestCase
         $maxImageHeight = 1;
 
         $validationRuleMock = $this->getMockBuilder(
-            \Magento\Customer\Api\Data\ValidationRuleInterface::class
+            ValidationRuleInterface::class
         )->getMockForAbstractClass();
         $validationRuleMock->expects($this->any())
             ->method('getName')
@@ -358,6 +398,14 @@ class ImageTest extends AbstractFormTestCase
         $validationRuleMock->expects($this->any())
             ->method('getValue')
             ->willReturn($maxImageHeight);
+
+        $this->ioFileSystemMock->expects($this->any())
+            ->method('getPathInfo')
+            ->with($value['name'])
+            ->willReturn([
+                'filename' => 'logo',
+                'extension' => 'gif'
+            ]);
 
         $this->attributeMetadataMock->expects($this->once())
             ->method('getStoreLabel')
@@ -370,6 +418,11 @@ class ImageTest extends AbstractFormTestCase
             ->method('isExist')
             ->with(FileProcessor::TMP_DIR . '/' . $value['name'])
             ->willReturn(true);
+
+        $this->ioFileSystemMock->expects($this->once())
+            ->method('getPathInfo')
+            ->with($value['name'])
+            ->willReturn(['extension' => 'gif']);
 
         $model = $this->initialize([
             'value' => $value,
@@ -466,7 +519,7 @@ class ImageTest extends AbstractFormTestCase
             ->willReturnSelf();
 
         $imageContentMock = $this->getMockBuilder(
-            \Magento\Framework\Api\Data\ImageContentInterface::class
+            ImageContentInterface::class
         )->getMockForAbstractClass();
         $imageContentMock->expects($this->once())
             ->method('setName')

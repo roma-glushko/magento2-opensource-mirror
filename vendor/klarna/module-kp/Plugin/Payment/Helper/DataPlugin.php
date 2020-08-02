@@ -14,7 +14,6 @@ use Klarna\Kp\Api\PaymentMethodListInterface;
 use Klarna\Kp\Model\Payment\Kp;
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NoSuchEntityException;
@@ -107,9 +106,9 @@ class DataPlugin
         ScopeConfigInterface $config,
         PaymentMethodListInterface $paymentMethodList,
         StoreManagerInterface $storeManager,
-        QuoteRepositoryInterface $quoteRepository = null,
-        KlarnaSession $klarnaSession = null,
-        LoggerInterface $logger = null
+        QuoteRepositoryInterface $quoteRepository,
+        KlarnaSession $klarnaSession,
+        LoggerInterface $logger
     ) {
         $this->request = $request;
         $this->orderRepository = $orderRepository;
@@ -118,13 +117,9 @@ class DataPlugin
         $this->config = $config;
         $this->paymentMethodList = $paymentMethodList;
         $this->storeManager = $storeManager;
-
-        $this->quoteRepository = ($quoteRepository !== null ? $quoteRepository :
-            ObjectManager::getInstance()->get(QuoteRepositoryInterface::class));
-        $this->klarnaSession = ($klarnaSession !== null ? $klarnaSession :
-            ObjectManager::getInstance()->get(KlarnaSession::class));
-        $this->logger = ($logger !== null ? $logger :
-            ObjectManager::getInstance()->get(LoggerInterface::class));
+        $this->quoteRepository = $quoteRepository;
+        $this->klarnaSession = $klarnaSession;
+        $this->logger = $logger;
     }
 
     /**

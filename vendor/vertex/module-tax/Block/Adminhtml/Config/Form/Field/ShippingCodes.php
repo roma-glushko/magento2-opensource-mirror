@@ -72,7 +72,7 @@ class ShippingCodes extends Field
     /**
      * @inheritdoc
      */
-    public function getElementHtml()
+    public function _getElementHtml(AbstractElement $element)
     {
         $storeId = $this->getStoreId();
 
@@ -126,19 +126,5 @@ class ShippingCodes extends Field
         $html .= '</tbody></table>';
 
         return $html;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     * @see \Magento\Config\Block\System\Config\Form\Field::render()
-     */
-    public function render(AbstractElement $element)
-    {
-        $html = '<td>';
-        $html .= $this->getElementHtml();
-        $html .= '</td>';
-
-        return $this->_decorateRowHtml($element, $html);
     }
 }

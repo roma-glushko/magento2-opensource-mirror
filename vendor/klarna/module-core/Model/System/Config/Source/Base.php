@@ -11,9 +11,9 @@
 namespace Klarna\Core\Model\System\Config\Source;
 
 use Magento\Framework\Config\DataInterface;
-use Magento\Framework\Option\ArrayInterface;
+use Magento\Framework\Data\OptionSourceInterface;
 
-class Base implements ArrayInterface
+class Base implements OptionSourceInterface
 {
     /**
      * @var DataInterface

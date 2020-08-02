@@ -9,6 +9,7 @@ namespace Magento\AdobeStockImageAdminUi\Controller\Adminhtml\License;
 
 use Magento\AdobeStockClientApi\Api\Client\FilesInterface;
 use Magento\Backend\App\Action;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultFactory;
 use Psr\Log\LoggerInterface;
@@ -16,7 +17,7 @@ use Psr\Log\LoggerInterface;
 /**
  * Identify if images are licensed in adobe stock
  */
-class GetList extends Action
+class GetList extends Action implements HttpGetActionInterface
 {
     private const HTTP_OK = 200;
     private const HTTP_INTERNAL_ERROR = 500;
@@ -62,7 +63,6 @@ class GetList extends Action
             $params = $this->getRequest()->getParams();
 
             $result = [];
-
             if (!empty($params[self::PARAM_IDS])) {
                 $result = $this->getLicensedData(explode(',', $params[self::PARAM_IDS]));
             }

@@ -9,7 +9,7 @@
         "sort-packages": true
     },
     "require": {
-        "magento/framework": "102.0.*"
+        "magento/framework": "103.0.*"
     },
     "type": "magento2-language",
     "autoload": {
@@ -17,5 +17,5 @@
             "registration.php"
         ]
     },
-    "version": "100.3.4"
+    "version": "100.4.0"
 }

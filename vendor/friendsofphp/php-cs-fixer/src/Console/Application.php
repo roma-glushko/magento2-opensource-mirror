@@ -35,8 +35,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class Application extends BaseApplication
 {
-    const VERSION = '2.14.6';
-    const VERSION_CODENAME = 'Sunrise';
+    const VERSION = '2.16.4';
+    const VERSION_CODENAME = 'Yellow Bird';
 
     /**
      * @var ToolInfo
@@ -46,7 +46,7 @@ final class Application extends BaseApplication
     public function __construct()
     {
         if (!getenv('PHP_CS_FIXER_FUTURE_MODE')) {
-            error_reporting(-1);
+            error_reporting(E_ALL & ~E_DEPRECATED & ~E_USER_DEPRECATED);
         }
 
         parent::__construct('PHP CS Fixer', self::VERSION);
@@ -61,6 +61,14 @@ final class Application extends BaseApplication
             $this->toolInfo,
             new PharChecker()
         ));
+    }
+
+    /**
+     * @return int
+     */
+    public static function getMajorVersion()
+    {
+        return (int) explode('.', self::VERSION)[0];
     }
 
     /**
@@ -89,11 +97,11 @@ final class Application extends BaseApplication
      */
     public function getLongVersion()
     {
-        $version = parent::getLongVersion();
-        if (self::VERSION_CODENAME) {
-            $version .= ' <info>'.self::VERSION_CODENAME.'</info>';
-        }
-        $version .= ' by <comment>Fabien Potencier</comment> and <comment>Dariusz Ruminski</comment>';
+        $version = sprintf(
+            '%s <info>%s</info> by <comment>Fabien Potencier</comment> and <comment>Dariusz Ruminski</comment>',
+            parent::getLongVersion(),
+            self::VERSION_CODENAME
+        );
 
         $commit = '@git-commit@';
 

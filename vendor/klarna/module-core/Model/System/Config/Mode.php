@@ -10,12 +10,12 @@
 
 namespace Klarna\Core\Model\System\Config;
 
-use Magento\Framework\Option\ArrayInterface;
+use Magento\Framework\Data\OptionSourceInterface;
 
 /**
  * Returning the values for the api mode
  */
-class Mode implements ArrayInterface
+class Mode implements OptionSourceInterface
 {
     /**
      * Return array of options as value-label pairs

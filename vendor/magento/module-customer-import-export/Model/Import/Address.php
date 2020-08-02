@@ -3,6 +3,7 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
 namespace Magento\CustomerImportExport\Model\Import;
 
 use Magento\Customer\Model\ResourceModel\Address\Attribute\Source\CountryWithWebsites as CountryWithWebsitesSource;
@@ -12,6 +13,7 @@ use Magento\ImportExport\Model\Import\ErrorProcessing\ProcessingErrorAggregatorI
 use Magento\Store\Model\Store;
 use Magento\CustomerImportExport\Model\ResourceModel\Import\Address\Storage as AddressStorage;
 use Magento\ImportExport\Model\Import\AbstractSource;
+use Magento\Customer\Model\Indexer\Processor;
 
 /**
  * Customer address import
@@ -224,7 +226,11 @@ class Address extends AbstractCustomer
      * @array
      */
     protected $validColumnNames = [
-        "region_id", "vat_is_valid", "vat_request_date", "vat_request_id", "vat_request_success"
+        "region_id",
+        "vat_is_valid",
+        "vat_request_date",
+        "vat_request_id",
+        "vat_request_success"
     ];
 
     /**
@@ -250,6 +256,11 @@ class Address extends AbstractCustomer
     private $addressStorage;
 
     /**
+     * @var Processor
+     */
+    private $indexerProcessor;
+
+    /**
      * @param \Magento\Framework\Stdlib\StringUtils $string
      * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
      * @param \Magento\ImportExport\Model\ImportFactory $importFactory
@@ -269,6 +280,7 @@ class Address extends AbstractCustomer
      * @param array $data
      * @param CountryWithWebsitesSource|null $countryWithWebsites
      * @param AddressStorage|null $addressStorage
+     * @param Processor $indexerProcessor
      *
      * @SuppressWarnings(PHPMD.NPathComplexity)
      * @SuppressWarnings(PHPMD.ExcessiveParameterList)
@@ -291,8 +303,9 @@ class Address extends AbstractCustomer
         \Magento\Framework\Stdlib\DateTime $dateTime,
         \Magento\Customer\Model\Address\Validator\Postcode $postcodeValidator,
         array $data = [],
-        CountryWithWebsitesSource $countryWithWebsites = null,
-        AddressStorage $addressStorage = null
+        ?CountryWithWebsitesSource $countryWithWebsites = null,
+        ?AddressStorage $addressStorage = null,
+        ?Processor $indexerProcessor = null
     ) {
         $this->_customerFactory = $customerFactory;
         $this->_addressFactory = $addressFactory;
@@ -342,6 +355,9 @@ class Address extends AbstractCustomer
         );
         $this->addressStorage = $addressStorage
             ?: ObjectManager::getInstance()->get(AddressStorage::class);
+
+        $this->indexerProcessor = $indexerProcessor
+            ?: ObjectManager::getInstance()->get(Processor::class);
 
         $this->_initAttributes();
         $this->_initCountryRegions();
@@ -507,11 +523,12 @@ class Address extends AbstractCustomer
     protected function _importData()
     {
         //Preparing data for mass validation/import.
-        $rows = [];
+        $rows = [[]];
         while ($bunch = $this->_dataSourceModel->getNextBunch()) {
-            $rows = array_merge($rows, $bunch);
+            $rows[] = $bunch;
         }
-        $this->prepareCustomerData($rows);
+
+        $this->prepareCustomerData(array_merge(...$rows));
         unset($bunch, $rows);
         $this->_dataSourceModel->getIterator()->rewind();
 
@@ -556,6 +573,7 @@ class Address extends AbstractCustomer
 
             $this->_deleteAddressEntities($deleteRowIds);
         }
+        $this->indexerProcessor->markIndexerAsInvalid();
         return true;
     }
 
@@ -586,7 +604,7 @@ class Address extends AbstractCustomer
      * @SuppressWarnings(PHPMD.CyclomaticComplexity)
      * @SuppressWarnings(PHPMD.NPathComplexity)
      */
-    protected function _prepareDataForUpdate(array $rowData):array
+    protected function _prepareDataForUpdate(array $rowData): array
     {
         $email = strtolower($rowData[self::COLUMN_EMAIL]);
         $customerId = $this->_getCustomerId($email, $rowData[self::COLUMN_WEBSITE]);
@@ -637,7 +655,7 @@ class Address extends AbstractCustomer
                 if ($attributeParams['is_static']) {
                     $entityRow[$attributeAlias] = $value;
                 } else {
-                    $attributes[$attributeParams['table']][$addressId][$attributeParams['id']]= $value;
+                    $attributes[$attributeParams['table']][$addressId][$attributeParams['id']] = $value;
                 }
             }
         }
@@ -876,8 +894,8 @@ class Address extends AbstractCustomer
                         );
                     } elseif ($attributeParams['is_required']
                         && !$this->addressStorage->doesExist(
-                            $addressId,
-                            $customerId
+                            (string)$addressId,
+                            (string)$customerId
                         )
                     ) {
                         $this->addRowError(self::ERROR_VALUE_IS_REQUIRED, $rowNumber, $attributeCode);

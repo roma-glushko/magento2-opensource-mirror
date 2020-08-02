@@ -37,7 +37,7 @@ class GetAllocatedSourcesForOrderTest extends \PHPUnit\Framework\TestCase
     /**
      * @inheritdoc
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->objectManager = Bootstrap::getObjectManager();
         $this->orderRepository = $this->objectManager->get(OrderRepository::class);
@@ -53,12 +53,13 @@ class GetAllocatedSourcesForOrderTest extends \PHPUnit\Framework\TestCase
         /** @var SearchCriteria $searchCriteria */
         $searchCriteria = $this->objectManager->create(SearchCriteriaBuilder::class)
             ->addFilter(OrderInterface::INCREMENT_ID, '100000001')
+            ->setPageSize(1)
+            ->setCurrentPage(1)
             ->create();
 
         $orders = $this->orderRepository->getList($searchCriteria)->getItems();
         /** @var OrderInterface|null $order */
         $order = reset($orders);
-
         if ($order->getId()) {
             $expected = ['Default Source'];
             $result = $this->model->execute((int)$order->getId());

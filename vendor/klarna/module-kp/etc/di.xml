@@ -40,12 +40,6 @@
         </arguments>
     </virtualType>
 
-    <virtualType name="KpDiscountOrderLine" type="Klarna\Core\Model\Checkout\Orderline\Discount">
-        <arguments>
-            <argument name="klarnaConfig" xsi:type="object">KpKlarnaConfig</argument>
-        </arguments>
-    </virtualType>
-
     <virtualType name="KpTaxOrderLine" type="Klarna\Core\Model\Checkout\Orderline\Tax">
         <arguments>
             <argument name="klarnaConfig" xsi:type="object">KpKlarnaConfig</argument>

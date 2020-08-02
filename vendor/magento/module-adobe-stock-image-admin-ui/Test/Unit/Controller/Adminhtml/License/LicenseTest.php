@@ -14,16 +14,16 @@ use Magento\Backend\App\Action\Context as ActionContext;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultFactory;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Exception\NotFoundException;
 use Magento\Framework\Phrase;
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
-use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 
 /**
- * License test.
+ * Test for the controller responsible for licensing an Adobe Stock image
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class LicenseTest extends TestCase
 {

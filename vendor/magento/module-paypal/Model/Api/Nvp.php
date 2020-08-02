@@ -1513,12 +1513,13 @@ class Nvp extends \Magento\Paypal\Model\Api\AbstractApi
         // attempt to fetch region_id from directory
         if ($address->getCountryId() && $address->getRegion()) {
             $regions = $this->_countryFactory->create()
+                ->loadByCode($address->getCountryId())
                 ->getRegionCollection()
-                ->addCountryFilter($address->getCountryId())
                 ->addRegionCodeOrNameFilter($address->getRegion())
                 ->setPageSize(1);
-            $regionItems = $regions->getItems();
-            if (count($regionItems)) {
+
+            if ($regions->count()) {
+                $regionItems = $regions->getItems();
                 $region = array_shift($regionItems);
                 $address->setRegionId($region->getId());
                 $address->setExportedKeys(array_merge($address->getExportedKeys(), ['region_id']));

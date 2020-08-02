@@ -23,15 +23,15 @@ use LogicException;
  *
  * @method LazyAssertion alnum(string|callable $message = null, string $propertyPath = null) Assert that value is alphanumeric.
  * @method LazyAssertion base64(string|callable $message = null, string $propertyPath = null) Assert that a constant is defined.
- * @method LazyAssertion between(mixed $lowerLimit, mixed $upperLimit, string $message = null, string $propertyPath = null) Assert that a value is greater or equal than a lower limit, and less than or equal to an upper limit.
- * @method LazyAssertion betweenExclusive(mixed $lowerLimit, mixed $upperLimit, string $message = null, string $propertyPath = null) Assert that a value is greater than a lower limit, and less than an upper limit.
- * @method LazyAssertion betweenLength(int $minLength, int $maxLength, string|callable $message = null, string $propertyPath = null, string $encoding = 'utf8') Assert that string length is between min,max lengths.
+ * @method LazyAssertion between(mixed $lowerLimit, mixed $upperLimit, string|callable $message = null, string $propertyPath = null) Assert that a value is greater or equal than a lower limit, and less than or equal to an upper limit.
+ * @method LazyAssertion betweenExclusive(mixed $lowerLimit, mixed $upperLimit, string|callable $message = null, string $propertyPath = null) Assert that a value is greater than a lower limit, and less than an upper limit.
+ * @method LazyAssertion betweenLength(int $minLength, int $maxLength, string|callable $message = null, string $propertyPath = null, string $encoding = 'utf8') Assert that string length is between min and max lengths.
  * @method LazyAssertion boolean(string|callable $message = null, string $propertyPath = null) Assert that value is php boolean.
  * @method LazyAssertion choice(array $choices, string|callable $message = null, string $propertyPath = null) Assert that value is in array of choices.
  * @method LazyAssertion choicesNotEmpty(array $choices, string|callable $message = null, string $propertyPath = null) Determines if the values array has every choice as key and that this choice has content.
  * @method LazyAssertion classExists(string|callable $message = null, string $propertyPath = null) Assert that the class exists.
  * @method LazyAssertion contains(string $needle, string|callable $message = null, string $propertyPath = null, string $encoding = 'utf8') Assert that string contains a sequence of chars.
- * @method LazyAssertion count(int $count, string $message = null, string $propertyPath = null) Assert that the count of countable is equal to count.
+ * @method LazyAssertion count(int $count, string|callable $message = null, string $propertyPath = null) Assert that the count of countable is equal to count.
  * @method LazyAssertion date(string $format, string|callable $message = null, string $propertyPath = null) Assert that date is valid and corresponds to the given format.
  * @method LazyAssertion defined(string|callable $message = null, string $propertyPath = null) Assert that a constant is defined.
  * @method LazyAssertion digit(string|callable $message = null, string $propertyPath = null) Validates if an integer or integerish is a digit.
@@ -39,7 +39,8 @@ use LogicException;
  * @method LazyAssertion e164(string|callable $message = null, string $propertyPath = null) Assert that the given string is a valid E164 Phone Number.
  * @method LazyAssertion email(string|callable $message = null, string $propertyPath = null) Assert that value is an email address (using input_filter/FILTER_VALIDATE_EMAIL).
  * @method LazyAssertion endsWith(string $needle, string|callable $message = null, string $propertyPath = null, string $encoding = 'utf8') Assert that string ends with a sequence of chars.
- * @method LazyAssertion eq(mixed $value2, string|callable $message = null, string $propertyPath = null) Assert that two values are equal (using == ).
+ * @method LazyAssertion eq(mixed $value2, string|callable $message = null, string $propertyPath = null) Assert that two values are equal (using ==).
+ * @method LazyAssertion eqArraySubset(mixed $value2, string|callable $message = null, string $propertyPath = null) Assert that the array contains the subset.
  * @method LazyAssertion extensionLoaded(string|callable $message = null, string $propertyPath = null) Assert that extension is loaded.
  * @method LazyAssertion extensionVersion(string $operator, mixed $version, string|callable $message = null, string $propertyPath = null) Assert that extension is loaded and a specific version is installed.
  * @method LazyAssertion false(string|callable $message = null, string $propertyPath = null) Assert that the value is boolean False.
@@ -58,6 +59,7 @@ use LogicException;
  * @method LazyAssertion isArray(string|callable $message = null, string $propertyPath = null) Assert that value is an array.
  * @method LazyAssertion isArrayAccessible(string|callable $message = null, string $propertyPath = null) Assert that value is an array or an array-accessible object.
  * @method LazyAssertion isCallable(string|callable $message = null, string $propertyPath = null) Determines that the provided value is callable.
+ * @method LazyAssertion isCountable(string|callable $message = null, string $propertyPath = null) Assert that value is countable.
  * @method LazyAssertion isInstanceOf(string $className, string|callable $message = null, string $propertyPath = null) Assert that value is instance of given class-name.
  * @method LazyAssertion isJsonString(string|callable $message = null, string $propertyPath = null) Assert that the given string is a valid json string.
  * @method LazyAssertion isObject(string|callable $message = null, string $propertyPath = null) Determines that the provided value is an object.
@@ -70,19 +72,23 @@ use LogicException;
  * @method LazyAssertion lessOrEqualThan(mixed $limit, string|callable $message = null, string $propertyPath = null) Determines if the value is less or equal than given limit.
  * @method LazyAssertion lessThan(mixed $limit, string|callable $message = null, string $propertyPath = null) Determines if the value is less than given limit.
  * @method LazyAssertion max(mixed $maxValue, string|callable $message = null, string $propertyPath = null) Assert that a number is smaller as a given limit.
+ * @method LazyAssertion maxCount(int $count, string|callable $message = null, string $propertyPath = null) Assert that the countable have at most $count elements.
  * @method LazyAssertion maxLength(int $maxLength, string|callable $message = null, string $propertyPath = null, string $encoding = 'utf8') Assert that string value is not longer than $maxLength chars.
  * @method LazyAssertion methodExists(mixed $object, string|callable $message = null, string $propertyPath = null) Determines that the named method is defined in the provided object.
  * @method LazyAssertion min(mixed $minValue, string|callable $message = null, string $propertyPath = null) Assert that a value is at least as big as a given limit.
+ * @method LazyAssertion minCount(int $count, string|callable $message = null, string $propertyPath = null) Assert that the countable have at least $count elements.
  * @method LazyAssertion minLength(int $minLength, string|callable $message = null, string $propertyPath = null, string $encoding = 'utf8') Assert that a string is at least $minLength chars long.
  * @method LazyAssertion noContent(string|callable $message = null, string $propertyPath = null) Assert that value is empty.
  * @method LazyAssertion notBlank(string|callable $message = null, string $propertyPath = null) Assert that value is not blank.
+ * @method LazyAssertion notContains(string $needle, string|callable $message = null, string $propertyPath = null, string $encoding = 'utf8') Assert that string does not contains a sequence of chars.
  * @method LazyAssertion notEmpty(string|callable $message = null, string $propertyPath = null) Assert that value is not empty.
  * @method LazyAssertion notEmptyKey(string|int $key, string|callable $message = null, string $propertyPath = null) Assert that key exists in an array/array-accessible object and its value is not empty.
- * @method LazyAssertion notEq(mixed $value2, string|callable $message = null, string $propertyPath = null) Assert that two values are not equal (using == ).
+ * @method LazyAssertion notEq(mixed $value2, string|callable $message = null, string $propertyPath = null) Assert that two values are not equal (using ==).
  * @method LazyAssertion notInArray(array $choices, string|callable $message = null, string $propertyPath = null) Assert that value is not in array of choices.
  * @method LazyAssertion notIsInstanceOf(string $className, string|callable $message = null, string $propertyPath = null) Assert that value is not instance of given class-name.
  * @method LazyAssertion notNull(string|callable $message = null, string $propertyPath = null) Assert that value is not null.
- * @method LazyAssertion notSame(mixed $value2, string|callable $message = null, string $propertyPath = null) Assert that two values are not the same (using === ).
+ * @method LazyAssertion notRegex(string $pattern, string|callable $message = null, string $propertyPath = null) Assert that value does not match a regex.
+ * @method LazyAssertion notSame(mixed $value2, string|callable $message = null, string $propertyPath = null) Assert that two values are not the same (using ===).
  * @method LazyAssertion null(string|callable $message = null, string $propertyPath = null) Assert that value is null.
  * @method LazyAssertion numeric(string|callable $message = null, string $propertyPath = null) Assert that value is numeric.
  * @method LazyAssertion objectOrClass(string|callable $message = null, string $propertyPath = null) Assert that the value is an object, or a class that exists.
@@ -112,15 +118,22 @@ class LazyAssertion
     private $alwaysTryAll = false;
     private $thisChainTryAll = false;
     private $currentChain;
-    private $errors = array();
+    private $errors = [];
 
     /** @var string The class to use as AssertionChain factory */
-    private $assertClass = 'Assert\Assert';
+    private $assertClass = Assert::class;
 
     /** @var string|LazyAssertionException The class to use for exceptions */
-    private $exceptionClass = 'Assert\LazyAssertionException';
+    private $exceptionClass = LazyAssertionException::class;
 
-    public function that($value, $propertyPath, $defaultMessage = null)
+    /**
+     * @param mixed $value
+     * @param string|null $propertyPath
+     * @param string|callable|null $defaultMessage
+     *
+     * @return static
+     */
+    public function that($value, string $propertyPath = null, $defaultMessage = null)
     {
         $this->currentChainFailed = false;
         $this->thisChainTryAll = false;
@@ -130,6 +143,9 @@ class LazyAssertion
         return $this;
     }
 
+    /**
+     * @return static
+     */
     public function tryAll()
     {
         if (!$this->currentChain) {
@@ -141,6 +157,12 @@ class LazyAssertion
         return $this;
     }
 
+    /**
+     * @param string $method
+     * @param array $args
+     *
+     * @return static
+     */
     public function __call($method, $args)
     {
         if (false === $this->alwaysTryAll
@@ -151,7 +173,7 @@ class LazyAssertion
         }
 
         try {
-            \call_user_func_array(array($this->currentChain, $method), $args);
+            \call_user_func_array([$this->currentChain, $method], $args);
         } catch (AssertionFailedException $e) {
             $this->errors[] = $e;
             $this->currentChainFailed = true;
@@ -161,14 +183,14 @@ class LazyAssertion
     }
 
     /**
-     * @throws \Assert\LazyAssertionException
-     *
      * @return bool
+     *
+     * @throws LazyAssertionException
      */
-    public function verifyNow()
+    public function verifyNow(): bool
     {
         if ($this->errors) {
-            throw \call_user_func(array($this->exceptionClass, 'fromErrors'), $this->errors);
+            throw \call_user_func([$this->exceptionClass, 'fromErrors'], $this->errors);
         }
 
         return true;
@@ -177,16 +199,12 @@ class LazyAssertion
     /**
      * @param string $className
      *
-     * @return $this
+     * @return static
      */
-    public function setAssertClass($className)
+    public function setAssertClass(string $className)
     {
-        if (!\is_string($className)) {
-            throw new LogicException('Assert class name must be passed as a string');
-        }
-
-        if ('Assert\Assert' !== $className && !\is_subclass_of($className, 'Assert\Assert')) {
-            throw new LogicException($className . ' is not (a subclass of) Assert\Assert');
+        if (Assert::class !== $className && !\is_subclass_of($className, Assert::class)) {
+            throw new LogicException($className.' is not (a subclass of) '.Assert::class);
         }
 
         $this->assertClass = $className;
@@ -197,16 +215,12 @@ class LazyAssertion
     /**
      * @param string $className
      *
-     * @return $this
+     * @return static
      */
-    public function setExceptionClass($className)
+    public function setExceptionClass(string $className)
     {
-        if (!\is_string($className)) {
-            throw new LogicException('Exception class name must be passed as a string');
-        }
-
-        if ('Assert\LazyAssertionException' !== $className && !\is_subclass_of($className, 'Assert\LazyAssertionException')) {
-            throw new LogicException($className . ' is not (a subclass of) Assert\LazyAssertionException');
+        if (LazyAssertionException::class !== $className && !\is_subclass_of($className, LazyAssertionException::class)) {
+            throw new LogicException($className.' is not (a subclass of) '.LazyAssertionException::class);
         }
 
         $this->exceptionClass = $className;

@@ -7,16 +7,17 @@ declare(strict_types=1);
 
 namespace Magento\AdobeStockAsset\Model\ResourceModel\Asset\Command;
 
-use Magento\MediaGalleryApi\Model\DataExtractorInterface;
-use Magento\Framework\App\ResourceConnection;
 use Magento\AdobeStockAssetApi\Api\Data\AssetInterface;
+use Magento\AdobeStockAssetApi\Model\Asset\Command\SaveInterface;
+use Magento\Framework\App\ResourceConnection;
 use Magento\Framework\Exception\CouldNotSaveException;
+use Magento\Framework\Reflection\DataObjectProcessor;
 use Psr\Log\LoggerInterface;
 
 /**
- * Command for saving the Adobe Stock asset object data
+ * Command is used to safe an Adobe Stock asset data to the data storage
  */
-class Save
+class Save implements SaveInterface
 {
     private const ADOBE_STOCK_ASSET_TABLE_NAME = 'adobe_stock_asset';
 
@@ -26,9 +27,9 @@ class Save
     private $resourceConnection;
 
     /**
-     * @var DataExtractorInterface
+     * @var DataObjectProcessor
      */
-    private $dataExtractor;
+    private $objectProcessor;
 
     /**
      * @var LoggerInterface
@@ -39,21 +40,21 @@ class Save
      * Save constructor.
      *
      * @param ResourceConnection $resourceConnection
-     * @param DataExtractorInterface $dataExtractor
+     * @param DataObjectProcessor $objectProcessor
      * @param LoggerInterface $logger
      */
     public function __construct(
         ResourceConnection $resourceConnection,
-        DataExtractorInterface $dataExtractor,
+        DataObjectProcessor $objectProcessor,
         LoggerInterface $logger
     ) {
         $this->resourceConnection = $resourceConnection;
-        $this->dataExtractor = $dataExtractor;
+        $this->objectProcessor = $objectProcessor;
         $this->logger = $logger;
     }
 
     /**
-     * Save asset action.
+     * Save an Adobe Stock asset.
      *
      * @param AssetInterface $asset
      *
@@ -62,7 +63,7 @@ class Save
     public function execute(AssetInterface $asset): void
     {
         try {
-            $data = $this->dataExtractor->extract($asset, AssetInterface::class);
+            $data = $this->objectProcessor->buildOutputDataArray($asset, AssetInterface::class);
 
             if (empty($data)) {
                 return;
@@ -74,10 +75,7 @@ class Save
             $connection->insertOnDuplicate($tableName, $saveData);
         } catch (\Exception $exception) {
             $this->logger->critical($exception);
-            $message = __(
-                'An error occurred during adobe stock asset save: %error',
-                ['error' => $exception->getMessage()]
-            );
+            $message = __('An error occurred during adobe stock asset save.');
             throw new CouldNotSaveException($message, $exception);
         }
     }

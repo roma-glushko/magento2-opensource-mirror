@@ -4,12 +4,11 @@ namespace Dotdigitalgroup\Email\Helper;
 
 use Dotdigitalgroup\Email\Helper\Config as EmailConfig;
 use Dotdigitalgroup\Email\Logger\Logger;
-use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Framework\App\Config\ReinitableConfigInterface;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Encryption\EncryptorInterface;
-use Magento\Framework\Filter\Email;
+use Magento\Framework\Serialize\SerializerInterface;
 use Magento\Store\Model\ScopeInterface;
 
 /**
@@ -1053,7 +1052,12 @@ class Data extends \Magento\Framework\App\Helper\AbstractHelper
             return [];
         }
 
-        return $this->serializer->unserialize($attr);
+        try {
+            return $this->serializer->unserialize($attr);
+        } catch (\InvalidArgumentException $e) {
+            $this->logger->debug((string) $e);
+            return [];
+        }
     }
 
     /**

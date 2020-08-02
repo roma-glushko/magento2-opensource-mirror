@@ -24,7 +24,8 @@ use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 
 /**
- * DownloadTest
+ * Test for controller downloading Adobe Stock asset preview version
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
 class DownloadTest extends TestCase
 {

@@ -473,8 +473,6 @@ class Switcher extends \Magento\Backend\Block\Template
                 return $website->getName();
             }
         }
-
-        return '';
     }
 
     /**
@@ -491,8 +489,6 @@ class Switcher extends \Magento\Backend\Block\Template
                 return $group->getName();
             }
         }
-
-        return '';
     }
 
     /**
@@ -509,8 +505,6 @@ class Switcher extends \Magento\Backend\Block\Template
                 return $store->getName();
             }
         }
-
-        return '';
     }
 
     /**
@@ -592,11 +586,13 @@ class Switcher extends \Magento\Backend\Block\Template
         $html = '';
         $url = $this->getHintUrl();
         if ($url) {
-            $html = '<div class="admin__field-tooltip tooltip"><a href="%s" onclick="this.target=\'_blank\'"  title="%s"
-            class="admin__field-tooltip-action action-help"><span>%s</span></a></span></div>';
-            $title =  $this->escapeHtmlAttr(__('What is this?'));
-            $span= $this->escapeHtml(__('What is this?'));
-            $html = sprintf($html, $this->escapeUrl($url), $title, $span);
+            $html = '<div class="admin__field-tooltip tooltip">' . '<a' . ' href="' . $this->escapeUrl(
+                $url
+            ) . '"' . ' onclick="this.target=\'_blank\'"' . ' title="' . __(
+                'What is this?'
+            ) . '"' . ' class="admin__field-tooltip-action action-help"><span>' . __(
+                'What is this?'
+            ) . '</span></a>' . ' </div>';
         }
         return $html;
     }

@@ -66,9 +66,13 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
         );
     }
 
+    /**
+     * {@inheritdoc}
+     *
+     * Must run before NoEmptyPhpdocFixer, PhpUnitMethodCasingFixer, PhpdocTrimFixer.
+     */
     public function getPriority()
     {
-        // must be run before the PhpdocSeparationFixer and PhpdocOrderFixer
         return 10;
     }
 
@@ -114,9 +118,8 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int    $startIndex
-     * @param int    $endIndex
+     * @param int $startIndex
+     * @param int $endIndex
      */
     private function applyTestAnnotation(Tokens $tokens, $startIndex, $endIndex)
     {
@@ -128,7 +131,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
             $functionNameIndex = $tokens->getNextMeaningfulToken($i);
             $functionName = $tokens[$functionNameIndex]->getContent();
 
-            if ($this->hasTestPrefix($functionName)) {
+            if ($this->hasTestPrefix($functionName) && !$this->hasProperTestAnnotation($tokens, $i)) {
                 $newFunctionName = $this->removeTestPrefix($functionName);
                 $tokens[$functionNameIndex] = new Token([T_STRING, $newFunctionName]);
             }
@@ -151,9 +154,8 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int    $startIndex
-     * @param int    $endIndex
+     * @param int $startIndex
+     * @param int $endIndex
      */
     private function applyTestPrefix(Tokens $tokens, $startIndex, $endIndex)
     {
@@ -183,7 +185,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Tokens $tokens
      * @param int$index
      *
      * @return bool
@@ -199,7 +200,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
         $functionNameIndex = $tokens->getNextMeaningfulToken($index);
         $functionName = $tokens[$functionNameIndex]->getContent();
 
-        if ($this->startsWith('test', $functionName)) {
+        if ($this->hasTestPrefix($functionName)) {
             return true;
         }
         // If the function doesn't have test in its name, and no doc block, its not a test
@@ -217,8 +218,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int    $index
+     * @param int $index
      *
      * @return bool
      */
@@ -230,21 +230,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param string $needle
-     * @param string $haystack
-     *
-     * @return bool
-     */
-    private function startsWith($needle, $haystack)
-    {
-        $len = \strlen($needle);
-
-        return substr($haystack, 0, $len) === $needle;
-    }
-
-    /**
-     * @param Tokens $tokens
-     * @param int    $index
+     * @param int $index
      *
      * @return bool
      */
@@ -256,8 +242,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int    $index
+     * @param int $index
      *
      * @return int
      */
@@ -277,17 +262,20 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
      */
     private function hasTestPrefix($functionName)
     {
-        if (!$this->startsWith('test', $functionName)) {
-            return false;
-        }
+        return 0 === strpos($functionName, 'test');
+    }
 
-        if ('test' === $functionName) {
-            return true;
-        }
+    /**
+     * @param int $index
+     *
+     * @return bool
+     */
+    private function hasProperTestAnnotation(Tokens $tokens, $index)
+    {
+        $docBlockIndex = $this->getDocBlockIndex($tokens, $index);
+        $doc = $tokens[$docBlockIndex]->getContent();
 
-        $nextCharacter = $functionName[4];
-
-        return $nextCharacter === strtoupper($nextCharacter);
+        return 1 === Preg::match('/\*\s+@test\b/', $doc);
     }
 
     /**
@@ -297,9 +285,9 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
      */
     private function removeTestPrefix($functionName)
     {
-        $remainder = Preg::replace('/^test_?/', '', $functionName);
+        $remainder = Preg::replace('/^test(?=[A-Z_])_?/', '', $functionName);
 
-        if ('' === $remainder || is_numeric($remainder[0])) {
+        if ('' === $remainder) {
             return $functionName;
         }
 
@@ -321,8 +309,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int    $index
+     * @param int $index
      *
      * @return string
      */
@@ -338,8 +325,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int    $docBlockIndex
+     * @param int $docBlockIndex
      */
     private function createDocBlock(Tokens $tokens, $docBlockIndex)
     {
@@ -354,8 +340,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Tokens $tokens
-     * @param int    $docBlockIndex
+     * @param int $docBlockIndex
      *
      * @return Line[]
      */
@@ -369,7 +354,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
 
     /**
      * @param Line[] $lines
-     * @param Tokens $tokens
      * @param int    $docBlockIndex
      *
      * @return Line[]
@@ -413,7 +397,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
      * Take a one line doc block, and turn it into a multi line doc block.
      *
      * @param Line[] $lines
-     * @param Tokens $tokens
      * @param int    $docBlockIndex
      *
      * @return Line[]
@@ -457,8 +440,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     /**
      * Updates the depends tag on the current doc block.
      *
-     * @param Line $line
-     *
      * @return Line
      */
     private function updateDependsAnnotation(Line $line)
@@ -471,8 +452,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Line $line
-     *
      * @return Line
      */
     private function removeTestPrefixFromDependsAnnotation(Line $line)
@@ -482,7 +461,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
         $dependsIndex = $this->findWhereDependsFunctionNameStarts($line);
         $dependsFunctionName = implode('', \array_slice($line, $dependsIndex));
 
-        if ($this->startsWith('test', $dependsFunctionName)) {
+        if ($this->hasTestPrefix($dependsFunctionName)) {
             $dependsFunctionName = $this->removeTestPrefix($dependsFunctionName);
         }
         array_splice($line, $dependsIndex);
@@ -491,8 +470,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param Line $line
-     *
      * @return Line
      */
     private function addTestPrefixToDependsAnnotation(Line $line)
@@ -501,7 +478,7 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
         $dependsIndex = $this->findWhereDependsFunctionNameStarts($line);
         $dependsFunctionName = implode('', \array_slice($line, $dependsIndex));
 
-        if (!$this->startsWith('test', $dependsFunctionName)) {
+        if (!$this->hasTestPrefix($dependsFunctionName)) {
             $dependsFunctionName = $this->addTestPrefix($dependsFunctionName);
         }
 
@@ -512,8 +489,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
 
     /**
      * Helps to find where the function name in the doc block starts.
-     *
-     * @param array $line
      *
      * @return int
      */
@@ -530,7 +505,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
 
     /**
      * @param Line[] $lines
-     * @param Tokens $tokens
      * @param int    $docBlockIndex
      *
      * @return Line[]
@@ -550,8 +524,6 @@ public function testItDoesSomething() {}}'.$this->whitespacesConfig->getLineEndi
     }
 
     /**
-     * @param DocBlock $doc
-     *
      * @return bool
      */
     private function doesDocBlockContainTest(DocBlock $doc)

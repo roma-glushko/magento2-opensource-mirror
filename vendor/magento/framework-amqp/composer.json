@@ -10,8 +10,8 @@
         "AFL-3.0"
     ],
     "require": {
-        "magento/framework": "102.0.*",
-        "php": "~7.1.3||~7.2.0||~7.3.0",
+        "magento/framework": "103.0.*",
+        "php": "~7.3.0||~7.4.0",
         "php-amqplib/php-amqplib": "~2.7.0||~2.10.0"
     },
     "autoload": {
@@ -22,5 +22,5 @@
             "registration.php"
         ]
     },
-    "version": "100.3.5"
+    "version": "100.4.0"
 }

@@ -10,9 +10,9 @@
 
 namespace Klarna\Core\Model\System\Config\Source;
 
-use Magento\Framework\Option\ArrayInterface;
+use Magento\Framework\Data\OptionSourceInterface;
 
-class Version implements ArrayInterface
+class Version implements OptionSourceInterface
 {
     /**
      * @var Base

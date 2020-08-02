@@ -41,7 +41,6 @@
     </api_version>
     <order_lines id="payments">
         <line id="items" class="KpItemsOrderline"/>
-        <line id="discount" class="KpDiscountOrderLine"/>
         <line id="shipping" class="KpShippingOrderLine"/>
         <line id="tax" class="KpTaxOrderLine"/>
         <line id="giftcard" class="KpGiftCardOrderLine"/>

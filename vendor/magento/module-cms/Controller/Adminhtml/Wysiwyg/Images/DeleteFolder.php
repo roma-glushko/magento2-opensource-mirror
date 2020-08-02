@@ -9,60 +9,55 @@ declare(strict_types=1);
 
 namespace Magento\Cms\Controller\Adminhtml\Wysiwyg\Images;
 
-use Magento\Backend\App\Action\Context;
-use Magento\Cms\Controller\Adminhtml\Wysiwyg\Images;
 use Magento\Framework\App\Action\HttpPostActionInterface;
-use Magento\Framework\App\Filesystem\DirectoryResolver;
-use Magento\Framework\Controller\Result\Json;
-use Magento\Framework\Controller\Result\JsonFactory;
-use Magento\Framework\Controller\Result\RawFactory;
-use Magento\Framework\Controller\ResultInterface;
-use Magento\Framework\Registry;
+use Magento\Framework\App\Filesystem\DirectoryList;
 
 /**
  * Delete image folder.
  */
-class DeleteFolder extends Images implements HttpPostActionInterface
+class DeleteFolder extends \Magento\Cms\Controller\Adminhtml\Wysiwyg\Images implements HttpPostActionInterface
 {
     /**
-     * @var JsonFactory
+     * @var \Magento\Framework\Controller\Result\JsonFactory
      */
     protected $resultJsonFactory;
 
     /**
-     * @var RawFactory
+     * @var \Magento\Framework\Controller\Result\RawFactory
      */
     protected $resultRawFactory;
 
     /**
-     * @var DirectoryResolver
+     * @var \Magento\Framework\App\Filesystem\DirectoryResolver
      */
     private $directoryResolver;
 
     /**
-     * @param Context $context
-     * @param Registry $coreRegistry
-     * @param JsonFactory $resultJsonFactory
-     * @param RawFactory $resultRawFactory
-     * @param DirectoryResolver|null $directoryResolver
+     * @param \Magento\Backend\App\Action\Context $context
+     * @param \Magento\Framework\Registry $coreRegistry
+     * @param \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory
+     * @param \Magento\Framework\Controller\Result\RawFactory $resultRawFactory
+     * @param \Magento\Framework\App\Filesystem\DirectoryResolver|null $directoryResolver
      */
     public function __construct(
-        Context $context,
-        Registry $coreRegistry,
-        JsonFactory $resultJsonFactory,
-        RawFactory $resultRawFactory,
-        DirectoryResolver $directoryResolver = null
+        \Magento\Backend\App\Action\Context $context,
+        \Magento\Framework\Registry $coreRegistry,
+        \Magento\Framework\Controller\Result\JsonFactory $resultJsonFactory,
+        \Magento\Framework\Controller\Result\RawFactory $resultRawFactory,
+        \Magento\Framework\App\Filesystem\DirectoryResolver $directoryResolver = null
     ) {
         parent::__construct($context, $coreRegistry);
         $this->resultRawFactory = $resultRawFactory;
         $this->resultJsonFactory = $resultJsonFactory;
-        $this->directoryResolver = $directoryResolver ?? $this->_objectManager->get(DirectoryResolver::class);
+        $this->directoryResolver = $directoryResolver
+            ?: $this->_objectManager->get(\Magento\Framework\App\Filesystem\DirectoryResolver::class);
     }
 
     /**
      * Delete folder action.
      *
-     * @return ResultInterface
+     * @return \Magento\Framework\Controller\ResultInterface
+     * @throws \Magento\Framework\Exception\LocalizedException
      */
     public function execute()
     {
@@ -73,7 +68,7 @@ class DeleteFolder extends Images implements HttpPostActionInterface
             return $this->resultRawFactory->create();
         } catch (\Exception $e) {
             $result = ['error' => true, 'message' => $e->getMessage()];
-            /** @var Json $resultJson */
+            /** @var \Magento\Framework\Controller\Result\Json $resultJson */
             $resultJson = $this->resultJsonFactory->create();
 
             return $resultJson->setData($result);

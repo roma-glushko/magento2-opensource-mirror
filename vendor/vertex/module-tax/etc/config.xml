@@ -19,6 +19,9 @@
                 <allowed_countries>US,CA</allowed_countries>
                 <summarize_tax>product_and_shipping</summarize_tax>
             </vertex_settings>
+            <vertex_seller_info>
+                <shipping_origin_source>1</shipping_origin_source>
+            </vertex_seller_info>
             <classes>
                 <default_customer_code><![CDATA[General]]></default_customer_code>
                 <creditmemo_adjustment_negative_code><![CDATA[adjustment-negative]]></creditmemo_adjustment_negative_code>

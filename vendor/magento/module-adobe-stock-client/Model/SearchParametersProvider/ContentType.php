@@ -17,6 +17,10 @@ use Magento\Framework\Api\SearchCriteriaInterface;
  */
 class ContentType implements SearchParameterProviderInterface
 {
+    private const PHOTO = 'photo';
+    private const ILLUSRATION = 'illustration';
+    private const CONTENT_TYPE_FILTER = 'content_type_filter';
+
     /**
      * @inheritdoc
      */
@@ -24,14 +28,12 @@ class ContentType implements SearchParameterProviderInterface
     {
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
             foreach ($filterGroup->getFilters() as $filter) {
-                if ($filter->getField() === 'content_type_filter') {
-                    switch ($filter->getValue()) {
-                        case 'photo':
-                            $searchParams->setFilterContentTypePhotos(true);
-                            break;
-                        case 'illustration':
-                            $searchParams->setFilterContentTypeIllustration(true);
-                            break;
+                if ($filter->getField() === self::CONTENT_TYPE_FILTER) {
+                    $value = $filter->getValue();
+                    if ($value == self::PHOTO) {
+                        $searchParams->setFilterContentTypePhotos(true);
+                    } elseif ($value == self::ILLUSRATION) {
+                        $searchParams->setFilterContentTypeIllustration(true);
                     }
                 }
             }

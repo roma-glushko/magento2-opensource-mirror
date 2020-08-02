@@ -2,8 +2,8 @@
     "name": "magento/module-media-gallery-api",
     "description": "Magento module responsible for media gallery asset attributes storage and management",
     "require": {
-        "php": "~7.1.3||~7.2.0||~7.3.0",
-        "magento/framework": "102.0.*"
+        "php": "~7.3.0||~7.4.0",
+        "magento/framework": "103.0.*"
     },
     "type": "magento2-module",
     "license": [
@@ -18,5 +18,5 @@
             "Magento\\MediaGalleryApi\\": ""
         }
     },
-    "version": "100.3.0"
+    "version": "101.0.0"
 }

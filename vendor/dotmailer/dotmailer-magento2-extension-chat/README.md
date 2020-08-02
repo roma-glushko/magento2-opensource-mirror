@@ -12,8 +12,8 @@
  composer require dotmailer/dotmailer-magento2-extension-chat
  bin/magento setup:upgrade
  ```
-- Ensure you have set valid API credentials in **Configuration > Engagement Cloud > Account Settings**
-- Turn on the chat bubble by enabling chat in **Configuration > Engagement Cloud > Chat Settings**
+- Ensure you have set valid API credentials in **Configuration > dotdigital > Account Settings**
+- Turn on the chat bubble by enabling chat in **Configuration > dotdigital > Chat Settings**
 
 ## 1.0.1
 

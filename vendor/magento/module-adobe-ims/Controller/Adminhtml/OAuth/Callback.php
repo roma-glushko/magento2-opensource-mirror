@@ -8,25 +8,24 @@ declare(strict_types=1);
 
 namespace Magento\AdobeIms\Controller\Adminhtml\OAuth;
 
-use Magento\AdobeImsApi\Api\Data\UserProfileInterface;
-use Magento\AdobeImsApi\Api\Data\UserProfileInterfaceFactory;
 use Magento\AdobeImsApi\Api\GetTokenInterface;
-use Magento\AdobeImsApi\Api\UserProfileRepositoryInterface;
+use Magento\AdobeImsApi\Api\LogInInterface;
 use Magento\Backend\App\Action;
+use Magento\Framework\App\Action\HttpGetActionInterface;
 use Magento\Framework\Controller\Result\Raw;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Exception\AuthorizationException;
+use Magento\Framework\Exception\ConfigurationMismatchException;
 use Magento\Framework\Exception\CouldNotSaveException;
-use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\User\Api\Data\UserInterface;
 use Psr\Log\LoggerInterface;
-use Magento\AdobeImsApi\Api\GetImageInterface;
 
 /**
  * Callback action for managing user authentication with the Adobe services
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
  */
-class Callback extends Action
+class Callback extends Action implements HttpGetActionInterface
 {
     /**
      * @see _isAllowed()
@@ -45,14 +44,13 @@ class Callback extends Action
     private const RESPONSE_ERROR_CODE = 'error';
 
     /**
-     * @var UserProfileRepositoryInterface
+     * Constants of request
+     *
+     * REQUEST_PARAM_ERROR error
+     * REQUEST_PARAM_CODE code
      */
-    private $userProfileRepository;
-
-    /**
-     * @var UserProfileInterfaceFactory
-     */
-    private $userProfileFactory;
+    private const REQUEST_PARAM_ERROR = 'error';
+    private const REQUEST_PARAM_CODE = 'code';
 
     /**
      * @var GetTokenInterface
@@ -60,38 +58,32 @@ class Callback extends Action
     private $getToken;
 
     /**
+     * @var LogInInterface
+     */
+    private $login;
+
+    /**
      * @var LoggerInterface
      */
     private $logger;
 
     /**
-     * @var GetImageInterface
-     */
-    private $getUserImage;
-
-    /**
      * @param Action\Context $context
-     * @param UserProfileRepositoryInterface $userProfileRepository
-     * @param UserProfileInterfaceFactory $userProfileFactory
      * @param GetTokenInterface $getToken
+     * @param LogInInterface $login
      * @param LoggerInterface $logger
-     * @param GetImageInterface $getImage
      */
     public function __construct(
         Action\Context $context,
-        UserProfileRepositoryInterface $userProfileRepository,
-        UserProfileInterfaceFactory $userProfileFactory,
         GetTokenInterface $getToken,
-        LoggerInterface $logger,
-        GetImageInterface $getImage
+        LogInInterface $login,
+        LoggerInterface $logger
     ) {
         parent::__construct($context);
 
-        $this->userProfileRepository = $userProfileRepository;
-        $this->userProfileFactory = $userProfileFactory;
         $this->getToken = $getToken;
+        $this->login = $login;
         $this->logger = $logger;
-        $this->getUserImage = $getImage;
     }
 
     /**
@@ -100,29 +92,18 @@ class Callback extends Action
     public function execute(): ResultInterface
     {
         try {
+            $this->validateCallbackRequest();
             $tokenResponse = $this->getToken->execute(
-                (string)$this->getRequest()->getParam('code')
+                (string)$this->getRequest()->getParam(self::REQUEST_PARAM_CODE)
             );
-            $userImage = $this->getUserImage->execute($tokenResponse->getAccessToken());
-            $userProfile = $this->getUserProfile();
-            $userProfile->setName($tokenResponse->getName());
-            $userProfile->setEmail($tokenResponse->getEmail());
-            $userProfile->setImage($userImage);
-            $userProfile->setUserId((int)$this->getUser()->getId());
-            $userProfile->setAccessToken($tokenResponse->getAccessToken());
-            $userProfile->setRefreshToken($tokenResponse->getRefreshToken());
-            $userProfile->setAccessTokenExpiresAt(
-                $this->getExpiresTime($tokenResponse->getExpiresIn())
-            );
-
-            $this->userProfileRepository->save($userProfile);
+            $this->login->execute((int) $this->getUser()->getId(), $tokenResponse);
 
             $response = sprintf(
                 self::RESPONSE_TEMPLATE,
                 self::RESPONSE_SUCCESS_CODE,
                 __('Authorization was successful')
             );
-        } catch (AuthorizationException | CouldNotSaveException $exception) {
+        } catch (AuthorizationException | ConfigurationMismatchException | CouldNotSaveException $exception) {
             $response = sprintf(
                 self::RESPONSE_TEMPLATE,
                 self::RESPONSE_ERROR_CODE,
@@ -145,18 +126,19 @@ class Callback extends Action
     }
 
     /**
-     * Get user profile entity
+     * Validate callback request from the Adobe OAth service
      *
-     * @return UserProfileInterface
+     * @throws ConfigurationMismatchException
      */
-    private function getUserProfile(): UserProfileInterface
+    private function validateCallbackRequest(): void
     {
-        try {
-            return $this->userProfileRepository->getByUserId(
-                (int)$this->getUser()->getId()
+        $error = $this->getRequest()->getParam(self::REQUEST_PARAM_ERROR);
+        if ($error) {
+            $message = __(
+                'An error occurred during the callback request from the Adobe service: %error',
+                ['error' => $error]
             );
-        } catch (NoSuchEntityException $exception) {
-            return $this->userProfileFactory->create();
+            throw new ConfigurationMismatchException($message);
         }
     }
 
@@ -172,19 +154,5 @@ class Callback extends Action
         }
 
         return $this->_auth->getUser();
-    }
-
-    /**
-     * Retrieve token expires date
-     *
-     * @param int $expiresIn
-     * @return string
-     * @throws \Exception
-     */
-    private function getExpiresTime(int $expiresIn): string
-    {
-        $dateTime = new \DateTime();
-        $dateTime->add(new \DateInterval(sprintf('PT%dS', $expiresIn / 1000)));
-        return $dateTime->format('Y-m-d H:i:s');
     }
 }

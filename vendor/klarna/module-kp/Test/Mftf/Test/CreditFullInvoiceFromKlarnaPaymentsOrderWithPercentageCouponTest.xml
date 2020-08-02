@@ -28,10 +28,10 @@
             <group value="Klarna_KP_Order_Credit"/>
         </annotations>
         <before>
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+            <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
         </before>
         <after>
-            <actionGroup ref="logout" stepKey="logout"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
         </after>
         <!--Create and go to invoice-->
         <actionGroup ref="AdminCreateInvoiceActionGroup" stepKey="createInvoice"/>

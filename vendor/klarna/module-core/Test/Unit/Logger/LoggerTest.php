@@ -1,28 +1,44 @@
 <?php
 
-namespace Klarna\Core\Logger;
+namespace Klarna\Core\Test\Unit\Logger;
 
+use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
 use Magento\Store\Model\ScopeInterface;
 use PHPUnit\Framework\TestCase;
+use Klarna\Core\Logger\Logger;
 
 /**
  * @coversDefaultClass  \Klarna\Core\Logger\Logger
  */
 class LoggerTest extends TestCase
 {
-    /** @var Cleanser | \PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var Cleanser | \PHPUnit_Framework_MockObject_MockObject
+     */
     private $cleanserMock;
-    /** @var Logger */
+    /**
+     * @var Logger
+     */
     private $model;
-    /** @var string */
+    /**
+     * @var string
+     */
     private $mockName;
-    /** @var \Magento\Framework\App\Config | \PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \Magento\Framework\App\Config | \PHPUnit_Framework_MockObject_MockObject
+     */
     private $configMock;
-    /** @var \Magento\Store\Model\StoreManagerInterface | \PHPUnit_Framework_MockObject_MockObject */
+    /**
+     * @var \Magento\Store\Model\StoreManagerInterface | \PHPUnit_Framework_MockObject_MockObject
+     */
     private $mockStoreManager;
-    /** @var array */
+    /**
+     * @var array
+     */
     private $mockHandlers;
-    /** @var array */
+    /**
+     * @var array
+     */
     private $mockProcessors;
 
     /**
@@ -53,9 +69,9 @@ class LoggerTest extends TestCase
         static::assertFalse($this->model->addRecord(200, $data, []));
     }
 
-    protected function setUp()
+    protected function setUp(): void
     {
-        $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
+        $objectManager = new ObjectManager($this);
 
         $this->mockStoreManager = $this->getMockBuilder(\Magento\Store\Model\StoreManager::class)
             ->setMethods(['getStore'])

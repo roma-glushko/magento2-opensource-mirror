@@ -10,15 +10,14 @@
 
 namespace Klarna\Core\Test\Unit\Mock;
 
-use PHPUnit\Framework\TestCase;
 use Magento\Framework\TestFramework\Unit\Helper\ObjectManager;
+use PHPUnit\Framework\TestCase;
 
 /**
  * Factory to create the test objects that each test class will
  * use to run the tests against. Automatically finds and sets up
  * mocks for all class dependencies.
  *
- * @package Klarna\Core\Test\Unit\Mock
  */
 class TestObjectFactory extends TestCase
 {
@@ -51,32 +50,70 @@ class TestObjectFactory extends TestCase
      *
      * @param string $className
      * @param array $methodsToMock
+     * @param array $instanceMocks
      * @return object
      */
-    public function create(string $className, array $methodsToMock = [])
+    public function create(string $className, array $methodsToMock = [], array $instanceMocks = [])
     {
         try {
             $objectManagerHelper = new ObjectManager($this);
             $reflection = new \ReflectionClass($className);
-            if (!$reflection->getConstructor()) {
-                return $objectManagerHelper->getObject($className);
-            }
-            $params = $reflection->getConstructor()->getParameters();
 
-            foreach ($params as $param) {
-                $paramName = $param->getName();
-                $paramClass = $param->getType()->getName();
-                $this->dependencyMocks[$paramName] = [];
-                if ($paramClass !== "array") {
-                    $paramMockMethods = $this->getParamMockMethods($methodsToMock, $paramClass);
-                    $dependencyMock = $this->mockFactory->create($paramClass, $paramMockMethods);
-                    $this->dependencyMocks[$paramName] = $dependencyMock;
+            $constructor = $reflection->getConstructor();
+            if ($constructor !== null) {
+                $params = $constructor->getParameters();
+
+                foreach ($params as $param) {
+                    if ($this->isObject($param->getType())) {
+                        $paramClass = $param->getType()->getName();
+
+                        $paramMockMethods = $this->getParamMockMethods($methodsToMock, $paramClass);
+                        $dependencyMock = $this->mockFactory->create($paramClass, $paramMockMethods);
+                        if (isset($instanceMocks[$paramClass])) {
+                            $dependencyMock = $instanceMocks[$paramClass];
+                        }
+
+                        $this->dependencyMocks[$param->getName()] = $dependencyMock;
+
+                        continue;
+                    }
+                    $this->handleSpecialConstructorInstanceCases($param);
                 }
             }
 
             return $objectManagerHelper->getObject($className, $this->dependencyMocks);
         } catch (\Exception $e) {
             $this->fail($e->getMessage());
+        }
+    }
+
+    /**
+     * Returns true when the given parameter can be used as a mocked instance
+     *
+     * @param null|\ReflectionNamedType $type
+     * @return bool
+     */
+    private function isObject($type): bool
+    {
+        return $type instanceof \ReflectionNamedType && $type->getName() !== 'array';
+    }
+
+    /**
+     * Adding special instancs of the constructor (array, ...) to the depency mock attribute
+     *
+     * @param \ReflectionParameter $param
+     */
+    private function handleSpecialConstructorInstanceCases(\ReflectionParameter $param): void
+    {
+        if ($param->getType() === null) {
+            $this->dependencyMocks[$param->getName()] = '';
+            return;
+        }
+
+        $paramClass = $param->getType()->getName();
+        if ($paramClass === 'array') {
+            $this->dependencyMocks[$param->getName()] = [];
+            return;
         }
     }
 

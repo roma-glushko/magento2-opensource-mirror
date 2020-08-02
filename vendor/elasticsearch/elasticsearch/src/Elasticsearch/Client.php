@@ -33,7 +33,6 @@ use Elasticsearch\Namespaces\MigrationNamespace;
 use Elasticsearch\Namespaces\MlNamespace;
 use Elasticsearch\Namespaces\MonitoringNamespace;
 use Elasticsearch\Namespaces\RollupNamespace;
-use Elasticsearch\Namespaces\SearchableSnapshotsNamespace;
 use Elasticsearch\Namespaces\SecurityNamespace;
 use Elasticsearch\Namespaces\SlmNamespace;
 use Elasticsearch\Namespaces\SqlNamespace;
@@ -44,7 +43,7 @@ use Elasticsearch\Namespaces\XpackNamespace;
 
 /**
  * Class Client
- * Generated running $ php util/GenerateEndpoints.php 7.8
+ * Generated running $ php util/GenerateEndpoints.php 7.7
  *
  * @category Elasticsearch
  * @package  Elasticsearch
@@ -54,7 +53,7 @@ use Elasticsearch\Namespaces\XpackNamespace;
  */
 class Client
 {
-    const VERSION = '7.8';
+    const VERSION = '7.7.0';
 
     /**
      * @var Transport
@@ -177,11 +176,6 @@ class Client
     protected $rollup;
     
     /**
-     * @var SearchableSnapshotsNamespace
-     */
-    protected $searchableSnapshots;
-    
-    /**
      * @var SecurityNamespace
      */
     protected $security;
@@ -248,7 +242,6 @@ class Client
         $this->ml = new MlNamespace($transport, $endpoint);
         $this->monitoring = new MonitoringNamespace($transport, $endpoint);
         $this->rollup = new RollupNamespace($transport, $endpoint);
-        $this->searchableSnapshots = new SearchableSnapshotsNamespace($transport, $endpoint);
         $this->security = new SecurityNamespace($transport, $endpoint);
         $this->slm = new SlmNamespace($transport, $endpoint);
         $this->sql = new SqlNamespace($transport, $endpoint);
@@ -1492,10 +1485,6 @@ class Client
     public function rollup(): RollupNamespace
     {
         return $this->rollup;
-    }
-    public function searchableSnapshots(): SearchableSnapshotsNamespace
-    {
-        return $this->searchableSnapshots;
     }
     public function security(): SecurityNamespace
     {

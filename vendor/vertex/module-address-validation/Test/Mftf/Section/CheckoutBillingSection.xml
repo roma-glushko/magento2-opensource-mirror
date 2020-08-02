@@ -10,12 +10,4 @@
     <section name="CheckoutBillingSection">
         <element name="updatedAddressDetails" type="text" selector=".payment-method-billing-address .billing-address-details" />
     </section>
-
-    <section name="CheckoutShippingSection">
-        <element name="addressMessageContainer" type="text" selector="div.field.vertex-message.address-message" />
-        <element name="updateLinkToValidAddress" type="text" selector="div.field.vertex-message.address-message button.update-address" />
-        <element name="addressMessageWarning" type="text" selector="div.field.vertex-message.address-message .message.warning" />
-        <element name="addressMessageWasValid" type="text" selector="div.field.vertex-message.address-message .message.success" />
-        <element name="addressInvalidFieldsContainer" type="text" selector="div.address-different" />
-    </section>
 </sections>

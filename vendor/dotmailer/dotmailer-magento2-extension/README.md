@@ -19,6 +19,40 @@ You are welcome to contribute to Engagement Cloud for Magento! You can either:
 - Fix a bug: please clone and use our [Develop branch](https://github.com/dotmailer/dotmailer-magento2-extension/tree/develop) to submit your Pull Request
 - Request a feature on our [roadmap](https://roadmap.dotdigital.com)
 
+# 4.5.1
+
+###### What’s new
+- Customer attribute values captured via any input type (dropdown, multiple select, etc.) are now correctly synced as data fields.
+- We're now handling an exception thrown if the API user is locked when mapping data fields.
+- Security is improved for SMTP configuration; SMTP host is now set via a dropdown list of options.  
+- Cart insight data is now sent for all active quotes, even if they have no items. This allows merchants to exit contacts from a program if they empty their cart.
+- Merchants can now sync website name, store name and store view name via individual data fields.
+- Wishlist, Review and Order syncs now look up the transactional data sync limit once, prior to looping over websites.
+- Logging output from the `Client` class has been improved, and is now consistent across all methods in the API wrapper. 
+
+###### Bug fixes
+- We fixed the exception thrown when trying to fetch stock during catalog sync.
+- Text compression for saved templates is now restored. 
+- Unit price for some products (simple, with configurable parents) was 0 in cart insight data; this has been fixed.  
+- We improved the way we fetch customer attribute values for data fields; attribute codes containing numbers (for example,  `title_123`) won't now break the contact sync.
+- We fixed an issue with inaccurate log output for wishlist sync.
+- An invalid return type was breaking web API processing for Swagger; this has been fixed. [External contribution](https://github.com/dotmailer/dotmailer-magento2-extension/pull/558) 
+
+# 4.5.0
+
+###### What's new
+- Configurable products now have a stock figure that is the sum of their child products.
+- We have added a plugin to detect stock updates that are performed outside of the Magento admin, that is, by third-party code.
+- Resource names across all dotdigital admin pages are now consistent. 
+- We added MFTF tests for our abandoned cart and review exclusion rules.
+
+###### Bug fixes
+- Missing or defunct product attribute sets now won't break the order sync. 
+- We added an extra check to our `MessagePlugin`  class to fix a potential `setEncoding` cron error.
+- We fixed a bug with the wishlist cron that could result in wishlists syncing without products.
+- `Single_Delete` importer jobs would always be marked as _Failed_; this has been fixed.
+- We now apply CSS styles to our coupon EDC inline, to ensure they are correctly added in Gmail.
+
 # 4.3.6
 
 ###### What's new
@@ -26,7 +60,7 @@ You are welcome to contribute to Engagement Cloud for Magento! You can either:
 - Codes for campaign tracking and ROI tracking applied to the **Get basket** link in the abandoned cart EDC are now preserved and applied at their destination.
 - We've added MFTF tests to test our dashboard and various report layouts.
 
-###### Fixes
+###### Bug fixes
 - Exclusion rules can now have conditions relating to product attribute sets.
 - The imported / not imported filter on some of our report grids now functions as expected. 
 - We fixed a regression introduced in 4.3.4 that prevented new exclusion rules being saved.
@@ -35,7 +69,7 @@ You are welcome to contribute to Engagement Cloud for Magento! You can either:
 
 # 4.3.5
 
-###### Fixes
+###### Bug fixes
 - We fixed an issue whereby redeeming EDC coupon codes generated in versions prior to 4.3.0, in version 4.3.4, caused a fatal error. 
 
 # 4.3.4
@@ -51,7 +85,7 @@ You are welcome to contribute to Engagement Cloud for Magento! You can either:
 - Our own custom serializer class is removed in favour of Magento's `SerializerInterface` .
 - We've added some code to allow the retrieval of tier prices during catalog sync. This won’t affect this module's functionality; it supports our forthcoming B2B module. 
 
-###### Fixes
+###### Bug fixes
 - We fixed a regression introduced in 4.3.1, which stopped some data fields from being captured when syncing customers, subscribers and guests.
 - Deleting customers in the Magento admin was triggering two `Contact_Delete` rows in the importer table. This has been fixed.
 - A single unsubscribed, hard bounced, or otherwise rejected contact could prevent a batch of campaign sends going out; this has been fixed.

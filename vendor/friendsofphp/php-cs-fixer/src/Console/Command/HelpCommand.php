@@ -12,10 +12,10 @@
 
 namespace PhpCsFixer\Console\Command;
 
+use PhpCsFixer\AbstractFixer;
 use PhpCsFixer\Console\Application;
 use PhpCsFixer\Fixer\ConfigurableFixerInterface;
 use PhpCsFixer\Fixer\ConfigurationDefinitionFixerInterface;
-use PhpCsFixer\Fixer\DefinedFixerInterface;
 use PhpCsFixer\Fixer\DeprecatedFixerInterface;
 use PhpCsFixer\Fixer\FixerInterface;
 use PhpCsFixer\FixerConfiguration\AliasedFixerOption;
@@ -41,7 +41,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 final class HelpCommand extends BaseHelpCommand
 {
-    const COMMAND_NAME = 'help';
+    protected static $defaultName = 'help';
 
     /**
      * Returns help-copy suitable for console output.
@@ -64,15 +64,23 @@ to merge paths from the config file and from the argument:
 
     <info>$ php %command.full_name% --path-mode=intersection /path/to/dir</info>
 
-The <comment>--format</comment> option for the output format. Supported formats are ``txt`` (default one), ``json``, ``xml``, ``checkstyle`` and ``junit``.
+The <comment>--format</comment> option for the output format. Supported formats are ``txt`` (default one), ``json``, ``xml``, ``checkstyle``, ``junit`` and ``gitlab``.
 
 NOTE: the output for the following formats are generated in accordance with XML schemas
 
 * ``junit`` follows the `JUnit xml schema from Jenkins </doc/junit-10.xsd>`_
 * ``checkstyle`` follows the common `"checkstyle" xml schema </doc/checkstyle.xsd>`_
 
+The <comment>--quiet</comment> Do not output any message.
 
 The <comment>--verbose</comment> option will show the applied rules. When using the ``txt`` format it will also display progress notifications.
+
+NOTE: if there is an error like "errors reported during linting after fixing", you can use this to be even more verbose for debugging purpose
+
+* ``--verbose=0`` or no option: normal
+* ``--verbose``, ``--verbose=1``, ``-v``: verbose
+* ``--verbose=2``, ``-vv``: very verbose
+* ``--verbose=3``, ``-vvv``: debug
 
 The <comment>--rules</comment> option limits the rules to apply to the
 project:
@@ -86,12 +94,12 @@ apply (the rule names must be separated by a comma):
 
     <info>$ php %command.full_name% /path/to/dir --rules=line_ending,full_opening_tag,indentation_type</info>
 
-You can also blacklist the rules you don't want by placing a dash in front of the rule name, if this is more convenient,
+You can also exclude the rules you don't want by placing a dash in front of the rule name, if this is more convenient,
 using <comment>-name_of_fixer</comment>:
 
     <info>$ php %command.full_name% /path/to/dir --rules=-full_opening_tag,-indentation_type</info>
 
-When using combinations of exact and blacklist rules, applying exact rules along with above blacklisted results:
+When using combinations of exact and exclude rules, applying exact rules along with above excluded results:
 
     <info>$ php %command.full_name% /path/to/project --rules=@Symfony,-@PSR1,-blank_line_before_statement,strict_comparison</info>
 
@@ -134,6 +142,17 @@ Finally, if you don't need BC kept on CLI level, you might use `PHP_CS_FIXER_FUT
 would be default in next MAJOR release (unified differ, estimating, full-width progress indicator):
 
     <info>$ PHP_CS_FIXER_FUTURE_MODE=1 php %command.full_name% -v --diff</info>
+
+Rules
+-----
+
+Use the following command to quickly understand what a rule will do to your code:
+
+    <info>$ php php-cs-fixer.phar describe align_multiline_comment</info>
+
+To visualize all the rules that belong to a ruleset:
+
+    <info>$ php php-cs-fixer.phar describe @PSR2</info>
 
 Choose from the list of available rules:
 
@@ -179,11 +198,12 @@ The example below will add two rules to the default list of PSR2 set rules:
     ?>
 
 **NOTE**: ``exclude`` will work only for directories, so if you need to exclude file, try ``notPath``.
+Both ``exclude`` and ``notPath`` methods accept only relative paths to the ones defined with the ``in`` method.
 
 See `Symfony\Finder` (<url>https://symfony.com/doc/current/components/finder.html</url>)
 online documentation for other `Finder` methods.
 
-You may also use a blacklist for the rules instead of the above shown whitelist approach.
+You may also use an exclude list for the rules instead of the above shown include approach.
 The following example shows how to use all ``Symfony`` rules but the ``full_opening_tag`` rule.
 
     <?php
@@ -273,7 +293,7 @@ Exit code is built using following bit flags:
 * 32 - Configuration error of a Fixer.
 * 64 - Exception raised within the application.
 
-(Applies to exit code of the `fix` command only)
+(Applies to exit code of the ``fix`` command only)
 EOF
         ;
 
@@ -284,7 +304,7 @@ EOF
             ),
             '%%%CI_INTEGRATION%%%' => implode("\n", array_map(
                 static function ($line) { return '    $ '.$line; },
-                \array_slice(file(__DIR__.'/../../../dev-tools/ci-integration.sh', FILE_IGNORE_NEW_LINES), 3)
+                \array_slice(file(__DIR__.'/../../../ci-integration.sh', FILE_IGNORE_NEW_LINES), 3)
             )),
             '%%%FIXERS_DETAILS%%%' => self::getFixersHelp(),
         ]);
@@ -333,8 +353,6 @@ EOF
 
     /**
      * Returns the allowed values of the given option that can be converted to a string.
-     *
-     * @param FixerOptionInterface $option
      *
      * @return null|array
      */
@@ -401,7 +419,7 @@ EOF
             ));
         }
 
-        for ($i = (int) Application::VERSION; $i > 0; --$i) {
+        for ($i = Application::getMajorVersion(); $i > 0; --$i) {
             if (1 === Preg::match('/Changelog for v('.$i.'.\d+.\d+)/', $changelog, $matches)) {
                 $version = $matches[1];
 
@@ -441,6 +459,7 @@ EOF
     {
         $help = '';
         $fixerFactory = new FixerFactory();
+        /** @var AbstractFixer[] $fixers */
         $fixers = $fixerFactory->registerBuiltInFixers()->getFixers();
 
         // sort fixers by name
@@ -472,11 +491,7 @@ EOF
         foreach ($fixers as $i => $fixer) {
             $sets = $getSetsWithRule($fixer->getName());
 
-            if ($fixer instanceof DefinedFixerInterface) {
-                $description = $fixer->getDefinition()->getSummary();
-            } else {
-                $description = '[n/a]';
-            }
+            $description = $fixer->getDefinition()->getSummary();
 
             if ($fixer instanceof DeprecatedFixerInterface) {
                 $successors = $fixer->getSuccessorsNames();
@@ -535,7 +550,7 @@ EOF
                             }
                         } else {
                             $allowed = array_map(
-                                function ($type) {
+                                static function ($type) {
                                     return '<comment>'.$type.'</comment>';
                                 },
                                 $option->getAllowedTypes()

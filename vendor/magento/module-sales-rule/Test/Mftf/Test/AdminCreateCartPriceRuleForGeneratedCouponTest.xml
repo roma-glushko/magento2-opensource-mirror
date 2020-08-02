@@ -21,7 +21,7 @@
 
         <before>
             <createData entity="_defaultCategory" stepKey="createPreReqCategory"/>
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+            <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
         </before>
 
         <after>
@@ -30,7 +30,7 @@
                 <argument name="ruleName" value="{{_defaultCoupon.code}}"/>
             </actionGroup>
             <deleteData createDataKey="createPreReqCategory" stepKey="deletePreReqCategory"/>
-            <actionGroup ref="logout" stepKey="adminLogout"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="adminLogout"/>
         </after>
 
         <!-- Create a cart price rule  -->
@@ -55,8 +55,8 @@
         <click selector="{{AdminCartPriceRulesFormSection.generateCouponsButton}}" stepKey="clickGenerate"/>
         <see selector="{{AdminCartPriceRulesFormSection.successMessage}}" userInput="Message is added to queue, wait to get your coupons soon" stepKey="seeGenerationSuccess"/>
 
-        <comment userInput="Apply changes" stepKey="runCron1"/>
-        <actionGroup ref="CliConsumerStartActionGroup" stepKey="runCron2">
+        <!-- Apply changes -->
+        <actionGroup ref="CliConsumerStartActionGroup" stepKey="startMessageQueue">
             <argument name="consumerName" value="{{AdminCodeGeneratorMessageConsumerData.consumerName}}"/>
             <argument name="maxMessages" value="{{AdminCodeGeneratorMessageConsumerData.messageLimit}}"/>
         </actionGroup>
@@ -71,7 +71,7 @@
         <grabTextFrom selector="{{AdminCartPriceRulesFormSection.generatedCouponByIndex('1')}}" stepKey="grabCouponCode"/>
 
         <!-- Create a product to check the storefront -->
-        <actionGroup ref="FillAdminSimpleProductForm" stepKey="fillProductFieldsInAdmin">
+        <actionGroup ref="FillAdminSimpleProductFormActionGroup" stepKey="fillProductFieldsInAdmin">
             <argument name="category" value="$$createPreReqCategory$$"/>
             <argument name="simpleProduct" value="_defaultProduct"/>
         </actionGroup>
@@ -82,8 +82,7 @@
         <click selector="{{StorefrontProductActionSection.addToCart}}" stepKey="addProductToCart"/>
         <waitForPageLoad stepKey="waitForAddToCart"/>
         <waitForElementVisible selector="{{StorefrontMessagesSection.success}}" stepKey="waitForSuccessMessage"/>
-        <amOnPage url="{{CheckoutCartPage.url}}" stepKey="goToCartPage"/>
-        <waitForPageLoad stepKey="waitForCartPage"/>
+        <actionGroup ref="StorefrontCartPageOpenActionGroup" stepKey="goToCartPage"/>
         <conditionalClick selector="{{StorefrontSalesRuleCartCouponSection.couponHeader}}" dependentSelector="{{StorefrontSalesRuleCartCouponSection.discountBlockActive}}" visible="false" stepKey="clickCouponHeader"/>
         <waitForElementVisible selector="{{StorefrontSalesRuleCartCouponSection.couponField}}" stepKey="waitForCouponField" />
         <fillField selector="{{StorefrontSalesRuleCartCouponSection.couponField}}" userInput="{$grabCouponCode}" stepKey="fillCouponField"/>

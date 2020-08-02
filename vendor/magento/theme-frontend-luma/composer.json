@@ -5,9 +5,9 @@
         "sort-packages": true
     },
     "require": {
-        "php": "~7.1.3||~7.2.0||~7.3.0",
-        "magento/framework": "102.0.*",
-        "magento/theme-frontend-blank": "100.3.*"
+        "php": "~7.3.0||~7.4.0",
+        "magento/framework": "103.0.*",
+        "magento/theme-frontend-blank": "100.4.*"
     },
     "type": "magento2-theme",
     "license": [
@@ -19,5 +19,5 @@
             "registration.php"
         ]
     },
-    "version": "100.3.5"
+    "version": "100.4.0"
 }

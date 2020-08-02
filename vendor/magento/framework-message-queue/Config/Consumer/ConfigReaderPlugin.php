@@ -11,7 +11,7 @@ use Magento\Framework\MessageQueue\Consumer\Config\CompositeReader as ConsumerCo
 /**
  * Plugin which provides access to consumers declared in queue config using consumer config interface.
  *
- * @deprecated 102.0.5
+ * @deprecated 103.0.0
  */
 class ConfigReaderPlugin
 {

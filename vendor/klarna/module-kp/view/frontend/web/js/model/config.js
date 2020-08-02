@@ -21,7 +21,8 @@ define(
       data_sharing_onload = window.checkoutConfig.payment.klarna_kp.data_sharing_onload,
       success = window.checkoutConfig.payment.klarna_kp.success,
       hasErrors = ko.observable(false),
-      available_methods = window.checkoutConfig.payment.klarna_kp.available_methods;
+      available_methods = window.checkoutConfig.payment.klarna_kp.available_methods,
+      redirect_url = window.checkoutConfig.payment.klarna_kp.redirect_url;
 
     return {
       hasErrors: hasErrors,
@@ -34,6 +35,7 @@ define(
       success: success,
       authorization_token: authorization_token,
       available_methods: available_methods,
+      redirect_url: redirect_url,
       getTitle: function (code) {
         if (window.checkoutConfig.payment.klarna_kp[code]) {
           return window.checkoutConfig.payment.klarna_kp[code].title;

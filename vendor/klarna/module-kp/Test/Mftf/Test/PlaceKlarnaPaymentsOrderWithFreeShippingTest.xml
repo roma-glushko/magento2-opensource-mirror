@@ -33,7 +33,7 @@
         <after>
             <deleteData createDataKey="createSimpleProduct" stepKey="deleteSimpleProduct"/>
             <createData entity="FreeShippinMethodDefault" stepKey="disableFreeShipping"/>
-            <actionGroup ref="logout" stepKey="signOutFromAdmin"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="signOutFromAdmin"/>
         </after>
         <!--Go to product page-->
         <actionGroup ref="GoToCreatedProductPageAndWaitForAddToCart" stepKey="goToProductPageAndWaitForAddToCart">
@@ -41,12 +41,13 @@
         </actionGroup>
 
         <!--Add product to shopping cart-->
-        <actionGroup ref="addToCartFromStorefrontProductPage" stepKey="addToCartFromStorefrontProductPage">
+        <actionGroup ref="AddToCartFromStorefrontProductPageActionGroup" stepKey="addToCartFromStorefrontProductPage">
             <argument name="productName" value="$$createSimpleProduct.name$$"/>
         </actionGroup>
 
         <!--Go to checkout-->
         <actionGroup ref="GoToCheckoutFromMinicartActionGroup" stepKey="goToCheckoutFromMinicart"/>
+        <waitForPageLoad stepKey="waitForCheckoutPageLoad"/>
 
         <!--Enter shipping information and continue to payments-->
         <actionGroup ref="GuestCheckoutFillingShippingSectionActionGroup" stepKey="guestCheckoutFillingShipping">
@@ -69,10 +70,14 @@
         <grabTextFrom selector="{{CheckoutSuccessMainSection.orderNumber}}" stepKey="grabOrderNumber"/>
 
         <!--Verify order summary in admin-->
-        <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
-        <actionGroup ref="ValidateAdminKlarnaOrderSummaryWithShipping" stepKey="validateOrderSummary">
-            <argument name="orderNumber" value="{$grabOrderNumber}"/>
+        <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
+        <actionGroup ref="OpenOrderByIdActionGroup" stepKey="goToOrderPage">
+            <argument name="orderId" value="{$grabOrderNumber}"/>
+        </actionGroup>
+        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateGrandTotal">
             <argument name="grandTotalAmount" value="{$grabTotalAmount}"/>
+        </actionGroup>
+        <actionGroup ref="ValidateAdminKlarnaOrderSummaryWithShipping" stepKey="validateShipping">
             <argument name="shippingAmount" value="0.00"/>
         </actionGroup>
     </test>

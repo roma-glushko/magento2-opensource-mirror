@@ -20,12 +20,10 @@ return array(
     'JShrink' => array($vendorDir . '/tedivm/jshrink/src'),
     'JMS\\Serializer' => array($vendorDir . '/jms/serializer/src'),
     'JMS\\' => array($vendorDir . '/jms/parser-lib/src'),
-    'Flow\\JSONPath\\Test' => array($vendorDir . '/flow/jsonpath/tests'),
-    'Flow\\JSONPath' => array($vendorDir . '/flow/jsonpath/src'),
     'Doctrine\\Common\\Inflector\\' => array($vendorDir . '/doctrine/inflector/lib'),
     'Cm\\RedisSession\\' => array($vendorDir . '/colinmollenhour/php-redis-session-abstract/src'),
+    'CBOR' => array($vendorDir . '/2tvenom/cborencode/src'),
     'Braintree' => array($vendorDir . '/braintree/braintree_php/lib'),
     'Behat\\Gherkin' => array($vendorDir . '/behat/gherkin/src'),
-    'BaconQrCode' => array($vendorDir . '/bacon/bacon-qr-code/src'),
     '' => array($baseDir . '/app/code', $baseDir . '/generated/code'),
 );

@@ -20,14 +20,14 @@ class Storage
     /**
      * Type font
      *
-     * Represents the font type.
+     * Represents the font type
      */
     const TYPE_FONT = 'font';
 
     /**
      * Type image
      *
-     * Represents the image type.
+     * Represents the image type
      */
     const TYPE_IMAGE = 'image';
 
@@ -125,7 +125,8 @@ class Storage
         $this->file = $file ?: ObjectManager::getInstance()->get(
             \Magento\Framework\Filesystem\Io\File::class
         );
-        $this->filesystemDriver = $filesystemDriver ?: ObjectManager::getInstance()->get(DriverInterface::class);
+        $this->filesystemDriver = $filesystemDriver ?: ObjectManager::getInstance()
+            ->get(DriverInterface::class);
     }
 
     /**
@@ -340,7 +341,10 @@ class Storage
     {
         $rootCmp = rtrim($this->_helper->getStorageRoot(), '/');
         $pathCmp = rtrim($path, '/');
-        $absolutePath = $this->filesystemDriver->getRealPathSafety($this->mediaWriteDirectory->getAbsolutePath($path));
+        $absolutePath = rtrim(
+            $this->filesystemDriver->getRealPathSafety($this->mediaWriteDirectory->getAbsolutePath($path)),
+            '/'
+        );
 
         if ($rootCmp == $pathCmp || $rootCmp === $absolutePath) {
             throw new \Magento\Framework\Exception\LocalizedException(

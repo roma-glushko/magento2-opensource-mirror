@@ -12,8 +12,8 @@ namespace Klarna\Kp\Tests\Unit\Plugin\Model;
 
 use Klarna\Kp\Model\SessionInitiatorFactory;
 use Klarna\Kp\Plugin\Model\MethodListPlugin;
-use Klarna\Kp\Test\Unit\Mock\MockFactory;
-use Klarna\Kp\Test\Unit\Mock\TestObjectFactory;
+use Klarna\Core\Test\Unit\Mock\MockFactory;
+use Klarna\Core\Test\Unit\Mock\TestObjectFactory;
 use Magento\Quote\Model\Quote;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -86,7 +86,7 @@ class MethodListPluginTest extends TestCase
     /**
      * Basic setup for test
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->mockFactory = new MockFactory();
         $objectFactory = new TestObjectFactory($this->mockFactory);

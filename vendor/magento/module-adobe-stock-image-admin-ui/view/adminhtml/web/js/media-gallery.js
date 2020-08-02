@@ -2,6 +2,8 @@
  * Copyright © Magento, Inc. All rights reserved.
  * See COPYING.txt for license details.
  */
+
+/* global Base64 */
 define([
     'jquery',
     'Magento_Ui/js/modal/confirm'
@@ -9,7 +11,7 @@ define([
     'use strict';
 
     return {
-        jsTreeRootFolderName: 'Storage Root',
+        jsTreeRootFolderId: 'root',
         jsTreeFolderNameMaxLength: 20,
 
         /**
@@ -18,57 +20,53 @@ define([
          * @param {String} path
          */
         locate: function (path) {
-            var i,
-                folderName,
-                openFolderChildrenButton,
-                imageFolder,
-                locatedImage,
-                imagePath = path.replace(/^\/+/, ''),
-                imagePathParts = imagePath.split('/'),
-                imageFilename = imagePath,
-                imageFolderName = this.jsTreeRootFolderName;
-
-            $.ajaxSetup({
-                async: false
-            });
-
-            if (imagePathParts.length > 1) {
-                imageFilename = imagePathParts[imagePathParts.length - 1];
-                imageFolderName = imagePathParts[imagePathParts.length - 2];
-
-                for (i = 0; i < imagePathParts.length - 2; i++) {
-                    folderName = imagePathParts[i];
-
-                    /* folder name is being cut in file browser */
-                    // eslint-disable-next-line max-depth
-                    if (folderName.length > this.jsTreeFolderNameMaxLength) {
-                        folderName = folderName.substring(0, this.jsTreeFolderNameMaxLength) + '...';
-                    }
-
-                    //var folderSelector = ".jstree a:contains('" + folderName + "')";
-                    openFolderChildrenButton = $('.jstree a:contains("' + folderName + '")').prev('.jstree-icon');
-
-                    // eslint-disable-next-line max-depth
-                    if (openFolderChildrenButton.length) {
-                        openFolderChildrenButton.click();
-                    }
-                }
-            }
-
-            //select folder
-            imageFolder = $('.jstree a:contains("' + imageFolderName + '")');
+            var imageFolder = this.selectFolder(path),
+                imageFilename = path.substring(path.lastIndexOf('/') + 1),
+                locatedImage;
 
             if (imageFolder.length) {
-                imageFolder[0].click();
-                //select image
                 locatedImage = $('div[data-row="file"]:has(img[alt=\"' + imageFilename + '\"])');
 
-                return locatedImage.length ?  locatedImage : false;
+                return locatedImage.length ? locatedImage : false;
             }
 
             $.ajaxSetup({
                 async: true
             });
+        },
+
+        /**
+         * Select folder
+         *
+         * @param {String} path
+         */
+        selectFolder: function (path) {
+            var imageFolder,
+                pathId,
+                imagePath = path.replace(/^\/+/, ''),
+                folderPathParts = imagePath.split('/').slice(0, -1);
+
+            $.ajaxSetup({
+                async: false
+            });
+
+            if (folderPathParts.length > 1) {
+                this.openFolderTree(folderPathParts);
+            }
+
+            pathId = Base64.idEncode(folderPathParts.join('/'));
+            imageFolder = $('.jstree li[data-id="' + pathId + '"]').children('a');
+
+            if (!imageFolder.length) {
+                imageFolder = $('.jstree li[data-id="' + this.jsTreeRootFolderId + '"]')
+                    .children('a');
+            }
+
+            if (imageFolder.length) {
+                imageFolder[0].click();
+            }
+
+            return imageFolder;
         },
 
         /**
@@ -91,6 +89,32 @@ define([
                     }
                 }]
             });
+        },
+
+        /**
+         * Open folder Tree
+         *
+         * @param {Array} folderPathParts
+         */
+        openFolderTree: function (folderPathParts) {
+            var i,
+                pathId,
+                openFolderButton,
+                folderPath = '';
+
+            for (i = 0; i < folderPathParts.length - 1; i++) {
+                if (folderPath === '') {
+                    folderPath = folderPathParts[i];
+                } else {
+                    folderPath = folderPath + '/' + folderPathParts[i];
+                }
+                pathId = Base64.idEncode(folderPath);
+                openFolderButton = $('.jstree li[data-id="' + pathId + '"]').children('.jstree-icon');
+
+                if (openFolderButton.length) {
+                    openFolderButton.click();
+                }
+            }
         }
     };
 });

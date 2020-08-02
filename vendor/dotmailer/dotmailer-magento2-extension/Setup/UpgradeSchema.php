@@ -9,6 +9,7 @@ use Magento\Framework\DB\Adapter\AdapterInterface;
 use Magento\Framework\Serialize\SerializerInterface;
 use Dotdigitalgroup\Email\Setup\SchemaInterface as Schema;
 use Dotdigitalgroup\Email\Setup\Schema\Shared;
+use Dotdigitalgroup\Email\Logger\Logger;
 
 /**
  * @codeCoverageIgnore
@@ -26,17 +27,24 @@ class UpgradeSchema implements UpgradeSchemaInterface
     private $shared;
 
     /**
+     * @var Logger
+     */
+    private $logger;
+
+    /**
      * UpgradeSchema constructor.
-     *
      * @param SerializerInterface $json
      * @param Shared $shared
+     * @param Logger $logger
      */
     public function __construct(
         SerializerInterface $json,
-        Shared $shared
+        Shared $shared,
+        Logger $logger
     ) {
         $this->shared = $shared;
         $this->json = $json;
+        $this->logger = $logger;
     }
 
     /**
@@ -55,6 +63,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
         $this->upgradeFourThreeZero($setup, $context, $connection);
         $this->upgradeFourThreeFour($setup, $context, $connection);
         $this->upgradeFourThreeSix($setup, $connection, $context);
+        $this->upgradeFourFiveTwo($setup, $connection, $context);
 
         $setup->endSetup();
     }
@@ -438,6 +447,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     );
                 } catch (\Exception $e) {
                     // Not critical. Continue upgrade.
+                    $this->logger->debug((string) $e);
                 }
 
                 try {
@@ -447,6 +457,7 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     );
                 } catch (\Exception $e) {
                     // Not critical. Continue upgrade.
+                    $this->logger->debug((string) $e);
                 }
 
                 // add processed and last_imported_at columns
@@ -633,6 +644,29 @@ class UpgradeSchema implements UpgradeSchemaInterface
                     'comment' => 'Review Imported'
                     ]
                 );
+            }
+        }
+    }
+
+    /**
+     * @param SchemaSetupInterface $setup
+     * @param AdapterInterface $connection
+     * @param ModuleContextInterface $context
+     */
+    private function upgradeFourFiveTwo(
+        SchemaSetupInterface $setup,
+        AdapterInterface $connection,
+        ModuleContextInterface $context
+    ) {
+        if (version_compare($context->getVersion(), '4.5.2', '<')) {
+            $emailCatalogTable = $setup->getTable(Schema::EMAIL_CATALOG_TABLE);
+
+            if ($connection->tableColumnExists($emailCatalogTable, 'imported')) {
+                $connection->dropColumn($emailCatalogTable, 'imported');
+            }
+
+            if ($connection->tableColumnExists($emailCatalogTable, 'modified')) {
+                $connection->dropColumn($emailCatalogTable, 'modified');
             }
         }
     }

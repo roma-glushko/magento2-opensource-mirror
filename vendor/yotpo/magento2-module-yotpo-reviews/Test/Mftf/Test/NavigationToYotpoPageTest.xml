@@ -18,7 +18,7 @@
       <group value="yotpo-navigation"/>
     </annotations>
 
-    <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+    <actionGroup ref="AdminLoginActionGroup" stepKey="AdminLoginActionGroup"/>
     <actionGroup ref="AdminNavigateMenuActionGroup" stepKey="navigateToStoresAllStoresPage">
       <argument name="menuUiId" value="{{AdminMenuStores.dataUiId}}"/>
       <argument name="submenuUiId" value="{{AdminMenuStoresSettingsConfiguration.dataUiId}}"/>

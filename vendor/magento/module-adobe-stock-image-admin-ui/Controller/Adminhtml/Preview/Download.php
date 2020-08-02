@@ -11,15 +11,16 @@ namespace Magento\AdobeStockImageAdminUi\Controller\Adminhtml\Preview;
 use Magento\AdobeStockAssetApi\Api\GetAssetByIdInterface;
 use Magento\AdobeStockImageApi\Api\SaveImageInterface;
 use Magento\Backend\App\Action;
+use Magento\Framework\App\Action\HttpPostActionInterface;
 use Magento\Framework\Controller\Result\Json;
 use Magento\Framework\Controller\ResultFactory;
 use Magento\Framework\Exception\LocalizedException;
 use Psr\Log\LoggerInterface;
 
 /**
- * Class Download
+ * Controller for downloading the Adobe Stock asset preview by the id
  */
-class Download extends Action
+class Download extends Action implements HttpPostActionInterface
 {
     private const HTTP_OK = 200;
     private const HTTP_BAD_REQUEST = 400;
@@ -48,19 +49,19 @@ class Download extends Action
 
     /**
      * @param Action\Context $context
-     * @param SaveImageInterface $saveImage
+     * @param SaveImageInterface $save
      * @param LoggerInterface $logger
      * @param GetAssetByIdInterface $getAssetById
      */
     public function __construct(
         Action\Context $context,
-        SaveImageInterface $saveImage,
+        SaveImageInterface $save,
         LoggerInterface $logger,
         GetAssetByIdInterface $getAssetById
     ) {
         parent::__construct($context);
 
-        $this->saveImage = $saveImage;
+        $this->saveImage = $save;
         $this->getAssetById = $getAssetById;
         $this->logger = $logger;
     }

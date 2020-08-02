@@ -21,7 +21,6 @@ use Magento\Framework\UrlInterface;
 use Magento\MediaStorage\Helper\File\Storage\Database;
 use Magento\MediaStorage\Model\File\UploaderFactory;
 use Magento\Theme\Model\Design\Backend\Image;
-use PHPUnit_Framework_MockObject_MockObject;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -37,7 +36,7 @@ class ImageTest extends \PHPUnit\Framework\TestCase
     /**
      * @inheritdoc
      */
-    public function setUp()
+    public function setUp(): void
     {
         $context = $this->getMockObject(Context::class);
         $registry = $this->getMockObject(Registry::class);
@@ -71,7 +70,7 @@ class ImageTest extends \PHPUnit\Framework\TestCase
     /**
      * @inheritdoc
      */
-    public function tearDown()
+    public function tearDown(): void
     {
         unset($this->imageBackend);
     }
@@ -79,9 +78,9 @@ class ImageTest extends \PHPUnit\Framework\TestCase
     /**
      * @param string $class
      * @param array $methods
-     * @return PHPUnit_Framework_MockObject_MockObject
+     * @return \PHPUnit\Framework\MockObject\MockObject
      */
-    private function getMockObject(string $class, array $methods = []): PHPUnit_Framework_MockObject_MockObject
+    private function getMockObject(string $class, array $methods = []): \PHPUnit\Framework\MockObject\MockObject
     {
         $builder =  $this->getMockBuilder($class)
             ->disableOriginalConstructor();
@@ -93,12 +92,16 @@ class ImageTest extends \PHPUnit\Framework\TestCase
 
     /**
      * Test for beforeSave method with invalid file extension.
-     *
-     * @expectedException \Magento\Framework\Exception\LocalizedException
-     * @expectedExceptionMessage Something is wrong with the file upload settings.
      */
     public function testBeforeSaveWithInvalidExtensionFile()
     {
+        $this->expectException(
+            \Magento\Framework\Exception\LocalizedException::class
+        );
+        $this->expectExceptionMessage(
+            'Something is wrong with the file upload settings.'
+        );
+
         $invalidFileName = 'fileName.invalidExtension';
         $this->imageBackend->setData(
             [

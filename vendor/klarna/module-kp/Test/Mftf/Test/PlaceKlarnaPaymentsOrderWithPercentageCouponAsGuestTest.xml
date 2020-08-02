@@ -27,7 +27,7 @@
         </annotations>
         <before>
             <createData entity="SimpleTwo" stepKey="createSimpleProduct"/>
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+            <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
             <actionGroup ref="ConfigurePercentageCoupon" stepKey="configurePercentageCoupon">
                 <argument name="ruleName" value="CatPriceRule"/>
                 <argument name="couponCode" value="CatPriceRule.coupon_code"/>
@@ -38,7 +38,7 @@
             <actionGroup ref="DeleteCartPriceRuleByName" stepKey="deleteCartPriceRule">
                 <argument name="ruleName" value="{{CatPriceRule.name}}"/>
             </actionGroup>
-            <actionGroup ref="logout" stepKey="logout"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
         </after>
         <!--Go to product page-->
         <actionGroup ref="GoToCreatedProductPageAndWaitForAddToCart" stepKey="goToCreatedProductPageAndWaitForAddToCart">
@@ -54,6 +54,7 @@
         <!--Go to checkout-->
         <waitForPageLoad stepKey="waitForCartPageLoad"/>
         <actionGroup ref="GoToCheckoutFromMinicartActionGroup" stepKey="goToCheckoutFromMinicart"/>
+        <waitForPageLoad stepKey="waitForCheckoutPageLoad"/>
 
         <!--Enter shipping information and continue to payments-->
         <actionGroup ref="GuestCheckoutFillingShippingSectionActionGroup" stepKey="guestCheckoutFillingShipping">
@@ -75,8 +76,10 @@
         <grabTextFrom selector="{{CheckoutSuccessMainSection.orderNumber}}" stepKey="grabOrderNumber"/>
 
         <!--Verify order summary in admin-->
-        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateOrderSummary">
-            <argument name="orderNumber" value="{$grabOrderNumber}"/>
+        <actionGroup ref="OpenOrderByIdActionGroup" stepKey="goToOrderPage">
+            <argument name="orderId" value="{$grabOrderNumber}"/>
+        </actionGroup>
+        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateGrandTotal">
             <argument name="grandTotalAmount" value="{$grabTotalAmount}"/>
         </actionGroup>
     </test>

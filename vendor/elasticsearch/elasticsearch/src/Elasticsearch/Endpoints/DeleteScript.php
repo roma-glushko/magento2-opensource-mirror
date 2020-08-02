@@ -9,7 +9,7 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 /**
  * Class DeleteScript
  * Elasticsearch API name delete_script
- * Generated running $ php util/GenerateEndpoints.php 7.8
+ * Generated running $ php util/GenerateEndpoints.php 7.7
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints

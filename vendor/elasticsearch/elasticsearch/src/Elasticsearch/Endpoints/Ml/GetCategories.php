@@ -9,7 +9,7 @@ use Elasticsearch\Endpoints\AbstractEndpoint;
 /**
  * Class GetCategories
  * Elasticsearch API name ml.get_categories
- * Generated running $ php util/GenerateEndpoints.php 7.8
+ * Generated running $ php util/GenerateEndpoints.php 7.7
  *
  * @category Elasticsearch
  * @package  Elasticsearch\Endpoints\Ml

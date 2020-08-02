@@ -1064,6 +1064,7 @@ class Address extends AbstractAddress implements
         $request->setLimitCarrier($this->getLimitCarrier());
         $baseSubtotalInclTax = $this->getBaseSubtotalTotalInclTax();
         $request->setBaseSubtotalInclTax($baseSubtotalInclTax);
+        $request->setBaseSubtotalWithDiscountInclTax($this->getBaseSubtotalWithDiscount() + $this->getBaseTaxAmount());
 
         $result = $this->_rateCollector->create()->collectRates($request)->getResult();
 

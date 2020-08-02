@@ -1,9 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * The MIT License (MIT)
  *
- * Copyright (c) 2014-2018 Spomky-Labs
+ * Copyright (c) 2014-2019 Spomky-Labs
  *
  * This software may be modified and distributed under the terms
  * of the MIT license.  See the LICENSE file for details.
@@ -12,19 +14,23 @@
 namespace OTPHP;
 
 use Assert\Assertion;
+use InvalidArgumentException;
+use function Safe\parse_url;
+use function Safe\sprintf;
+use Throwable;
 
-final class Factory
+/**
+ * This class is used to load OTP object from a provisioning Uri.
+ */
+final class Factory implements FactoryInterface
 {
-    /**
-     * @param string $uri
-     *
-     * @throws \InvalidArgumentException
-     *
-     * @return \OTPHP\TOTPInterface|\OTPHP\HOTPInterface
-     */
-    public static function loadFromProvisioningUri($uri)
+    public static function loadFromProvisioningUri(string $uri): OTPInterface
     {
-        $parsed_url = parse_url($uri);
+        try {
+            $parsed_url = parse_url($uri);
+        } catch (Throwable $throwable) {
+            throw new InvalidArgumentException('Not a valid OTP provisioning URI', $throwable->getCode(), $throwable);
+        }
         Assertion::isArray($parsed_url, 'Not a valid OTP provisioning URI');
         self::checkData($parsed_url);
 
@@ -36,10 +42,9 @@ final class Factory
     }
 
     /**
-     * @param \OTPHP\OTPInterface $otp
-     * @param array               $data
+     * @param array<string, mixed> $data
      */
-    private static function populateParameters(OTPInterface &$otp, array $data)
+    private static function populateParameters(OTPInterface &$otp, array $data): void
     {
         foreach ($data['query'] as $key => $value) {
             $otp->setParameter($key, $value);
@@ -47,21 +52,20 @@ final class Factory
     }
 
     /**
-     * @param \OTPHP\OTPInterface $otp
-     * @param array               $data
+     * @param array<string, mixed> $data
      */
-    private static function populateOTP(OTPInterface &$otp, array $data)
+    private static function populateOTP(OTPInterface &$otp, array $data): void
     {
         self::populateParameters($otp, $data);
-        $result = explode(':', rawurldecode(mb_substr($data['path'], 1, null, '8bit')));
+        $result = explode(':', rawurldecode(mb_substr($data['path'], 1)));
 
-        if (2 > count($result)) {
+        if (2 > \count($result)) {
             $otp->setIssuerIncludedAsParameter(false);
 
             return;
         }
 
-        if (!empty($otp->getIssuer())) {
+        if (null !== $otp->getIssuer()) {
             Assertion::eq($result[0], $otp->getIssuer(), 'Invalid OTP: invalid issuer in parameter');
             $otp->setIssuerIncludedAsParameter(true);
         }
@@ -69,9 +73,9 @@ final class Factory
     }
 
     /**
-     * @param array $data
+     * @param array<string, mixed> $data
      */
-    private static function checkData(array &$data)
+    private static function checkData(array &$data): void
     {
         foreach (['scheme', 'host', 'path', 'query'] as $key) {
             Assertion::keyExists($data, $key, 'Not a valid OTP provisioning URI');
@@ -82,31 +86,30 @@ final class Factory
     }
 
     /**
-     * @param array $parsed_url
-     *
-     * @return \OTPHP\HOTPInterface|\OTPHP\TOTPInterface
+     * @param array<string, mixed> $parsed_url
      */
-    private static function createOTP(array $parsed_url)
+    private static function createOTP(array $parsed_url): OTPInterface
     {
         switch ($parsed_url['host']) {
             case 'totp':
-                return new TOTP(self::getLabel($parsed_url['path']), $parsed_url['query']['secret']);
+                $totp = TOTP::create($parsed_url['query']['secret']);
+                $totp->setLabel(self::getLabel($parsed_url['path']));
+
+                return $totp;
             case 'hotp':
-                return new HOTP(self::getLabel($parsed_url['path']), $parsed_url['query']['secret']);
+                $hotp = HOTP::create($parsed_url['query']['secret']);
+                $hotp->setLabel(self::getLabel($parsed_url['path']));
+
+                return $hotp;
             default:
-                throw new \InvalidArgumentException(sprintf('Unsupported "%s" OTP type', $parsed_url['host']));
+                throw new InvalidArgumentException(sprintf('Unsupported "%s" OTP type', $parsed_url['host']));
         }
     }
 
-    /**
-     * @param string $data
-     *
-     * @return string
-     */
-    private static function getLabel($data)
+    private static function getLabel(string $data): string
     {
-        $result = explode(':', rawurldecode(mb_substr($data, 1, null, '8bit')));
+        $result = explode(':', rawurldecode(mb_substr($data, 1)));
 
-        return 2 === count($result) ? $result[1] : $result[0];
+        return 2 === \count($result) ? $result[1] : $result[0];
     }
 }

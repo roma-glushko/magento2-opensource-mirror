@@ -11,8 +11,8 @@
 
 namespace Klarna\Kp\Tests\Unit\Block;
 
-use Klarna\Kp\Test\Unit\Mock\MockFactory;
-use Klarna\Kp\Test\Unit\Mock\TestObjectFactory;
+use Klarna\Core\Test\Unit\Mock\MockFactory;
+use Klarna\Core\Test\Unit\Mock\TestObjectFactory;
 use PHPUnit\Framework\TestCase;
 use Klarna\Kp\Block\Adminhtml\System\Config\Form\Field\Onboarding;
 use Magento\Framework\Data\Form\Element\AbstractElement;
@@ -68,7 +68,7 @@ class OnboardingTest extends TestCase
     /**
      * Basic setup for test
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $mockFactory           = new MockFactory();
         $objectFactory         = new TestObjectFactory($mockFactory);

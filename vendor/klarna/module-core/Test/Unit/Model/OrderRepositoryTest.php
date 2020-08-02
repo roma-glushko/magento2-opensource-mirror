@@ -8,9 +8,10 @@
  * and LICENSE files that were distributed with this source code.
  */
 
-namespace Klarna\Core\Model;
+namespace Klarna\Core\Test\Unit\Model;
 
 use Klarna\Core\Api\OrderRepositoryInterface;
+use Klarna\Core\Model\OrderRepository;
 use Magento\Sales\Api\Data\OrderInterface;
 
 /**
@@ -60,12 +61,12 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
     private $storeMock;
 
     /**
-     * @covers ::getById()
-     * @expectedException \Magento\Framework\Exception\NoSuchEntityException
-     * @expectedExceptionMessage Order with id "" does not exist.
+     * @covers                   ::getById()
      */
     public function testGetByIdWithException()
     {
+        $this->expectException(\Magento\Framework\Exception\NoSuchEntityException::class, 'Order with id "" does not exist.');
+
         $orderId = '';
 
         $this->orderFactoryMock->expects(static::once())->method('create')->willReturn($this->orderMock);
@@ -101,12 +102,12 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers ::getByOrder()
-     * @expectedException \Magento\Framework\Exception\NoSuchEntityException
-     * @expectedExceptionMessage Requested order doesn't exist
+     * @covers                   ::getByOrder()
      */
     public function testGetByOrderWithException()
     {
+        $this->expectException(\Magento\Framework\Exception\NoSuchEntityException::class, 'Requested order doesn\'t exist');
+
         $orderId = '';
 
         $this->orderFactoryMock->expects(static::once())
@@ -144,12 +145,12 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers ::getByReservationId()
-     * @expectedException \Magento\Framework\Exception\NoSuchEntityException
-     * @expectedExceptionMessage Order with Reservation ID "" does not exist.
+     * @covers                   ::getByReservationId()
      */
     public function testGetByReservationIdWithException()
     {
+        $this->expectException(\Magento\Framework\Exception\NoSuchEntityException::class, 'Order with Reservation ID "" does not exist.');
+
         $orderId = '';
         $reservationId = '';
 
@@ -188,12 +189,12 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers ::getBySessionId()
-     * @expectedException \Magento\Framework\Exception\NoSuchEntityException
-     * @expectedExceptionMessage Order with session_id "" does not exist.
+     * @covers                   ::getBySessionId()
      */
     public function testGetBySessionIdWithException()
     {
+        $this->expectException(\Magento\Framework\Exception\NoSuchEntityException::class, 'Order with session_id "" does not exist.');
+
         $orderId = '';
         $sessionId = '';
 
@@ -288,12 +289,12 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @covers ::save()
-     * @expectedException \Magento\Framework\Exception\CouldNotSaveException
-     * @expectedExceptionMessage No such entity with payments_quote_id =
+     * @covers                   ::save()
      */
     public function testSaveWithException()
     {
+        $this->expectException(\Magento\Framework\Exception\CouldNotSaveException::class, 'No such entity with payments_quote_id =');
+
         $exceptionMessage = 'No such entity with payments_quote_id = ';
         $this->orderResourceMock->expects(static::once())
             ->method('save')
@@ -306,7 +307,7 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
     /**
      * Set up
      */
-    protected function setUp()
+    protected function setUp(): void
     {
         $objectManager = new \Magento\Framework\TestFramework\Unit\Helper\ObjectManager($this);
 
@@ -318,12 +319,8 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
             \Magento\Sales\Model\Order::class,
             [
                 'load',
-                'loadByIdWithoutStore',
-                'loadByCustomer',
-                'getIsActive',
                 'getId',
                 '__wakeup',
-                'setSharedStoreIds',
                 'save',
                 'delete',
                 'getCustomerId',
@@ -347,7 +344,9 @@ class OrderRepositoryTest extends \PHPUnit\Framework\TestCase
             )
             ->getMock();
 
-        $this->orderFactoryMock = $this->getMockBuilder(\Klarna\Core\Model\OrderFactory::class)->setMethods(['create'])
+        $this->orderFactoryMock = $this->getMockBuilder(\Klarna\Core\Model\OrderFactory::class)
+            ->disableOriginalConstructor()
+            ->setMethods(['create'])
             ->getMock();
 
         $this->orderMock = $this->getMockBuilder(\Klarna\Core\Model\Order::class)

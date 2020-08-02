@@ -23,6 +23,7 @@ use Magento\Payment\Gateway\Command\CommandException;
 use Magento\Payment\Gateway\CommandInterface;
 use Magento\Quote\Api\CartRepositoryInterface;
 use Magento\Quote\Api\Data\CartInterface;
+use Magento\Checkout\Model\Session;
 
 /**
  * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
@@ -40,41 +41,38 @@ class Authorize implements CommandInterface
      * @var BuilderInterface
      */
     private $builder;
-
     /**
      * @var OrderFactory
      */
     private $klarnaOrderFactory;
-
     /**
      * @var OrderRepositoryInterface
      */
     private $klarnaOrderRepository;
-
     /**
      * @var CartRepositoryInterface
      */
     private $mageQuoteRepository;
-
     /**
      * @var QuoteRepositoryInterface
      */
     private $klarnaQuoteRepository;
-
     /**
      * @var CreditApiInterface
      */
     private $api;
-
     /**
      * @var CartRepositoryInterface
      */
     private $quoteRepository;
-
     /**
      * @var \Magento\Sales\Api\OrderRepositoryInterface
      */
     private $mageOrderRepository;
+    /**
+     * @var Session
+     */
+    private $checkoutSession;
 
     /**
      * @param QuoteRepositoryInterface                    $klarnaQuoteRepository
@@ -84,6 +82,7 @@ class Authorize implements CommandInterface
      * @param OrderFactory                                $klarnaOrderFactory
      * @param BuilderInterface                            $builder
      * @param \Magento\Sales\Api\OrderRepositoryInterface $mageOrderRepository
+     * @param Session                                     $checkoutSession
      * @internal param OrderRepositoryInterface $orderRepository
      * @internal param OrderFactory $orderFactory
      */
@@ -94,16 +93,18 @@ class Authorize implements CommandInterface
         OrderRepositoryInterface $klarnaOrderRepository,
         OrderFactory $klarnaOrderFactory,
         BuilderInterface $builder,
-        \Magento\Sales\Api\OrderRepositoryInterface $mageOrderRepository
+        \Magento\Sales\Api\OrderRepositoryInterface $mageOrderRepository,
+        Session $checkoutSession
     ) {
-        $this->quoteRepository = $quoteRepository;
-        $this->api = $api;
+        $this->quoteRepository       = $quoteRepository;
+        $this->api                   = $api;
         $this->klarnaQuoteRepository = $klarnaQuoteRepository;
         $this->klarnaOrderRepository = $klarnaOrderRepository;
-        $this->klarnaOrderFactory = $klarnaOrderFactory;
-        $this->builder = $builder;
-        $this->mageQuoteRepository = $quoteRepository;
-        $this->mageOrderRepository = $mageOrderRepository;
+        $this->klarnaOrderFactory    = $klarnaOrderFactory;
+        $this->builder               = $builder;
+        $this->mageQuoteRepository   = $quoteRepository;
+        $this->mageOrderRepository   = $mageOrderRepository;
+        $this->checkoutSession       = $checkoutSession;
     }
 
     /**
@@ -129,6 +130,7 @@ class Authorize implements CommandInterface
         $data = $this->builder->setObject($quote)->generateRequest(Builder::GENERATE_TYPE_PLACE)->getRequest();
         $authorizationToken = $klarnaQuote->getAuthorizationToken();
         $result = $this->getKpApi()->placeOrder($authorizationToken, $data, $klarnaQuote->getSessionId());
+        $this->checkoutSession->setRedirectUrl($result->getRedirectUrl());
 
         if (!$result->isSuccessfull()) {
             $response = $this->getKpApi()->cancelOrder($authorizationToken, $klarnaQuote->getSessionId());

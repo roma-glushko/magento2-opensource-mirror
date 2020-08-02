@@ -17,6 +17,9 @@ use Magento\Framework\Api\SearchCriteriaInterface;
  */
 class Offensive implements SearchParameterProviderInterface
 {
+    private const OFFENSIVE_FILTER = 'offensive_filter';
+    private const DISABLED = 'Disabled';
+
     /**
      * @inheritdoc
      */
@@ -24,11 +27,9 @@ class Offensive implements SearchParameterProviderInterface
     {
         foreach ($searchCriteria->getFilterGroups() as $filterGroup) {
             foreach ($filterGroup->getFilters() as $filter) {
-                if ($filter->getField() === 'offensive_filter') {
-                    if ($filter->getValue() === 'Disabled') {
-                        $searchParams->setFilterOffensive2(true);
-                        break;
-                    }
+                if ($filter->getField() === self::OFFENSIVE_FILTER && $filter->getValue() === self::DISABLED) {
+                    $searchParams->setFilterOffensive2(true);
+                    break;
                 }
             }
         }

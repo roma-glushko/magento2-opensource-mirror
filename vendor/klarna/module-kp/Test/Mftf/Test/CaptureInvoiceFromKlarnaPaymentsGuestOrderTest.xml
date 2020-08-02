@@ -14,7 +14,7 @@
 -->
 <tests xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="urn:magento:mftf:Test/etc/testSchema.xsd">
-    <test name="CaptureInvoiceFromKlarnaPaymentsGuestOrderTest" extends="PlacePayLaterOrderAsGuestUSTest">
+    <test name="CaptureInvoiceFromKlarnaPaymentsGuestOrderTest" extends="PlacePayLaterOrderAsGuestTest">
         <annotations>
             <features value="Klarna Payments"/>
             <stories value="Capture an invoice from an order placed by a guest"/>
@@ -28,13 +28,17 @@
             <group value="Klarna_KP_Order_Capture"/>
         </annotations>
         <before>
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+            <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
         </before>
         <after>
-            <actionGroup ref="logout" stepKey="logout"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
         </after>
+
         <!--Go to order page-->
-        <actionGroup ref="GoToOrderPageFromKlarnaConfirmationPageGuest" stepKey="goToOrderPage"/>
+        <grabTextFrom selector="{{CheckoutSuccessMainSection.orderNumber}}" stepKey="grabOrderNumber"/>
+        <actionGroup ref="OpenOrderByIdActionGroup" stepKey="goToOrderPage">
+            <argument name="orderId" value="{$grabOrderNumber}"/>
+        </actionGroup>
 
         <!--Create and confirm invoice-->
         <actionGroup ref="AdminCreateInvoiceActionGroup" stepKey="createInvoice"/>

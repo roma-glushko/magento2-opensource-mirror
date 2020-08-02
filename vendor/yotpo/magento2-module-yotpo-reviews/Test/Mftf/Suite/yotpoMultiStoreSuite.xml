@@ -1,7 +1,7 @@
-<suites xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="../../dev/tests/acceptance/vendor/magento/magento2-functional-testing-framework/src/Magento/FunctionalTestingFramework/Suite/etc/suiteSchema.xsd">
+<suites xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:mftf:Suite/etc/suiteSchema.xsd">
   <suite name="YotpoMultiStoreSuite">
     <before>
-      <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+      <actionGroup ref="AdminLoginActionGroup" stepKey="AdminLoginActionGroup"/>
       <createData entity="SimpleProduct2" stepKey="createProduct"/>
       <actionGroup ref="EnableYotpoPlugin" stepKey="enableYotpoPlugin">
         <argument name="storeView" value="_defaultStore.name"/>
@@ -25,7 +25,7 @@
 
     <after>
       <deleteData createDataKey="createProduct" stepKey="deleteProduct"/>
-      <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+      <actionGroup ref="AdminLoginActionGroup" stepKey="AdminLoginActionGroup"/>
       <actionGroup ref="DisableYotpoPlugin" stepKey="DisableYotpoPlugin"/>
 
       <!-- remove the additional store view -->

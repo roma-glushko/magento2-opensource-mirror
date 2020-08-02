@@ -98,7 +98,6 @@ class Storage extends \Magento\Framework\App\Helper\AbstractHelper
      * @var \Magento\Framework\Filesystem\Io\File
      */
     private $file;
-
     /**
      * @var DriverInterface
      */
@@ -110,8 +109,8 @@ class Storage extends \Magento\Framework\App\Helper\AbstractHelper
      * @param \Magento\Backend\Model\Session $session
      * @param \Magento\Framework\View\Design\Theme\FlyweightFactory $themeFactory
      * @param \Magento\Framework\Filesystem\Io\File|null $file
-     * @param DriverInterface|null $filesystemDriver
      *
+     * @param DriverInterface|null $filesystemDriver
      * @throws \Magento\Framework\Exception\FileSystemException
      * @throws \Magento\Framework\Exception\ValidatorException
      */
@@ -255,6 +254,7 @@ class Storage extends \Magento\Framework\App\Helper\AbstractHelper
             $path = $this->_getRequest()->getParam(self::PARAM_NODE);
             if ($path && $path !== self::NODE_ROOT) {
                 $path = $this->convertIdToPath($path);
+
                 $path = $this->filesystemDriver->getRealPathSafety($path);
 
                 if (strpos($path, $currentPath) !== 0) {

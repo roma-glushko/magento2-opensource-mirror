@@ -7,14 +7,15 @@ declare(strict_types=1);
 
 namespace Magento\AdobeStockAsset\Model\ResourceModel\Category\Command;
 
-use Magento\MediaGalleryApi\Model\DataExtractorInterface;
+use Magento\AdobeStockAssetApi\Model\Category\Command\SaveInterface;
 use Magento\AdobeStockAssetApi\Api\Data\CategoryInterface;
 use Magento\AdobeStockAsset\Model\ResourceModel\Command\InsertIgnore;
+use Magento\Framework\Reflection\DataObjectProcessor;
 
 /**
- * Command for saving the Adobe Stock category object data
+ * Command is used to save an Adobe Stock asset category data
  */
-class Save
+class Save implements SaveInterface
 {
     private const ADOBE_STOCK_ASSET_CATEGORY_TABLE_NAME = 'adobe_stock_category';
 
@@ -24,20 +25,20 @@ class Save
     private $insertIgnore;
 
     /**
-     * @var DataExtractorInterface
+     * @var DataObjectProcessor
      */
-    private $dataExtractor;
+    private $objectProcessor;
 
     /**
      * @param InsertIgnore $insertIgnore
-     * @param DataExtractorInterface $dataExtractor
+     * @param DataObjectProcessor $objectProcessor
      */
     public function __construct(
         InsertIgnore $insertIgnore,
-        DataExtractorInterface $dataExtractor
+        DataObjectProcessor $objectProcessor
     ) {
         $this->insertIgnore = $insertIgnore;
-        $this->dataExtractor = $dataExtractor;
+        $this->objectProcessor = $objectProcessor;
     }
 
     /**
@@ -48,7 +49,7 @@ class Save
      */
     public function execute(CategoryInterface $category): void
     {
-        $data = $this->dataExtractor->extract($category, CategoryInterface::class);
+        $data = $this->objectProcessor->buildOutputDataArray($category, CategoryInterface::class);
         $this->insertIgnore->execute(
             $data,
             self::ADOBE_STOCK_ASSET_CATEGORY_TABLE_NAME,

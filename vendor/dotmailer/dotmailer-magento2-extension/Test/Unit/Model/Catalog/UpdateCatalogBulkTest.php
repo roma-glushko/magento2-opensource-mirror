@@ -14,6 +14,7 @@ use Magento\Framework\Api\FilterBuilder;
 use Dotdigitalgroup\Email\Model\Catalog\UpdateCatalogBulk;
 use Magento\Catalog\Api\Data\ProductSearchResultsInterface;
 use Magento\Catalog\Model\Product;
+use Dotdigitalgroup\Email\Model\Product\ParentFinder;
 use PHPUnit\Framework\TestCase;
 
 class UpdateCatalogBulkTest extends TestCase
@@ -78,7 +79,12 @@ class UpdateCatalogBulkTest extends TestCase
      */
     private $bunchMock;
 
-    protected function setUp()
+    /**
+     * @var \PHPUnit\Framework\MockObject\MockObject
+     */
+    private $parentFinderMock;
+
+    protected function setUp() :void
     {
         $this->productRepositoryMock = $this->createMock(ProductRepositoryInterface::class);
         $this->resourceCatalogMock = $this->createMock(Catalog::class);
@@ -92,12 +98,14 @@ class UpdateCatalogBulkTest extends TestCase
         $this->productMock = $this->createMock(Product::class);
         $this->collectionMock = $this->createMock(Collection::class);
         $this->bunchMock = $this->createMock(Bunch::class);
+        $this->parentFinderMock = $this->createMock(ParentFinder::class);
 
         $this->bulkUpdate = new UpdateCatalogBulk(
             $this->resourceCatalogMock,
             $this->collectionFactoryMock,
             $this->dateTimeMock,
-            $this->bunchMock
+            $this->bunchMock,
+            $this->parentFinderMock
         );
     }
 
@@ -194,7 +202,12 @@ class UpdateCatalogBulkTest extends TestCase
         $this->dateTimeMock->expects($this->atLeastOnce())
             ->method('formatDate')
             ->willReturn('randomDate');
+
+        $this->parentFinderMock->expects($this->once())
+            ->method('getConfigurableParentsFromBunchOfProducts')
+            ->willReturn(['sku' => 'chaz-kangaroo']);
     }
+
     /**
      * Generates random values for product and catalogIds depending on scope
      * @param $scope
@@ -238,7 +251,7 @@ class UpdateCatalogBulkTest extends TestCase
 
         for ($i=0; $i<$numberOfProducts; $i++) {
             $bunch[] = [
-              'sku' => substr(hash("sha256", random_int(1, 9)), 0, 8)
+                'sku' => substr(hash("sha256", random_int(1, 9)), 0, 8)
             ];
         }
         return$bunch;

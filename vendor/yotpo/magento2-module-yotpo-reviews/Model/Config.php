@@ -13,14 +13,15 @@ use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Psr\Log\LoggerInterface;
+use Yotpo\Yotpo\Model\Logger as YotpoLogger;
 
 class Config
 {
     const MODULE_NAME = 'Yotpo_Yotpo';
 
     //= General Settings
-    const XML_PATH_YOTPO_ALL = "yotpo";
-    const XML_PATH_YOTPO_ENABLED = "yotpo/settings/active";
+    const XML_PATH_YOTPO_ALL = 'yotpo';
+    const XML_PATH_YOTPO_ENABLED = 'yotpo/settings/active';
     const XML_PATH_YOTPO_APP_KEY = 'yotpo/settings/app_key';
     const XML_PATH_YOTPO_SECRET = 'yotpo/settings/secret';
     const XML_PATH_YOTPO_WIDGET_ENABLED = 'yotpo/settings/widget_enabled';
@@ -28,14 +29,14 @@ class Config
     const XML_PATH_YOTPO_BOTTOMLINE_ENABLED = 'yotpo/settings/bottomline_enabled';
     const XML_PATH_YOTPO_BOTTOMLINE_QNA_ENABLED = 'yotpo/settings/qna_enabled';
     const XML_PATH_YOTPO_MDR_ENABLED = 'yotpo/settings/mdr_enabled';
-    const XML_PATH_YOTPO_DEBUG_MODE_ENABLED = "yotpo/settings/debug_mode_active";
-    const XML_PATH_YOTPO_ORDERS_SYNC_FROM_DATE = "yotpo/sync_settings/orders_sync_start_date";
+    const XML_PATH_YOTPO_DEBUG_MODE_ENABLED = 'yotpo/settings/debug_mode_active';
+    const XML_PATH_YOTPO_ORDERS_SYNC_FROM_DATE = 'yotpo/sync_settings/orders_sync_start_date';
     const XML_PATH_YOTPO_CUSTOM_ORDER_STATUS = 'yotpo/settings/custom_order_status';
-    const XML_PATH_YOTPO_ORDERS_SYNC_LIMIT = "yotpo/sync_settings/orders_sync_limit";
+    const XML_PATH_YOTPO_ORDERS_SYNC_LIMIT = 'yotpo/sync_settings/orders_sync_limit';
     //= Not visible on system.xml
-    const XML_PATH_YOTPO_API_URL = "yotpo/env/yotpo_api_url";
-    const XML_PATH_YOTPO_WIDGET_URL = "yotpo/env/yotpo_widget_url";
-    const XML_PATH_YOTPO_MODULE_INFO_INSTALLATION_DATE = "yotpo/module_info/yotpo_installation_date";
+    const XML_PATH_YOTPO_API_URL = 'yotpo/env/yotpo_api_url';
+    const XML_PATH_YOTPO_WIDGET_URL = 'yotpo/env/yotpo_widget_url';
+    const XML_PATH_YOTPO_MODULE_INFO_INSTALLATION_DATE = 'yotpo/module_info/yotpo_installation_date';
 
     private $allStoreIds = [0 => null, 1 => null];
 
@@ -80,6 +81,11 @@ class Config
     private $logger;
 
     /**
+     * @var YotpoLogger
+     */
+    private $yotpoLogger;
+
+    /**
      * @method __construct
      * @param  StoreManagerInterface    $storeManager
      * @param  ScopeConfigInterface     $scopeConfig
@@ -89,6 +95,7 @@ class Config
      * @param  ModuleListInterface      $moduleList
      * @param  ProductMetadataInterface $productMetadata
      * @param  LoggerInterface          $logger
+     * @param  YotpoLogger              $yotpoLogger
      */
     public function __construct(
         StoreManagerInterface $storeManager,
@@ -98,7 +105,8 @@ class Config
         DateTimeFactory $datetimeFactory,
         ModuleListInterface $moduleList,
         ProductMetadataInterface $productMetadata,
-        LoggerInterface $logger
+        LoggerInterface $logger,
+        YotpoLogger $yotpoLogger
     ) {
         $this->storeManager = $storeManager;
         $this->scopeConfig = $scopeConfig;
@@ -108,6 +116,7 @@ class Config
         $this->moduleList = $moduleList;
         $this->productMetadata = $productMetadata;
         $this->logger = $logger;
+        $this->yotpoLogger = $yotpoLogger;
     }
 
     /**
@@ -129,10 +138,10 @@ class Config
     }
 
     /**
-    * @method getWebsiteIdByStoreId
-    * @param int $storeId
-    * @return int
-    */
+     * @method getWebsiteIdByStoreId
+     * @param int $storeId
+     * @return int
+     */
     public function getWebsiteIdByStoreId($storeId)
     {
         return $this->storeManager->getStore($storeId)->getWebsiteId();
@@ -146,7 +155,9 @@ class Config
         if (!$scope && $this->isSingleStoreMode()) {
             return $this->scopeConfig->getValue($configPath);
         }
-        return $this->scopeConfig->getValue($configPath, $scope ?: ScopeInterface::SCOPE_STORE, is_null($scopeId) ? $this->storeManager->getStore()->getId() : $scopeId);
+        $scopeId = ($scopeId === null) ? $this->getCurrentStoreId() : $scopeId;
+
+        return $this->scopeConfig->getValue($configPath, $scope ?: ScopeInterface::SCOPE_STORE, $scopeId);
     }
 
     /**
@@ -313,9 +324,8 @@ class Config
      */
     public function setStoreCredentialsAndIsEnabled($appKey, $secret, $isEnabled, $storeId = null, $scopes = ScopeInterface::SCOPE_STORES)
     {
-        if (is_null($storeId)) {
-            $storeId = $this->storeManager->getStore()->getId();
-        }
+        $storeId = ($storeId === null) ? $this->getCurrentStoreId() : $storeId;
+        
         $this->resourceConfig->saveConfig(self::XML_PATH_YOTPO_APP_KEY, $appKey, $scopes, $storeId);
         $this->resourceConfig->saveConfig(self::XML_PATH_YOTPO_SECRET, ($secret ? $this->encryptor->encrypt($secret) : null), $scopes, $storeId);
         $this->resourceConfig->saveConfig(self::XML_PATH_YOTPO_ENABLED, $isEnabled, $scopes, $storeId);
@@ -398,6 +408,7 @@ class Config
                     $this->logger->debug($prefix . json_encode($message), $data);
                     break;
             }
+            $this->yotpoLogger->info($prefix . json_encode($message), $data);
         }
         return $this;
     }

@@ -6,7 +6,6 @@
 namespace Magento\Eav\Model\Attribute\Data;
 
 use Magento\Framework\App\Filesystem\DirectoryList;
-use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Filesystem\Io\File as FileIo;
 
@@ -53,7 +52,7 @@ class File extends \Magento\Eav\Model\Attribute\Data\AbstractData
      * @param \Magento\Framework\Url\EncoderInterface $urlEncoder
      * @param \Magento\MediaStorage\Model\File\Validator\NotProtectedExtension $fileValidator
      * @param \Magento\Framework\Filesystem $filesystem
-     * @param FileIo|null $fileIo
+     * @param FileIo $fileIo
      * @codeCoverageIgnore
      */
     public function __construct(
@@ -63,13 +62,13 @@ class File extends \Magento\Eav\Model\Attribute\Data\AbstractData
         \Magento\Framework\Url\EncoderInterface $urlEncoder,
         \Magento\MediaStorage\Model\File\Validator\NotProtectedExtension $fileValidator,
         \Magento\Framework\Filesystem $filesystem,
-        FileIo $fileIo = null
+        FileIo $fileIo
     ) {
         parent::__construct($localeDate, $logger, $localeResolver);
         $this->urlEncoder = $urlEncoder;
         $this->_fileValidator = $fileValidator;
         $this->_directory = $filesystem->getDirectoryWrite(DirectoryList::MEDIA);
-        $this->fileIo = $fileIo ?? ObjectManager::getInstance()->get(FileIo::class);
+        $this->fileIo = $fileIo;
     }
 
     /**

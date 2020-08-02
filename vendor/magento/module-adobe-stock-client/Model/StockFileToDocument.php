@@ -23,6 +23,13 @@ use Psr\Log\LoggerInterface;
  */
 class StockFileToDocument
 {
+    private const ID = 'id';
+    private const NAME = 'name';
+    private const CATEGORY = 'category';
+    private const CATEGORY_ID = 'category_id';
+    private const CATEGORY_NAME = 'category_name';
+    private const ID_FIELD_NAME = 'id_field_name';
+
     /**
      * @var DocumentFactory
      */
@@ -63,15 +70,15 @@ class StockFileToDocument
     public function convert(StockFile $file): Document
     {
         $itemData = (array) $file;
-        $itemId = $itemData['id'];
+        $itemId = $itemData[self::ID];
 
-        $category = (array) $itemData['category'];
+        $category = (array) $itemData[self::CATEGORY];
 
-        $itemData['category'] = $category;
-        $itemData['category_id'] = $category['id'];
-        $itemData['category_name'] = $category['name'];
+        $itemData[self::CATEGORY] = $category;
+        $itemData[self::CATEGORY_ID] = $category[self::ID];
+        $itemData[self::CATEGORY_NAME] = $category[self::NAME];
 
-        $attributes = $this->createAttributes('id', $this->toArray($itemData));
+        $attributes = $this->createAttributes(self::ID, $this->toArray($itemData));
 
         $item = $this->documentFactory->create();
         $item->setId($itemId);
@@ -109,13 +116,12 @@ class StockFileToDocument
      */
     private function createAttributes(string $idFieldName, array $itemData): array
     {
+        $attributes = [];
         try {
-            $attributes = [];
-
             $idFieldNameAttribute = $this->attributeValueFactory->create();
-            $idFieldNameAttribute->setAttributeCode('id_field_name');
+            $idFieldNameAttribute->setAttributeCode(self::ID_FIELD_NAME);
             $idFieldNameAttribute->setValue($idFieldName);
-            $attributes['id_field_name'] = $idFieldNameAttribute;
+            $attributes[self::ID_FIELD_NAME] = $idFieldNameAttribute;
 
             foreach ($itemData as $key => $value) {
                 if ($value === null) {
@@ -130,7 +136,6 @@ class StockFileToDocument
                 $attribute->setValue($value);
                 $attributes[$key] = $attribute;
             }
-            return $attributes;
         } catch (Exception $exception) {
             $message = __(
                 'Create attributes process failed: %error_message',
@@ -138,6 +143,7 @@ class StockFileToDocument
             );
             $this->processException($message, $exception);
         }
+        return $attributes;
     }
 
     /**

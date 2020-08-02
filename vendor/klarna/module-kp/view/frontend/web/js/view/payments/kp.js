@@ -20,7 +20,8 @@ define(
     'Magento_Checkout/js/model/quote',
     'Magento_Checkout/js/model/payment/additional-validators',
     'Klarna_Kp/js/view/payments',
-    'Klarna_Kp/js/model/debug'
+    'Klarna_Kp/js/model/debug',
+    'Klarna_Kp/js/action/set-payment-method-action'
   ],
   function (ko,
             $,
@@ -34,13 +35,15 @@ define(
             quote,
             additionalValidators,
             kp,
-            debug) {
+            debug,
+            setPaymentMethodAction) {
     'use strict';
 
     return Component.extend({
       defaults: {
         template: 'Klarna_Kp/payments/kp',
-        timeoutMessage: 'Sorry, but something went wrong. Please contact the seller.'
+        timeoutMessage: 'Sorry, but something went wrong. Please contact the seller.',
+        redirectAfterPlaceOrder: false
       },
       placeOrderHandler: null,
       validateHandler: null,
@@ -256,7 +259,10 @@ define(
           }
           self.showButton(true);
         });
-
+      },
+      afterPlaceOrder: function () {
+        setPaymentMethodAction(this.messageContainer);
+        return;
       }
     });
   }

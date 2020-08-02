@@ -28,8 +28,8 @@
         <before>
             <createData entity="SimpleTwo" stepKey="createSimpleProduct"/>
             <createData entity="Klarna_US_Customer_B2C" stepKey="createCustomer"/>
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
-            <actionGroup ref="AdminCreateCartPriceRuleWithCouponCode" stepKey="createCartPriceRule">
+            <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
+            <actionGroup ref="AdminCreateCartPriceRuleWithCouponCodeActionGroup" stepKey="createCartPriceRule">
                 <argument name="ruleName" value="CatPriceRule"/>
             </actionGroup>
         </before>
@@ -39,7 +39,7 @@
             <actionGroup ref="DeleteCartPriceRuleByName" stepKey="deleteCartPriceRule">
                 <argument name="ruleName" value="{{CatPriceRule.name}}"/>
             </actionGroup>
-            <actionGroup ref="logout" stepKey="logout"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
         </after>
         <!--Log in to store front as customer-->
         <actionGroup ref="LoginToStorefrontActionGroup" stepKey="customerLogin">

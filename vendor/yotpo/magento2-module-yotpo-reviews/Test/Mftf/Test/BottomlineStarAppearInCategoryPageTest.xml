@@ -19,7 +19,7 @@
         </annotations>
 
         <before>
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+            <actionGroup ref="AdminLoginActionGroup" stepKey="AdminLoginActionGroup"/>
             <amOnPage url="admin/admin/system_config/edit/section/yotpo/store/1/" stepKey="navigateToYotpoConfigurationOnDefaultStoreView" />
             <createData entity="ApiCategory" stepKey="createCategory"/>
             <createData entity="SimpleProduct" stepKey="createSimpleProduct">
@@ -38,7 +38,7 @@
         <waitForPageLoad stepKey="waitForWidgetSettingsLoad"/>
         <seeOptionIsSelected userInput="Yes" selector="{{YotpoCategoryPage.StarRatingEnabled}}" stepKey="seeBottomlineEnabled"/>
 
-        <actionGroup ref="GoToStorefrontCategoryPageByParameters" stepKey="goToStorefrontCategoryPage">
+        <actionGroup ref="GoToStorefrontCategoryPageByParametersActionGroup" stepKey="goToStorefrontCategoryPage">
             <argument name="category" value="$$createCategory.custom_attributes[url_key]$$"/>
             <argument name="mode" value="grid"/>
             <argument name="numOfProductsPerPage" value="25"/>

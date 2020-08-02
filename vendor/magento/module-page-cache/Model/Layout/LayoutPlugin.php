@@ -7,6 +7,7 @@ declare(strict_types=1);
 
 namespace Magento\PageCache\Model\Layout;
 
+use Magento\Framework\App\MaintenanceMode;
 use Magento\Framework\App\ResponseInterface;
 use Magento\Framework\DataObject\IdentityInterface;
 use Magento\Framework\View\Layout;
@@ -28,15 +29,23 @@ class LayoutPlugin
     private $response;
 
     /**
+     * @var MaintenanceMode
+     */
+    private $maintenanceMode;
+
+    /**
      * @param ResponseInterface $response
      * @param Config $config
+     * @param MaintenanceMode $maintenanceMode
      */
     public function __construct(
         ResponseInterface $response,
-        Config $config
+        Config $config,
+        MaintenanceMode $maintenanceMode
     ) {
         $this->response = $response;
         $this->config = $config;
+        $this->maintenanceMode = $maintenanceMode;
     }
 
     /**
@@ -49,7 +58,7 @@ class LayoutPlugin
      */
     public function afterGenerateElements(Layout $subject)
     {
-        if ($subject->isCacheable() && $this->config->isEnabled()) {
+        if ($subject->isCacheable() && !$this->maintenanceMode->isOn() && $this->config->isEnabled()) {
             $this->response->setPublicHeaders($this->config->getTtl());
         }
     }

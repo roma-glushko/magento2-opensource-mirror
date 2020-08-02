@@ -29,12 +29,12 @@
         <before>
             <createData entity="SimpleTwo" stepKey="createSimpleProduct"/>
             <createData entity="SimpleTwo" stepKey="createSimpleProduct2"/>
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+            <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
         </before>
         <after>
             <deleteData createDataKey="createSimpleProduct" stepKey="deleteSimpleProduct"/>
             <deleteData createDataKey="createSimpleProduct2" stepKey="deleteSimpleProduct2"/>
-            <actionGroup ref="logout" stepKey="logout"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
         </after>
         <!--Go to product page 1-->
         <actionGroup ref="GoToCreatedProductPageAndWaitForAddToCart" stepKey="goToCreatedProductPageAndWaitForAddToCart">
@@ -42,7 +42,7 @@
         </actionGroup>
 
         <!--Add product to shopping cart-->
-        <actionGroup ref="addToCartFromStorefrontProductPage" stepKey="addToCartFromStorefrontProductPage">
+        <actionGroup ref="AddToCartFromStorefrontProductPageActionGroup" stepKey="addToCartFromStorefrontProductPage">
             <argument name="productName" value="$$createSimpleProduct.name$$"/>
         </actionGroup>
 
@@ -52,12 +52,13 @@
         </actionGroup>
 
         <!--Add product to shopping cart-->
-        <actionGroup ref="addToCartFromStorefrontProductPage" stepKey="addToCartFromStorefrontProductPage2">
+        <actionGroup ref="AddToCartFromStorefrontProductPageActionGroup" stepKey="addToCartFromStorefrontProductPage2">
             <argument name="productName" value="$$createSimpleProduct2.name$$"/>
         </actionGroup>
 
         <!--Go to checkout-->
         <actionGroup ref="GoToCheckoutFromMinicartActionGroup" stepKey="goToCheckoutFromMinicart"/>
+        <waitForPageLoad stepKey="waitForCheckoutPageLoad"/>
 
         <!--Enter shipping information and continue to payments-->
         <actionGroup ref="GuestCheckoutFillingShippingSectionActionGroup" stepKey="guestCheckoutFillingShipping">
@@ -79,8 +80,10 @@
         <grabTextFrom selector="{{CheckoutSuccessMainSection.orderNumber}}" stepKey="grabOrderNumber"/>
 
         <!--Verify order summary in admin-->
-        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateOrderSummary">
-            <argument name="orderNumber" value="{$grabOrderNumber}"/>
+        <actionGroup ref="OpenOrderByIdActionGroup" stepKey="goToOrderPage">
+            <argument name="orderId" value="{$grabOrderNumber}"/>
+        </actionGroup>
+        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateGrandTotal">
             <argument name="grandTotalAmount" value="{$grabTotalAmount}"/>
         </actionGroup>
     </test>

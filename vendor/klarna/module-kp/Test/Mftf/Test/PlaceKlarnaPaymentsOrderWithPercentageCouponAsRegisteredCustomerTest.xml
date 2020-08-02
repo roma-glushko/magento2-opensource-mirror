@@ -28,7 +28,7 @@
         <before>
             <createData entity="SimpleTwo" stepKey="createSimpleProduct"/>
             <createData entity="Klarna_US_Customer_B2C" stepKey="createCustomer"/>
-            <actionGroup ref="LoginAsAdmin" stepKey="loginAsAdmin"/>
+            <actionGroup ref="AdminLoginActionGroup" stepKey="loginAsAdmin"/>
             <actionGroup ref="ConfigurePercentageCoupon" stepKey="configurePercentageCoupon">
                 <argument name="ruleName" value="CatPriceRule"/>
                 <argument name="couponCode" value="CatPriceRule.coupon_code"/>
@@ -40,7 +40,7 @@
             <actionGroup ref="DeleteCartPriceRuleByName" stepKey="deleteCartPriceRule">
                 <argument name="ruleName" value="{{CatPriceRule.name}}"/>
             </actionGroup>
-            <actionGroup ref="logout" stepKey="logout"/>
+            <actionGroup ref="AdminLogoutActionGroup" stepKey="logout"/>
         </after>
         <!--Log in to store front as customer-->
         <actionGroup ref="LoginToStorefrontActionGroup" stepKey="customerLogin">
@@ -82,8 +82,10 @@
         <grabTextFrom selector="{{CheckoutSuccessMainSection.orderNumber22}}" stepKey="grabOrderNumber"/>
 
         <!--Verify order summary in admin-->
-        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateOrderSummary">
-            <argument name="orderNumber" value="{$grabOrderNumber}"/>
+        <actionGroup ref="OpenOrderByIdActionGroup" stepKey="goToOrderPage">
+            <argument name="orderId" value="{$grabOrderNumber}"/>
+        </actionGroup>
+        <actionGroup ref="ValidateAdminKlarnaOrderSummaryGrandTotal" stepKey="validateGrandTotal">
             <argument name="grandTotalAmount" value="{$grabTotalAmount}"/>
         </actionGroup>
     </test>

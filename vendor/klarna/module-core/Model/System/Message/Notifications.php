@@ -10,62 +10,57 @@
 
 namespace Klarna\Core\Model\System\Message;
 
-use Ramsey\Uuid\Uuid;
+use Klarna\Core\Model\Config;
+use Magento\Framework\DataObject\IdentityService;
+use Magento\Framework\Notification\MessageInterface;
+use Magento\Framework\UrlInterface;
+use Magento\Store\Model\StoreManagerInterface;
 
-/**
- * Notifications class
- */
-class Notifications implements \Magento\Framework\Notification\MessageInterface
+class Notifications implements MessageInterface
 {
     /**
      * Store manager object
      *
-     * @var \Magento\Store\Model\StoreManagerInterface
+     * @var StoreManagerInterface
      */
     private $storeManager;
-
     /**
      * @var \Magento\Framework\UrlInterface
      */
     private $urlBuilder;
-
     /**
      * Klarna configuration object
      *
      * @var \Klarna\Core\Model\Config
      */
     private $klarnaConfig;
-
     /**
      * List of countries where region is marked as required and should not be
      *
      * @var array
      */
     private $regionRequired;
-
     /**
-     * @var \Ramsey\Uuid\UuidFactoryInterface
+     * @var IdentityService
      */
-    private $uuidFactory;
+    private $identityService;
 
     /**
-     * @param \Magento\Store\Model\StoreManagerInterface $storeManager
-     * @param \Magento\Framework\UrlInterface            $urlBuilder
-     * @param \Klarna\Core\Model\Config                  $klarnaConfig
+     * @param StoreManagerInterface $storeManager
+     * @param UrlInterface          $urlBuilder
+     * @param Config                $klarnaConfig
+     * @param IdentityService       $identityService
      */
     public function __construct(
-        \Magento\Store\Model\StoreManagerInterface $storeManager,
-        \Magento\Framework\UrlInterface $urlBuilder,
-        \Klarna\Core\Model\Config $klarnaConfig
+        StoreManagerInterface $storeManager,
+        UrlInterface $urlBuilder,
+        Config $klarnaConfig,
+        IdentityService $identityService
     ) {
         $this->storeManager = $storeManager;
         $this->urlBuilder = $urlBuilder;
         $this->klarnaConfig = $klarnaConfig;
-        /**
-         * Temp solution because Magento 2.1 DI breaks on classes with type-hints
-         * @codingStandardsIgnoreLine
-         */
-        $this->uuidFactory = new \Ramsey\Uuid\UuidFactory();
+        $this->identityService = $identityService;
     }
 
     /**
@@ -75,21 +70,7 @@ class Notifications implements \Magento\Framework\Notification\MessageInterface
      */
     public function getIdentity()
     {
-        return $this->generateIdForData('KLARNA_CONFIG_NOTIFICATION');
-    }
-
-    /**
-     * Borrowed function from Magento 2.2. See \Magento\Framework\DataObject\IdentityService
-     *
-     * @param $data
-     * @return string
-     */
-    private function generateIdForData($data)
-    {
-        // Cannot use \Magento\Framework\DataObject\IdentityGeneratorInterface because
-        // it doesn't exist in Magento 2.1
-        $uuid = $this->uuidFactory->uuid3(Uuid::NAMESPACE_DNS, $data);
-        return $uuid->toString();
+        return $this->identityService->generateIdForData('KLARNA_CONFIG_NOTIFICATION');
     }
 
     /**

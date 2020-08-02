@@ -1,4 +1,10 @@
 
+6.0.0 / 2020-04-28
+==================
+
+  * MAGE-1939 Updates for PHP 7.4
+  * MAGE-2015 Update order line code to handle discounts on item level instead of separate line
+
 5.3.0 / 2020-02-11
 ==================
 

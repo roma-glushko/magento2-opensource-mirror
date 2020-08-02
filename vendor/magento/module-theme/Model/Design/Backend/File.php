@@ -97,8 +97,8 @@ class File extends BackendFile
             $data
         );
         $this->urlBuilder = $urlBuilder;
-        $this->databaseHelper = $databaseHelper ?? ObjectManager::getInstance()->get(Database::class);
-        $this->ioFileSystem = $ioFileSystem ?? ObjectManager::getInstance()->get(IoFileSystem::class);
+        $this->databaseHelper = $databaseHelper ?: ObjectManager::getInstance()->get(Database::class);
+        $this->ioFileSystem = $ioFileSystem ?: ObjectManager::getInstance()->get(IoFileSystem::class);
     }
 
     /**

@@ -8,6 +8,6 @@
 <entities xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
           xsi:noNamespaceSchemaLocation="urn:magento:mftf:DataGenerator/etc/dataProfileSchema.xsd">
     <entity name="Vertex_CustomerGroup_BlanKetException" type="customerGroup">
-        <data key="code">BlanKet Exception</data>
+        <data key="code" unique="suffix">BlanKet Exception</data>
     </entity>
 </entities>

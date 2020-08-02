@@ -32,4 +32,9 @@
         <data key="region_code">QC</data>
         <data key="region_id">76</data>
     </entity>
+    <entity name="RegionRM" type="region">
+        <data key="region">Roma</data>
+        <data key="region_code">RM</data>
+        <data key="region_id">739</data>
+    </entity>
 </entities>

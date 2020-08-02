@@ -141,7 +141,8 @@ class Items extends AbstractLine
             'reference'     => substr($item->getSku(), 0, 64),
             'name'          => $item->getName(),
             'quantity'      => ceil($this->getItemQty($item) * $qtyMultiplier),
-            'discount_rate' => 0
+            'discount_rate' => 0,
+            'total_discount_amount' => $this->helper->toApiFloat($item->getBaseDiscountAmount())
         ];
 
         if ($product && $product->getId()) {
@@ -154,20 +155,17 @@ class Items extends AbstractLine
             $_item['total_tax_amount'] = 0;
             $_item['unit_price'] = $this->helper->toApiFloat($item->getBasePrice())
                 ?: $this->helper->toApiFloat($item->getBaseOriginalPrice());
-            $_item['total_amount'] = $this->helper->toApiFloat($item->getBaseRowTotal());
+            $_item['total_amount'] = $this->helper->toApiFloat(
+                $item->getBaseRowTotal() - $item->getBaseDiscountAmount()
+            );
         } else {
-            $taxRate = 0;
-            if ($item->getBaseRowTotal() > 0) {
-                $taxRate = ($item->getTaxPercent() > 0) ? $item->getTaxPercent()
-                    : ($item->getBaseTaxAmount() / $item->getBaseRowTotal() * 100);
-            }
-
-            $taxAmount = $this->calculator->calcTaxAmount($item->getBaseRowTotalInclTax(), $taxRate, true);
-            $_item['tax_rate'] = $this->helper->toApiFloat($taxRate);
-            $_item['total_tax_amount'] = $this->helper->toApiFloat($taxAmount);
+            $_item['tax_rate'] = $this->helper->toApiFloat($item->getTaxPercent());
+            $_item['total_tax_amount'] = $this->helper->toApiFloat($item->getBaseTaxAmount());
             $_item['unit_price'] = $this->helper->toApiFloat($item->getBasePriceInclTax())
                 ?: $this->helper->toApiFloat($item->getBaseRowTotalInclTax());
-            $_item['total_amount'] = $this->helper->toApiFloat($item->getBaseRowTotalInclTax());
+            $_item['total_amount'] = $this->helper->toApiFloat(
+                $item->getBaseRowTotalInclTax() - $item->getBaseDiscountAmount()
+            );
         }
 
         return $_item;
